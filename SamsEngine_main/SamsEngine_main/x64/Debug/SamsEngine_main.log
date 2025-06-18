@@ -1,0 +1,8 @@
+﻿  Main.cpp
+  Renderer.cpp
+D:\Projects\Personal\SamsEngine_main\SamsEngine_main\Renderer.cpp(144,28): warning C4305: 'argument': truncation from 'double' to 'GLfloat'
+D:\Projects\Personal\SamsEngine_main\SamsEngine_main\Renderer.cpp(123,8): warning C4101: 'AllVertsToRender': unreferenced local variable
+  Shape.cpp
+  Triangle.cpp
+  Generating Code...
+  SamsEngine_main.vcxproj -> D:\Projects\Personal\SamsEngine_main\x64\Debug\SamsEngine_main.exe

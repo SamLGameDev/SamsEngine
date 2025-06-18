@@ -1,0 +1,384 @@
+{
+  "Version": 1,
+  "WorkspaceRootPath": "D:\\Projects\\Personal\\SamsEngine_main\\",
+  "Documents": [
+    {
+      "AbsoluteMoniker": "D:0:0:{0CD9E9A1-E0E5-408A-A4FE-71B095AF4B71}|SamsEngine_main\\SamsEngine_main.vcxproj|D:\\Projects\\Personal\\SamsEngine_main\\SamsEngine_main\\Renderer.cpp||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}",
+      "RelativeMoniker": "D:0:0:{0CD9E9A1-E0E5-408A-A4FE-71B095AF4B71}|SamsEngine_main\\SamsEngine_main.vcxproj|solutionrelative:SamsEngine_main\\Renderer.cpp||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{0CD9E9A1-E0E5-408A-A4FE-71B095AF4B71}|SamsEngine_main\\SamsEngine_main.vcxproj|D:\\Projects\\Personal\\SamsEngine_main\\SamsEngine_main\\Triangle.h||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}",
+      "RelativeMoniker": "D:0:0:{0CD9E9A1-E0E5-408A-A4FE-71B095AF4B71}|SamsEngine_main\\SamsEngine_main.vcxproj|solutionrelative:SamsEngine_main\\Triangle.h||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{0CD9E9A1-E0E5-408A-A4FE-71B095AF4B71}|SamsEngine_main\\SamsEngine_main.vcxproj|D:\\Projects\\Personal\\SamsEngine_main\\SamsEngine_main\\Shape.h||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}",
+      "RelativeMoniker": "D:0:0:{0CD9E9A1-E0E5-408A-A4FE-71B095AF4B71}|SamsEngine_main\\SamsEngine_main.vcxproj|solutionrelative:SamsEngine_main\\Shape.h||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{0CD9E9A1-E0E5-408A-A4FE-71B095AF4B71}|SamsEngine_main\\SamsEngine_main.vcxproj|D:\\Projects\\Personal\\SamsEngine_main\\SamsEngine_main\\Renderer.h||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}",
+      "RelativeMoniker": "D:0:0:{0CD9E9A1-E0E5-408A-A4FE-71B095AF4B71}|SamsEngine_main\\SamsEngine_main.vcxproj|solutionrelative:SamsEngine_main\\Renderer.h||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{0CD9E9A1-E0E5-408A-A4FE-71B095AF4B71}|SamsEngine_main\\SamsEngine_main.vcxproj|D:\\Projects\\Personal\\SamsEngine_main\\SamsEngine_main\\Verticie.h||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}",
+      "RelativeMoniker": "D:0:0:{0CD9E9A1-E0E5-408A-A4FE-71B095AF4B71}|SamsEngine_main\\SamsEngine_main.vcxproj|solutionrelative:SamsEngine_main\\Verticie.h||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{0CD9E9A1-E0E5-408A-A4FE-71B095AF4B71}|SamsEngine_main\\SamsEngine_main.vcxproj|D:\\Projects\\Personal\\SamsEngine_main\\SamsEngine_main\\Vector3D.h||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}",
+      "RelativeMoniker": "D:0:0:{0CD9E9A1-E0E5-408A-A4FE-71B095AF4B71}|SamsEngine_main\\SamsEngine_main.vcxproj|solutionrelative:SamsEngine_main\\Vector3D.h||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{0CD9E9A1-E0E5-408A-A4FE-71B095AF4B71}|SamsEngine_main\\SamsEngine_main.vcxproj|D:\\Projects\\Personal\\SamsEngine_main\\SamsEngine_main\\LinkedList.h||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}",
+      "RelativeMoniker": "D:0:0:{0CD9E9A1-E0E5-408A-A4FE-71B095AF4B71}|SamsEngine_main\\SamsEngine_main.vcxproj|solutionrelative:SamsEngine_main\\LinkedList.h||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{0CD9E9A1-E0E5-408A-A4FE-71B095AF4B71}|SamsEngine_main\\SamsEngine_main.vcxproj|D:\\Projects\\Personal\\SamsEngine_main\\SamsEngine_main\\Item.h||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}",
+      "RelativeMoniker": "D:0:0:{0CD9E9A1-E0E5-408A-A4FE-71B095AF4B71}|SamsEngine_main\\SamsEngine_main.vcxproj|solutionrelative:SamsEngine_main\\Item.h||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{0CD9E9A1-E0E5-408A-A4FE-71B095AF4B71}|SamsEngine_main\\SamsEngine_main.vcxproj|D:\\Projects\\Personal\\SamsEngine_main\\SamsEngine_main\\Triangle.cpp||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}",
+      "RelativeMoniker": "D:0:0:{0CD9E9A1-E0E5-408A-A4FE-71B095AF4B71}|SamsEngine_main\\SamsEngine_main.vcxproj|solutionrelative:SamsEngine_main\\Triangle.cpp||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{0CD9E9A1-E0E5-408A-A4FE-71B095AF4B71}|SamsEngine_main\\SamsEngine_main.vcxproj|D:\\Projects\\Personal\\SamsEngine_main\\SamsEngine_main\\Array.h||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}",
+      "RelativeMoniker": "D:0:0:{0CD9E9A1-E0E5-408A-A4FE-71B095AF4B71}|SamsEngine_main\\SamsEngine_main.vcxproj|solutionrelative:SamsEngine_main\\Array.h||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{0CD9E9A1-E0E5-408A-A4FE-71B095AF4B71}|SamsEngine_main\\SamsEngine_main.vcxproj|D:\\Projects\\Personal\\SamsEngine_main\\SamsEngine_main\\Vector3D.cpp||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}",
+      "RelativeMoniker": "D:0:0:{0CD9E9A1-E0E5-408A-A4FE-71B095AF4B71}|SamsEngine_main\\SamsEngine_main.vcxproj|solutionrelative:SamsEngine_main\\Vector3D.cpp||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{0CD9E9A1-E0E5-408A-A4FE-71B095AF4B71}|SamsEngine_main\\SamsEngine_main.vcxproj|D:\\Projects\\Personal\\SamsEngine_main\\SamsEngine_main\\Main.cpp||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}",
+      "RelativeMoniker": "D:0:0:{0CD9E9A1-E0E5-408A-A4FE-71B095AF4B71}|SamsEngine_main\\SamsEngine_main.vcxproj|solutionrelative:SamsEngine_main\\Main.cpp||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{0CD9E9A1-E0E5-408A-A4FE-71B095AF4B71}|SamsEngine_main\\SamsEngine_main.vcxproj|D:\\Projects\\Personal\\SamsEngine_main\\SamsEngine_main\\Item.cpp||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}",
+      "RelativeMoniker": "D:0:0:{0CD9E9A1-E0E5-408A-A4FE-71B095AF4B71}|SamsEngine_main\\SamsEngine_main.vcxproj|solutionrelative:SamsEngine_main\\Item.cpp||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{0CD9E9A1-E0E5-408A-A4FE-71B095AF4B71}|SamsEngine_main\\SamsEngine_main.vcxproj|D:\\Projects\\Personal\\SamsEngine_main\\SamsEngine_main\\LinkedList.cpp||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}",
+      "RelativeMoniker": "D:0:0:{0CD9E9A1-E0E5-408A-A4FE-71B095AF4B71}|SamsEngine_main\\SamsEngine_main.vcxproj|solutionrelative:SamsEngine_main\\LinkedList.cpp||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|C:\\Program Files\\Microsoft Visual Studio\\2022\\Community\\VC\\Tools\\MSVC\\14.41.34120\\crt\\src\\vcruntime\\delete_scalar.cpp||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{0CD9E9A1-E0E5-408A-A4FE-71B095AF4B71}|SamsEngine_main\\SamsEngine_main.vcxproj|D:\\Projects\\Personal\\SamsEngine_main\\SamsEngine_main\\FirstWindow.cpp||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}",
+      "RelativeMoniker": "D:0:0:{0CD9E9A1-E0E5-408A-A4FE-71B095AF4B71}|SamsEngine_main\\SamsEngine_main.vcxproj|solutionrelative:SamsEngine_main\\FirstWindow.cpp||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{0CD9E9A1-E0E5-408A-A4FE-71B095AF4B71}|SamsEngine_main\\SamsEngine_main.vcxproj|D:\\Projects\\Personal\\SamsEngine_main\\SamsEngine_main\\Array.cpp||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}",
+      "RelativeMoniker": "D:0:0:{0CD9E9A1-E0E5-408A-A4FE-71B095AF4B71}|SamsEngine_main\\SamsEngine_main.vcxproj|solutionrelative:SamsEngine_main\\Array.cpp||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{0CD9E9A1-E0E5-408A-A4FE-71B095AF4B71}|SamsEngine_main\\SamsEngine_main.vcxproj|D:\\Projects\\Personal\\SamsEngine_main\\SamsEngine_main\\FirstWindow.h||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}",
+      "RelativeMoniker": "D:0:0:{0CD9E9A1-E0E5-408A-A4FE-71B095AF4B71}|SamsEngine_main\\SamsEngine_main.vcxproj|solutionrelative:SamsEngine_main\\FirstWindow.h||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{0CD9E9A1-E0E5-408A-A4FE-71B095AF4B71}|SamsEngine_main\\SamsEngine_main.vcxproj|D:\\Projects\\Personal\\SamsEngine_main\\SamsEngine_main\\Verticie.cpp||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}",
+      "RelativeMoniker": "D:0:0:{0CD9E9A1-E0E5-408A-A4FE-71B095AF4B71}|SamsEngine_main\\SamsEngine_main.vcxproj|solutionrelative:SamsEngine_main\\Verticie.cpp||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{0CD9E9A1-E0E5-408A-A4FE-71B095AF4B71}|SamsEngine_main\\SamsEngine_main.vcxproj|D:\\Projects\\Personal\\SamsEngine_main\\SamsEngine_main\\InputManager.h||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}",
+      "RelativeMoniker": "D:0:0:{0CD9E9A1-E0E5-408A-A4FE-71B095AF4B71}|SamsEngine_main\\SamsEngine_main.vcxproj|solutionrelative:SamsEngine_main\\InputManager.h||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{0CD9E9A1-E0E5-408A-A4FE-71B095AF4B71}|SamsEngine_main\\SamsEngine_main.vcxproj|D:\\Projects\\Personal\\SamsEngine_main\\SamsEngine_main\\InputManager.cpp||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}",
+      "RelativeMoniker": "D:0:0:{0CD9E9A1-E0E5-408A-A4FE-71B095AF4B71}|SamsEngine_main\\SamsEngine_main.vcxproj|solutionrelative:SamsEngine_main\\InputManager.cpp||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{0CD9E9A1-E0E5-408A-A4FE-71B095AF4B71}|SamsEngine_main\\SamsEngine_main.vcxproj|D:\\Projects\\Personal\\SamsEngine_main\\SamsEngine_main\\Main.h||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}",
+      "RelativeMoniker": "D:0:0:{0CD9E9A1-E0E5-408A-A4FE-71B095AF4B71}|SamsEngine_main\\SamsEngine_main.vcxproj|solutionrelative:SamsEngine_main\\Main.h||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}"
+    }
+  ],
+  "DocumentGroupContainers": [
+    {
+      "Orientation": 0,
+      "VerticalTabListWidth": 256,
+      "DocumentGroups": [
+        {
+          "DockedWidth": 200,
+          "SelectedChildIndex": 1,
+          "Children": [
+            {
+              "$type": "Document",
+              "DocumentIndex": 11,
+              "Title": "Main.cpp",
+              "DocumentMoniker": "D:\\Projects\\Personal\\SamsEngine_main\\SamsEngine_main\\Main.cpp",
+              "RelativeDocumentMoniker": "SamsEngine_main\\Main.cpp",
+              "ToolTip": "D:\\Projects\\Personal\\SamsEngine_main\\SamsEngine_main\\Main.cpp",
+              "RelativeToolTip": "SamsEngine_main\\Main.cpp",
+              "ViewState": "AgIAAAwAAAAAAAAAAAAMwBgAAAARAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000677|",
+              "WhenOpened": "2025-05-26T14:17:24.163Z",
+              "IsPinned": true,
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 0,
+              "Title": "Renderer.cpp",
+              "DocumentMoniker": "D:\\Projects\\Personal\\SamsEngine_main\\SamsEngine_main\\Renderer.cpp",
+              "RelativeDocumentMoniker": "SamsEngine_main\\Renderer.cpp",
+              "ToolTip": "D:\\Projects\\Personal\\SamsEngine_main\\SamsEngine_main\\Renderer.cpp",
+              "RelativeToolTip": "SamsEngine_main\\Renderer.cpp",
+              "ViewState": "AgIAAGkAAAAAAAAAAAAAAHkAAAAiAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000677|",
+              "WhenOpened": "2025-05-26T14:16:52.268Z",
+              "IsPinned": true,
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 7,
+              "Title": "Item.h",
+              "DocumentMoniker": "D:\\Projects\\Personal\\SamsEngine_main\\SamsEngine_main\\Item.h",
+              "RelativeDocumentMoniker": "SamsEngine_main\\Item.h",
+              "ToolTip": "D:\\Projects\\Personal\\SamsEngine_main\\SamsEngine_main\\Item.h",
+              "RelativeToolTip": "SamsEngine_main\\Item.h",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAgAAAABAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000680|",
+              "WhenOpened": "2025-06-04T12:19:25.758Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 6,
+              "Title": "LinkedList.h",
+              "DocumentMoniker": "D:\\Projects\\Personal\\SamsEngine_main\\SamsEngine_main\\LinkedList.h",
+              "RelativeDocumentMoniker": "SamsEngine_main\\LinkedList.h",
+              "ToolTip": "D:\\Projects\\Personal\\SamsEngine_main\\SamsEngine_main\\LinkedList.h",
+              "RelativeToolTip": "SamsEngine_main\\LinkedList.h",
+              "ViewState": "AgIAAE8AAAAAAAAAAAASwF0AAAAVAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000680|",
+              "WhenOpened": "2025-06-04T12:19:00.299Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 3,
+              "Title": "Renderer.h",
+              "DocumentMoniker": "D:\\Projects\\Personal\\SamsEngine_main\\SamsEngine_main\\Renderer.h",
+              "RelativeDocumentMoniker": "SamsEngine_main\\Renderer.h",
+              "ToolTip": "D:\\Projects\\Personal\\SamsEngine_main\\SamsEngine_main\\Renderer.h",
+              "RelativeToolTip": "SamsEngine_main\\Renderer.h",
+              "ViewState": "AgIAABIAAAAAAAAAAAASwBsAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000680|",
+              "WhenOpened": "2025-05-26T14:16:14.98Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 8,
+              "Title": "Triangle.cpp",
+              "DocumentMoniker": "D:\\Projects\\Personal\\SamsEngine_main\\SamsEngine_main\\Triangle.cpp",
+              "RelativeDocumentMoniker": "SamsEngine_main\\Triangle.cpp",
+              "ToolTip": "D:\\Projects\\Personal\\SamsEngine_main\\SamsEngine_main\\Triangle.cpp",
+              "RelativeToolTip": "SamsEngine_main\\Triangle.cpp",
+              "ViewState": "AgIAAAIAAAAAAAAAAAAqwA0AAAATAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000677|",
+              "WhenOpened": "2025-05-26T17:34:15.343Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 9,
+              "Title": "Array.h",
+              "DocumentMoniker": "D:\\Projects\\Personal\\SamsEngine_main\\SamsEngine_main\\Array.h",
+              "RelativeDocumentMoniker": "SamsEngine_main\\Array.h",
+              "ToolTip": "D:\\Projects\\Personal\\SamsEngine_main\\SamsEngine_main\\Array.h",
+              "RelativeToolTip": "SamsEngine_main\\Array.h",
+              "ViewState": "AgIAAAMAAAAAAAAAAAAAAEMAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000680|",
+              "WhenOpened": "2025-05-26T17:46:31.792Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 10,
+              "Title": "Vector3D.cpp",
+              "DocumentMoniker": "D:\\Projects\\Personal\\SamsEngine_main\\SamsEngine_main\\Vector3D.cpp",
+              "RelativeDocumentMoniker": "SamsEngine_main\\Vector3D.cpp",
+              "ToolTip": "D:\\Projects\\Personal\\SamsEngine_main\\SamsEngine_main\\Vector3D.cpp",
+              "RelativeToolTip": "SamsEngine_main\\Vector3D.cpp",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAYAAAAHAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000677|",
+              "WhenOpened": "2025-05-26T17:19:24.221Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 1,
+              "Title": "Triangle.h",
+              "DocumentMoniker": "D:\\Projects\\Personal\\SamsEngine_main\\SamsEngine_main\\Triangle.h",
+              "RelativeDocumentMoniker": "SamsEngine_main\\Triangle.h",
+              "ToolTip": "D:\\Projects\\Personal\\SamsEngine_main\\SamsEngine_main\\Triangle.h",
+              "RelativeToolTip": "SamsEngine_main\\Triangle.h",
+              "ViewState": "AgIAABIAAAAAAAAAAAAAACEAAAAWAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000680|",
+              "WhenOpened": "2025-05-26T17:34:01.399Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 2,
+              "Title": "Shape.h",
+              "DocumentMoniker": "D:\\Projects\\Personal\\SamsEngine_main\\SamsEngine_main\\Shape.h",
+              "RelativeDocumentMoniker": "SamsEngine_main\\Shape.h",
+              "ToolTip": "D:\\Projects\\Personal\\SamsEngine_main\\SamsEngine_main\\Shape.h",
+              "RelativeToolTip": "SamsEngine_main\\Shape.h",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAABYAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000680|",
+              "WhenOpened": "2025-05-26T17:40:36.985Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 4,
+              "Title": "Verticie.h",
+              "DocumentMoniker": "D:\\Projects\\Personal\\SamsEngine_main\\SamsEngine_main\\Verticie.h",
+              "RelativeDocumentMoniker": "SamsEngine_main\\Verticie.h",
+              "ToolTip": "D:\\Projects\\Personal\\SamsEngine_main\\SamsEngine_main\\Verticie.h",
+              "RelativeToolTip": "SamsEngine_main\\Verticie.h",
+              "ViewState": "AgIAABsAAAAAAAAAAAAAACwAAAABAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000680|",
+              "WhenOpened": "2025-05-26T17:17:43.967Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 5,
+              "Title": "Vector3D.h",
+              "DocumentMoniker": "D:\\Projects\\Personal\\SamsEngine_main\\SamsEngine_main\\Vector3D.h",
+              "RelativeDocumentMoniker": "SamsEngine_main\\Vector3D.h",
+              "ToolTip": "D:\\Projects\\Personal\\SamsEngine_main\\SamsEngine_main\\Vector3D.h",
+              "RelativeToolTip": "SamsEngine_main\\Vector3D.h",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAoAAAA0AAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000680|",
+              "WhenOpened": "2025-05-26T17:18:17.365Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 13,
+              "Title": "LinkedList.cpp",
+              "DocumentMoniker": "D:\\Projects\\Personal\\SamsEngine_main\\SamsEngine_main\\LinkedList.cpp",
+              "RelativeDocumentMoniker": "SamsEngine_main\\LinkedList.cpp",
+              "ToolTip": "D:\\Projects\\Personal\\SamsEngine_main\\SamsEngine_main\\LinkedList.cpp",
+              "RelativeToolTip": "SamsEngine_main\\LinkedList.cpp",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAEAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000677|",
+              "WhenOpened": "2025-06-04T12:37:56.1Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 12,
+              "Title": "Item.cpp",
+              "DocumentMoniker": "D:\\Projects\\Personal\\SamsEngine_main\\SamsEngine_main\\Item.cpp",
+              "RelativeDocumentMoniker": "SamsEngine_main\\Item.cpp",
+              "ToolTip": "D:\\Projects\\Personal\\SamsEngine_main\\SamsEngine_main\\Item.cpp",
+              "RelativeToolTip": "SamsEngine_main\\Item.cpp",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAEAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000677|",
+              "WhenOpened": "2025-06-04T12:37:53.232Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 15,
+              "Title": "FirstWindow.cpp",
+              "DocumentMoniker": "D:\\Projects\\Personal\\SamsEngine_main\\SamsEngine_main\\FirstWindow.cpp",
+              "RelativeDocumentMoniker": "SamsEngine_main\\FirstWindow.cpp",
+              "ToolTip": "D:\\Projects\\Personal\\SamsEngine_main\\SamsEngine_main\\FirstWindow.cpp",
+              "RelativeToolTip": "SamsEngine_main\\FirstWindow.cpp",
+              "ViewState": "AgIAAAMAAAAAAAAAAAAAAA0AAAABAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000677|",
+              "WhenOpened": "2025-05-26T13:21:21.517Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 14,
+              "Title": "delete_scalar.cpp",
+              "DocumentMoniker": "C:\\Program Files\\Microsoft Visual Studio\\2022\\Community\\VC\\Tools\\MSVC\\14.41.34120\\crt\\src\\vcruntime\\delete_scalar.cpp",
+              "ToolTip": "C:\\Program Files\\Microsoft Visual Studio\\2022\\Community\\VC\\Tools\\MSVC\\14.41.34120\\crt\\src\\vcruntime\\delete_scalar.cpp",
+              "ViewState": "AgIAABkAAAAAAAAAAAAnwCUAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000677|",
+              "WhenOpened": "2025-05-29T18:06:29.933Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 18,
+              "Title": "Verticie.cpp",
+              "DocumentMoniker": "D:\\Projects\\Personal\\SamsEngine_main\\SamsEngine_main\\Verticie.cpp",
+              "RelativeDocumentMoniker": "SamsEngine_main\\Verticie.cpp",
+              "ToolTip": "D:\\Projects\\Personal\\SamsEngine_main\\SamsEngine_main\\Verticie.cpp",
+              "RelativeToolTip": "SamsEngine_main\\Verticie.cpp",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAAAAAAVAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000677|",
+              "WhenOpened": "2025-05-26T17:21:37.672Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 16,
+              "Title": "Array.cpp",
+              "DocumentMoniker": "D:\\Projects\\Personal\\SamsEngine_main\\SamsEngine_main\\Array.cpp",
+              "RelativeDocumentMoniker": "SamsEngine_main\\Array.cpp",
+              "ToolTip": "D:\\Projects\\Personal\\SamsEngine_main\\SamsEngine_main\\Array.cpp",
+              "RelativeToolTip": "SamsEngine_main\\Array.cpp",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAEAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000677|",
+              "WhenOpened": "2025-05-26T17:47:15.061Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 19,
+              "Title": "InputManager.h",
+              "DocumentMoniker": "D:\\Projects\\Personal\\SamsEngine_main\\SamsEngine_main\\InputManager.h",
+              "RelativeDocumentMoniker": "SamsEngine_main\\InputManager.h",
+              "ToolTip": "D:\\Projects\\Personal\\SamsEngine_main\\SamsEngine_main\\InputManager.h",
+              "RelativeToolTip": "SamsEngine_main\\InputManager.h",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAoAAAAOAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000680|",
+              "WhenOpened": "2025-05-26T16:37:41.986Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 20,
+              "Title": "InputManager.cpp",
+              "DocumentMoniker": "D:\\Projects\\Personal\\SamsEngine_main\\SamsEngine_main\\InputManager.cpp",
+              "RelativeDocumentMoniker": "SamsEngine_main\\InputManager.cpp",
+              "ToolTip": "D:\\Projects\\Personal\\SamsEngine_main\\SamsEngine_main\\InputManager.cpp",
+              "RelativeToolTip": "SamsEngine_main\\InputManager.cpp",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAABAAAAApAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000677|",
+              "WhenOpened": "2025-05-26T16:38:11.28Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 21,
+              "Title": "Main.h",
+              "DocumentMoniker": "D:\\Projects\\Personal\\SamsEngine_main\\SamsEngine_main\\Main.h",
+              "RelativeDocumentMoniker": "SamsEngine_main\\Main.h",
+              "ToolTip": "D:\\Projects\\Personal\\SamsEngine_main\\SamsEngine_main\\Main.h",
+              "RelativeToolTip": "SamsEngine_main\\Main.h",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAAAAAAMAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000680|",
+              "WhenOpened": "2025-05-26T14:17:17.589Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 17,
+              "Title": "FirstWindow.h",
+              "DocumentMoniker": "D:\\Projects\\Personal\\SamsEngine_main\\SamsEngine_main\\FirstWindow.h",
+              "RelativeDocumentMoniker": "SamsEngine_main\\FirstWindow.h",
+              "ToolTip": "D:\\Projects\\Personal\\SamsEngine_main\\SamsEngine_main\\FirstWindow.h",
+              "RelativeToolTip": "SamsEngine_main\\FirstWindow.h",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAABcAAAAdAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000680|",
+              "WhenOpened": "2025-05-26T13:18:50.472Z"
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}
