@@ -10,9 +10,17 @@ public:
 		Value = InItem;
 	}
 
+	Item( const Item<T>& item)
+	{
+		Value = item.GetValue();
+	}
+
 	~Item()
 	{
-
+		if (Next != nullptr)
+		{
+			Next->SetPrev(nullptr);
+		}
 	}
 
 	void SetNext(Item<T>* InItem)
@@ -25,17 +33,17 @@ public:
 		Prev = InItem;
 	}
 
-	Item<T>* GetPrev()
+	Item<T>* GetPrev() const
 	{
 		return Prev;
 	}
 
-	Item<T>* GetNext()
+	Item<T>* GetNext() const
 	{
 		return Next;
 	}
 
-	T GetValue()
+	T GetValue() const
 	{
 		return Value;
 	}

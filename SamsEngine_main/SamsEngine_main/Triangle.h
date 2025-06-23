@@ -40,7 +40,7 @@ private:
 
 	LinkedList<int> IndicesOrder;
 
-	float Vertices[9];
+	float* Vertices;
 
 };
 

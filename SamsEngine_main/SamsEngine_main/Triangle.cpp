@@ -13,6 +13,8 @@ Triangle::Triangle(Verticie InPos1, Verticie InPos2, Verticie InPos3)
 	Verts.Add(InPos2);
 	Verts.Add(InPos3);
 
+	Vertices = new float[9];
+
 	Vertices[0] = InPos1.GetPosition().X;
 	Vertices[1] = InPos1.GetPosition().Y;
 	Vertices[2] = InPos1.GetPosition().Z;
@@ -30,6 +32,7 @@ Triangle::Triangle(Verticie InPos1, Verticie InPos2, Verticie InPos3)
 
 Triangle::~Triangle()
 {
+	delete[] Vertices;
 }
 
 void Triangle::Render()
@@ -40,4 +43,5 @@ void Triangle::Render()
 void Triangle::SetRenderOrder(LinkedList<int> Indices)
 {
 	IndicesOrder = Indices;
+//	IndicesOrder.Sort();
 }

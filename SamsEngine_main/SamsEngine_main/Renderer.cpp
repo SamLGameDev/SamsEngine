@@ -103,22 +103,60 @@ void Renderer::RenderingLoop()
 	glDeleteShader(tempFragmentShader);
 
 
-	unsigned int VAO[2];
-	glGenVertexArrays(2, VAO);
+	unsigned int VBO, VAO, EBO;
+	glGenVertexArrays(1, &VAO);
+	glGenBuffers(1, &VBO);
+	glGenBuffers(1, &EBO);
 
-	float* verts = new float[CurrentIndicesCount * 3];
 
-	int* Inds = new int[CurrentIndicesCount];
+	int totsSzeverts = VertsToIndices.size() * 3;
+
+	float debugverts[100];
+
+	int debugInds[100];
+
+	float* verts = new float[totsSzeverts]();
+
+	int totsSze = 0;
 
 	for (int i = 0; i < ItemsToRender.GetSize(); i++)
 	{
 		LinkedList<int> Indices = ItemsToRender[i]->GetIndices();
+		totsSze += Indices.GetSize();
+	}
+
+	int* Inds = new int[totsSze]();
+
+	int next = 0;
+
+	LinkedList<int> AppearedIndicies;
+
+	for (int i = 0; i < ItemsToRender.GetSize(); i++)
+	{
+		LinkedList<int> Indices = ItemsToRender[i]->GetIndices();
+
 		for(int j = 0; j < Indices.GetSize(); j++)
 		{
-			Verticie vert = IndicesToVerts.find(Indices[j])->second;
-			verts[Indices[j]] = vert.GetPosition().X;
-			verts[Indices[j + 1]] = vert.GetPosition().Y;
-			verts[Indices[j + 2]] = vert.GetPosition().Z;
+			int index = Indices[j];
+			Verticie vert = IndicesToVerts.find(index)->second;
+
+			if (!AppearedIndicies.Contains(index))
+			{
+				verts[next] = vert.GetPosition().X;
+				debugverts[next] = vert.GetPosition().X;
+				next++;
+				verts[next] = vert.GetPosition().Y;
+				debugverts[next] = vert.GetPosition().Y;
+				next++;
+				verts[next] = vert.GetPosition().Z;
+				debugverts[next] = vert.GetPosition().Z;
+				next++;
+				AppearedIndicies.Add(index);
+			}
+
+
+
+			debugInds[j + (i * 3)]= Indices[j];
 			Inds[j + (i * 3)] = Indices[j];
 		}
 	}
@@ -127,35 +165,43 @@ void Renderer::RenderingLoop()
 
 	const int RenderSize = ItemsToRender.GetSize();
 
-	GLuint* vbos = new GLuint[RenderSize];
-	glGenBuffers(RenderSize, vbos);
-
-
-	for (int i = 0; i < RenderSize; i++)
-	{
-		glBindVertexArray(VAO[i]);
-		glBindBuffer(GL_ARRAY_BUFFER, vbos[i]);
-
-		glBufferData(GL_ARRAY_BUFFER, ItemsToRender[i]->GetVerticiesSizeByte(), ItemsToRender[i]->GetVertices(), GL_STATIC_DRAW);
-		glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0);
-		glEnableVertexAttribArray(0);
+	std::cout << "VERTS:\n";
+	for (int i = 0; i < totsSzeverts; i += 3) {
+		std::cout << verts[i] << ", " << verts[i + 1] << ", " << verts[i + 2] << "\n";
 	}
+
+	std::cout << "INDICES:\n";
+	for (int i = 0; i < totsSze; i += 3) {
+		std::cout << Inds[i] << ", " << Inds[i + 1] << ", " << Inds[i + 2] << "\n";
+	}
+
+	glBindVertexArray(VAO);
+	glBindBuffer(GL_ARRAY_BUFFER, VBO);
+	glBufferData(GL_ARRAY_BUFFER, totsSzeverts * sizeof(float), verts, GL_STATIC_DRAW);
+
+	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
+	glBufferData(GL_ELEMENT_ARRAY_BUFFER, totsSze* sizeof(int), Inds, GL_STATIC_DRAW);
+
+
+	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0);
+	glEnableVertexAttribArray(0);
+
 
 	while (!glfwWindowShouldClose(Window->GetWindow()))
 	{
 		WindowInputManager->ProcessInput(Window->GetWindow());
 		glClearColor(0.5f, 0.2f, 0.7, 1);
 		glClear(GL_COLOR_BUFFER_BIT);
-		glUseProgram(tempShaderProgram);
-		glBindVertexArray(VAO[1]);
-		glDrawArrays(GL_TRIANGLES, 0, 3);
+
 		glUseProgram(ShaderProgram);
-		glBindVertexArray(VAO[0]);
-		glDrawArrays(GL_TRIANGLES, 0, 3);
+		glDrawElements(GL_TRIANGLES, ItemsToRender.GetSize() * 3, GL_UNSIGNED_INT, 0);
 
 
 
 		glfwSwapBuffers(Window->GetWindow());
 		glfwPollEvents();
 	}
+
+	//delete[] verts;
+	//delete[] Inds;
 }
