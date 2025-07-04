@@ -9,6 +9,7 @@
 #include "Verticie.h"
 #include "Vector3D.h"
 #include "LinkedList.h"
+#include "Vector2D.h"
 
 
 
@@ -19,22 +20,22 @@ int main()
 
 	InputManager* inputManager = new InputManager();
 	Renderer* renderer = new Renderer(window, inputManager);
-	Verticie vert = Verticie(Vector3D(0.5f, 0.5f, 0));
-	Verticie vert2 = Verticie(Vector3D(0.5f, -0.5f, 0));
-	Verticie vert3 = Verticie(Vector3D(-0.5f, 0.5f, 0));
+	Vertex vert = Vertex(Vector3D(0.5f, 0.5f, 0));
+	Vertex vert2 = Vertex(Vector3D(0.5f, -0.5f, 0));
+	Vertex vert3 = Vertex(Vector3D(-0.5f, 0.5f, 0));
 
-	renderer->AddItemToRender(new Triangle(vert, vert2, vert3));
-	Verticie vertx = Verticie(Vector3D(0.5f, -0.5f, 0));
-	Verticie vertx2 = Verticie(Vector3D(-0.5f, -0.5f, 0));
-	Verticie vertx3 = Verticie(Vector3D(-0.5f, 0.5f, 0));
+	renderer->AddItemToRender(new Triangle(vert, vert2, vert3, Vector3D(0.5f, 0.2f, 0.5f), Vector2D(2,2), Vector2D(2, 0), Vector2D(0, 2)));
+	Vertex vertx = Vertex(Vector3D(0.5f, -0.5f, 0));
+	Vertex vertx2 = Vertex(Vector3D(-0.5f, -0.5f, 0));
+	Vertex vertx3 = Vertex(Vector3D(-0.5f, 0.5f, 0));
 
-	renderer->AddItemToRender(new Triangle(vertx, vertx2, vertx3));
+	renderer->AddItemToRender(new Triangle(vertx, vertx2, vertx3, Vector3D(0.5f, 0, 0), Vector2D(2, 0), Vector2D(0, 0), Vector2D(0, 2)));
 
-	Verticie verty = Verticie(Vector3D(0.5f, -0.5f, 0));
-	Verticie verty2 = Verticie(Vector3D(-0.5f, -0.5f, 0));
-	Verticie verty3 = Verticie(Vector3D(0, 0.9f, 0));
+	Vertex verty = Vertex(Vector3D(0.5f, -0.5f, 0));
+	Vertex verty2 = Vertex(Vector3D(-0.5f, -0.5f, 0));
+	Vertex verty3 = Vertex(Vector3D(0, 0.9f, 0));
 
-	renderer->AddItemToRender(new Triangle(verty, verty2, verty3));
+	//renderer->AddItemToRender(new Triangle(verty, verty2, verty3, Vector3D(0.5f, 0.5f, 0.9f)));
 
 	renderer->Start();
 

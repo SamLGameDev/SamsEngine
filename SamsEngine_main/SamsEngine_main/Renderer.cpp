@@ -4,6 +4,7 @@
 #include "Shape.h"
 #include <iostream>
 #include "Array.h"
+#include "Vector2D.h"
 
 
 
@@ -23,21 +24,21 @@ void Renderer::AddItemToRender(Shape* Item)
 	LinkedList<int> Indices;
 	for (int i =0; i < 3; i++)
 	{
-		Verticie Vert = Item->GetVerts()[i];
+		Vertex Vert = Item->GetVerts()[i];
 		auto KeyValue = VertsToIndices.find(Vert);
 		if (KeyValue == VertsToIndices.end())
 		{
 			if (FreeIndices.IsEmpty())
 			{
-				VertsToIndices.insert(std::pair<const Verticie, int>(Vert, CurrentIndicesCount));
-				IndicesToVerts.insert(std::pair<const int, Verticie>(CurrentIndicesCount, Vert));
+				VertsToIndices.insert(std::pair<const Vertex, int>(Vert, CurrentIndicesCount));
+				IndicesToVerts.insert(std::pair<const int, Vertex>(CurrentIndicesCount, Vert));
 				Indices.Add(CurrentIndicesCount);
 				CurrentIndicesCount++;
 			}
 			else
 			{
-				VertsToIndices.insert(std::pair<const Verticie, int>(Vert, FreeIndices[0]));
-				IndicesToVerts.insert(std::pair<const int, Verticie>(FreeIndices[0], Vert));
+				VertsToIndices.insert(std::pair<const Vertex, int>(Vert, FreeIndices[0]));
+				IndicesToVerts.insert(std::pair<const int, Vertex>(FreeIndices[0], Vert));
 				Indices.Add(FreeIndices[0]);
 				FreeIndices.RemoveAt(0);
 			}
@@ -108,8 +109,7 @@ void Renderer::RenderingLoop()
 	glGenBuffers(1, &VBO);
 	glGenBuffers(1, &EBO);
 
-
-	int totsSzeverts = VertsToIndices.size() * 3;
+	int totsSzeverts = VertsToIndices.size() * 8;
 
 	float debugverts[100];
 
@@ -138,7 +138,7 @@ void Renderer::RenderingLoop()
 		for(int j = 0; j < Indices.GetSize(); j++)
 		{
 			int index = Indices[j];
-			Verticie vert = IndicesToVerts.find(index)->second;
+			Vertex vert = IndicesToVerts.find(index)->second;
 
 			if (!AppearedIndicies.Contains(index))
 			{
@@ -151,6 +151,17 @@ void Renderer::RenderingLoop()
 				verts[next] = vert.GetPosition().Z;
 				debugverts[next] = vert.GetPosition().Z;
 				next++;
+				verts[next] = ItemsToRender[i]->GetColor().X;
+				next++;
+				verts[next] = ItemsToRender[i]->GetColor().Y;
+				next++;
+				verts[next] = ItemsToRender[i]->GetColor().Z;
+				next++;
+				verts[next] = ItemsToRender[i]->GetTextureCords()[j].X;
+				next++;
+				verts[next] = ItemsToRender[i]->GetTextureCords()[j].Y;
+				next++;
+
 				AppearedIndicies.Add(index);
 			}
 
@@ -183,20 +194,53 @@ void Renderer::RenderingLoop()
 	glBufferData(GL_ELEMENT_ARRAY_BUFFER, totsSze* sizeof(int), Inds, GL_STATIC_DRAW);
 
 
-	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0);
+	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)0);
 	glEnableVertexAttribArray(0);
+
+	glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)(3 * sizeof(float)));
+	glEnableVertexAttribArray(1);
+
+	glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)(6 * sizeof(float)));
+	glEnableVertexAttribArray(2);
+
+
+
 
 
 	while (!glfwWindowShouldClose(Window->GetWindow()))
 	{
-		WindowInputManager->ProcessInput(Window->GetWindow());
 		glClearColor(0.5f, 0.2f, 0.7, 1);
 		glClear(GL_COLOR_BUFFER_BIT);
 
+		const float time = glfwGetTime();
+
+		const float green = sin(time) / 2 + 0.5;
+
+		int UniformColorLoc = glGetUniformLocation(ShaderProgram, "VertexColor");
+
+		int UniformOffSetLoc = glGetUniformLocation(ShaderProgram, "offset");
+
 		glUseProgram(ShaderProgram);
+
+		glActiveTexture(GL_TEXTURE0);
+		glBindTexture(GL_TEXTURE_2D, ItemsToRender[0]->GetTexture(0));
+
+		glActiveTexture(GL_TEXTURE1);
+		glBindTexture(GL_TEXTURE_2D, ItemsToRender[1]->GetTexture(1));
+
+		glUniform1i(glGetUniformLocation(ShaderProgram, "ourTexture"), 0);
+		glUniform1i(glGetUniformLocation(ShaderProgram, "ourTexture2"), 1);
+
+		glUseProgram(ShaderProgram);
+
+		glUniform4f(UniformColorLoc, 0, green, 0, 1);
+
+		glUniform1f(UniformOffSetLoc, green);
+
 		glDrawElements(GL_TRIANGLES, ItemsToRender.GetSize() * 3, GL_UNSIGNED_INT, 0);
 
 
+		WindowInputManager->ProcessInput(Window->GetWindow(), ShaderProgram);
 
 		glfwSwapBuffers(Window->GetWindow());
 		glfwPollEvents();

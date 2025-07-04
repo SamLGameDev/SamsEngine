@@ -1,13 +1,15 @@
 #pragma once
 #include "Shape.h"
 #include "LinkedList.h"
-class Verticie;
+#include "Vector3D.h"
+#include "Vector2D.h"
+class Vertex;
 
 class Triangle : public Shape
 {
 public:
 
-	Triangle(Verticie InPos1, Verticie InPos2, Verticie InPos3);
+	Triangle(Vertex InPos1, Vertex InPos2, Vertex InPos3, Vector3D color = Vector3D(0,0,0), Vector2D TexPos1 = Vector2D(0, 0), Vector2D TexPos2 = Vector2D(0, 0), Vector2D TexPos3 = Vector2D(0, 0));
 	~Triangle();
 
 	virtual void Render() override;
@@ -24,7 +26,7 @@ public:
 
 	virtual void SetRenderOrder(LinkedList<int> Indices) override;
 
-	virtual LinkedList<Verticie> GetVerts() override
+	virtual LinkedList<Vertex> GetVerts() override
 	{
 		return Verts;
 	}
@@ -36,7 +38,7 @@ public:
 
 private:
 
-	LinkedList<Verticie> Verts;
+	LinkedList<Vertex> Verts;
 
 	LinkedList<int> IndicesOrder;
 

@@ -1,5 +1,5 @@
-﻿  Renderer.cpp
-D:\Projects\Personal\SamsEngine\SamsEngine_main\SamsEngine_main\Renderer.cpp(112,19): warning C4267: 'initializing': conversion from 'size_t' to 'int', possible loss of data
-D:\Projects\Personal\SamsEngine\SamsEngine_main\SamsEngine_main\Renderer.cpp(193,28): warning C4305: 'argument': truncation from 'double' to 'GLfloat'
-D:\Projects\Personal\SamsEngine\SamsEngine_main\SamsEngine_main\Renderer.cpp(164,8): warning C4101: 'AllVertsToRender': unreferenced local variable
+﻿  InputManager.cpp
+D:\Projects\Personal\SamsEngine\SamsEngine_main\SamsEngine_main\InputManager.cpp(2,10): warning C4067: unexpected tokens following preprocessor directive - expected a newline
+D:\Projects\Personal\SamsEngine\SamsEngine_main\SamsEngine_main\InputManager.cpp(24,12): warning C4305: '+=': truncation from 'double' to 'float'
+D:\Projects\Personal\SamsEngine\SamsEngine_main\SamsEngine_main\InputManager.cpp(35,12): warning C4305: '-=': truncation from 'double' to 'float'
   SamsEngine_main.vcxproj -> D:\Projects\Personal\SamsEngine\SamsEngine_main\x64\Debug\SamsEngine_main.exe
