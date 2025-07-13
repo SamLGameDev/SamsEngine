@@ -6,6 +6,9 @@
 #include <unordered_map>
 #include "Verticie.h"
 #include "stb_image.h"
+#include "Camera.h"
+#include "Renderer.h"
+
 
 class InputManager;
 class Shape;
@@ -14,7 +17,7 @@ class Renderer
 {
 
 public:
-	Renderer(FirstWindow* InWindow, InputManager* InInputManager);
+	Renderer(FirstWindow* InWindow, InputManager* InInputManager, Camera* InCamera);
 	~Renderer();
 
 	void AddItemToRender(Shape* Item);
@@ -27,7 +30,10 @@ public:
 
 	LinkedList<Shape*> ItemsToRender;
 
+	//static MulticastDelegate<float> TickDel;
 private:
+
+	Camera* Cam;
 
 	std::unordered_map<int, Vertex> IndicesToVerts;
 
@@ -61,9 +67,14 @@ private:
 
 		"uniform float offset; \n"
 
+		"uniform mat4 Transform; \n"
+		"uniform mat4 Model; \n"
+		"uniform mat4 View; \n"
+		"uniform mat4 Projection; \n"
+
 		"void main()\n"
 		"{\n"
-		"   Pos = vec4(aPos.x + -offset, aPos.y + offset, aPos.z, 1.0);\n"	
+		"   Pos = Projection * View * Model * Transform * vec4(aPos, 1.0);\n"	
 		"   gl_Position = Pos;\n" //can use negative to reverse
 		"	VertexColor = aColor + offset;\n"
 		"	TexCoord = aTexture;\n"

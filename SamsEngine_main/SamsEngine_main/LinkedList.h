@@ -1,7 +1,7 @@
 #pragma once
 #include "Item.h"
 
-template<typename T : Item>
+template<typename T>
 class LinkedList
 {
 public:

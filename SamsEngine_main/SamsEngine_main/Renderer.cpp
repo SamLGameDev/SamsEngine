@@ -5,14 +5,15 @@
 #include <iostream>
 #include "Array.h"
 #include "Vector2D.h"
+#include "glm-1.0.1/glm/glm.hpp"
+#include "glm-1.0.1/glm/gtc/matrix_transform.hpp"
+#include "glm-1.0.1/glm/gtc/type_ptr.hpp"
 
-
-
-
-Renderer::Renderer(FirstWindow* InWindow, InputManager* InInputManager)
+Renderer::Renderer(FirstWindow* InWindow, InputManager* InInputManager, Camera* InCamera)
 {
 	Window = InWindow;
 	WindowInputManager = InInputManager;
+	Cam = InCamera;
 }
 
 Renderer::~Renderer()
@@ -203,12 +204,27 @@ void Renderer::RenderingLoop()
 	glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)(6 * sizeof(float)));
 	glEnableVertexAttribArray(2);
 
+	glm::mat4 translation = glm::mat4(1);
+	translation = glm::translate(translation, glm::vec3(0, 0, 0.0f));
+	translation = glm::rotate(translation, glm::radians(0.0f), glm::vec3(0, 0, 1));
+	translation = glm::scale(translation, glm::vec3(0.5, 0.5, 0.5));
 
+	glm::mat4 Model = glm::mat4(1);
+	Model = glm::rotate(Model, glm::radians(-55.0f), glm::vec3(1, 0, 0));
 
+	glm::mat4 View = glm::mat4(1);
 
+	glm::mat4 projection = glm::perspective(glm::radians(45.0f), Window->GetWindowWidth() / Window->GetWindowHeight(), 0.1f, 100.0f);
 
+	float lastFrameTime = glfwGetTime();
 	while (!glfwWindowShouldClose(Window->GetWindow()))
 	{
+		float currentFrame = glfwGetTime();
+		Cam->DeltaTime = currentFrame - lastFrameTime;
+		lastFrameTime = currentFrame;
+
+		//TickDel.Broadcast(deltaTime);
+
 		glClearColor(0.5f, 0.2f, 0.7, 1);
 		glClear(GL_COLOR_BUFFER_BIT);
 
@@ -220,6 +236,17 @@ void Renderer::RenderingLoop()
 
 		int UniformOffSetLoc = glGetUniformLocation(ShaderProgram, "offset");
 
+		unsigned int UniformTransform = glGetUniformLocation(ShaderProgram, "Transform");
+
+
+		unsigned int UniformModel = glGetUniformLocation(ShaderProgram, "Model");
+
+
+		unsigned int UniformView = glGetUniformLocation(ShaderProgram, "View");
+
+
+		unsigned int UniformProjection = glGetUniformLocation(ShaderProgram, "Projection");
+
 		glUseProgram(ShaderProgram);
 
 		glActiveTexture(GL_TEXTURE0);
@@ -228,8 +255,14 @@ void Renderer::RenderingLoop()
 		glActiveTexture(GL_TEXTURE1);
 		glBindTexture(GL_TEXTURE_2D, ItemsToRender[1]->GetTexture(1));
 
+		View = Cam->GetLook();
+
 		glUniform1i(glGetUniformLocation(ShaderProgram, "ourTexture"), 0);
 		glUniform1i(glGetUniformLocation(ShaderProgram, "ourTexture2"), 1);
+		glUniformMatrix4fv(UniformTransform, 1, GL_FALSE, glm::value_ptr(translation));
+		glUniformMatrix4fv(UniformModel, 1, GL_FALSE, glm::value_ptr(Model));
+		glUniformMatrix4fv(UniformView, 1, GL_FALSE, glm::value_ptr(View));
+		glUniformMatrix4fv(UniformProjection, 1, GL_FALSE, glm::value_ptr(projection));
 
 		glUseProgram(ShaderProgram);
 

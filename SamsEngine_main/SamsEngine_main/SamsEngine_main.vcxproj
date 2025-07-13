@@ -20,7 +20,11 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Array.h" />
+    <ClInclude Include="BaseDelegate.h" />
+    <ClInclude Include="Camera.h" />
     <ClInclude Include="FirstWindow.h" />
+    <ClInclude Include="InputAction.h" />
+    <ClInclude Include="InputActionMouse.h" />
     <ClInclude Include="InputManager.h" />
     <ClInclude Include="Item.h" />
     <ClInclude Include="LinkedList.h" />
@@ -35,8 +39,12 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Array.cpp" />
+    <ClCompile Include="BaseDelegate.cpp" />
+    <ClCompile Include="Camera.cpp" />
     <ClCompile Include="FirstWindow.cpp" />
     <ClCompile Include="glad.c" />
+    <ClCompile Include="InputAction.cpp" />
+    <ClCompile Include="InputActionMouse.cpp" />
     <ClCompile Include="InputManager.cpp" />
     <ClCompile Include="Item.cpp" />
     <ClCompile Include="LinkedList.cpp" />

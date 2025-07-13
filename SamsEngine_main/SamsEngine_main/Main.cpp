@@ -10,6 +10,7 @@
 #include "Vector3D.h"
 #include "LinkedList.h"
 #include "Vector2D.h"
+#include "Camera.h"
 
 
 
@@ -18,8 +19,12 @@ int main()
 
 	FirstWindow* window = new FirstWindow();
 
-	InputManager* inputManager = new InputManager();
-	Renderer* renderer = new Renderer(window, inputManager);
+	InputManager* inputManager = new InputManager(window->GetWindow());
+	
+	Camera* camera = new Camera(window, inputManager);
+
+
+	Renderer* renderer = new Renderer(window, inputManager, camera);
 	Vertex vert = Vertex(Vector3D(0.5f, 0.5f, 0));
 	Vertex vert2 = Vertex(Vector3D(0.5f, -0.5f, 0));
 	Vertex vert3 = Vertex(Vector3D(-0.5f, 0.5f, 0));

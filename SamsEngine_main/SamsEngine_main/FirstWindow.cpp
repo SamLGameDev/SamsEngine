@@ -3,11 +3,16 @@
 #include <GLFW/glfw3.h>
 #include <iostream>
 
+float FirstWindow::Width;
+float FirstWindow::Height;
+
 FirstWindow::FirstWindow()
 {
 	Initialisation();
 	CreateWindow();
 	glViewport(0, 0, 800, 600);
+	Width = 800;
+	Height = 600;
 }
 
 FirstWindow::~FirstWindow()
@@ -41,7 +46,9 @@ void FirstWindow::CreateWindow()
 	glfwSetFramebufferSizeCallback(Window, FrameBuffer_Size_Callback);
 }
 
-void FirstWindow::FrameBuffer_Size_Callback(GLFWwindow* Inwindow, int Width, int Height)
+void FirstWindow::FrameBuffer_Size_Callback(GLFWwindow* Inwindow, int InWidth, int InHeight)
 {
-	glViewport(0, 0, Width, Height);
+	glViewport(0, 0, InWidth, InHeight);
+	FirstWindow::Width = InWidth;
+	FirstWindow::Height = InHeight;
 }
