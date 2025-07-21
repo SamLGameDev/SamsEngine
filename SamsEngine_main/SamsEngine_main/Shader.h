@@ -4,12 +4,16 @@
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
 #include "Array.h"
+#include "LinkedList.h"
+#include "Texture.h"
 
 
 class Shader
 {
 
 public:
+
+	Shader();
 
 	Shader(std::string InName, std::string InStorageLocation);
 
@@ -23,6 +27,10 @@ public:
 
 
 	void Set4Float(const std::string InName, Array<float> Value) const;
+
+	void ApplyTextures();
+
+	void AddTexture(Texture InTexture);
 
 
 private:
@@ -50,6 +58,8 @@ private:
 	std::string Name;
 
 	unsigned int ID;
+
+	LinkedList<Texture> Textures;
 
 };
 

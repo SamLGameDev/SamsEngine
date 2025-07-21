@@ -4,6 +4,10 @@
 #include <fstream>
 #include <sstream>
 
+Shader::Shader()
+{
+}
+
 Shader::Shader(std::string InName, std::string InStorageLocation)
 {
 	StorageLocation = InStorageLocation;
@@ -66,6 +70,23 @@ void Shader::Set4Float(const std::string InName, Array<float> Value) const
 	glUniform4f(glGetUniformLocation(ID, InName.c_str()), Value[0], Value[1], Value[2], Value[3]);
 }
 
+void Shader::ApplyTextures()
+{
+	for (int i = 0; i < Textures.GetSize(); i++)
+	{
+		glActiveTexture(GL_TEXTURE0 + i);
+		glBindTexture(GL_TEXTURE_2D, Textures[i].GetID());
+
+		std::string TextureSlot = "ourTexture" + i;
+		SetInt(TextureSlot, Textures[i].GetID());
+	}
+}
+
+void Shader::AddTexture(Texture InTexture)
+{
+	Textures.Add(InTexture);
+}
+
 void Shader::CreateDefaultFragmentFile() const
 {
 	std::ofstream FragmentFile;
@@ -79,13 +100,13 @@ void Shader::CreateDefaultFragmentFile() const
 
 		"in vec2 TexCoord; \n"
 
-		"uniform sampler2D ourTexture; \n"
+		"uniform sampler2D ourTexture0; \n"
 		"uniform float Visibility; \n"
 
 
 		"void main()\n"
 		"{\n"
-		"   FragColor = texture(ourTexture, TexCoord) * vec4(VertexColor, Visibility);\n"
+		"   FragColor = texture(ourTexture0, TexCoord) * vec4(VertexColor, Visibility);\n"
 		"}\0";
 
 	FragmentFile.close();

@@ -4,10 +4,18 @@
 #include "Verticie.h"
 #include "Vector3D.h"
 #include "Vector2D.h"
+#include "Object.h"
+#include "Shader.h"
+#include "Texture.h"
+#include "glm-1.0.1/glm/glm.hpp"
+#include "glm-1.0.1/glm/gtc/matrix_transform.hpp"
+#include "glm-1.0.1/glm/gtc/type_ptr.hpp"
 
-class Shape
+class Shape : Object
 {
 public:
+
+	Shape();
 
 	virtual void Render() = 0;
 
@@ -31,10 +39,7 @@ public:
 		return TextureCords;
 	};
 
-	const virtual unsigned int GetTexture(const int index)const
-	{
-		return Textures[index];
-	};
+	virtual void Draw(glm::mat4 Translation, glm::mat4 Model, glm::mat4 View, glm::mat4 Projection);
 
 protected:
 
@@ -42,6 +47,6 @@ protected:
 
 	LinkedList<Vector2D> TextureCords;
 
-	LinkedList<unsigned int> Textures;
+	Shader shader;
 };
 

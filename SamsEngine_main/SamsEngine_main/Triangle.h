@@ -36,6 +36,8 @@ public:
 		return IndicesOrder;
 	}
 
+
+
 private:
 
 	LinkedList<Vertex> Verts;

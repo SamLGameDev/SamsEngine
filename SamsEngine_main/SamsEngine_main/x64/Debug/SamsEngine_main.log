@@ -1,2 +1,16 @@
-﻿  Shader.cpp
+﻿  Main.cpp
+  Renderer.cpp
+D:\Projects\Personal\SamsEngine\SamsEngine_main\SamsEngine_main\Renderer.cpp(70,19): warning C4267: 'initializing': conversion from 'size_t' to 'int', possible loss of data
+D:\Projects\Personal\SamsEngine\SamsEngine_main\SamsEngine_main\Renderer.cpp(176,22): warning C4244: 'initializing': conversion from 'double' to 'float', possible loss of data
+D:\Projects\Personal\SamsEngine\SamsEngine_main\SamsEngine_main\Renderer.cpp(179,22): warning C4244: 'initializing': conversion from 'double' to 'float', possible loss of data
+D:\Projects\Personal\SamsEngine\SamsEngine_main\SamsEngine_main\Renderer.cpp(185,28): warning C4305: 'argument': truncation from 'double' to 'GLfloat'
+D:\Projects\Personal\SamsEngine\SamsEngine_main\SamsEngine_main\Renderer.cpp(188,33): warning C4244: 'initializing': conversion from 'double' to 'float', possible loss of data
+D:\Projects\Personal\SamsEngine\SamsEngine_main\SamsEngine_main\Renderer.cpp(188,20): warning C4244: 'initializing': conversion from 'double' to 'const float', possible loss of data
+D:\Projects\Personal\SamsEngine\SamsEngine_main\SamsEngine_main\Renderer.cpp(190,37): warning C4244: 'initializing': conversion from 'double' to 'float', possible loss of data
+D:\Projects\Personal\SamsEngine\SamsEngine_main\SamsEngine_main\Renderer.cpp(190,21): warning C4244: 'initializing': conversion from 'double' to 'const float', possible loss of data
+D:\Projects\Personal\SamsEngine\SamsEngine_main\SamsEngine_main\Renderer.cpp(133,8): warning C4101: 'AllVertsToRender': unreferenced local variable
+  Shader.cpp
+  Shape.cpp
+  Triangle.cpp
+  Generating Code...
   SamsEngine_main.vcxproj -> D:\Projects\Personal\SamsEngine\SamsEngine_main\x64\Debug\SamsEngine_main.exe

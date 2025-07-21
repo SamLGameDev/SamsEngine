@@ -60,7 +60,7 @@ void Renderer::AddItemToRender(Shape* Item)
 
 void Renderer::RenderingLoop()
 {
-	Shader shader = Shader("TestShader", "Contents/Shaders/");
+
 
 	unsigned int VBO, VAO, EBO;
 	glGenVertexArrays(1, &VAO);
@@ -198,29 +198,7 @@ void Renderer::RenderingLoop()
 
 		View = Cam->GetLook();
 
-		shader.Use();
-
-		glActiveTexture(GL_TEXTURE0);
-		glBindTexture(GL_TEXTURE_2D, ItemsToRender[0]->GetTexture(0));
-
-		glActiveTexture(GL_TEXTURE1);
-		glBindTexture(GL_TEXTURE_2D, ItemsToRender[1]->GetTexture(1));
-
-		shader.SetInt("ourTexture", 0);
-
-		shader.SetInt("ourTexture2", 1);
-
-		shader.SetMatrix4fv("Transform", glm::value_ptr(translation));
-
-		shader.SetMatrix4fv("Model", glm::value_ptr(Model));
-
-		shader.SetMatrix4fv("View", glm::value_ptr(View));
-
-		shader.SetMatrix4fv("Projection", glm::value_ptr(projection));
-
-		shader.Set4Float("VertexColor", color);
-
-		shader.SetFloat("offset", green);
+		ItemsToRender[0]->Draw(translation, Model, View, projection);
 
 		glDrawElements(GL_TRIANGLES, ItemsToRender.GetSize() * 3, GL_UNSIGNED_INT, 0);
 
