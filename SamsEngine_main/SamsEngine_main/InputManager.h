@@ -10,7 +10,7 @@ public:
 	InputManager(GLFWwindow* Window);
 	~InputManager();
 
-	void ProcessInput(GLFWwindow* window, unsigned int Shader);
+	void ProcessInput(GLFWwindow* window);
 
 	MulticastDelegate<GLFWwindow*> InputActions;
 

@@ -8,6 +8,8 @@
 #include "glm-1.0.1/glm/glm.hpp"
 #include "glm-1.0.1/glm/gtc/matrix_transform.hpp"
 #include "glm-1.0.1/glm/gtc/type_ptr.hpp"
+#include "Shader.h"
+
 
 Renderer::Renderer(FirstWindow* InWindow, InputManager* InInputManager, Camera* InCamera)
 {
@@ -58,52 +60,7 @@ void Renderer::AddItemToRender(Shape* Item)
 
 void Renderer::RenderingLoop()
 {
-	VertexShader = glCreateShader(GL_VERTEX_SHADER);
-	glShaderSource(VertexShader, 1, &Shader, NULL);
-	glCompileShader(VertexShader);
-	int  success;
-	char infoLog[512];
-	glGetShaderiv(VertexShader, GL_COMPILE_STATUS, &success);
-	if (!success)
-	{
-		glGetShaderInfoLog(VertexShader, 512, NULL, infoLog);
-		std::cout << "ERROR::SHADER::VERTEX::COMPILATION_FAILED\n" << infoLog << std::endl;
-	}
-	FragmentShader = glCreateShader(GL_FRAGMENT_SHADER);
-	glShaderSource(FragmentShader, 1, &Fragment, NULL);
-	glCompileShader(FragmentShader);
-	glGetShaderiv(FragmentShader, GL_COMPILE_STATUS, &success);
-	if (!success)
-	{
-		glGetShaderInfoLog(FragmentShader, 512, NULL, infoLog);
-		std::cout << "ERROR::SHADER::FRAGMENT::COMPILATION_FAILED\n" << infoLog << std::endl;
-	}
-	ShaderProgram = glCreateProgram();
-	glAttachShader(ShaderProgram, VertexShader);
-	glAttachShader(ShaderProgram, FragmentShader);
-	glLinkProgram(ShaderProgram);
-	glGetProgramiv(ShaderProgram, GL_LINK_STATUS, &success);
-	if (!success) {
-		glGetProgramInfoLog(ShaderProgram, 512, NULL, infoLog);
-		std::cout << "ERROR::SHADER::PROGRAM::COMPILATION_FAILED\n" << infoLog << std::endl;
-	}
-	unsigned int tempFragmentShader = glCreateShader(GL_FRAGMENT_SHADER);
-	glShaderSource(tempFragmentShader, 1, &tempFragment, NULL);
-	glCompileShader(tempFragmentShader);
-	glGetShaderiv(tempFragmentShader, GL_COMPILE_STATUS, &success);
-	if (!success)
-	{
-		glGetShaderInfoLog(tempFragmentShader, 512, NULL, infoLog);
-		std::cout << "ERROR::SHADER::FRAGMENT::COMPILATION_FAILED\n" << infoLog << std::endl;
-	}
-	unsigned int tempShaderProgram = glCreateProgram();
-	glAttachShader(tempShaderProgram, VertexShader);
-	glAttachShader(tempShaderProgram, tempFragmentShader);
-	glLinkProgram(tempShaderProgram);
-	glDeleteShader(VertexShader);
-	glDeleteShader(FragmentShader);
-	glDeleteShader(tempFragmentShader);
-
+	Shader shader = Shader("TestShader", "Contents/Shaders/");
 
 	unsigned int VBO, VAO, EBO;
 	glGenVertexArrays(1, &VAO);
@@ -232,22 +189,16 @@ void Renderer::RenderingLoop()
 
 		const float green = sin(time) / 2 + 0.5;
 
-		int UniformColorLoc = glGetUniformLocation(ShaderProgram, "VertexColor");
+		Array<float> color;
 
-		int UniformOffSetLoc = glGetUniformLocation(ShaderProgram, "offset");
+		color.Add(0);
+		color.Add(green);
+		color.Add(0);
+		color.Add(0);
 
-		unsigned int UniformTransform = glGetUniformLocation(ShaderProgram, "Transform");
+		View = Cam->GetLook();
 
-
-		unsigned int UniformModel = glGetUniformLocation(ShaderProgram, "Model");
-
-
-		unsigned int UniformView = glGetUniformLocation(ShaderProgram, "View");
-
-
-		unsigned int UniformProjection = glGetUniformLocation(ShaderProgram, "Projection");
-
-		glUseProgram(ShaderProgram);
+		shader.Use();
 
 		glActiveTexture(GL_TEXTURE0);
 		glBindTexture(GL_TEXTURE_2D, ItemsToRender[0]->GetTexture(0));
@@ -255,25 +206,26 @@ void Renderer::RenderingLoop()
 		glActiveTexture(GL_TEXTURE1);
 		glBindTexture(GL_TEXTURE_2D, ItemsToRender[1]->GetTexture(1));
 
-		View = Cam->GetLook();
+		shader.SetInt("ourTexture", 0);
 
-		glUniform1i(glGetUniformLocation(ShaderProgram, "ourTexture"), 0);
-		glUniform1i(glGetUniformLocation(ShaderProgram, "ourTexture2"), 1);
-		glUniformMatrix4fv(UniformTransform, 1, GL_FALSE, glm::value_ptr(translation));
-		glUniformMatrix4fv(UniformModel, 1, GL_FALSE, glm::value_ptr(Model));
-		glUniformMatrix4fv(UniformView, 1, GL_FALSE, glm::value_ptr(View));
-		glUniformMatrix4fv(UniformProjection, 1, GL_FALSE, glm::value_ptr(projection));
+		shader.SetInt("ourTexture2", 1);
 
-		glUseProgram(ShaderProgram);
+		shader.SetMatrix4fv("Transform", glm::value_ptr(translation));
 
-		glUniform4f(UniformColorLoc, 0, green, 0, 1);
+		shader.SetMatrix4fv("Model", glm::value_ptr(Model));
 
-		glUniform1f(UniformOffSetLoc, green);
+		shader.SetMatrix4fv("View", glm::value_ptr(View));
+
+		shader.SetMatrix4fv("Projection", glm::value_ptr(projection));
+
+		shader.Set4Float("VertexColor", color);
+
+		shader.SetFloat("offset", green);
 
 		glDrawElements(GL_TRIANGLES, ItemsToRender.GetSize() * 3, GL_UNSIGNED_INT, 0);
 
 
-		WindowInputManager->ProcessInput(Window->GetWindow(), ShaderProgram);
+		WindowInputManager->ProcessInput(Window->GetWindow());
 
 		glfwSwapBuffers(Window->GetWindow());
 		glfwPollEvents();

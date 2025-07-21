@@ -13,6 +13,12 @@ public:
 	{
 		delete[] DynamicArray;
 	}
+
+	Array(const Array<T>& CopyArray)
+	{
+		copy(CopyArray);
+	}
+
 	Array& operator=(const Array& other)
 	{
 		if (this != &other)
@@ -20,6 +26,11 @@ public:
 			copy(other);
 		}
 		return *this;
+	}
+
+	T operator[](const int Index) const
+	{
+		return GetItemAt(Index);
 	}
 
 	void Add(T item)
@@ -38,7 +49,7 @@ public:
 
 	}
 
-	T GetItemAt(int Index)
+	T GetItemAt(int Index) const
 	{
 		return DynamicArray[Index];
 	}
@@ -55,7 +66,7 @@ public:
 
 private:
 
-	void copy(Array other)
+	void copy(const Array& other)
 	{
 		delete[] DynamicArray;
 		DynamicArray = new T[other.GetSize()];

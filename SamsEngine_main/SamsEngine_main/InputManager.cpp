@@ -14,7 +14,7 @@ InputManager::~InputManager()
 {
 }
 
-void InputManager::ProcessInput(GLFWwindow* window, unsigned int Shader)
+void InputManager::ProcessInput(GLFWwindow* window)
 {
 
 	InputActions.Broadcast(window);
