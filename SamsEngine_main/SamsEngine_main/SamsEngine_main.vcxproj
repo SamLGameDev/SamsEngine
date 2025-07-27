@@ -29,6 +29,7 @@
     <ClInclude Include="Item.h" />
     <ClInclude Include="LinkedList.h" />
     <ClInclude Include="Main.h" />
+    <ClInclude Include="Mesh.h" />
     <ClInclude Include="Object.h" />
     <ClInclude Include="PreprocessorDefinitions.h" />
     <ClInclude Include="Renderer.h" />
@@ -52,6 +53,7 @@
     <ClCompile Include="Item.cpp" />
     <ClCompile Include="LinkedList.cpp" />
     <ClCompile Include="Main.cpp" />
+    <ClCompile Include="Mesh.cpp" />
     <ClCompile Include="Object.cpp" />
     <ClCompile Include="PreprocessorDefinitions.cpp" />
     <ClCompile Include="Renderer.cpp" />
