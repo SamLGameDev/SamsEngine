@@ -8,6 +8,7 @@
 #include "stb_image.h"
 #include "Camera.h"
 #include "Renderer.h"
+#include "Model.h"
 
 class InputManager;
 class Shape;
@@ -19,7 +20,7 @@ public:
 	Renderer(FirstWindow* InWindow, InputManager* InInputManager, Camera* InCamera);
 	~Renderer();
 
-	void AddItemToRender(Shape* Item);
+	void AddItemToRender(Model* Item);
 
 	bool Start()
 	{
@@ -27,7 +28,7 @@ public:
 		return true;
 	}
 
-	LinkedList<Shape*> ItemsToRender;
+	LinkedList<Model*> ItemsToRender;
 
 	//static MulticastDelegate<float> TickDel;
 private:

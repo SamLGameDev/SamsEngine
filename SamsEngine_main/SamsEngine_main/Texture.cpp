@@ -11,9 +11,11 @@ Texture::Texture()
 {
 }
 
-Texture::Texture(const std::string InTextureLocation)
+Texture::Texture(const std::string InTextureLocation, std::string InType)
 {
 	TextureLocation = InTextureLocation;
+
+	Type = InType;
 
 	int width, height;
 
@@ -38,6 +40,7 @@ Texture::Texture(const std::string InTextureLocation)
 	glGenerateMipmap(GL_TEXTURE_2D);
 	stbi_image_free(data);
 }
+
 
 unsigned char* Texture::LoadTexture(int* Width, int* Height) const
 {

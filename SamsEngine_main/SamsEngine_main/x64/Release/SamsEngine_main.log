@@ -1,0 +1,52 @@
+﻿  Array.cpp
+  BaseDelegate.cpp
+  Camera.cpp
+D:\Projects\Personal\SamsEngine\SamsEngine_main\SamsEngine_main\InputAction.h(3,10): error C1083: Cannot open include file: 'GLFW/glfw3.h': No such file or directory
+  (compiling source file 'Camera.cpp')
+  
+  FirstWindow.cpp
+D:\Projects\Personal\SamsEngine\SamsEngine_main\SamsEngine_main\FirstWindow.cpp(2,10): error C1083: Cannot open include file: 'glad/glad.h': No such file or directory
+  InputAction.cpp
+D:\Projects\Personal\SamsEngine\SamsEngine_main\SamsEngine_main\InputAction.h(3,10): error C1083: Cannot open include file: 'GLFW/glfw3.h': No such file or directory
+  (compiling source file 'InputAction.cpp')
+  
+  InputActionMouse.cpp
+  InputManager.cpp
+D:\Projects\Personal\SamsEngine\SamsEngine_main\SamsEngine_main\InputManager.cpp(2,10): error C1083: Cannot open include file: 'glad/glad.h': No such file or directory
+  Item.cpp
+  LinkedList.cpp
+  Main.cpp
+D:\Projects\Personal\SamsEngine\SamsEngine_main\SamsEngine_main\Main.cpp(1,10): error C1083: Cannot open include file: 'glad/glad.h': No such file or directory
+  Mesh.cpp
+D:\Projects\Personal\SamsEngine\SamsEngine_main\SamsEngine_main\Shader.h(4,10): error C1083: Cannot open include file: 'glad/glad.h': No such file or directory
+  (compiling source file 'Mesh.cpp')
+  
+  Model.cpp
+D:\Projects\Personal\SamsEngine\SamsEngine_main\SamsEngine_main\Shader.h(4,10): error C1083: Cannot open include file: 'glad/glad.h': No such file or directory
+  (compiling source file 'Model.cpp')
+  
+  Object.cpp
+  PreprocessorDefinitions.cpp
+  Renderer.cpp
+D:\Projects\Personal\SamsEngine\SamsEngine_main\SamsEngine_main\Renderer.h(2,10): error C1083: Cannot open include file: 'glad/glad.h': No such file or directory
+  (compiling source file 'Renderer.cpp')
+  
+  Shader.cpp
+D:\Projects\Personal\SamsEngine\SamsEngine_main\SamsEngine_main\Shader.h(4,10): error C1083: Cannot open include file: 'glad/glad.h': No such file or directory
+  (compiling source file 'Shader.cpp')
+  
+  Shape.cpp
+D:\Projects\Personal\SamsEngine\SamsEngine_main\SamsEngine_main\Shader.h(4,10): error C1083: Cannot open include file: 'glad/glad.h': No such file or directory
+  (compiling source file 'Shape.cpp')
+  
+  Texture.cpp
+D:\Projects\Personal\SamsEngine\SamsEngine_main\SamsEngine_main\Texture.cpp(5,10): error C1083: Cannot open include file: 'glad/glad.h': No such file or directory
+C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.44.35207\include\filesystem(12): warning STL4038: The contents of <filesystem> are available only with C++17 or later.
+  Triangle.cpp
+D:\Projects\Personal\SamsEngine\SamsEngine_main\SamsEngine_main\Shader.h(4,10): error C1083: Cannot open include file: 'glad/glad.h': No such file or directory
+  (compiling source file 'Triangle.cpp')
+  
+  Vector2D.cpp
+  Compiling...
+  Vector3D.cpp
+  Verticie.cpp

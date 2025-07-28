@@ -8,7 +8,7 @@ public:
 
 	Texture();
 
-	Texture(const std::string InTextureLocation);
+	Texture(const std::string InTextureLocation, std::string InType);
 
 	Texture(const Texture& Other)
 	{
@@ -26,6 +26,11 @@ public:
 		return TextureLocation;
 	}
 
+	std::string GetType()
+	{
+		return Type;
+	}
+
 private:
 
 	unsigned char* LoadTexture(int* Width, int* Height) const;
@@ -33,6 +38,8 @@ private:
 	std::string TextureLocation;
 
 	unsigned int ID;
+
+	std::string Type;
 
 };
 

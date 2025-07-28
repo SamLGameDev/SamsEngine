@@ -17,6 +17,15 @@ public:
 
 	Shader(std::string InName, std::string InStorageLocation);
 
+	Shader(const Shader& Other)
+	{
+		StorageLocation = Other.GetRawStorageLocation();
+		Name = Other.GetName();
+		ID = Other.GetID();
+		Textures = Other.GetTextures();
+
+	}
+
 	void Use() const;
 
 	void SetFloat(const std::string InName, float Value) const;
@@ -31,6 +40,26 @@ public:
 	void ApplyTextures();
 
 	void AddTexture(Texture InTexture);
+
+	std::string GetRawStorageLocation() const
+	{
+		return StorageLocation;
+	}
+
+	std::string GetName() const
+	{
+		return Name;
+	}
+
+	const unsigned int GetID() const
+	{
+		return ID;
+	}
+
+	LinkedList<Texture> GetTextures() const
+	{
+		return Textures;
+	}
 
 
 private:

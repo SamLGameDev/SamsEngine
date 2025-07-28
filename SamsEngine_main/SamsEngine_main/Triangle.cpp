@@ -13,15 +13,15 @@ Triangle::Triangle(Vertex InPos1, Vertex InPos2, Vertex InPos3, Vector3D color, 
 
 	Vertices = new float[9];
 
-	Vertices[0] = InPos1.GetPosition().X;
-	Vertices[1] = InPos1.GetPosition().Y;
-	Vertices[2] = InPos1.GetPosition().Z;
-	Vertices[3] = InPos2.GetPosition().X;
-	Vertices[4] = InPos2.GetPosition().Y;
-	Vertices[5] = InPos2.GetPosition().Z;
-	Vertices[6] = InPos3.GetPosition().X;
-	Vertices[7] = InPos3.GetPosition().Y;
-	Vertices[8] = InPos2.GetPosition().Z;
+	Vertices[0] = InPos1.Position.X;
+	Vertices[1] = InPos1.Position.Y;
+	Vertices[2] = InPos1.Position.Z;
+	Vertices[3] = InPos2.Position.X;
+	Vertices[4] = InPos2.Position.Y;
+	Vertices[5] = InPos2.Position.Z;
+	Vertices[6] = InPos3.Position.X;
+	Vertices[7] = InPos3.Position.Y;
+	Vertices[8] = InPos3.Position.Z;
 
 	TextureCords.Add(TexPos1);
 	TextureCords.Add(TexPos2);
@@ -31,7 +31,7 @@ Triangle::Triangle(Vertex InPos1, Vertex InPos2, Vertex InPos3, Vector3D color, 
 
 	shader = Shader("TestShader", "Contents/Shaders/");
 
-	shader.AddTexture(Texture("Contents/Images/Container.jpg"));
+	//shader.AddTexture(Texture("Contents/Images/Container.jpg"));
 }
 
 Triangle::~Triangle()

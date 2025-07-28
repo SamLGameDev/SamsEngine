@@ -72,13 +72,30 @@ void Shader::Set4Float(const std::string InName, Array<float> Value) const
 
 void Shader::ApplyTextures()
 {
+	unsigned int SpecularNum = 1;
+	unsigned int DiffuseNum = 1;
+
 	for (int i = 0; i < Textures.GetSize(); i++)
 	{
 		glActiveTexture(GL_TEXTURE0 + i);
+
+		std::string number;
+
+		if (Textures[i].GetType() == "texture_diffuse")
+		{
+			number = std::to_string(DiffuseNum++);
+		}
+		else if (Textures[i].GetType() == "texture_specular")
+		{
+			number = std::to_string(SpecularNum++);
+		}
+
+		std::string TextureSlot = "material." + Textures[i].GetType() + number;
+		SetInt(TextureSlot, i);
+
 		glBindTexture(GL_TEXTURE_2D, Textures[i].GetID());
 
-		std::string TextureSlot = "ourTexture" + i;
-		SetInt(TextureSlot, Textures[i].GetID());
+
 	}
 }
 

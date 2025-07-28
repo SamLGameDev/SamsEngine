@@ -33,6 +33,16 @@ public:
 		return GetItemAt(Index);
 	}
 
+	T* GetItemAtRef(const int Index) const
+	{
+		return &DynamicArray[Index];
+	}
+
+	T* GetFirstRef()const
+	{
+		return DynamicArray;
+	}
+
 	void Add(T item)
 	{
 		T* NewArray = new T[ArraySize + 1];
@@ -43,6 +53,28 @@ public:
 		}
 		NewArray[ArraySize] = item;
 		ArraySize++;
+
+		delete[] DynamicArray;
+		DynamicArray = NewArray;
+
+	}
+
+
+	void Add(Array<T>& item)
+	{
+		T* NewArray = new T[ArraySize + item.GetSize()];
+
+		for (unsigned int i = 0; i < ArraySize; i++)
+		{
+			NewArray[i] = GetItemAt(i);
+		}
+
+		for (unsigned int i = 0; i < item.GetSize(); i++)
+		{
+			NewArray[i + ArraySize] = item.GetItemAt(i);
+		}
+
+		ArraySize += item.GetSize();;
 
 		delete[] DynamicArray;
 		DynamicArray = NewArray;
@@ -62,6 +94,19 @@ public:
 	T GetArray()
 	{
 		return DynamicArray;
+	}
+
+	const bool Contains(T& Item, unsigned int& Index)
+	{
+		for (unsigned int i = 0; i < ArraySize; i++)
+		{
+			if (Item == DynamicArray[i])
+			{
+				Index = i;
+				return true;
+			}
+		}
+		return false;
 	}
 
 private:

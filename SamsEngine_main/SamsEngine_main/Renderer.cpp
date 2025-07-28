@@ -22,145 +22,13 @@ Renderer::~Renderer()
 {
 }
 
-void Renderer::AddItemToRender(Shape* Item)
+void Renderer::AddItemToRender(Model* Item)
 {
-	LinkedList<int> Indices;
-	for (int i =0; i < 3; i++)
-	{
-		Vertex Vert = Item->GetVerts()[i];
-		auto KeyValue = VertsToIndices.find(Vert);
-		if (KeyValue == VertsToIndices.end())
-		{
-			if (FreeIndices.IsEmpty())
-			{
-				VertsToIndices.insert(std::pair<const Vertex, int>(Vert, CurrentIndicesCount));
-				IndicesToVerts.insert(std::pair<const int, Vertex>(CurrentIndicesCount, Vert));
-				Indices.Add(CurrentIndicesCount);
-				CurrentIndicesCount++;
-			}
-			else
-			{
-				VertsToIndices.insert(std::pair<const Vertex, int>(Vert, FreeIndices[0]));
-				IndicesToVerts.insert(std::pair<const int, Vertex>(FreeIndices[0], Vert));
-				Indices.Add(FreeIndices[0]);
-				FreeIndices.RemoveAt(0);
-			}
-
-		}
-		else
-		{
-			Indices.Add(KeyValue->second);
-		}
-	}
-	Item->SetRenderOrder(Indices);
 	ItemsToRender.Add(Item);
-
-	return;
 }
 
 void Renderer::RenderingLoop()
 {
-
-
-	unsigned int VBO, VAO, EBO;
-	glGenVertexArrays(1, &VAO);
-	glGenBuffers(1, &VBO);
-	glGenBuffers(1, &EBO);
-
-	int totsSzeverts = VertsToIndices.size() * 8;
-
-	float debugverts[100];
-
-	int debugInds[100];
-
-	float* verts = new float[totsSzeverts]();
-
-	int totsSze = 0;
-
-	for (int i = 0; i < ItemsToRender.GetSize(); i++)
-	{
-		LinkedList<int> Indices = ItemsToRender[i]->GetIndices();
-		totsSze += Indices.GetSize();
-	}
-
-	int* Inds = new int[totsSze]();
-
-	int next = 0;
-
-	LinkedList<int> AppearedIndicies;
-
-	for (int i = 0; i < ItemsToRender.GetSize(); i++)
-	{
-		LinkedList<int> Indices = ItemsToRender[i]->GetIndices();
-
-		for(int j = 0; j < Indices.GetSize(); j++)
-		{
-			int index = Indices[j];
-			Vertex vert = IndicesToVerts.find(index)->second;
-
-			if (!AppearedIndicies.Contains(index))
-			{
-				verts[next] = vert.GetPosition().X;
-				debugverts[next] = vert.GetPosition().X;
-				next++;
-				verts[next] = vert.GetPosition().Y;
-				debugverts[next] = vert.GetPosition().Y;
-				next++;
-				verts[next] = vert.GetPosition().Z;
-				debugverts[next] = vert.GetPosition().Z;
-				next++;
-				verts[next] = ItemsToRender[i]->GetColor().X;
-				next++;
-				verts[next] = ItemsToRender[i]->GetColor().Y;
-				next++;
-				verts[next] = ItemsToRender[i]->GetColor().Z;
-				next++;
-				verts[next] = ItemsToRender[i]->GetTextureCords()[j].X;
-				next++;
-				verts[next] = ItemsToRender[i]->GetTextureCords()[j].Y;
-				next++;
-
-				AppearedIndicies.Add(index);
-			}
-
-
-
-			debugInds[j + (i * 3)]= Indices[j];
-			Inds[j + (i * 3)] = Indices[j];
-		}
-	}
-
-	float AllVertsToRender;
-
-	const int RenderSize = ItemsToRender.GetSize();
-
-	std::cout << "VERTS:\n";
-	for (int i = 0; i < totsSzeverts; i += 3) {
-		std::cout << verts[i] << ", " << verts[i + 1] << ", " << verts[i + 2] << "\n";
-	}
-
-	std::cout << "INDICES:\n";
-	for (int i = 0; i < totsSze; i += 3) {
-		std::cout << Inds[i] << ", " << Inds[i + 1] << ", " << Inds[i + 2] << "\n";
-	}
-
-	glBindVertexArray(VAO);
-	glBindBuffer(GL_ARRAY_BUFFER, VBO);
-	glBufferData(GL_ARRAY_BUFFER, totsSzeverts * sizeof(float), verts, GL_STATIC_DRAW);
-
-	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
-	glBufferData(GL_ELEMENT_ARRAY_BUFFER, totsSze* sizeof(int), Inds, GL_STATIC_DRAW);
-
-
-	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)0);
-	glEnableVertexAttribArray(0);
-
-	glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)(3 * sizeof(float)));
-	glEnableVertexAttribArray(1);
-
-	glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)(6 * sizeof(float)));
-	glEnableVertexAttribArray(2);
-
 	glm::mat4 translation = glm::mat4(1);
 	translation = glm::translate(translation, glm::vec3(0, 0, 0.0f));
 	translation = glm::rotate(translation, glm::radians(0.0f), glm::vec3(0, 0, 1));
@@ -198,10 +66,19 @@ void Renderer::RenderingLoop()
 
 		View = Cam->GetLook();
 
-		ItemsToRender[0]->Draw(translation, Model, View, projection);
+		Shader* MeshShader = ItemsToRender[0]->GetShader();
 
-		glDrawElements(GL_TRIANGLES, ItemsToRender.GetSize() * 3, GL_UNSIGNED_INT, 0);
+		MeshShader->Use();
 
+		MeshShader->SetMatrix4fv("Transform", glm::value_ptr(translation));
+
+		MeshShader->SetMatrix4fv("Model", glm::value_ptr(Model));
+
+		MeshShader->SetMatrix4fv("View", glm::value_ptr(View));
+
+		MeshShader->SetMatrix4fv("Projection", glm::value_ptr(projection));
+
+		ItemsToRender[0]->Draw();
 
 		WindowInputManager->ProcessInput(Window->GetWindow());
 
