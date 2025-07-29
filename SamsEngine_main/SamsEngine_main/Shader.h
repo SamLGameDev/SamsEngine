@@ -6,6 +6,7 @@
 #include "Array.h"
 #include "LinkedList.h"
 #include "Texture.h"
+#include "Vector3D.h"
 
 
 class Shader
@@ -33,9 +34,12 @@ public:
 	void SetInt(const std::string InName, int Value) const;
 
 	void SetMatrix4fv(const std::string InName, GLfloat* Value) const;
+	void SetMatrix3fv(const std::string InName, GLfloat* Value) const;
 
 
-	void Set4Float(const std::string InName, Array<float> Value) const;
+	void SetVec4(const std::string InName, Array<float> Value) const;
+	void SetVec3(const std::string InName, Array<float> Value) const;
+	void SetVec3(const std::string InName, Vector3D Value) const;
 
 	void ApplyTextures();
 

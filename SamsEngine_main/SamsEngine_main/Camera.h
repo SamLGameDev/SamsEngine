@@ -22,6 +22,11 @@ public:
 
 	void MouseCallback(float xpos, float ypos);
 
+	glm::vec3 GetPos() const
+	{
+		return Pos;
+	}
+
 	glm::mat4 GetLook();
 
 	float DeltaTime;

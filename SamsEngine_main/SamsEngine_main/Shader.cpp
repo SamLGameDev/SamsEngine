@@ -65,9 +65,24 @@ void Shader::SetMatrix4fv(const std::string InName, GLfloat* Value) const
 	glUniformMatrix4fv(glGetUniformLocation(ID, InName.c_str()), 1, GL_FALSE, Value);
 }
 
-void Shader::Set4Float(const std::string InName, Array<float> Value) const
+void Shader::SetMatrix3fv(const std::string InName, GLfloat* Value) const
+{
+	glUniformMatrix3fv(glGetUniformLocation(ID, InName.c_str()), 1, GL_FALSE, Value);
+}
+
+void Shader::SetVec4(const std::string InName, Array<float> Value) const
 {
 	glUniform4f(glGetUniformLocation(ID, InName.c_str()), Value[0], Value[1], Value[2], Value[3]);
+}
+
+void Shader::SetVec3(const std::string InName, Array<float> Value) const
+{
+	glUniform3f(glGetUniformLocation(ID, InName.c_str()), Value[0], Value[1], Value[2]);
+}
+
+void Shader::SetVec3(const std::string InName, Vector3D Value) const
+{
+	glUniform3f(glGetUniformLocation(ID, InName.c_str()), Value.X, Value.Y, Value.Z);
 }
 
 void Shader::ApplyTextures()

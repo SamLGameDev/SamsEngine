@@ -4,31 +4,4 @@ D:\Projects\Personal\SamsEngine\SamsEngine_main\SamsEngine_main\Triangle.h(6,7):
       D:\Projects\Personal\SamsEngine\SamsEngine_main\SamsEngine_main\Verticie.h(10,8):
       see declaration of 'Vertex'
   
-  Mesh.cpp
-  Model.cpp
-D:\Projects\Personal\SamsEngine\SamsEngine_main\SamsEngine_main\Model.cpp(18,29): warning C4018: '<': signed/unsigned mismatch
-D:\Projects\Personal\SamsEngine\SamsEngine_main\SamsEngine_main\Model.cpp(123,38): warning C4018: '<': signed/unsigned mismatch
-D:\Projects\Personal\SamsEngine\SamsEngine_main\SamsEngine_main\Array.h(67,30): warning C4018: '<': signed/unsigned mismatch
-  (compiling source file 'Model.cpp')
-      D:\Projects\Personal\SamsEngine\SamsEngine_main\SamsEngine_main\Array.h(67,30):
-      the template instantiation context (the oldest one first) is
-          D:\Projects\Personal\SamsEngine\SamsEngine_main\SamsEngine_main\Model.cpp(3,23):
-          see reference to class template instantiation 'Array<Texture>' being compiled
-          D:\Projects\Personal\SamsEngine\SamsEngine_main\SamsEngine_main\Array.h(63,7):
-          while compiling class template member function 'void Array<Texture>::Add(Array<Texture> &)'
-              D:\Projects\Personal\SamsEngine\SamsEngine_main\SamsEngine_main\Model.cpp(100,15):
-              see the first reference to 'Array<Texture>::Add' in 'Model::ProcessMesh'
-  
-D:\Projects\Personal\SamsEngine\SamsEngine_main\SamsEngine_main\Array.h(72,30): warning C4018: '<': signed/unsigned mismatch
-  (compiling source file 'Model.cpp')
-  
-  Renderer.cpp
-D:\Projects\Personal\SamsEngine\SamsEngine_main\SamsEngine_main\Renderer.cpp(44,22): warning C4244: 'initializing': conversion from 'double' to 'float', possible loss of data
-D:\Projects\Personal\SamsEngine\SamsEngine_main\SamsEngine_main\Renderer.cpp(47,22): warning C4244: 'initializing': conversion from 'double' to 'float', possible loss of data
-D:\Projects\Personal\SamsEngine\SamsEngine_main\SamsEngine_main\Renderer.cpp(53,28): warning C4305: 'argument': truncation from 'double' to 'GLfloat'
-D:\Projects\Personal\SamsEngine\SamsEngine_main\SamsEngine_main\Renderer.cpp(56,33): warning C4244: 'initializing': conversion from 'double' to 'float', possible loss of data
-D:\Projects\Personal\SamsEngine\SamsEngine_main\SamsEngine_main\Renderer.cpp(56,20): warning C4244: 'initializing': conversion from 'double' to 'const float', possible loss of data
-D:\Projects\Personal\SamsEngine\SamsEngine_main\SamsEngine_main\Renderer.cpp(58,37): warning C4244: 'initializing': conversion from 'double' to 'float', possible loss of data
-D:\Projects\Personal\SamsEngine\SamsEngine_main\SamsEngine_main\Renderer.cpp(58,21): warning C4244: 'initializing': conversion from 'double' to 'const float', possible loss of data
-  Generating Code...
   SamsEngine_main.vcxproj -> D:\Projects\Personal\SamsEngine\SamsEngine_main\x64\Debug\SamsEngine_main.exe

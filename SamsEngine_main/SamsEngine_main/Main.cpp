@@ -42,7 +42,10 @@ int main()
 
 	//renderer->AddItemToRender(new Triangle(verty, verty2, verty3, Vector3D(0.5f, 0.5f, 0.9f)));
 
-	Shader shader = Shader("TestShader", "Contents/Shaders/");
+	Shader shader = Shader("LightShader", "Contents/Shaders/");
+
+	shader.SetVec3("lightColor", Vector3D(0, 0, 0));
+	shader.SetVec3("objectColor", Vector3D(0, 0, 0));
 
 	Model model = Model("Contents/Models/backpack.obj", shader);
 

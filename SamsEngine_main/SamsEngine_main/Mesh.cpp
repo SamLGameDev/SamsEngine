@@ -11,6 +11,11 @@ Mesh::Mesh(Array<Vertex> InVertices, Array<unsigned int> InIndices, Shader InSha
 	Indices = InIndices;
 	MeshShader = InShader;
 
+	//for (int i = 0; i < Vertices.GetSize(); i++)
+	//{
+	//	std::cout << "Vert" << Vertices[i].Position.X << "," << Vertices[i].Position.Y << "," << Vertices[i].Position.Z << std::endl;
+	//}
+
 	SetUpMesh();
 }
 

@@ -120,12 +120,12 @@ Array<Texture> Model::LoadMaterialTextures(aiMaterial* Mat, aiTextureType Type, 
 
 		bool bSkip = false;
 
-		for (unsigned int index = 0; index < LoadedTextures.GetSize(); i++)
+		for (unsigned int index = 0; index < LoadedTextures.GetSize(); index++)
 		{
 			std::string texPath = LoadedTextures[index].GetTextureLocation();
 			if (texPath == Path)
 			{
-				textures.Add(LoadedTextures[i]);
+				textures.Add(LoadedTextures[index]);
 				bSkip = true;
 				break;
 			}
@@ -138,6 +138,7 @@ Array<Texture> Model::LoadMaterialTextures(aiMaterial* Mat, aiTextureType Type, 
 
 		Texture texture = Texture(Path, TypeName);
 		textures.Add(texture);
+		LoadedTextures.Add(texture);
 	}
 
 	return textures;
