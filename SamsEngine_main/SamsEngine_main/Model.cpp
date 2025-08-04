@@ -99,6 +99,8 @@ Mesh Model::ProcessMesh(aiMesh* InMesh, const aiScene* Scene)
 
 		textures.Add(diffuseMaps);
 		textures.Add(specularMaps);
+		//ModelShader.AddTexture(diffuseMaps);
+		//ModelShader.AddTexture(specularMaps);
 	}
 
 
@@ -110,6 +112,8 @@ Array<Texture> Model::LoadMaterialTextures(aiMaterial* Mat, aiTextureType Type, 
 {
 
 	Array<Texture> textures;
+
+	std::cout << Mat->GetTextureCount(Type);
 
 	for (unsigned int i = 0; i < Mat->GetTextureCount(Type); i++)
 	{
@@ -125,7 +129,6 @@ Array<Texture> Model::LoadMaterialTextures(aiMaterial* Mat, aiTextureType Type, 
 			std::string texPath = LoadedTextures[index].GetTextureLocation();
 			if (texPath == Path)
 			{
-				textures.Add(LoadedTextures[index]);
 				bSkip = true;
 				break;
 			}
@@ -139,6 +142,7 @@ Array<Texture> Model::LoadMaterialTextures(aiMaterial* Mat, aiTextureType Type, 
 		Texture texture = Texture(Path, TypeName);
 		textures.Add(texture);
 		LoadedTextures.Add(texture);
+		ModelShader.AddTexture(texture);
 	}
 
 	return textures;

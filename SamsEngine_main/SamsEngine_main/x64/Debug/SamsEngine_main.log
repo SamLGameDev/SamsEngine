@@ -1,7 +1,0 @@
-﻿  Main.cpp
-D:\Projects\Personal\SamsEngine\SamsEngine_main\SamsEngine_main\Triangle.h(6,7): warning C4099: 'Vertex': type name first seen using 'struct' now seen using 'class'
-  (compiling source file 'Main.cpp')
-      D:\Projects\Personal\SamsEngine\SamsEngine_main\SamsEngine_main\Verticie.h(10,8):
-      see declaration of 'Vertex'
-  
-  SamsEngine_main.vcxproj -> D:\Projects\Personal\SamsEngine\SamsEngine_main\x64\Debug\SamsEngine_main.exe

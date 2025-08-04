@@ -1,5 +1,5 @@
 #pragma once
-class Vector2D
+struct Vector2D
 {
 public:
 

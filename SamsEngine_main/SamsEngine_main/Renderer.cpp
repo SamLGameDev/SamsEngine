@@ -52,8 +52,11 @@ void Renderer::RenderingLoop()
 
 		//TickDel.Broadcast(deltaTime);
 
-		glClearColor(0.5f, 0.2f, 0.7, 1);
-		glClear(GL_COLOR_BUFFER_BIT);
+		//glClearColor(0.5f, 0.2f, 0.7, 1);
+		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+		glEnable(GL_DEPTH_TEST);
+
+
 
 		const float time = glfwGetTime();
 
@@ -65,6 +68,7 @@ void Renderer::RenderingLoop()
 		color.Add(green);
 		color.Add(0);
 		color.Add(0);
+
 
 		View = Cam->GetLook();
 
@@ -82,19 +86,14 @@ void Renderer::RenderingLoop()
 
 		MeshShader->SetMatrix3fv("NormalModel", glm::value_ptr(NormalModel));
 
-		glm::vec3 ViewPos = View * Model * glm::vec4(0, 0.5f, 0, 1);
+		glm::vec4 lightModel = View  * glm::vec4(1.2f, 1.0f, 2.0f, 1);
 
-		MeshShader->SetVec3("light.position", Vector3D(ViewPos.x, ViewPos.y, ViewPos.z));
+		MeshShader->SetVec3("light.position", Vector3D(lightModel.x, lightModel.y, lightModel.z));
 
+		MeshShader->SetFloat("material.shininess", 64.0f);
 
-		MeshShader->SetVec3("material.ambient", Vector3D(1.0f, 0.5f, 0.31f));
-		MeshShader->SetFloat("material.shininess", 32.0f);
-
-		MeshShader->SetVec3("material.diffuse", Vector3D(1.0f, 0.5f, 0.31f));
-		MeshShader->SetVec3("material.specular", Vector3D(0.5f, 0.5f, 0.5f));
-
-		MeshShader->SetVec3("light.ambient", Vector3D(0.2f, 0.2f, 0.2f));
-		MeshShader->SetVec3("light.diffuse", Vector3D(0.5f, 0.5f, 0.5f)); // darken diffuse light a bit
+		MeshShader->SetVec3("light.ambient", Vector3D(0.5f, 0.5f, 0.5f));
+		MeshShader->SetVec3("light.diffuse", Vector3D(0.2f, 0.2f, 0.2f)); // darken diffuse light a bit
 		MeshShader->SetVec3("light.specular",Vector3D(1.0f, 1.0f, 1.0f));
 
 		ItemsToRender[0]->Draw();

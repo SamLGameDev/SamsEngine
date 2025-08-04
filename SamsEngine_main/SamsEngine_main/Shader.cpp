@@ -19,6 +19,7 @@ Shader::Shader(std::string InName, std::string InStorageLocation)
 		bool bIsSuccessful = CreateDefaultShaderFile();
 		if (!bIsSuccessful)
 		{
+			std::cout << "ERROR::SHADER::SHADER NOT CREATED" << std::endl;
 			return;
 		};
 
@@ -115,6 +116,11 @@ void Shader::ApplyTextures()
 }
 
 void Shader::AddTexture(Texture InTexture)
+{
+	Textures.Add(InTexture);
+}
+
+void Shader::AddTexture(Array<Texture>& InTexture)
 {
 	Textures.Add(InTexture);
 }
@@ -277,6 +283,8 @@ void Shader::CreateProgram(const unsigned int vertex, const unsigned int fragmen
 		glGetProgramInfoLog(ID, 512, NULL, infoLog);
 		std::cout << "ERROR::SHADER::PROGRAM::COMPILATION_FAILED\n" << infoLog << std::endl;
 	}
+	glDeleteShader(vertex);
+	glDeleteShader(fragment);
 
 }
 

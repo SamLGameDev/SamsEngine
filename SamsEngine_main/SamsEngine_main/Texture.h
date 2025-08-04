@@ -14,6 +14,7 @@ public:
 	{
 		TextureLocation = Other.GetTextureLocation();
 		ID = Other.GetID();
+		Type = Other.Type;
 	}
 
 	const unsigned int GetID() const

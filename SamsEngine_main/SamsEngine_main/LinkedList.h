@@ -1,5 +1,6 @@
 #pragma once
 #include "Item.h"
+#include "Array.h"
 
 template<typename T>
 class LinkedList
@@ -64,6 +65,14 @@ public:
 			LastItem = NewItem;
 		}
 		Size++;
+
+	}
+	void Add(Array<T>& Items)
+	{
+		for (int i = 0; i < Items.GetSize(); i++)
+		{
+			Add(Items[i]);
+		}
 
 	}
 

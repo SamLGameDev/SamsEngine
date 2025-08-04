@@ -12,11 +12,13 @@ struct Vertex
 
 public:
 	
+
+	Vector3D Position;
+
 	Vector3D Normal;
 
 	Vector2D TexCoords;
 
-	Vector3D Position;
 
 
 	bool operator==(const Vertex& other) const {

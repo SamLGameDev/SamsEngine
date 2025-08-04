@@ -11,6 +11,8 @@ public:
 
 	Mesh(Array<Vertex> InVertices, Array<unsigned int> InIndices, Shader InShader);
 
+	Mesh(const Mesh& Copy);
+
 	void Draw();
 
 private:

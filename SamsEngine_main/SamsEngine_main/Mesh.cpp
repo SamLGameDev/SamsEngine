@@ -19,6 +19,16 @@ Mesh::Mesh(Array<Vertex> InVertices, Array<unsigned int> InIndices, Shader InSha
 	SetUpMesh();
 }
 
+Mesh::Mesh(const Mesh& Copy)
+{
+	Vertices = Copy.Vertices;
+	Indices = Copy.Indices;
+	MeshShader = Copy.MeshShader;
+	VAO = Copy.VAO;
+	VBO = Copy.VBO;
+	EBO = Copy.EBO;
+}
+
 void Mesh::Draw()
 {
 	MeshShader.ApplyTextures();
@@ -53,6 +63,8 @@ void Mesh::SetUpMesh()
 
 	glEnableVertexAttribArray(2);
 	glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)offsetof(Vertex, TexCoords));
+
+
 
 	glBindVertexArray(0);
 }

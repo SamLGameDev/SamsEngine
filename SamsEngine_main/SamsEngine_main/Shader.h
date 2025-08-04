@@ -44,6 +44,8 @@ public:
 	void ApplyTextures();
 
 	void AddTexture(Texture InTexture);
+	void AddTexture(Array<Texture>& InTexture);
+
 
 	std::string GetRawStorageLocation() const
 	{
