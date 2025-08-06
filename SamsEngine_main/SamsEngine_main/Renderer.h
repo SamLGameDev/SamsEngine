@@ -12,6 +12,7 @@
 
 class InputManager;
 class Shape;
+class WireObject;
 
 class Renderer
 {
@@ -29,6 +30,8 @@ public:
 	}
 
 	LinkedList<Model*> ItemsToRender;
+
+	static LinkedList<WireObject*> WiresToDraw;
 
 	//static MulticastDelegate<float> TickDel;
 private:

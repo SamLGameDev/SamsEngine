@@ -1,4 +1,5 @@
 #include "Model.h"
+#include "WireShapes.h"
 
 Array<Texture> Model::LoadedTextures;
 
@@ -22,6 +23,7 @@ void Model::Draw()
 		Meshes.GetItemAtRef(i)->Draw(&ModelTransform);
 	}
 }
+
 
 void Model::LoadModel()
 {

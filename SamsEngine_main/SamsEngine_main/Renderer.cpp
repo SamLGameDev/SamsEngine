@@ -12,6 +12,9 @@
 #include "WireShapes.h"
 
 
+LinkedList<WireObject*> Renderer::WiresToDraw;
+
+
 Renderer::Renderer(InputManager* InInputManager)
 {
 	WindowInputManager = InInputManager;
@@ -30,6 +33,8 @@ void Renderer::RenderingLoop()
 {
 	float lastFrameTime = glfwGetTime();
 
+	WireObject object = DrawWireCube(Vector3D(0, 0, 0), Vector3D(5, 10, 10), Vector3D(0.2f, 0.5f, 0.2f));
+
 	while (!glfwWindowShouldClose(Camera::GetActiveWindow()->GetWindow()))
 	{
 		float currentFrame = glfwGetTime();
@@ -43,7 +48,6 @@ void Renderer::RenderingLoop()
 		glEnable(GL_DEPTH_TEST);
 
 
-
 		const float time = glfwGetTime();
 
 		const float green = sin(time) / 2 + 0.5;
@@ -55,6 +59,9 @@ void Renderer::RenderingLoop()
 		color.Add(0);
 		color.Add(0);
 
+
+	//	std::cout << WiresToDraw[0]->GetShader()->GetName() << std::endl;
+
 		if (!ItemsToRender.IsEmpty())
 		{
 			for (unsigned int i = 0; i < ItemsToRender.GetSize(); i++)
@@ -64,8 +71,19 @@ void Renderer::RenderingLoop()
 		}
 
 
+	//	std::cout << WiresToDraw[0]->GetShader()->GetName() << std::endl;
 
-		//DrawWireCube(Vector3D(0, 0, 0), Vector3D(0.5f, 0.5f, 0.5f));
+		//if (!WiresToDraw.IsEmpty())
+		//{
+		//	for (unsigned int i = 0; i < WiresToDraw.GetSize(); i++)
+		//	{
+
+		//		std::cout << WiresToDraw[0]->GetShader()->GetName() << std::endl;
+		//		WiresToDraw[i]->Draw();
+		//	}
+		//}
+
+		object.Draw();
 
 		WindowInputManager->ProcessInput(Camera::GetActiveWindow()->GetWindow());
 

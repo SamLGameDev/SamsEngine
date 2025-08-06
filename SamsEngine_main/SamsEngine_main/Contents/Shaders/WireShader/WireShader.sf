@@ -12,5 +12,5 @@ void main()
 {
    Pos = Projection * View * Model * vec4(aPos, 1.0);
    gl_Position = Pos;
-   VertexColor = aColor
+   VertexColor = aColor;
 }
