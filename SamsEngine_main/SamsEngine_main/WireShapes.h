@@ -14,6 +14,8 @@ public:
 
 	WireObject(const WireObject& Copy);
 
+	~WireObject();
+
 	void Draw();
 
 	Array<float> Vertices;
@@ -24,7 +26,7 @@ public:
 
 	Shader* GetShader()
 	{
-		return &WireShader;
+		return WireShader;
 	}
 
 private:
@@ -33,7 +35,7 @@ private:
 
 		unsigned int VAO, VBO, EBO;
 
-		Shader WireShader;
+		Shader* WireShader;
 
 
 		void SetShaderVariables(const Transform* WireTransform);
@@ -43,4 +45,4 @@ private:
 };
 
 
-WireObject DrawWireCube(Vector3D Center, Vector3D Size, Vector3D Color);
+void DrawWireCube(Vector3D Center, Vector3D Size, Vector3D Color);

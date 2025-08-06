@@ -54,9 +54,9 @@ int main()
 	shader.SetVec3("lightColor", Vector3D(0, 0, 0));
 	shader.SetVec3("objectColor", Vector3D(0, 0, 0));
 
-	//Model model = Model("Contents/Models/backpack.obj", shader);
+	Model model = Model("Contents/Models/backpack.obj", shader);
 
-	//renderer->AddItemToRender(&model);
+	renderer->AddItemToRender(&model);
 
 	renderer->Start();
 

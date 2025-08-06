@@ -11,7 +11,7 @@ WireObject::WireObject(const Transform* InTransform, const Shader* InShader)
 {
 	WireTransform = *InTransform;
 
-	WireShader = Shader(*InShader);
+	WireShader = new Shader(*InShader);
 
 	Renderer::WiresToDraw.Add(this);
 }
@@ -19,12 +19,17 @@ WireObject::WireObject(const Transform* InTransform, const Shader* InShader)
 WireObject::WireObject(const WireObject& Copy)
 {
 	WireTransform = Copy.WireTransform;
-	WireShader = Copy.WireShader;
+	WireShader = new Shader(*Copy.WireShader);
 	Vertices = Copy.Vertices;
 	Indices = Copy.Indices;
 	VAO = Copy.VAO;
 	VBO = Copy.VBO;
 	EBO = Copy.EBO;
+}
+
+WireObject::~WireObject()
+{
+	delete WireShader;
 }
 
 
@@ -56,7 +61,7 @@ void WireObject::Draw()
 {
 	glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
 
-	WireShader.Use();
+	WireShader->Use();
 
 	SetShaderVariables(&WireTransform);
 
@@ -82,136 +87,134 @@ void WireObject::SetShaderVariables(const Transform* WireTransform)
 
 void WireObject::SetTransformationVariables(glm::mat4& model, glm::mat4& view, glm::mat4& projection)
 {
-	WireShader.SetMatrix4fv("Model", glm::value_ptr(model));
+	WireShader->SetMatrix4fv("Model", glm::value_ptr(model));
 
-	WireShader.SetMatrix4fv("View", glm::value_ptr(view));
+	WireShader->SetMatrix4fv("View", glm::value_ptr(view));
 
-	WireShader.SetMatrix4fv("Projection", glm::value_ptr(projection));
+	WireShader->SetMatrix4fv("Projection", glm::value_ptr(projection));
 }
 
-WireObject DrawWireCube(Vector3D Center, Vector3D Size, Vector3D Color)
+void DrawWireCube(Vector3D Center, Vector3D Size, Vector3D Color)
 { 
 
 	Transform wireTransform = Transform(Center, Vector3D(1, 1, 1), Vector3D(0, 0, 0));
 
 	Shader wireShader = Shader("WireShader", "Contents/Shaders/WireShader/");
 
-	WireObject object = WireObject(&wireTransform, &wireShader);
+	WireObject* object = new WireObject(&wireTransform, &wireShader);
 
-	object.Vertices.Add(Center.X + (Size.X / 2));
-	object.Vertices.Add(Center.Y + (Size.Y / 2));
-	object.Vertices.Add(Center.Z + (Size.Z / 2));
+	object->Vertices.Add(Center.X + (Size.X / 2));
+	object->Vertices.Add(Center.Y + (Size.Y / 2));
+	object->Vertices.Add(Center.Z + (Size.Z / 2));
 
-	object.Vertices.Add(Color.X);
-	object.Vertices.Add(Color.Y);
-	object.Vertices.Add(Color.Z);
-
-
-
-	object.Vertices.Add(Center.X + (Size.X / 2));
-	object.Vertices.Add(Center.Y - (Size.Y / 2));
-	object.Vertices.Add(Center.Z + (Size.Z / 2));
+	object->Vertices.Add(Color.X);
+	object->Vertices.Add(Color.Y);
+	object->Vertices.Add(Color.Z);
 
 
-	object.Vertices.Add(Color.X);
-	object.Vertices.Add(Color.Y);
-	object.Vertices.Add(Color.Z);
+
+	object->Vertices.Add(Center.X + (Size.X / 2));
+	object->Vertices.Add(Center.Y - (Size.Y / 2));
+	object->Vertices.Add(Center.Z + (Size.Z / 2));
 
 
-	object.Vertices.Add(Center.X - (Size.X / 2));
-	object.Vertices.Add(Center.Y - (Size.Y / 2));
-	object.Vertices.Add(Center.Z + (Size.Z / 2));
+	object->Vertices.Add(Color.X);
+	object->Vertices.Add(Color.Y);
+	object->Vertices.Add(Color.Z);
 
 
-	object.Vertices.Add(Color.X);
-	object.Vertices.Add(Color.Y);
-	object.Vertices.Add(Color.Z);
+	object->Vertices.Add(Center.X - (Size.X / 2));
+	object->Vertices.Add(Center.Y - (Size.Y / 2));
+	object->Vertices.Add(Center.Z + (Size.Z / 2));
 
 
-	object.Indices.Add(0);
-	object.Indices.Add(1);
-	object.Indices.Add(2);
-
-	object.Vertices.Add(Center.X - (Size.X / 2));
-	object.Vertices.Add(Center.Y + (Size.Y / 2));
-	object.Vertices.Add(Center.Z + (Size.Z / 2));
+	object->Vertices.Add(Color.X);
+	object->Vertices.Add(Color.Y);
+	object->Vertices.Add(Color.Z);
 
 
-	object.Vertices.Add(Color.X);
-	object.Vertices.Add(Color.Y);
-	object.Vertices.Add(Color.Z);
+	object->Indices.Add(0);
+	object->Indices.Add(1);
+	object->Indices.Add(2);
+
+	object->Vertices.Add(Center.X - (Size.X / 2));
+	object->Vertices.Add(Center.Y + (Size.Y / 2));
+	object->Vertices.Add(Center.Z + (Size.Z / 2));
 
 
-	object.Indices.Add(0);
-	object.Indices.Add(3);
-	object.Indices.Add(2);
-
-	object.Vertices.Add(Center.X + (Size.X / 2));
-	object.Vertices.Add(Center.Y + (Size.Y / 2));
-	object.Vertices.Add(Center.Z - (Size.Z / 2));
+	object->Vertices.Add(Color.X);
+	object->Vertices.Add(Color.Y);
+	object->Vertices.Add(Color.Z);
 
 
-	object.Vertices.Add(Color.X);
-	object.Vertices.Add(Color.Y);
-	object.Vertices.Add(Color.Z);
+	object->Indices.Add(0);
+	object->Indices.Add(3);
+	object->Indices.Add(2);
+
+	object->Vertices.Add(Center.X + (Size.X / 2));
+	object->Vertices.Add(Center.Y + (Size.Y / 2));
+	object->Vertices.Add(Center.Z - (Size.Z / 2));
 
 
-	object.Vertices.Add(Center.X + (Size.X / 2));
-	object.Vertices.Add(Center.Y - (Size.Y / 2));
-	object.Vertices.Add(Center.Z - (Size.Z / 2));
+	object->Vertices.Add(Color.X);
+	object->Vertices.Add(Color.Y);
+	object->Vertices.Add(Color.Z);
 
 
-	object.Vertices.Add(Color.X);
-	object.Vertices.Add(Color.Y);
-	object.Vertices.Add(Color.Z);
+	object->Vertices.Add(Center.X + (Size.X / 2));
+	object->Vertices.Add(Center.Y - (Size.Y / 2));
+	object->Vertices.Add(Center.Z - (Size.Z / 2));
 
 
-	object.Vertices.Add(Center.X - (Size.X / 2));
-	object.Vertices.Add(Center.Y - (Size.Y / 2));
-	object.Vertices.Add(Center.Z - (Size.Z / 2));
+	object->Vertices.Add(Color.X);
+	object->Vertices.Add(Color.Y);
+	object->Vertices.Add(Color.Z);
 
 
-	object.Vertices.Add(Color.X);
-	object.Vertices.Add(Color.Y);
-	object.Vertices.Add(Color.Z);
+	object->Vertices.Add(Center.X - (Size.X / 2));
+	object->Vertices.Add(Center.Y - (Size.Y / 2));
+	object->Vertices.Add(Center.Z - (Size.Z / 2));
 
 
-	object.Indices.Add(4);
-	object.Indices.Add(5);
-	object.Indices.Add(6);
-
-	object.Vertices.Add(Center.X - (Size.X / 2));
-	object.Vertices.Add(Center.Y + (Size.Y / 2));
-	object.Vertices.Add(Center.Z - (Size.Z / 2));
+	object->Vertices.Add(Color.X);
+	object->Vertices.Add(Color.Y);
+	object->Vertices.Add(Color.Z);
 
 
-	object.Vertices.Add(Color.X);
-	object.Vertices.Add(Color.Y);
-	object.Vertices.Add(Color.Z);
+	object->Indices.Add(4);
+	object->Indices.Add(5);
+	object->Indices.Add(6);
+
+	object->Vertices.Add(Center.X - (Size.X / 2));
+	object->Vertices.Add(Center.Y + (Size.Y / 2));
+	object->Vertices.Add(Center.Z - (Size.Z / 2));
 
 
-	object.Indices.Add(4);
-	object.Indices.Add(7);
-	object.Indices.Add(6);
+	object->Vertices.Add(Color.X);
+	object->Vertices.Add(Color.Y);
+	object->Vertices.Add(Color.Z);
 
-	object.Indices.Add(0);
-	object.Indices.Add(4);
-	object.Indices.Add(5);
 
-	object.Indices.Add(0);
-	object.Indices.Add(1);
-	object.Indices.Add(5);
+	object->Indices.Add(4);
+	object->Indices.Add(7);
+	object->Indices.Add(6);
 
-	object.Indices.Add(3);
-	object.Indices.Add(2);
-	object.Indices.Add(6);
+	object->Indices.Add(0);
+	object->Indices.Add(4);
+	object->Indices.Add(5);
 
-	object.Indices.Add(3);
-	object.Indices.Add(7);
-	object.Indices.Add(6);
+	object->Indices.Add(0);
+	object->Indices.Add(1);
+	object->Indices.Add(5);
 
-	object.Initialise();
+	object->Indices.Add(3);
+	object->Indices.Add(2);
+	object->Indices.Add(6);
 
-	return object;
+	object->Indices.Add(3);
+	object->Indices.Add(7);
+	object->Indices.Add(6);
+
+	object->Initialise();
 
 }

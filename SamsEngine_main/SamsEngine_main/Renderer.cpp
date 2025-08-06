@@ -33,7 +33,7 @@ void Renderer::RenderingLoop()
 {
 	float lastFrameTime = glfwGetTime();
 
-	WireObject object = DrawWireCube(Vector3D(0, 0, 0), Vector3D(5, 10, 10), Vector3D(0.2f, 0.5f, 0.2f));
+	DrawWireCube(Vector3D(0, 0, 0), Vector3D(5, 10, 10), Vector3D(0.2f, 0.5f, 0.2f));
 
 	while (!glfwWindowShouldClose(Camera::GetActiveWindow()->GetWindow()))
 	{
@@ -73,22 +73,26 @@ void Renderer::RenderingLoop()
 
 	//	std::cout << WiresToDraw[0]->GetShader()->GetName() << std::endl;
 
-		//if (!WiresToDraw.IsEmpty())
-		//{
-		//	for (unsigned int i = 0; i < WiresToDraw.GetSize(); i++)
-		//	{
-
-		//		std::cout << WiresToDraw[0]->GetShader()->GetName() << std::endl;
-		//		WiresToDraw[i]->Draw();
-		//	}
-		//}
-
-		object.Draw();
+		if (!WiresToDraw.IsEmpty())
+		{
+			for (unsigned int i = 0; i < WiresToDraw.GetSize(); i++)
+			{
+				WiresToDraw[i]->Draw();
+			}
+		}
 
 		WindowInputManager->ProcessInput(Camera::GetActiveWindow()->GetWindow());
 
 		glfwSwapBuffers(Camera::GetActiveWindow()->GetWindow());
 		glfwPollEvents();
+	}
+
+	if (!WiresToDraw.IsEmpty())
+	{
+		for (unsigned int i = 0; i < WiresToDraw.GetSize(); i++)
+		{
+			delete WiresToDraw[i];
+		}
 	}
 
 	//delete[] verts;
