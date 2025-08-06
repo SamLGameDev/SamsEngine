@@ -86,7 +86,7 @@ public:
 		return DynamicArray[Index];
 	}
 
-	const int GetSize() const
+	const unsigned int GetSize() const
 	{
 		return ArraySize;
 	}
@@ -124,7 +124,7 @@ private:
 
 	T* DynamicArray = nullptr;
 
-	int ArraySize;
+	unsigned int ArraySize;
 
 };
 

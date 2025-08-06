@@ -1,7 +1,9 @@
 #include "Camera.h"
 #include "glm-1.0.1/glm/gtc/matrix_transform.hpp"
 
+Camera* Camera::ActiveCamera;
 
+FirstWindow* Camera::ActiveWindow;
 
 Camera::Camera(FirstWindow* Window, InputManager* Manager)
 {
@@ -82,7 +84,7 @@ void Camera::MouseCallback(float xpos, float ypos)
 	Front = glm::normalize(Directon);
 }
 
-glm::mat4 Camera::GetLook()
+const glm::mat4 Camera::GetLook() const
 {
 	glm::vec3 zaxis = glm::normalize(Pos - (Front + Pos));
 	// 3. Get positive right axis vector
@@ -109,4 +111,16 @@ glm::mat4 Camera::GetLook()
 	return rotation * translation;
 
 	//return glm::lookAt(Pos, Pos + Front, Up);
+}
+
+const glm::mat4 Camera::GetProjection() const
+{
+	glm::mat4 projection = glm::perspective
+	(
+		glm::radians(FOV),
+		ActiveWindow->GetWindowWidth() / ActiveWindow->GetWindowHeight(),
+		0.1f,
+		100.0f
+	);
+	return projection;
 }

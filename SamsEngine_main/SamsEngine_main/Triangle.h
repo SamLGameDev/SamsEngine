@@ -3,7 +3,7 @@
 #include "LinkedList.h"
 #include "Vector3D.h"
 #include "Vector2D.h"
-class Vertex;
+struct Vertex;
 
 class Triangle : public Shape
 {

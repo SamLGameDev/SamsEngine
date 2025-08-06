@@ -11,13 +11,15 @@ Model::Model(std::string Path, Shader InShader)
 	Directory = Path.substr(0, Path.find_last_of('/'));
 
 	LoadModel();
+
+	ModelTransform = Transform(Vector3D(0, 0, 0), Vector3D(1, 1, 1), Vector3D(0, 0, 0));
 }
 
 void Model::Draw()
 {
 	for (unsigned int i = 0; i < Meshes.GetSize(); i++)
 	{
-		Meshes.GetItemAtRef(i)->Draw();
+		Meshes.GetItemAtRef(i)->Draw(&ModelTransform);
 	}
 }
 

@@ -21,6 +21,8 @@ public:
 		return &ModelShader;
 	}
 
+	Transform ModelTransform;
+
 private:
 
 	Array<Mesh> Meshes;

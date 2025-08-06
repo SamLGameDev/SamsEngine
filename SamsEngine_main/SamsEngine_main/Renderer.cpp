@@ -9,13 +9,12 @@
 #include "glm-1.0.1/glm/gtc/matrix_transform.hpp"
 #include "glm-1.0.1/glm/gtc/type_ptr.hpp"
 #include "Shader.h"
+#include "WireShapes.h"
 
 
-Renderer::Renderer(FirstWindow* InWindow, InputManager* InInputManager, Camera* InCamera)
+Renderer::Renderer(InputManager* InInputManager)
 {
-	Window = InWindow;
 	WindowInputManager = InInputManager;
-	Cam = InCamera;
 }
 
 Renderer::~Renderer()
@@ -29,25 +28,12 @@ void Renderer::AddItemToRender(Model* Item)
 
 void Renderer::RenderingLoop()
 {
-	glm::mat4 translation = glm::mat4(1);
-	translation = glm::translate(translation, glm::vec3(0, 0, 0.0f));
-	translation = glm::rotate(translation, glm::radians(0.0f), glm::vec3(0, 0, 1));
-	translation = glm::scale(translation, glm::vec3(0.5, 0.5, 0.5));
-
-	glm::mat4 Model = glm::mat4(1);
-	Model = glm::rotate(Model, glm::radians(-55.0f), glm::vec3(1, 0, 0));
-
-	glm::mat4 View = glm::mat4(1);
-
-	glm::mat4 projection = glm::perspective(glm::radians(45.0f), Window->GetWindowWidth() / Window->GetWindowHeight(), 0.1f, 100.0f);
-
 	float lastFrameTime = glfwGetTime();
 
-	glm::mat3 NormalModel = glm::transpose(glm::inverse(View * Model));
-	while (!glfwWindowShouldClose(Window->GetWindow()))
+	while (!glfwWindowShouldClose(Camera::GetActiveWindow()->GetWindow()))
 	{
 		float currentFrame = glfwGetTime();
-		Cam->DeltaTime = currentFrame - lastFrameTime;
+		Camera::GetActiveCamera()->DeltaTime = currentFrame - lastFrameTime;
 		lastFrameTime = currentFrame;
 
 		//TickDel.Broadcast(deltaTime);
@@ -69,38 +55,21 @@ void Renderer::RenderingLoop()
 		color.Add(0);
 		color.Add(0);
 
+		if (!ItemsToRender.IsEmpty())
+		{
+			for (unsigned int i = 0; i < ItemsToRender.GetSize(); i++)
+			{
+				ItemsToRender[i]->Draw();
+			}
+		}
 
-		View = Cam->GetLook();
 
-		Shader* MeshShader = ItemsToRender[0]->GetShader();
 
-		MeshShader->Use();
+		//DrawWireCube(Vector3D(0, 0, 0), Vector3D(0.5f, 0.5f, 0.5f));
 
-		MeshShader->SetMatrix4fv("Transform", glm::value_ptr(translation));
+		WindowInputManager->ProcessInput(Camera::GetActiveWindow()->GetWindow());
 
-		MeshShader->SetMatrix4fv("Model", glm::value_ptr(Model));
-
-		MeshShader->SetMatrix4fv("View", glm::value_ptr(View));
-
-		MeshShader->SetMatrix4fv("Projection", glm::value_ptr(projection));
-
-		MeshShader->SetMatrix3fv("NormalModel", glm::value_ptr(NormalModel));
-
-		glm::vec4 lightModel = View  * glm::vec4(1.2f, 1.0f, 2.0f, 1);
-
-		MeshShader->SetVec3("light.position", Vector3D(lightModel.x, lightModel.y, lightModel.z));
-
-		MeshShader->SetFloat("material.shininess", 64.0f);
-
-		MeshShader->SetVec3("light.ambient", Vector3D(0.5f, 0.5f, 0.5f));
-		MeshShader->SetVec3("light.diffuse", Vector3D(0.2f, 0.2f, 0.2f)); // darken diffuse light a bit
-		MeshShader->SetVec3("light.specular",Vector3D(1.0f, 1.0f, 1.0f));
-
-		ItemsToRender[0]->Draw();
-
-		WindowInputManager->ProcessInput(Window->GetWindow());
-
-		glfwSwapBuffers(Window->GetWindow());
+		glfwSwapBuffers(Camera::GetActiveWindow()->GetWindow());
 		glfwPollEvents();
 	}
 

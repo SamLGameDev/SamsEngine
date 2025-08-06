@@ -9,16 +9,15 @@ out vec2 TexCoord;
 out vec3 Normal;
 out vec3 FragPos;
 uniform float offset; 
-uniform mat4 Transform; 
 uniform mat4 Model; 
 uniform mat3 NormalModel;
 uniform mat4 View; 
 uniform mat4 Projection; 
 void main()
 {
-   Pos = Projection * View * Model  * Transform * vec4(aPos, 1.0);
+   Pos = Projection * View * Model * vec4(aPos, 1.0);
    gl_Position = Pos;
-   FragPos = vec3(View * Model * vec4(aPos, 1.0));
+   FragPos = vec3((View * Model * vec4(aPos, 1.0)));
    Normal = NormalModel * aNormal;
    TexCoord = aTexture;
 }

@@ -27,9 +27,31 @@ public:
 		return Pos;
 	}
 
-	glm::mat4 GetLook();
+	const glm::mat4 GetLook() const;
 
 	float DeltaTime;
+
+	static Camera* GetActiveCamera()
+	{
+		return ActiveCamera;
+	};
+
+	static void SetActiveCamera(Camera* NewCamera)
+	{
+		ActiveCamera = NewCamera;
+	}
+
+	static FirstWindow* GetActiveWindow()
+	{
+		return ActiveWindow;
+	};
+
+	static void SetActiveWindow(FirstWindow* NewWindow)
+	{
+		ActiveWindow = NewWindow;
+	}
+
+	const glm::mat4 GetProjection()const;
 
 private:
 
@@ -44,6 +66,8 @@ private:
 
 	const float LookSpeed = 0.1f;
 
+	const float FOV = 45.0f;
+
 	InputAction* WKey;
 	InputAction* AKey;
 	InputAction* SKey;
@@ -57,6 +81,10 @@ private:
 	glm::vec3 Up = glm::vec3(0, 1, 0);
 
 	glm::vec3 Directon = glm::vec3(0, 0, 0);
+
+	static Camera* ActiveCamera;
+
+	static FirstWindow* ActiveWindow;
 
 
 

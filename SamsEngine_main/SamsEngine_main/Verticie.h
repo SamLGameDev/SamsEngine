@@ -3,7 +3,7 @@
 #include "Vector2D.h"
 #include <iostream>
 
-class Vector3D;
+struct Vector3D;
 
 
 

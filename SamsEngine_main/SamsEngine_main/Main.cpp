@@ -24,7 +24,11 @@ int main()
 	
 	Camera* camera = new Camera(window, inputManager);
 
-	Renderer* renderer = new Renderer(window, inputManager, camera);
+	Camera::SetActiveCamera(camera);
+
+	Camera::SetActiveWindow(window);
+
+	Renderer* renderer = new Renderer(inputManager);
 	//Vertex vert = Vertex(Vector3D(0.5f, 0.5f, 0));
 	//Vertex vert2 = Vertex(Vector3D(0.5f, -0.5f, 0));
 	//Vertex vert3 = Vertex(Vector3D(-0.5f, 0.5f, 0));
@@ -41,6 +45,9 @@ int main()
 	//Vertex verty3 = Vertex(Vector3D(0, 0.9f, 0));
 
 	//renderer->AddItemToRender(new Triangle(verty, verty2, verty3, Vector3D(0.5f, 0.5f, 0.9f)));
+
+	//Shader shader = Shader("WireShader", "Contents/Shaders/WireShader/");
+
 
 	Shader shader = Shader("LightShader", "Contents/Shaders/");
 

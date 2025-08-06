@@ -17,7 +17,7 @@ class Renderer
 {
 
 public:
-	Renderer(FirstWindow* InWindow, InputManager* InInputManager, Camera* InCamera);
+	Renderer(InputManager* InInputManager);
 	~Renderer();
 
 	void AddItemToRender(Model* Item);
@@ -33,8 +33,6 @@ public:
 	//static MulticastDelegate<float> TickDel;
 private:
 
-	Camera* Cam;
-
 	std::unordered_map<int, Vertex> IndicesToVerts;
 
 	std::unordered_map<Vertex, int> VertsToIndices;
@@ -44,8 +42,6 @@ private:
 	int CurrentIndicesCount = 0;
 
 	void RenderingLoop();
-
-	FirstWindow* Window;
 
 	InputManager* WindowInputManager;
 
