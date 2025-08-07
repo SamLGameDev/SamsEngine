@@ -6,6 +6,7 @@ class Array
 public:
 	Array()
 	{
+		NumItems = 0;
 		ArraySize = 0;
 		DynamicArray = new T[1];
 	}
@@ -45,39 +46,60 @@ public:
 
 	void Add(T item)
 	{
-		T* NewArray = new T[ArraySize + 1];
 
-		for (int i = 0; i < ArraySize; i++)
+		if (NumItems + 1 < ArraySize)
 		{
-			NewArray[i] = GetItemAt(i);
+			NumItems++;
+			DynamicArray[NumItems] = item;
+			return;
 		}
-		NewArray[ArraySize] = item;
-		ArraySize++;
+		T* NewArray = new T[NumItems + 1];
+
+		for (int i = 0; i < NumItems; i++)
+		{
+			NewArray[i] = std::move(GetItemAt(i));;
+		}
+		NewArray[NumItems] = item;
+		NumItems++;
 
 		delete[] DynamicArray;
 		DynamicArray = NewArray;
+
+		ArraySize = NumItems;
 
 	}
 
 
 	void Add(Array<T>& item)
 	{
-		T* NewArray = new T[ArraySize + item.GetSize()];
-
-		for (unsigned int i = 0; i < ArraySize; i++)
+		if (ArraySize > NumItems + item.GetSize())
 		{
-			NewArray[i] = GetItemAt(i);
+			for (unsigned int i = 0; i < item.GetSize(); i++)
+			{
+				DynamicArray[i + NumItems] = std::move(item.GetItemAt(i));;
+			}
+			NumItems += item.GetSize();
+			return;
+		}
+
+		T* NewArray = new T[NumItems + item.GetSize()];
+
+		for (unsigned int i = 0; i < NumItems; i++)
+		{
+			NewArray[i] = std::move(GetItemAt(i));;
 		}
 
 		for (unsigned int i = 0; i < item.GetSize(); i++)
 		{
-			NewArray[i + ArraySize] = item.GetItemAt(i);
+			NewArray[i + NumItems] = std::move(item.GetItemAt(i));;
 		}
 
-		ArraySize += item.GetSize();;
+		NumItems += item.GetSize();;
 
 		delete[] DynamicArray;
 		DynamicArray = NewArray;
+
+		ArraySize = NumItems;
 
 	}
 
@@ -88,7 +110,7 @@ public:
 
 	const unsigned int GetSize() const
 	{
-		return ArraySize;
+		return NumItems;
 	}
 
 	T GetArray()
@@ -98,7 +120,7 @@ public:
 
 	const bool Contains(T& Item, unsigned int& Index)
 	{
-		for (unsigned int i = 0; i < ArraySize; i++)
+		for (unsigned int i = 0; i < NumItems; i++)
 		{
 			if (Item == DynamicArray[i])
 			{
@@ -109,6 +131,29 @@ public:
 		return false;
 	}
 
+	const bool Reallocate(const unsigned int Size)
+	{
+		if (Size > ArraySize)
+		{
+			return false;
+		}
+
+		T* NewArray = new T[Size];
+
+		for (unsigned int i = 0; i < NumItems; i++)
+		{
+			NewArray[i] = std::move(GetItemAt(i));
+		}
+
+		ArraySize = Size;
+
+		delete[] DynamicArray;
+		DynamicArray = NewArray;
+
+		return true;
+
+	}
+
 private:
 
 	void copy(const Array& other)
@@ -117,12 +162,15 @@ private:
 		DynamicArray = new T[other.GetSize()];
 		for (int i = 0; i < other.GetSize(); i++)
 		{
-			DynamicArray[i] = other.GetItemAt(i);
+			DynamicArray[i] = std::move(other.GetItemAt(i));
 		}
-		ArraySize = other.GetSize();
+		NumItems = other.GetSize();
+		ArraySize = other.ArraySize;
 	}
 
 	T* DynamicArray = nullptr;
+
+	unsigned int NumItems;
 
 	unsigned int ArraySize;
 

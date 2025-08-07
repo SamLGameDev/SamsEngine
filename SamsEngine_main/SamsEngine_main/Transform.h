@@ -19,11 +19,26 @@ public:
 		Rotation = Copy.Rotation;
 	}
 
+	void CalculateBounds();
+
 	Vector3D Position;
 
 	Vector3D Scale;
 
 	Vector3D Rotation;
+
+	Vector3D Bounds;
+
+	Vector3D HalfBounds;
+
+	Vector3D Center;
+
+	float TopHeight;
+	float TopWidth;
+	float TopLength;
+	float BottomHeight;
+	float BottomWidth;
+	float BottomLength;
 
 	const glm::mat4 GetModelMatrix() const;
 

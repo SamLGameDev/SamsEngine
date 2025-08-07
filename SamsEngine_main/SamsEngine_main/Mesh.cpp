@@ -45,6 +45,7 @@ void Mesh::Draw(const Transform* ModelTransform)
 	glBindVertexArray(VAO);
 	glDrawElements(GL_TRIANGLES, Indices.GetSize(), GL_UNSIGNED_INT, 0);
 	glBindVertexArray(0);
+	glUseProgram(0);
 }
 
 void Mesh::SetShaderVariables(const Transform* ModelTransform)
@@ -84,6 +85,11 @@ void Mesh::SetTransformationVariables(glm::mat4& model, glm::mat4& view, glm::ma
 	MeshShader.SetMatrix4fv("Projection", glm::value_ptr(projection));
 
 	MeshShader.SetMatrix3fv("NormalModel", glm::value_ptr(normalModel));
+}
+
+void Mesh::RegenerateMesh()
+{
+	SetUpMesh();
 }
 
 void Mesh::SetUpMesh()

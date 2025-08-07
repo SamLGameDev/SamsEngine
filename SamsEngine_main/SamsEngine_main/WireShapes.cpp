@@ -71,6 +71,8 @@ void WireObject::Draw()
 
 	glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
 
+	glUseProgram(0);
+
 }
 
 void WireObject::SetShaderVariables(const Transform* WireTransform)
@@ -94,7 +96,7 @@ void WireObject::SetTransformationVariables(glm::mat4& model, glm::mat4& view, g
 	WireShader->SetMatrix4fv("Projection", glm::value_ptr(projection));
 }
 
-void DrawWireCube(Vector3D Center, Vector3D Size, Vector3D Color)
+void DrawWireCube(Vector3D Center, Vector3D HalfBounds, Vector3D Color)
 { 
 
 	Transform wireTransform = Transform(Center, Vector3D(1, 1, 1), Vector3D(0, 0, 0));
@@ -103,9 +105,9 @@ void DrawWireCube(Vector3D Center, Vector3D Size, Vector3D Color)
 
 	WireObject* object = new WireObject(&wireTransform, &wireShader);
 
-	object->Vertices.Add(Center.X + (Size.X / 2));
-	object->Vertices.Add(Center.Y + (Size.Y / 2));
-	object->Vertices.Add(Center.Z + (Size.Z / 2));
+	object->Vertices.Add(Center.X + (HalfBounds.X));
+	object->Vertices.Add(Center.Y + (HalfBounds.Y));
+	object->Vertices.Add(Center.Z + (HalfBounds.Z));
 
 	object->Vertices.Add(Color.X);
 	object->Vertices.Add(Color.Y);
@@ -113,9 +115,9 @@ void DrawWireCube(Vector3D Center, Vector3D Size, Vector3D Color)
 
 
 
-	object->Vertices.Add(Center.X + (Size.X / 2));
-	object->Vertices.Add(Center.Y - (Size.Y / 2));
-	object->Vertices.Add(Center.Z + (Size.Z / 2));
+	object->Vertices.Add(Center.X + (HalfBounds.X));
+	object->Vertices.Add(Center.Y - (HalfBounds.Y));
+	object->Vertices.Add(Center.Z + (HalfBounds.Z));
 
 
 	object->Vertices.Add(Color.X);
@@ -123,9 +125,9 @@ void DrawWireCube(Vector3D Center, Vector3D Size, Vector3D Color)
 	object->Vertices.Add(Color.Z);
 
 
-	object->Vertices.Add(Center.X - (Size.X / 2));
-	object->Vertices.Add(Center.Y - (Size.Y / 2));
-	object->Vertices.Add(Center.Z + (Size.Z / 2));
+	object->Vertices.Add(Center.X - (HalfBounds.X));
+	object->Vertices.Add(Center.Y - (HalfBounds.Y));
+	object->Vertices.Add(Center.Z + (HalfBounds.Z));
 
 
 	object->Vertices.Add(Color.X);
@@ -137,9 +139,9 @@ void DrawWireCube(Vector3D Center, Vector3D Size, Vector3D Color)
 	object->Indices.Add(1);
 	object->Indices.Add(2);
 
-	object->Vertices.Add(Center.X - (Size.X / 2));
-	object->Vertices.Add(Center.Y + (Size.Y / 2));
-	object->Vertices.Add(Center.Z + (Size.Z / 2));
+	object->Vertices.Add(Center.X - (HalfBounds.X));
+	object->Vertices.Add(Center.Y + (HalfBounds.Y));
+	object->Vertices.Add(Center.Z + (HalfBounds.Z));
 
 
 	object->Vertices.Add(Color.X);
@@ -151,9 +153,9 @@ void DrawWireCube(Vector3D Center, Vector3D Size, Vector3D Color)
 	object->Indices.Add(3);
 	object->Indices.Add(2);
 
-	object->Vertices.Add(Center.X + (Size.X / 2));
-	object->Vertices.Add(Center.Y + (Size.Y / 2));
-	object->Vertices.Add(Center.Z - (Size.Z / 2));
+	object->Vertices.Add(Center.X + (HalfBounds.X));
+	object->Vertices.Add(Center.Y + (HalfBounds.Y));
+	object->Vertices.Add(Center.Z - (HalfBounds.Z));
 
 
 	object->Vertices.Add(Color.X);
@@ -161,9 +163,9 @@ void DrawWireCube(Vector3D Center, Vector3D Size, Vector3D Color)
 	object->Vertices.Add(Color.Z);
 
 
-	object->Vertices.Add(Center.X + (Size.X / 2));
-	object->Vertices.Add(Center.Y - (Size.Y / 2));
-	object->Vertices.Add(Center.Z - (Size.Z / 2));
+	object->Vertices.Add(Center.X + (HalfBounds.X));
+	object->Vertices.Add(Center.Y - (HalfBounds.Y));
+	object->Vertices.Add(Center.Z - (HalfBounds.Z));
 
 
 	object->Vertices.Add(Color.X);
@@ -171,9 +173,9 @@ void DrawWireCube(Vector3D Center, Vector3D Size, Vector3D Color)
 	object->Vertices.Add(Color.Z);
 
 
-	object->Vertices.Add(Center.X - (Size.X / 2));
-	object->Vertices.Add(Center.Y - (Size.Y / 2));
-	object->Vertices.Add(Center.Z - (Size.Z / 2));
+	object->Vertices.Add(Center.X - (HalfBounds.X));
+	object->Vertices.Add(Center.Y - (HalfBounds.Y));
+	object->Vertices.Add(Center.Z - (HalfBounds.Z));
 
 
 	object->Vertices.Add(Color.X);
@@ -185,9 +187,9 @@ void DrawWireCube(Vector3D Center, Vector3D Size, Vector3D Color)
 	object->Indices.Add(5);
 	object->Indices.Add(6);
 
-	object->Vertices.Add(Center.X - (Size.X / 2));
-	object->Vertices.Add(Center.Y + (Size.Y / 2));
-	object->Vertices.Add(Center.Z - (Size.Z / 2));
+	object->Vertices.Add(Center.X - (HalfBounds.X));
+	object->Vertices.Add(Center.Y + (HalfBounds.Y));
+	object->Vertices.Add(Center.Z - (HalfBounds.Z));
 
 
 	object->Vertices.Add(Color.X);

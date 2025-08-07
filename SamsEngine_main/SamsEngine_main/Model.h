@@ -14,6 +14,8 @@ public:
 
 	Model(std::string Path, Shader InShader);
 
+	~Model();
+
 	void Draw();
 
 	Shader* GetShader()
@@ -37,11 +39,19 @@ private:
 
 	Mesh ProcessMesh(aiMesh* InMesh, const aiScene* Scene);
 
-	Array<Texture> LoadMaterialTextures(aiMaterial* Mat, aiTextureType Type, std::string TypeName);
+	void LoadMaterialTextures(aiMaterial* Mat, aiTextureType Type, std::string TypeName);
+
+	void CalculateBoundPoints(aiNode* Node, const aiScene* Scene);
+
+	void CalculatePointsForMesh(aiMesh* InMesh);
 
 	Shader ModelShader;
 
 	static Array<Texture> LoadedTextures;
+
+	float Time;
+
+	int NumVerticies;
 
 
 

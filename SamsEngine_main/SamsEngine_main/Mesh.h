@@ -23,13 +23,15 @@ public:
 
 	void SetTransformationVariables(glm::mat4& model, glm::mat4& view, glm::mat4& projection, glm::mat3& normalModel);
 
-private:
+	void RegenerateMesh();
 
 	Array<Vertex> Vertices;
 
 	Array<unsigned int> Indices;
 
 	Shader MeshShader;
+
+private:
 
 	unsigned int VAO, VBO, EBO;
 

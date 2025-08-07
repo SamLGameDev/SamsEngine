@@ -33,7 +33,7 @@ void Renderer::RenderingLoop()
 {
 	float lastFrameTime = glfwGetTime();
 
-	DrawWireCube(Vector3D(0, 0, 0), Vector3D(5, 10, 10), Vector3D(0.2f, 0.5f, 0.2f));
+	DrawWireCube(ItemsToRender[0]->ModelTransform.Center, ItemsToRender[0]->ModelTransform.HalfBounds, Vector3D(0.2f, 0.5f, 0.2f));
 
 	while (!glfwWindowShouldClose(Camera::GetActiveWindow()->GetWindow()))
 	{
@@ -50,17 +50,6 @@ void Renderer::RenderingLoop()
 
 		const float time = glfwGetTime();
 
-		const float green = sin(time) / 2 + 0.5;
-
-		Array<float> color;
-
-		color.Add(0);
-		color.Add(green);
-		color.Add(0);
-		color.Add(0);
-
-
-	//	std::cout << WiresToDraw[0]->GetShader()->GetName() << std::endl;
 
 		if (!ItemsToRender.IsEmpty())
 		{
@@ -69,9 +58,6 @@ void Renderer::RenderingLoop()
 				ItemsToRender[i]->Draw();
 			}
 		}
-
-
-	//	std::cout << WiresToDraw[0]->GetShader()->GetName() << std::endl;
 
 		if (!WiresToDraw.IsEmpty())
 		{

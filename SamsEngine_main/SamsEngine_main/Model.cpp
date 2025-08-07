@@ -5,15 +5,27 @@ Array<Texture> Model::LoadedTextures;
 
 Model::Model(std::string Path, Shader InShader)
 {
+	Time = glfwGetTime();
+	
+	std::cout << glfwGetTime() - Time << std::endl;
+
 	StorageLocation = Path;
 
 	ModelShader = InShader;
 
 	Directory = Path.substr(0, Path.find_last_of('/'));
 
-	LoadModel();
+	std::cout << glfwGetTime() - Time << std::endl;
 
 	ModelTransform = Transform(Vector3D(0, 0, 0), Vector3D(1, 1, 1), Vector3D(0, 0, 0));
+
+	LoadModel();
+
+	std::cout << "NumVerticies: " << NumVerticies << std::endl;
+}
+
+Model::~Model()
+{
 }
 
 void Model::Draw()
@@ -30,95 +42,132 @@ void Model::LoadModel()
 	Assimp::Importer import;
 
 	const aiScene* scene = import.ReadFile(StorageLocation, aiProcess_Triangulate | aiProcess_FlipUVs);
+	std::cout << glfwGetTime() - Time << std::endl;
 
 	if (!scene || scene->mFlags & AI_SCENE_FLAGS_INCOMPLETE || !scene->mRootNode)
 	{
 		std::cout << "ERROR::ASSIMP::" << import.GetErrorString() << std::endl;
 		return;
 	}
+	std::cout << glfwGetTime() - Time << std::endl;
+	//Meshes.Reallocate(scene->mNumMeshes);
 
+	CalculateBoundPoints(scene->mRootNode, scene);
+
+	ModelTransform.CalculateBounds();
+	
 	ProcessNode(scene->mRootNode, scene);
+
 }
 
 void Model::ProcessNode(aiNode* Node, const aiScene* Scene)
 {
+	std::cout << glfwGetTime() - Time << std::endl;
 	for (unsigned int i = 0; i < Node->mNumMeshes; i++)
 	{
 		aiMesh* mesh = Scene->mMeshes[Node->mMeshes[i]];
 		Meshes.Add(ProcessMesh(mesh, Scene));
 	}
+	std::cout << glfwGetTime() - Time << std::endl;
 
 	for (unsigned int i = 0; i < Node->mNumChildren; i++)
 	{
 		ProcessNode(Node->mChildren[i], Scene);
 	}
+	std::cout << glfwGetTime() - Time << std::endl;
 
 }
 
 Mesh Model::ProcessMesh(aiMesh* InMesh, const aiScene* Scene)
 {
-	Array<Vertex> verticies;
-	Array<unsigned int> indicies;
-	Array<Texture> textures;
+	Mesh mesh = Mesh();
+
+	float time = glfwGetTime();
+
+	std::cout  << "BeforeVerticies: " << glfwGetTime() - time << std::endl;
+
+	NumVerticies += InMesh->mNumVertices;
+
+	mesh.Vertices.Reallocate(InMesh->mNumVertices);
 
 	for (unsigned int i = 0; i < InMesh->mNumVertices; i++)
 	{
+
 		Vertex vert;
-		aiVector3D aiVert = InMesh->mVertices[i];
 
-		aiVector3D* aiNorms= InMesh->mNormals;
+		//aiVector3D aiVert = InMesh->mVertices[i];
 
-		vert.Position = Vector3D(aiVert.x, aiVert.y, aiVert.z);
-		vert.Normal = Vector3D(aiNorms->x, aiNorms->y, aiNorms->z);
+		//aiVector3D* aiNorms = InMesh->mNormals;
+
+		vert.Position = Vector3D(InMesh->mVertices[i].x + ModelTransform.Center.X, InMesh->mVertices[i].y+ ModelTransform.Center.Y, InMesh->mVertices[i].z + ModelTransform.Center.Z);
+
+		vert.Normal = Vector3D(InMesh->mNormals[i].x, InMesh->mNormals[i].y, InMesh->mNormals[i].z);
 
 		if (InMesh->HasTextureCoords(0))
 		{
-			aiVector3D* aiTexCoords = InMesh->mTextureCoords[0];
-			vert.TexCoords = Vector2D(aiTexCoords[i].x, aiTexCoords[i].y);
+			//aiVector3D* aiTexCoords = InMesh->mTextureCoords[0];
+			vert.TexCoords = Vector2D(InMesh->mTextureCoords[0][i].x, InMesh->mTextureCoords[0][i].y);
 		}
 		else
 		{
 			vert.TexCoords = Vector2D(0, 0);
 		}
 
-		verticies.Add(vert);
+		mesh.Vertices.Add(vert);
 	}
+
+	std::cout << "AfterVerticies: " << glfwGetTime() - time << std::endl;
+
+	time = glfwGetTime();
 
 	for (unsigned int i = 0; i < InMesh->mNumFaces; i++)
 	{
-		aiFace face = InMesh->mFaces[i];
-		for (unsigned int j = 0; j < face.mNumIndices; j++)
+		//aiFace face = InMesh->mFaces[i];
+		for (unsigned int j = 0; j < InMesh->mFaces[i].mNumIndices; j++)
 		{
-			indicies.Add(face.mIndices[j]);
+			mesh.Indices.Add(InMesh->mFaces[i].mIndices[j]);
 		}
 	}
 
+
+	std::cout << "AfterIndices: " << glfwGetTime() - time << std::endl;
+
+	time = glfwGetTime();
 	if (InMesh->mMaterialIndex >= 0)
 	{
 		aiMaterial* mat = Scene->mMaterials[InMesh->mMaterialIndex];
 
-		Array<Texture> diffuseMaps = LoadMaterialTextures(mat, aiTextureType_DIFFUSE, "texture_diffuse");
+		LoadMaterialTextures(mat, aiTextureType_DIFFUSE, "texture_diffuse");
 
-		Array<Texture> specularMaps = LoadMaterialTextures(mat, aiTextureType_SPECULAR, "texture_specular");
+		LoadMaterialTextures(mat, aiTextureType_SPECULAR, "texture_specular");
 
-		textures.Add(diffuseMaps);
-		textures.Add(specularMaps);
+		//textures.Add(diffuseMaps);
+		//textures.Add(specularMaps);
 		//ModelShader.AddTexture(diffuseMaps);
 		//ModelShader.AddTexture(specularMaps);
 	}
 
 
+	std::cout << "AfterTextures: " << glfwGetTime() - time << std::endl;
 
-	return Mesh(verticies, indicies, ModelShader);
+	time = glfwGetTime();
+	mesh.MeshShader = ModelShader;
+
+
+	std::cout << "AfterShader: " << glfwGetTime() - time << std::endl;
+
+	time = glfwGetTime();
+
+	mesh.RegenerateMesh();
+
+
+	std::cout << "AfterGPUAllocation" << glfwGetTime() - time << std::endl;
+
+	return mesh;
 }
 
-Array<Texture> Model::LoadMaterialTextures(aiMaterial* Mat, aiTextureType Type, std::string TypeName)
+void Model::LoadMaterialTextures(aiMaterial* Mat, aiTextureType Type, std::string TypeName)
 {
-
-	Array<Texture> textures;
-
-	std::cout << Mat->GetTextureCount(Type);
-
 	for (unsigned int i = 0; i < Mat->GetTextureCount(Type); i++)
 	{
 		aiString str;
@@ -144,10 +193,55 @@ Array<Texture> Model::LoadMaterialTextures(aiMaterial* Mat, aiTextureType Type, 
 		}
 
 		Texture texture = Texture(Path, TypeName);
-		textures.Add(texture);
+
 		LoadedTextures.Add(texture);
 		ModelShader.AddTexture(texture);
 	}
+}
 
-	return textures;
+void Model::CalculateBoundPoints(aiNode* Node, const aiScene* Scene)
+{
+	for (unsigned int i = 0; i < Node->mNumMeshes; i++)
+	{
+		CalculatePointsForMesh(Scene->mMeshes[Node->mMeshes[i]]);
+	}
+
+	for (unsigned int i = 0; i < Node->mNumChildren; i++)
+	{
+		CalculateBoundPoints(Node->mChildren[i], Scene);
+	}
+}
+
+void Model::CalculatePointsForMesh(aiMesh* InMesh)
+{
+	for (unsigned int i = 0; i < InMesh->mNumVertices; i++)
+	{
+
+		if (InMesh->mVertices[i].x > ModelTransform.TopWidth)
+		{
+			ModelTransform.TopWidth = InMesh->mVertices[i].x;
+		}
+		if (InMesh->mVertices[i].x < ModelTransform.BottomWidth)
+		{
+			ModelTransform.BottomWidth = InMesh->mVertices[i].x;
+		}
+
+		if (InMesh->mVertices[i].y > ModelTransform.TopHeight)
+		{
+			ModelTransform.TopHeight = InMesh->mVertices[i].y;
+		}
+		if (InMesh->mVertices[i].y < ModelTransform.BottomHeight)
+		{
+			ModelTransform.BottomHeight = InMesh->mVertices[i].y;
+		}
+
+		if (InMesh->mVertices[i].z > ModelTransform.TopLength)
+		{
+			ModelTransform.TopLength = InMesh->mVertices[i].z;
+		}
+		if (InMesh->mVertices[i].z < ModelTransform.BottomLength)
+		{
+			ModelTransform.BottomLength = InMesh->mVertices[i].z;
+		}
+	}
 }

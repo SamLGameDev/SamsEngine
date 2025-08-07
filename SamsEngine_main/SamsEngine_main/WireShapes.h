@@ -45,4 +45,4 @@ private:
 };
 
 
-void DrawWireCube(Vector3D Center, Vector3D Size, Vector3D Color);
+void DrawWireCube(Vector3D Center, Vector3D HalfBounds, Vector3D Color);
