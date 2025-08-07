@@ -33,6 +33,12 @@ public:
 
 	Vector3D Center;
 
+	Vector3D TransCenter;
+
+	Vector3D TransBounds;
+
+	Vector3D TransHalfBounds;
+
 	float TopHeight;
 	float TopWidth;
 	float TopLength;

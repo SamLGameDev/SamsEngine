@@ -17,7 +17,7 @@ Model::Model(std::string Path, Shader InShader)
 
 	std::cout << glfwGetTime() - Time << std::endl;
 
-	ModelTransform = Transform(Vector3D(0, 0, 0), Vector3D(1, 1, 1), Vector3D(0, 0, 0));
+	ModelTransform = Transform(Vector3D(0, 0, 0), Vector3D(10, 10, 1), Vector3D(90, 0, 0));
 
 	LoadModel();
 

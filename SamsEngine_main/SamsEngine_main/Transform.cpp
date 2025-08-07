@@ -23,17 +23,29 @@ Transform::Transform(const Vector3D InPosition, const Vector3D InScale, const Ve
 
 void Transform::CalculateBounds()
 {
+
+
 	Bounds.X = std::abs(TopWidth) + std::abs(BottomWidth);
 	Bounds.Y = std::abs(TopHeight) + std::abs(BottomHeight);
 	Bounds.Z = std::abs(TopLength) + std::abs(BottomLength);
 
+	glm::vec4 bounds = GetModelMatrix() * glm::vec4(Bounds.X, Bounds.Y, Bounds.Z, 1);
+
+	TransBounds = Vector3D(bounds.x, bounds.y, bounds.z);
+
 	HalfBounds = Bounds / 2;
+
+	TransHalfBounds = TransBounds / 2;
 
 	glm::vec4 center = glm::vec4((TopWidth + BottomWidth) / 2, (TopHeight + BottomHeight) /2, (TopLength + BottomLength) /2, 1);
 
-	center = GetModelMatrix() * center;
+	//center = GetModelMatrix() * center;
 
 	Center = Vector3D(center.x, center.y, center.z);
+
+	glm::vec4 transCenter = GetModelMatrix() * center;
+
+	TransCenter = Vector3D(transCenter.x, transCenter.y, transCenter.z);
 
 	std::cout << Center.X << Center.Y << Center.Z << std::endl;
 }
@@ -43,9 +55,9 @@ const glm::mat4 Transform::GetModelMatrix() const
 	glm::mat4 model = glm::mat4(1);
 	model = glm::translate(model, glm::vec3(Position.X, Position.Y, Position.Z));
 
-	model = glm::rotate(model, glm::radians(Rotation.X), glm::vec3(1, 0, 0));
-	model = glm::rotate(model, glm::radians(Rotation.Y), glm::vec3(0, 1, 0));
 	model = glm::rotate(model, glm::radians(Rotation.Z), glm::vec3(0, 0, 1));
+	model = glm::rotate(model, glm::radians(Rotation.Y), glm::vec3(0, 1, 0));
+	model = glm::rotate(model, glm::radians(Rotation.X), glm::vec3(1, 0, 0));
 
 	model = glm::scale(model, glm::vec3(Scale.X, Scale.Y, Scale.Z));
 

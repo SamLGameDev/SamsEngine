@@ -33,7 +33,7 @@ void Renderer::RenderingLoop()
 {
 	float lastFrameTime = glfwGetTime();
 
-	DrawWireCube(ItemsToRender[0]->ModelTransform.Center, ItemsToRender[0]->ModelTransform.HalfBounds, Vector3D(0.2f, 0.5f, 0.2f));
+	DrawWireCube(ItemsToRender[0]->ModelTransform.TransCenter, ItemsToRender[0]->ModelTransform.TransHalfBounds, Vector3D(0.2f, 0.5f, 0.2f));
 
 	while (!glfwWindowShouldClose(Camera::GetActiveWindow()->GetWindow()))
 	{
