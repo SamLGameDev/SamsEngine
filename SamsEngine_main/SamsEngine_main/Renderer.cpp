@@ -10,6 +10,7 @@
 #include "glm-1.0.1/glm/gtc/type_ptr.hpp"
 #include "Shader.h"
 #include "WireShapes.h"
+#include "Fracturerer.h"
 
 
 LinkedList<WireObject*> Renderer::WiresToDraw;
@@ -33,7 +34,7 @@ void Renderer::RenderingLoop()
 {
 	float lastFrameTime = glfwGetTime();
 
-	DrawWireCube(ItemsToRender[0]->ModelTransform.TransCenter, ItemsToRender[0]->ModelTransform.TransHalfBounds, Vector3D(0.2f, 0.5f, 0.2f));
+	Fracturerer::Fracture(*ItemsToRender[0], 10);
 
 	while (!glfwWindowShouldClose(Camera::GetActiveWindow()->GetWindow()))
 	{

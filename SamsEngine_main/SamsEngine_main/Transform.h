@@ -21,6 +21,8 @@ public:
 
 	void CalculateBounds();
 
+	void ReCalculateBounds();
+
 	Vector3D Position;
 
 	Vector3D Scale;
@@ -38,6 +40,8 @@ public:
 	Vector3D TransBounds;
 
 	Vector3D TransHalfBounds;
+
+	Vector3D GetRandomPointInBounds();
 
 	float TopHeight;
 	float TopWidth;

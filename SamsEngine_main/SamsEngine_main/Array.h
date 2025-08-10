@@ -154,6 +154,44 @@ public:
 
 	}
 
+	const bool Contains(const T& Item, unsigned int& Index) const
+	{
+		for (unsigned int i = 0; i < NumItems; i++)
+		{
+			if (DynamicArray[i] == Item)
+			{
+				Index = i;
+				return true;
+			}
+		}
+		return false;
+	}
+
+	void Remove(T& Item)
+	{
+		unsigned int index;
+
+		if (Contains(Item, index))
+		{
+			T* NewArray = new T[ArraySize - 1];
+			unsigned int Skip = 0;
+			for (unsigned int i = 0; i < NumItems-1; i++)
+			{
+				if (i == index)
+				{
+					Skip = 1;
+				}
+
+				NewArray[i] = std::move(DynamicArray[i + Skip]);
+			}
+			delete[] DynamicArray;
+			DynamicArray = NewArray;
+			NumItems--;
+			ArraySize--;
+
+		}
+	}
+
 private:
 
 	void copy(const Array& other)

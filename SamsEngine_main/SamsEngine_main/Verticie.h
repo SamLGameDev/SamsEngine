@@ -19,6 +19,8 @@ public:
 
 	Vector2D TexCoords;
 
+	Vector3D Color;
+
 
 
 	bool operator==(const Vertex& other) const {

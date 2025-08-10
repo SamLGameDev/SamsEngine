@@ -7,6 +7,8 @@
 #include <assimp/scene.h>
 #include <assimp/postprocess.h>
 
+class WireObject;
+
 class Model
 {
 
@@ -25,9 +27,15 @@ public:
 
 	Transform ModelTransform;
 
-private:
+	const bool IsPointInsideModel(Vector3D Point);
 
 	Array<Mesh> Meshes;
+
+	WireObject* BoundingBox;
+
+private:
+
+
 
 	std::string StorageLocation;
 
@@ -44,6 +52,7 @@ private:
 	void CalculateBoundPoints(aiNode* Node, const aiScene* Scene);
 
 	void CalculatePointsForMesh(aiMesh* InMesh);
+
 
 	Shader ModelShader;
 

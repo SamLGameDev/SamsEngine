@@ -43,16 +43,16 @@ void WireObject::Initialise()
 	glBindVertexArray(VAO);
 	glBindBuffer(GL_ARRAY_BUFFER, VBO);
 
-	glBufferData(GL_ARRAY_BUFFER, Vertices.GetSize() * sizeof(float), Vertices.GetFirstRef(), GL_STATIC_DRAW);
+	glBufferData(GL_ARRAY_BUFFER, Vertices.GetSize() * sizeof(Vertex), Vertices.GetFirstRef(), GL_STATIC_DRAW);
 
 	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
 	glBufferData(GL_ELEMENT_ARRAY_BUFFER, Indices.GetSize() * sizeof(unsigned int), Indices.GetFirstRef(), GL_STATIC_DRAW);
 
 	glEnableVertexAttribArray(0);
-	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float), (void*)0);
+	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)0);
 
 	glEnableVertexAttribArray(1);
-	glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float), (void*)(3 * sizeof(float)));
+	glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)(offsetof(Vertex, Color)));
 
 	glBindVertexArray(0);
 }
@@ -96,106 +96,62 @@ void WireObject::SetTransformationVariables(glm::mat4& model, glm::mat4& view, g
 	WireShader->SetMatrix4fv("Projection", glm::value_ptr(projection));
 }
 
-void DrawWireCube(Vector3D Center, Vector3D HalfBounds, Vector3D Color)
+WireObject* DrawWireCube(Vector3D Center, Vector3D HalfBounds, Vector3D Size, Vector3D Color)
 { 
 
-	Transform wireTransform = Transform(Center, Vector3D(1, 1, 1), Vector3D(0, 0, 0));
+	Transform wireTransform = Transform(Center, Size, Vector3D(0, 0, 0));
 
 	Shader wireShader = Shader("WireShader", "Contents/Shaders/WireShader/");
 
 	WireObject* object = new WireObject(&wireTransform, &wireShader);
 
-	object->Vertices.Add(Center.X + (HalfBounds.X));
-	object->Vertices.Add(Center.Y + (HalfBounds.Y));
-	object->Vertices.Add(Center.Z + (HalfBounds.Z));
+	Vertex Point;
 
-	object->Vertices.Add(Color.X);
-	object->Vertices.Add(Color.Y);
-	object->Vertices.Add(Color.Z);
+	Point.Position = HalfBounds;
 
+	Point.Color = Color;
 
+	object->Vertices.Add(Point);
 
-	object->Vertices.Add(Center.X + (HalfBounds.X));
-	object->Vertices.Add(Center.Y - (HalfBounds.Y));
-	object->Vertices.Add(Center.Z + (HalfBounds.Z));
+	Point.Position = Vector3D(HalfBounds.X, -HalfBounds.Y, HalfBounds.Z);
 
+	object->Vertices.Add(Point);
 
-	object->Vertices.Add(Color.X);
-	object->Vertices.Add(Color.Y);
-	object->Vertices.Add(Color.Z);
+	Point.Position = Vector3D(-HalfBounds.X, -HalfBounds.Y, HalfBounds.Z);
 
-
-	object->Vertices.Add(Center.X - (HalfBounds.X));
-	object->Vertices.Add(Center.Y - (HalfBounds.Y));
-	object->Vertices.Add(Center.Z + (HalfBounds.Z));
-
-
-	object->Vertices.Add(Color.X);
-	object->Vertices.Add(Color.Y);
-	object->Vertices.Add(Color.Z);
-
+	object->Vertices.Add(Point);
 
 	object->Indices.Add(0);
 	object->Indices.Add(1);
 	object->Indices.Add(2);
 
-	object->Vertices.Add(Center.X - (HalfBounds.X));
-	object->Vertices.Add(Center.Y + (HalfBounds.Y));
-	object->Vertices.Add(Center.Z + (HalfBounds.Z));
+	Point.Position = Vector3D(-HalfBounds.X, HalfBounds.Y, HalfBounds.Z);
 
-
-	object->Vertices.Add(Color.X);
-	object->Vertices.Add(Color.Y);
-	object->Vertices.Add(Color.Z);
-
+	object->Vertices.Add(Point);
 
 	object->Indices.Add(0);
 	object->Indices.Add(3);
 	object->Indices.Add(2);
 
-	object->Vertices.Add(Center.X + (HalfBounds.X));
-	object->Vertices.Add(Center.Y + (HalfBounds.Y));
-	object->Vertices.Add(Center.Z - (HalfBounds.Z));
+	Point.Position = Vector3D(HalfBounds.X, HalfBounds.Y, -HalfBounds.Z);
 
+	object->Vertices.Add(Point);
 
-	object->Vertices.Add(Color.X);
-	object->Vertices.Add(Color.Y);
-	object->Vertices.Add(Color.Z);
+	Point.Position = Vector3D(HalfBounds.X, -HalfBounds.Y, -HalfBounds.Z);
 
+	object->Vertices.Add(Point);
 
-	object->Vertices.Add(Center.X + (HalfBounds.X));
-	object->Vertices.Add(Center.Y - (HalfBounds.Y));
-	object->Vertices.Add(Center.Z - (HalfBounds.Z));
+	Point.Position = Vector3D(-HalfBounds.X, -HalfBounds.Y, -HalfBounds.Z);
 
-
-	object->Vertices.Add(Color.X);
-	object->Vertices.Add(Color.Y);
-	object->Vertices.Add(Color.Z);
-
-
-	object->Vertices.Add(Center.X - (HalfBounds.X));
-	object->Vertices.Add(Center.Y - (HalfBounds.Y));
-	object->Vertices.Add(Center.Z - (HalfBounds.Z));
-
-
-	object->Vertices.Add(Color.X);
-	object->Vertices.Add(Color.Y);
-	object->Vertices.Add(Color.Z);
-
+	object->Vertices.Add(Point);
 
 	object->Indices.Add(4);
 	object->Indices.Add(5);
 	object->Indices.Add(6);
 
-	object->Vertices.Add(Center.X - (HalfBounds.X));
-	object->Vertices.Add(Center.Y + (HalfBounds.Y));
-	object->Vertices.Add(Center.Z - (HalfBounds.Z));
+	Point.Position = Vector3D(-HalfBounds.X, HalfBounds.Y, -HalfBounds.Z);
 
-
-	object->Vertices.Add(Color.X);
-	object->Vertices.Add(Color.Y);
-	object->Vertices.Add(Color.Z);
-
+	object->Vertices.Add(Point);
 
 	object->Indices.Add(4);
 	object->Indices.Add(7);
@@ -218,5 +174,7 @@ void DrawWireCube(Vector3D Center, Vector3D HalfBounds, Vector3D Color)
 	object->Indices.Add(6);
 
 	object->Initialise();
+
+	return object;
 
 }

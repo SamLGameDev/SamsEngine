@@ -3,6 +3,7 @@
 #include "Vector3D.h"
 #include "Transform.h"
 #include "Shader.h"
+#include "Verticie.h"
 
 class WireObject
 {
@@ -18,7 +19,7 @@ public:
 
 	void Draw();
 
-	Array<float> Vertices;
+	Array<Vertex> Vertices;
 
 	Array<unsigned int> Indices;
 
@@ -44,5 +45,4 @@ private:
 		void SetTransformationVariables(glm::mat4& model, glm::mat4& view, glm::mat4& projection);
 };
 
-
-void DrawWireCube(Vector3D Center, Vector3D HalfBounds, Vector3D Color);
+WireObject* DrawWireCube(Vector3D Center, Vector3D HalfBounds, Vector3D Size, Vector3D Color);

@@ -1,5 +1,8 @@
 #include "Model.h"
 #include "WireShapes.h"
+#include "CollisionCast.h"
+#include "Math.h"
+#include "WireShapes.h"
 
 Array<Texture> Model::LoadedTextures;
 
@@ -17,11 +20,13 @@ Model::Model(std::string Path, Shader InShader)
 
 	std::cout << glfwGetTime() - Time << std::endl;
 
-	ModelTransform = Transform(Vector3D(0, 0, 0), Vector3D(10, 10, 1), Vector3D(90, 0, 0));
+	ModelTransform = Transform(Vector3D(0, 0, 0), Vector3D(1, 1, 1), Vector3D(0, 0, 0));
 
 	LoadModel();
 
 	std::cout << "NumVerticies: " << NumVerticies << std::endl;
+
+	BoundingBox = DrawWireCube(ModelTransform.TransCenter, ModelTransform.TransHalfBounds, Vector3D(1, 1, 1), Vector3D(0.2, 0.5, 0.2));
 }
 
 Model::~Model()
@@ -57,6 +62,8 @@ void Model::LoadModel()
 	ModelTransform.CalculateBounds();
 	
 	ProcessNode(scene->mRootNode, scene);
+
+	ModelTransform.ReCalculateBounds();
 
 }
 
@@ -99,7 +106,7 @@ Mesh Model::ProcessMesh(aiMesh* InMesh, const aiScene* Scene)
 
 		//aiVector3D* aiNorms = InMesh->mNormals;
 
-		vert.Position = Vector3D(InMesh->mVertices[i].x + ModelTransform.Center.X, InMesh->mVertices[i].y+ ModelTransform.Center.Y, InMesh->mVertices[i].z + ModelTransform.Center.Z);
+		vert.Position = Vector3D(InMesh->mVertices[i].x, InMesh->mVertices[i].y, InMesh->mVertices[i].z);
 
 		vert.Normal = Vector3D(InMesh->mNormals[i].x, InMesh->mNormals[i].y, InMesh->mNormals[i].z);
 
@@ -244,4 +251,16 @@ void Model::CalculatePointsForMesh(aiMesh* InMesh)
 			ModelTransform.BottomLength = InMesh->mVertices[i].z;
 		}
 	}
+}
+
+const bool Model::IsPointInsideModel(Vector3D Point)
+{
+	Array<RayCastHit> Hits = CollisionCast::RayCastMeshAll(Point, Vector3D(1, 1, 1), this);
+	
+	if (Math::IsEven(Hits.GetSize()))
+	{
+		return false;
+	}
+
+	return true;
 }

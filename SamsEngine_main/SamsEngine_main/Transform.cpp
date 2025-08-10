@@ -50,6 +50,32 @@ void Transform::CalculateBounds()
 	std::cout << Center.X << Center.Y << Center.Z << std::endl;
 }
 
+void Transform::ReCalculateBounds()
+{
+
+	//TopWidth -= Center.X;
+	//BottomWidth -= Center.X;
+
+	//TopHeight -= Center.Y;
+	//BottomHeight -= Center.Y;
+
+	//TopLength -= Center.Z;
+	//BottomLength -= Center.Z;
+
+	//CalculateBounds();
+
+
+}
+
+Vector3D Transform::GetRandomPointInBounds()
+{
+	Vector3D min = TransCenter - TransHalfBounds;
+
+	Vector3D max = TransCenter + TransHalfBounds;
+
+	return Vector3D::RandomRange(min, max);
+}
+
 const glm::mat4 Transform::GetModelMatrix() const
 {
 	glm::mat4 model = glm::mat4(1);
