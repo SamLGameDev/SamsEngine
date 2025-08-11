@@ -2,6 +2,7 @@
 #include "Vector3D.h"
 #include "Vector2D.h"
 #include <iostream>
+#include "Array.h"
 
 struct Vector3D;
 
@@ -40,4 +41,11 @@ namespace std {
 		}
 	};
 }
+
+struct Face
+{
+public:
+
+	Array<Vertex> Verticies;
+};
 

@@ -14,12 +14,10 @@ void Fracturerer::Fracture(Model& InModel, const unsigned int FracturePoints)
 
 	for (unsigned int i = 0; i < FracturePoints; i++)
 	{
-		std::cout << "done: " << InModel.BoundingBox->Indices.GetSize() << std::endl;
+		std::cout << "done: " << InModel.BoundingBox->Indices.GetSize()<< std::endl;
 		Vector3D point = points[i];
 
-		Array<unsigned int> CurrentInds = InModel.BoundingBox->Indices;
-
-		Array<Vertex> CurrentPoints = InModel.BoundingBox->Vertices;
+		Array<Face> faces = InModel.BoundingBox->Faces;
 
 		for (unsigned int j = 0; j < FracturePoints; j++)
 		{
@@ -28,119 +26,131 @@ void Fracturerer::Fracture(Model& InModel, const unsigned int FracturePoints)
 				continue;
 			}
 
-			const Vector3D dirToOther = (points[j] - point).Normalised();
+			const Vector3D dirToOther = (point - points[j]).Normalised();
 			const Vector3D mid = (point + points[j]) / 2;
 
-			Array<Vertex> CP = CurrentPoints;
+			Array<unsigned int> CurrentInds = InModel.BoundingBox->Indices;
 
+			Array<Face> newFaces;
 
-			for (unsigned int vertex = 0; vertex < CurrentPoints.GetSize(); vertex ++)
+			for (unsigned int f = 0; f < faces.GetSize(); f++)
 			{
-				WireObject* BoundingBox = InModel.BoundingBox;
+				Array<Vertex> Verticies = faces[f].Verticies;
 
-				//Array<Vector3D> verts;
-				//for (unsigned int v = 0; v < 3; v++)
-				//{
-				//	verts.Add(BoundingBox->Vertices[BoundingBox->Indices[vertex + v]].Position);
-				//}
+				const float EQS = 1e-6f;
 
-				float edge = vertex;
+				if (Verticies.GetSize() == 0)
+				{
+					continue;
+				}
 
-					const float IsFirstOnPlane = Vector3D::Dot(dirToOther, CurrentPoints[edge].Position - mid);
+				Array<Vertex> Copy;
 
-					unsigned int next = edge < CurrentPoints.GetSize() ? vertex + 1: 0;
+				for (unsigned int n = 0; n < Verticies.GetSize(); n++)
+				{
+					const unsigned int next = (n + 1) % Verticies.GetSize();
 
-					const float IsSecondOnPlane = Vector3D::Dot(dirToOther, CurrentPoints[next].Position - mid);
+					const float dp = Vector3D::Dot(dirToOther, Verticies[n].Position - mid);
 
-					const bool Inside = IsFirstOnPlane >= 0;
+					const float dq = Vector3D::Dot(dirToOther, Verticies[next].Position - mid);
 
-					const bool Inside2 = IsSecondOnPlane >= 0;
+					const bool InsideDp = dp >= 0;
 
-		
+					const bool InsideDq = dq >= 0;
 
-					if (Inside != Inside2)
+					if (InsideDp && InsideDq)
 					{
-						const float tStar = IsFirstOnPlane / (IsFirstOnPlane - IsSecondOnPlane);
+						Copy.Add(Verticies[next]);
+					}
+					else if (InsideDp && !InsideDq)
+					{
+						const float denom = dp - dq;
 
-						const Vector3D intersectionPoint = CurrentPoints[edge].Position + tStar * (CurrentPoints[next].Position - CurrentPoints[edge].Position);
-
-						Vertex vert;
-						vert.Position = intersectionPoint;
-						vert.Color = Vector3D(0.2, 0.5, 0.2);
-
-						unsigned int index;
-
-						if (!CP.Contains(vert, index)) 
+						if (fabs(denom) > EQS)
 						{
-							CurrentPoints.Add(vert);
+							const float t = dp / denom;
+							Vector3D I = Verticies[n].Position + t * (Verticies[next].Position - Verticies[n].Position);
+							Vertex v = Verticies[n];
+							v.Position = I;
+							std::cout << "Dp: " << I.X << std::endl;
+
+							Copy.Add(v);
 						}
-
-
-						//if (BoundingBox->Vertices.Contains(vert, index))
-						//{
-						//	//BoundingBox->Indices.Add(index);
-						//}
-						//else
-						//{
-						//	BoundingBox->Indices.Add(BoundingBox->Vertices.GetSize());
-						//	BoundingBox->Vertices.Add(vert);
-						//}
-
-
 					}
-					else 
+					else if (!InsideDp && InsideDq)
 					{
-						Vertex vert = CurrentPoints[edge];
+						const float denom = dp - dq;
 
-						CP.Remove(vert);
-					}
-
-					if (Inside2)
-					{
-						Vertex vert;
-						vert.Position = CurrentPoints[next].Position;
-						vert.Color = Vector3D(0.2, 0.5, 0.2);
-
-
-						unsigned int index;
-
-						if (!CP.Contains(vert, index)) 
+						if (fabs(denom) > EQS)
 						{
-							CP.Add(vert);
-						}
+							const float t = dp / denom;
+							Vector3D I = Verticies[n].Position + t * (Verticies[next].Position - Verticies[n].Position);
+							Vertex v = Verticies[n];
+							v.Position = I;
+							std::cout << "Dq: " << I.X << std::endl;
 
-						//if (BoundingBox->Vertices.Contains(vert, index))
-						//{
-						//	BoundingBox->Indices.Add(index);
-						//}
-						//else
-						//{
-						//	BoundingBox->Indices.Add(BoundingBox->Vertices.GetSize());
-						//	BoundingBox->Vertices.Add(vert);
-						//}
+							Copy.Add(v);
+						}
+						Copy.Add(Verticies[next]);
 					}
-					else 
+				}
+
+				if (Copy.GetSize() >= 3)
+				{
+					for (unsigned int k = 1; k + 1 < Copy.GetSize(); k++)
 					{
-						Vertex vert = CurrentPoints[next];
-						CP.Remove(vert);
+						Face tri;
+						tri.Verticies.Add(Copy[0]);
+						tri.Verticies.Add(Copy[k]);
+						tri.Verticies.Add(Copy[k + 1]);
+						newFaces.Add(tri);
 					}
-		
+				}
+
 			}
-			CurrentPoints = CP;
-
+			faces = newFaces;
+			if (faces.GetSize() == 0)
+			{
+				break;
+			}
+		
 
 		}
-		for (unsigned int k = 0; k < CurrentPoints.GetSize(); k++)
+
+		for (unsigned int poly = 0; poly < faces.GetSize();poly++)
 		{
-			InModel.BoundingBox->Vertices.Add(CurrentPoints[k]);
-			InModel.BoundingBox->Indices.Add(InModel.BoundingBox->Vertices.GetSize());
+			if (faces[poly].Verticies.GetSize() < 3)
+			{
+				continue;
+			}
 
-			DrawWireCube(CurrentPoints[k].Position, Vector3D(1, 1, 1), Vector3D(0.1, 0.1, 0.1), Vector3D(0.5, 0.1, 0.1));
+			Array<unsigned int> CopyInds;
 
-			std::cout << CurrentPoints[k].Position.X << CurrentPoints[k].Position.Y << CurrentPoints[k].Position.Z << std::endl;
+			for (unsigned int v = 0; v < faces[poly].Verticies.GetSize(); v++)
+			{
+				unsigned int index = 0;
+
+				if (InModel.BoundingBox->Vertices.Contains(faces[poly].Verticies[v], index))
+				{
+					CopyInds.Add(index);
+				}
+				else
+				{
+					CopyInds.Add(InModel.BoundingBox->Vertices.GetSize());
+					InModel.BoundingBox->Vertices.Add(faces[poly].Verticies[v]);
+					DrawWireCube(faces[poly].Verticies[v].Position, Vector3D(1,1,1), Vector3D(0.1, 0.1, 0.1), Vector3D(0.1, 0.1, 0.5));
+				}
+			}
+
+			for (unsigned int k = 1; k + 1 < CopyInds.GetSize(); k++)
+			{
+				InModel.BoundingBox->Indices.Add(CopyInds[0]);
+				InModel.BoundingBox->Indices.Add(CopyInds[k]);
+				InModel.BoundingBox->Indices.Add(CopyInds[k + 1]);
+			}
 		}
-
 	}
+
 	InModel.BoundingBox->Initialise();
 
 

@@ -125,6 +125,7 @@ WireObject* DrawWireCube(Vector3D Center, Vector3D HalfBounds, Vector3D Size, Ve
 	object->Indices.Add(1);
 	object->Indices.Add(2);
 
+
 	Point.Position = Vector3D(-HalfBounds.X, HalfBounds.Y, HalfBounds.Z);
 
 	object->Vertices.Add(Point);
@@ -172,6 +173,16 @@ WireObject* DrawWireCube(Vector3D Center, Vector3D HalfBounds, Vector3D Size, Ve
 	object->Indices.Add(3);
 	object->Indices.Add(7);
 	object->Indices.Add(6);
+
+
+	for (unsigned int Ind = 0; Ind + 2 < object->Indices.GetSize(); Ind+=3)
+	{
+		Face face;
+		face.Verticies.Add(object->Vertices[object->Indices[Ind]]);
+		face.Verticies.Add(object->Vertices[object->Indices[Ind + 1]]);
+		face.Verticies.Add(object->Vertices[object->Indices[Ind + 2]]);
+		object->Faces.Add(face);
+	}
 
 	object->Initialise();
 

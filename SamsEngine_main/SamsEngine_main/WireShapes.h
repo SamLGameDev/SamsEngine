@@ -23,6 +23,8 @@ public:
 
 	Array<unsigned int> Indices;
 
+	Array<Face> Faces;
+
 	void Initialise();
 
 	Shader* GetShader()

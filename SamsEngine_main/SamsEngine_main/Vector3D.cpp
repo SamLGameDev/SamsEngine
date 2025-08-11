@@ -28,6 +28,11 @@ const float Vector3D::GetLength() const
 	return std::sqrt(X*X + Y*Y + Z*Z);
 }
 
+const float Vector3D::GetSquaredLength() const
+{
+	return X * X + Y * Y + Z * Z;
+}
+
 Vector3D Vector3D::RandomRange(Vector3D min, Vector3D max)
 {
 	std::random_device rd;

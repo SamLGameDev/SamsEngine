@@ -39,6 +39,8 @@ public:
 
 	const float GetLength() const;
 
+	const float GetSquaredLength() const;
+
 	static Vector3D RandomRange(Vector3D min, Vector3D max);
 
 	static void Clamp(Vector3D& Value, Vector3D MinRange, Vector3D MaxRange);
