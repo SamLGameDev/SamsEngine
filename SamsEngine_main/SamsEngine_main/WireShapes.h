@@ -48,3 +48,5 @@ private:
 };
 
 WireObject* DrawWireCube(Vector3D Center, Vector3D HalfBounds, Vector3D Size, Vector3D Color);
+
+WireObject* DrawWirePlane(Vector3D Center, Vector3D Normal, Vector3D Size, Vector3D Color);

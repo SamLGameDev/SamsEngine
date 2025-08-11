@@ -1,6 +1,12 @@
 #include "Vector3D.h"
 
 #include<random>
+#include "Math.h"
+
+Vector3D const Vector3D::Up = Vector3D(0, 1, 0);
+
+Vector3D const Vector3D::Zero = Vector3D(0, 0, 0);
+
 
 Vector3D::Vector3D()
 {
@@ -93,6 +99,61 @@ void Vector3D::Clamp(Vector3D& Value, Vector3D MinRange, Vector3D MaxRange)
 float Vector3D::Dot(Vector3D a, Vector3D b)
 {
 	return a.X * b.X + a.Y * b.Y, + a.Z * b.Z;
+}
+
+Vector3D Vector3D::Cross(const Vector3D& a, const Vector3D& b)
+{
+
+	float X = a.Y * b.Z - a.Z * b.Y;
+	float Y = a.Z * b.X - a.X * b.Z;
+	float Z = a.X * b.Y - a.Y * b.X;
+
+
+	return Vector3D(X, Y, Z);
+}
+
+bool Vector3D::GetIntersectionPoint(Vector3D& a, Vector3D& aDir, Vector3D& b, Vector3D& bDir, Vector3D& out)
+{
+	if (Cross(aDir, bDir) == Zero)
+	{
+		return false;
+	}
+
+	const Vector3D FromBToA = a - b;
+
+	const float SqLengthA = aDir.GetSquaredLength();
+
+	const float SqLengthB = bDir.GetSquaredLength();
+
+	const float bDirSimiliarity = Vector3D::Dot(bDir, FromBToA);
+
+	const float aDirSimiliarity = Vector3D::Dot(aDir, FromBToA);
+
+	const float Similarity = Vector3D::Dot(aDir, bDir);
+
+	const float denom = SqLengthA * SqLengthB - Similarity * Similarity;
+
+	const float s = (Similarity * bDirSimiliarity - aDirSimiliarity * SqLengthB) / denom;
+
+	const float t = (SqLengthA * bDirSimiliarity - Similarity * aDirSimiliarity) / denom;
+
+	Vector3D closestA = a + aDir * s;
+
+	Vector3D closestB = b + bDir * t;
+
+	if (IsAlmostEqual(closestA, closestB))
+	{
+		out = closestA;
+
+		return true;
+	}
+
+	return false;
+}
+
+bool Vector3D::IsAlmostEqual(Vector3D& a, Vector3D& b, float range)
+{
+	return a - b < range;
 }
 
 Vector3D::~Vector3D()

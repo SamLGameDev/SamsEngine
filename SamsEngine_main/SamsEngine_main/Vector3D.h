@@ -35,6 +35,11 @@ public:
 		return Vector3D(X + other.X, Y + other.Y, Z + other.Z);
 	}
 
+	bool operator<(const float& value)
+	{
+		return (X < value && Y < value && Z < value);
+	}
+
 	Vector3D Normalised();
 
 	const float GetLength() const;
@@ -47,11 +52,20 @@ public:
 
 	static float Dot(Vector3D a, Vector3D b);
 
+	static Vector3D Cross(const Vector3D& a, const Vector3D& b);
+
+	static bool GetIntersectionPoint(Vector3D& a, Vector3D& aDir, Vector3D& b, Vector3D& bDir, Vector3D& out);
+
+	static bool IsAlmostEqual(Vector3D& a, Vector3D& b, float range = 1e-6);
+
 	~Vector3D();
 
 	float X;
 	float Y;
 	float Z;
+	
+	static const Vector3D Up;
+	static const Vector3D Zero;
 
 };
 

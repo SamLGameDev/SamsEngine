@@ -189,3 +189,66 @@ WireObject* DrawWireCube(Vector3D Center, Vector3D HalfBounds, Vector3D Size, Ve
 	return object;
 
 }
+
+WireObject* DrawWirePlane(Vector3D Center, Vector3D Normal, Vector3D Size, Vector3D Color)
+{
+	Transform wireTransform = Transform(Center, Size, Vector3D(0, 0, 0));
+
+	Shader wireShader = Shader("WireShader", "Contents/Shaders/WireShader/");
+
+	WireObject* object = new WireObject(&wireTransform, &wireShader);
+
+	Vector3D arbitraryUp = Vector3D::Up;
+	if (fabs(Vector3D::Dot(Normal, arbitraryUp)) > 0.99f) {
+		arbitraryUp = Vector3D(1, 0, 0);  // pick another axis if too close
+	}
+
+	Vector3D Right = Vector3D::Cross(Normal, arbitraryUp);
+
+	Vector3D Up = Vector3D::Cross(Right, Normal);
+
+
+	Vertex Point;
+
+	Point.Color = Color;
+
+	Point.Position = Up + Right;
+
+	object->Vertices.Add(Point);
+
+	Point.Position = Up - Right;
+
+	object->Vertices.Add(Point);
+
+	Point.Position =  -Up + Right;
+
+	object->Vertices.Add(Point);
+
+	Point.Position = -Up - Right;
+
+	object->Vertices.Add(Point);
+
+	object->Indices.Add(0);
+	object->Indices.Add(1);
+	object->Indices.Add(3);
+
+	object->Indices.Add(0);
+	object->Indices.Add(3);
+	object->Indices.Add(2);
+	
+
+	for (unsigned int Ind = 0; Ind + 2 < object->Indices.GetSize(); Ind += 3)
+	{
+		Face face;
+		face.Verticies.Add(object->Vertices[object->Indices[Ind]]);
+		face.Verticies.Add(object->Vertices[object->Indices[Ind + 1]]);
+		face.Verticies.Add(object->Vertices[object->Indices[Ind + 2]]);
+		object->Faces.Add(face);
+	}
+
+	object->Initialise();
+
+	return object;
+
+	return nullptr;
+}
