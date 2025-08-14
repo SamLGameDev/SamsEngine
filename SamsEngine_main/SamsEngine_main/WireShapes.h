@@ -32,9 +32,11 @@ public:
 		return WireShader;
 	}
 
+
+	Transform WireTransform;
+
 private:
 
-		Transform WireTransform;
 
 		unsigned int VAO, VBO, EBO;
 
@@ -50,3 +52,5 @@ private:
 WireObject* DrawWireCube(Vector3D Center, Vector3D HalfBounds, Vector3D Size, Vector3D Color);
 
 WireObject* DrawWirePlane(Vector3D Center, Vector3D Normal, Vector3D Size, Vector3D Color);
+
+WireObject* DrawWireLine(Vector3D Start, Vector3D End, Vector3D Color);

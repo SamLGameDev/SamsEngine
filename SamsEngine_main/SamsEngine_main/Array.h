@@ -192,6 +192,11 @@ public:
 		}
 	}
 
+	const bool IsEmpty() const
+	{
+		return NumItems == 0;
+	}
+
 private:
 
 	void copy(const Array& other)

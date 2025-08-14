@@ -89,3 +89,8 @@ const glm::mat4 Transform::GetModelMatrix() const
 
 	return model;
 }
+
+const glm::mat4 Transform::GetInverseModelMatrix() const
+{
+	return glm::inverse(GetModelMatrix());
+}

@@ -18,6 +18,10 @@ public:
 	{
 		return Vector3D(X / other, Y / other, Z / other);
 	}
+	Vector3D operator/(const Vector3D& other)const
+	{
+		return Vector3D(X / other.X, Y / other.Y, Z / other.Z);
+	}
 	Vector3D operator-() const {
 		return Vector3D(-X, -Y, -Z);
 	}
@@ -29,10 +33,19 @@ public:
 	{
 		return Vector3D(X * multiplyer, Y * multiplyer, Z * multiplyer);
 	}
+	Vector3D operator*(const Vector3D& multiplyer)const
+	{
+		return Vector3D(X * multiplyer.X, Y * multiplyer.Y, Z * multiplyer.Z);
+	}
 
 	Vector3D operator+(const Vector3D& other)const
 	{
 		return Vector3D(X + other.X, Y + other.Y, Z + other.Z);
+	}
+
+	Vector3D operator+(const float& other)const
+	{
+		return Vector3D(X + other, Y + other, Z + other);
 	}
 
 	bool operator<(const float& value)
@@ -54,9 +67,9 @@ public:
 
 	static Vector3D Cross(const Vector3D& a, const Vector3D& b);
 
-	static bool GetIntersectionPoint(Vector3D& a, Vector3D& aDir, Vector3D& b, Vector3D& bDir, Vector3D& out);
+	static bool GetIntersectionPoint(Vector3D& Mid, Vector3D& Normal, Vector3D& Point, Vector3D& LineDir, Vector3D& out);
 
-	static bool IsAlmostEqual(Vector3D& a, Vector3D& b, float range = 1e-6);
+	static bool IsAlmostEqual(const Vector3D& a, const Vector3D& b, const float range = 1e-6);
 
 	~Vector3D();
 

@@ -15,6 +15,8 @@
 
 LinkedList<WireObject*> Renderer::WiresToDraw;
 
+LinkedList<FractureObject*> Renderer::FracturesToDraw;
+
 
 Renderer::Renderer(InputManager* InInputManager)
 {

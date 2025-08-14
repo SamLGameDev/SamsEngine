@@ -252,3 +252,42 @@ WireObject* DrawWirePlane(Vector3D Center, Vector3D Normal, Vector3D Size, Vecto
 
 	return nullptr;
 }
+
+WireObject* DrawWireLine(Vector3D Start, Vector3D End, Vector3D Color)
+{
+	Transform wireTransform = Transform(Start, Vector3D(1,1,1), Vector3D(0, 0, 0));
+
+	Shader wireShader = Shader("WireShader", "Contents/Shaders/WireShader/");
+
+	WireObject* object = new WireObject(&wireTransform, &wireShader);
+
+
+	Vertex Point;
+
+	Point.Color = Color;
+
+	Point.Position = Vector3D::Zero;
+
+	object->Vertices.Add(Point);
+
+	Point.Position = End - Start;
+
+	object->Vertices.Add(Point);
+
+	object->Indices.Add(0);
+	object->Indices.Add(1);
+	object->Indices.Add(0);
+
+	for (unsigned int Ind = 0; Ind + 2 < object->Indices.GetSize(); Ind += 3)
+	{
+		Face face;
+		face.Verticies.Add(object->Vertices[object->Indices[Ind]]);
+		face.Verticies.Add(object->Vertices[object->Indices[Ind + 1]]);
+		face.Verticies.Add(object->Vertices[object->Indices[Ind + 2]]);
+		object->Faces.Add(face);
+	}
+
+	object->Initialise();
+
+	return object;
+}

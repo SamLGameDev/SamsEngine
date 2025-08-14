@@ -52,5 +52,7 @@ public:
 
 	const glm::mat4 GetModelMatrix() const;
 
+	const glm::mat4 GetInverseModelMatrix() const;
+
 };
 

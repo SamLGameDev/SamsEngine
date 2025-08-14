@@ -13,6 +13,7 @@
 class InputManager;
 class Shape;
 class WireObject;
+class FractureObject;
 
 class Renderer
 {
@@ -32,6 +33,8 @@ public:
 	LinkedList<Model*> ItemsToRender;
 
 	static LinkedList<WireObject*> WiresToDraw;
+
+	static LinkedList<FractureObject*> FracturesToDraw;
 
 	//static MulticastDelegate<float> TickDel;
 private:

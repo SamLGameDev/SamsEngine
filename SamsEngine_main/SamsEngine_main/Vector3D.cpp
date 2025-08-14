@@ -26,7 +26,7 @@ Vector3D Vector3D::Normalised()
 {
 	const float length = GetLength();
 
-	return Vector3D(X /= length, Y /= length, Z /= length);
+	return Vector3D(X / length, Y / length, Z / length);
 }
 
 const float Vector3D::GetLength() const
@@ -98,7 +98,7 @@ void Vector3D::Clamp(Vector3D& Value, Vector3D MinRange, Vector3D MaxRange)
 
 float Vector3D::Dot(Vector3D a, Vector3D b)
 {
-	return a.X * b.X + a.Y * b.Y, + a.Z * b.Z;
+	return a.X * b.X + a.Y * b.Y + a.Z * b.Z;
 }
 
 Vector3D Vector3D::Cross(const Vector3D& a, const Vector3D& b)
@@ -112,46 +112,34 @@ Vector3D Vector3D::Cross(const Vector3D& a, const Vector3D& b)
 	return Vector3D(X, Y, Z);
 }
 
-bool Vector3D::GetIntersectionPoint(Vector3D& a, Vector3D& aDir, Vector3D& b, Vector3D& bDir, Vector3D& out)
+bool Vector3D::GetIntersectionPoint(Vector3D& Mid, Vector3D& Normal, Vector3D& point, Vector3D& LineDir, Vector3D& out)
 {
-	if (Cross(aDir, bDir) == Zero)
+
+	float d = -Dot(Normal, Mid);
+
+	float dot1 = Dot(Normal, LineDir);
+	float dot2 = Dot(Normal, point);
+
+	if (dot1 == 0)
 	{
+//		std::cout << "failed" << std::endl;
 		return false;
 	}
 
-	const Vector3D FromBToA = a - b;
+	//std::cout << "Point" << std::endl;
 
-	const float SqLengthA = aDir.GetSquaredLength();
+	float t = -(dot2 + d) / dot1;
 
-	const float SqLengthB = bDir.GetSquaredLength();
-
-	const float bDirSimiliarity = Vector3D::Dot(bDir, FromBToA);
-
-	const float aDirSimiliarity = Vector3D::Dot(aDir, FromBToA);
-
-	const float Similarity = Vector3D::Dot(aDir, bDir);
-
-	const float denom = SqLengthA * SqLengthB - Similarity * Similarity;
-
-	const float s = (Similarity * bDirSimiliarity - aDirSimiliarity * SqLengthB) / denom;
-
-	const float t = (SqLengthA * bDirSimiliarity - Similarity * aDirSimiliarity) / denom;
-
-	Vector3D closestA = a + aDir * s;
-
-	Vector3D closestB = b + bDir * t;
-
-	if (IsAlmostEqual(closestA, closestB))
-	{
-		out = closestA;
-
-		return true;
+	if (t < 0.0f || t > 1.0f) {
+		return false;
 	}
 
-	return false;
+	out = point + (t * LineDir);
+
+	return true;
 }
 
-bool Vector3D::IsAlmostEqual(Vector3D& a, Vector3D& b, float range)
+bool Vector3D::IsAlmostEqual(const Vector3D& a, const Vector3D& b, const float range)
 {
 	return a - b < range;
 }

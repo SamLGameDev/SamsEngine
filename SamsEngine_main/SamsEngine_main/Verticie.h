@@ -47,5 +47,23 @@ struct Face
 public:
 
 	Array<Vertex> Verticies;
+
+
+	bool operator==(const Face& other) const {
+
+		if (other.Verticies.GetSize() == Verticies.GetSize())
+		{
+			for (unsigned int i = 0; i < Verticies.GetSize(); i++)
+			{
+				if (Verticies[i] != other.Verticies[i])
+				{
+					return false;
+				}
+			}
+			return true;
+		}
+
+		return false;
+	}
 };
 
