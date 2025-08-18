@@ -19,7 +19,7 @@ public:
 
 	void Draw();
 
-	Array<Vertex> Vertices;
+	Array<Vertex*> Vertices;
 
 	Array<unsigned int> Indices;
 

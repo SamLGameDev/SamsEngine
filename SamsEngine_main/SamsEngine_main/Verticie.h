@@ -22,6 +22,12 @@ public:
 
 	Vector3D Color;
 
+	bool first = false;
+	bool inter = false;
+	bool last = false;
+
+	Array<Vertex*> ConnectingPoints = Array<Vertex*>();
+
 
 
 	bool operator==(const Vertex& other) const {

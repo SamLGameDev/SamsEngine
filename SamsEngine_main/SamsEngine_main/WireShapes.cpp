@@ -30,6 +30,11 @@ WireObject::WireObject(const WireObject& Copy)
 WireObject::~WireObject()
 {
 	delete WireShader;
+
+	for (unsigned int i = 0; i < Vertices.GetSize(); i++)
+	{
+		delete Vertices[i];
+	}
 }
 
 
@@ -106,57 +111,89 @@ WireObject* DrawWireCube(Vector3D Center, Vector3D HalfBounds, Vector3D Size, Ve
 	WireObject* object = new WireObject(&wireTransform, &wireShader);
 
 	Vertex Point;
+	Vertex* FrontTopLeft = new Vertex();
+	Vertex* FrontBottomLeft = new Vertex();
+	Vertex* FrontTopRight = new Vertex();
+	Vertex* FrontBottomRight = new Vertex();
+	Vertex* BackTopLeft = new Vertex();
+	Vertex* BackBottomLeft = new Vertex();
+	Vertex* BackTopRight = new Vertex();
+	Vertex* BackBottomRight = new Vertex();
 
-	Point.Position = HalfBounds;
+	FrontTopLeft->Position = HalfBounds;
+	FrontTopLeft->Color = Color;
+	FrontTopLeft->ConnectingPoints.Add(FrontBottomLeft);
+	FrontTopLeft->ConnectingPoints.Add(FrontTopRight);
+	FrontTopLeft->ConnectingPoints.Add(BackTopLeft);
 
-	Point.Color = Color;
 
-	object->Vertices.Add(Point);
+	FrontBottomLeft->Position = Vector3D(HalfBounds.X, -HalfBounds.Y, HalfBounds.Z);
+	FrontBottomLeft->Color = Color;
+	FrontBottomLeft->ConnectingPoints.Add(FrontTopLeft);
+	FrontBottomLeft->ConnectingPoints.Add(FrontBottomRight);
+	FrontBottomLeft->ConnectingPoints.Add(BackBottomLeft);
 
-	Point.Position = Vector3D(HalfBounds.X, -HalfBounds.Y, HalfBounds.Z);
+	FrontTopRight->Position = Vector3D(-HalfBounds.X, HalfBounds.Y, HalfBounds.Z);;
+	FrontTopRight->Color = Color;
+	FrontTopRight->ConnectingPoints.Add(FrontBottomRight);
+	FrontTopRight->ConnectingPoints.Add(FrontTopLeft);
+	FrontTopRight->ConnectingPoints.Add(BackTopRight);
 
-	object->Vertices.Add(Point);
+	FrontBottomRight->Position = Vector3D(-HalfBounds.X, -HalfBounds.Y, HalfBounds.Z);;
+	FrontBottomRight->Color = Color;
+	FrontBottomRight->ConnectingPoints.Add(FrontTopRight);
+	FrontBottomRight->ConnectingPoints.Add(FrontBottomLeft);
+	FrontBottomRight->ConnectingPoints.Add(BackBottomRight);
 
-	Point.Position = Vector3D(-HalfBounds.X, -HalfBounds.Y, HalfBounds.Z);
+	BackTopLeft->Position = Vector3D(HalfBounds.X, HalfBounds.Y, -HalfBounds.Z);;
+	BackTopLeft->Color = Color;
+	BackTopLeft->ConnectingPoints.Add(BackBottomLeft);
+	BackTopLeft->ConnectingPoints.Add(BackTopRight);
+	BackTopLeft->ConnectingPoints.Add(FrontTopLeft);
 
-	object->Vertices.Add(Point);
+	BackBottomLeft->Position = Vector3D(HalfBounds.X, -HalfBounds.Y, -HalfBounds.Z);;
+	BackBottomLeft->Color = Color;
+	BackBottomLeft->ConnectingPoints.Add(BackTopLeft);
+	BackBottomLeft->ConnectingPoints.Add(BackBottomRight);
+	BackBottomLeft->ConnectingPoints.Add(FrontBottomLeft);
+
+	BackTopRight->Position = Vector3D(-HalfBounds.X, HalfBounds.Y, -HalfBounds.Z);;
+	BackTopRight->Color = Color;
+	BackTopRight->ConnectingPoints.Add(BackBottomRight);
+	BackTopRight->ConnectingPoints.Add(BackTopLeft);
+	BackTopRight->ConnectingPoints.Add(FrontTopRight);
+
+	BackBottomRight->Position = Vector3D(-HalfBounds.X, -HalfBounds.Y, -HalfBounds.Z);;
+	BackBottomRight->Color = Color;
+	BackBottomRight->ConnectingPoints.Add(BackTopRight);
+	BackBottomRight->ConnectingPoints.Add(BackBottomLeft);
+	BackBottomRight->ConnectingPoints.Add(FrontBottomRight);
+
+
+	object->Vertices.Add(FrontTopLeft);
+	object->Vertices.Add(FrontBottomLeft);
+	object->Vertices.Add(FrontTopRight);
+	object->Vertices.Add(FrontBottomRight);
+	object->Vertices.Add(BackTopLeft);
+	object->Vertices.Add(BackBottomLeft);
+	object->Vertices.Add(BackTopRight);
+	object->Vertices.Add(BackBottomRight);
 
 	object->Indices.Add(0);
 	object->Indices.Add(1);
-	object->Indices.Add(2);
-
-
-	Point.Position = Vector3D(-HalfBounds.X, HalfBounds.Y, HalfBounds.Z);
-
-	object->Vertices.Add(Point);
+	object->Indices.Add(3);
 
 	object->Indices.Add(0);
-	object->Indices.Add(3);
 	object->Indices.Add(2);
-
-	Point.Position = Vector3D(HalfBounds.X, HalfBounds.Y, -HalfBounds.Z);
-
-	object->Vertices.Add(Point);
-
-	Point.Position = Vector3D(HalfBounds.X, -HalfBounds.Y, -HalfBounds.Z);
-
-	object->Vertices.Add(Point);
-
-	Point.Position = Vector3D(-HalfBounds.X, -HalfBounds.Y, -HalfBounds.Z);
-
-	object->Vertices.Add(Point);
+	object->Indices.Add(3);
 
 	object->Indices.Add(4);
 	object->Indices.Add(5);
-	object->Indices.Add(6);
-
-	Point.Position = Vector3D(-HalfBounds.X, HalfBounds.Y, -HalfBounds.Z);
-
-	object->Vertices.Add(Point);
+	object->Indices.Add(7);
 
 	object->Indices.Add(4);
-	object->Indices.Add(7);
 	object->Indices.Add(6);
+	object->Indices.Add(7);
 
 	object->Indices.Add(0);
 	object->Indices.Add(4);
@@ -174,15 +211,48 @@ WireObject* DrawWireCube(Vector3D Center, Vector3D HalfBounds, Vector3D Size, Ve
 	object->Indices.Add(7);
 	object->Indices.Add(6);
 
+	Face face;
+	face.Verticies.Add(object->Vertices[object->Indices[0]]);
+	face.Verticies.Add(object->Vertices[object->Indices[1]]);
+	face.Verticies.Add(object->Vertices[object->Indices[2]]);
+	face.Verticies.Add(object->Vertices[object->Indices[3]]);
+	object->Faces.Add(face);
 
-	for (unsigned int Ind = 0; Ind + 2 < object->Indices.GetSize(); Ind+=3)
-	{
-		Face face;
-		face.Verticies.Add(object->Vertices[object->Indices[Ind]]);
-		face.Verticies.Add(object->Vertices[object->Indices[Ind + 1]]);
-		face.Verticies.Add(object->Vertices[object->Indices[Ind + 2]]);
-		object->Faces.Add(face);
-	}
+	face = Face();
+	face.Verticies.Add(object->Vertices[object->Indices[0]]);
+	face.Verticies.Add(object->Vertices[object->Indices[1]]);
+	face.Verticies.Add(object->Vertices[object->Indices[5]]);
+	face.Verticies.Add(object->Vertices[object->Indices[4]]);
+	object->Faces.Add(face);
+
+	face = Face();
+	face.Verticies.Add(object->Vertices[object->Indices[4]]);
+	face.Verticies.Add(object->Vertices[object->Indices[5]]);
+	face.Verticies.Add(object->Vertices[object->Indices[6]]);
+	face.Verticies.Add(object->Vertices[object->Indices[7]]);
+	object->Faces.Add(face);
+
+	face = Face();
+	face.Verticies.Add(object->Vertices[object->Indices[2]]);
+	face.Verticies.Add(object->Vertices[object->Indices[3]]);
+	face.Verticies.Add(object->Vertices[object->Indices[7]]);
+	face.Verticies.Add(object->Vertices[object->Indices[6]]);
+	object->Faces.Add(face);
+
+	//face = Face();
+	//face.Verticies.Add(object->Vertices[object->Indices[0]]);
+	//face.Verticies.Add(object->Vertices[object->Indices[3]]);
+	//face.Verticies.Add(object->Vertices[object->Indices[7]]);
+	//face.Verticies.Add(object->Vertices[object->Indices[3]]);
+	//object->Faces.Add(face);
+
+	//face = Face();
+	//face.Verticies.Add(object->Vertices[object->Indices[1]]);
+	//face.Verticies.Add(object->Vertices[object->Indices[2]]);
+	//face.Verticies.Add(object->Vertices[object->Indices[6]]);
+	//face.Verticies.Add(object->Vertices[object->Indices[5]]);
+	//object->Faces.Add(face);
+
 
 	object->Initialise();
 

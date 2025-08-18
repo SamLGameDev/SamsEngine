@@ -32,7 +32,6 @@ void Fracturerer::Fracture(Model& InModel, const unsigned int FracturePoints)
 
 		Array<Face> CurrentFaces = InModel.BoundingBox->Faces;
 
-
 		while (remainingPoints.GetSize() > 1)
 		{
 			closestPoint = points[(p + 1) % points.GetSize()];
@@ -53,17 +52,19 @@ void Fracturerer::Fracture(Model& InModel, const unsigned int FracturePoints)
 
 			bool bFirst = false;
 
-			Array<Face> CopyFace = CurrentFaces;
+			Array<Face> CopyFace;
 
 			for (unsigned int i = 0; i < CurrentFaces.GetSize(); i++)
 			{
 				Face face;
 				Array<Vector3D> IPs;
-				for (unsigned int edge = 0; edge < 2; edge++)
+				for (unsigned int edge = 0; edge < 4; edge++)
 				{
 					Array<Vertex> verts = CurrentFaces[i].Verticies;
 
 					Vector3D LineOriginWorld = verts[edge].Position;
+
+					float next = (edge + 1) % verts.GetSize();
 
 					glm::vec4 glmLine = glm::vec4(LineOriginWorld.X, LineOriginWorld.Y, LineOriginWorld.Z, 1);
 
@@ -71,7 +72,15 @@ void Fracturerer::Fracture(Model& InModel, const unsigned int FracturePoints)
 
 					LineOriginWorld = Vector3D(glmLine.x, glmLine.y, glmLine.z);
 
-					glmLine = glm::vec4(verts[edge + 1].Position.X, verts[edge + 1].Position.Y, verts[edge + 1].Position.Z, 1);
+					if (Vector3D::Dot(normal, (LineOriginWorld - CurrentPoint).Normalised()) >= 0 && edge == 0)
+					{
+						Vertex v;
+						v.Position = LineOriginWorld;
+						v.first = true;
+						face.Verticies.Add(v);
+					}
+
+					glmLine = glm::vec4(verts[next].Position.X, verts[next].Position.Y, verts[next].Position.Z, 1);
 
 					glmLine = InModel.BoundingBox->WireTransform.GetModelMatrix() * glmLine;
 
@@ -81,103 +90,71 @@ void Fracturerer::Fracture(Model& InModel, const unsigned int FracturePoints)
 
 					if (Vector3D::GetIntersectionPoint(CurrentPoint, normal, LineOriginWorld, lineDIr, intersectionPoint))
 					{
-						glm::vec4 glmIntersectionPoint = glm::vec4(intersectionPoint.X, intersectionPoint.Y, intersectionPoint.Z, 1);
-						glm::vec4 ToLocal = InModel.BoundingBox->WireTransform.GetInverseModelMatrix() * glmIntersectionPoint;
 
-						DrawWireCube(Vector3D(glmIntersectionPoint.x, glmIntersectionPoint.y, glmIntersectionPoint.z), Vector3D(1, 1, 1), Vector3D(0.1, 0.1, 0.1), Vector3D(0.5, 0.5, 0.5));
+						Vertex v;
+						v.Position = intersectionPoint;
+						v.inter = true;
+						face.Verticies.Add(v);
 
-						IPs.Add(Vector3D(ToLocal.x, ToLocal.y, ToLocal.z));
-
-						if (!UnfinishedFace.Verticies.IsEmpty())
-						{
-							Vertex v;
-							v.Position = Vector3D(ToLocal.x, ToLocal.y, ToLocal.z);
-
-							UnfinishedFace.Verticies.Add(v);
-							CopyFace.Add(UnfinishedFace);
-							UnfinishedFace = Face();
-						}
-
-						if (!bFirst)
-						{
-							first = IPs[0];
-							bFirst = true;
-						}
 
 						//Vertex v;
 						//v.Position = Vector3D(ToLocal.x, ToLocal.y, ToLocal.z);
 
 					}
-
-
-
-				}
-
-				if (!IPs.IsEmpty())
-				{
-					face.Verticies.Add(CurrentFaces[i].Verticies[0]);
-					for (unsigned int k = 0; k < IPs.GetSize(); k++)
+					
+					
+					if (Vector3D::Dot(normal, (Vector3D(glmLine.x, glmLine.y, glmLine.z) - CurrentPoint).Normalised()) >= 0)
 					{
 						Vertex v;
-						v.Position = IPs[k];
-
+						v.Position = Vector3D(glmLine.x, glmLine.y, glmLine.z);
+						v.last = true;
 						face.Verticies.Add(v);
 					}
+					
 
-					if (face.Verticies.GetSize() < 3)
-					{
-						UnfinishedFace = face;
-						Face CurrentFace = CurrentFaces[i];
-						CopyFace.Remove(CurrentFace);
 
-					}
-					else
-					{
-						CopyFace.Add(face);
-					}
 				}
-				else
+
+				if (face.Verticies.IsEmpty())
 				{
-					Face CurrentFace = CurrentFaces[i];
-					CopyFace.Remove(CurrentFace);
+					continue;
 				}
 
+				std::cout << "FaceNum: " << face.Verticies.GetSize() << std::endl;
+
+				CopyFace.Add(face);
+
 			}
 
-			if (!UnfinishedFace.Verticies.IsEmpty())
-			{
-				Vertex v;
-				v.Position = first;
-
-				UnfinishedFace.Verticies.Add(v);
-
-				CopyFace.Add(UnfinishedFace);
-			}
 			CurrentFaces = CopyFace;
 		}
 
-		Vertex point;
-		point.Color = Vector3D::RandomRange(Vector3D::Zero, Vector3D(1,1,1));
-		for (unsigned int j = 0; j < CurrentFaces.GetSize(); j++)
-		{
-			unsigned int ind = InModel.BoundingBox->Vertices.GetSize();
 
-			point.Position = CurrentFaces[j].Verticies[0].Position;
+		//current point defo in world space
+		FractureObject* fracture = new FractureObject(CurrentFaces, CurrentPoint);
 
-			InModel.BoundingBox->Vertices.Add(point);
+		//Vertex point;
+		//point.Color = Vector3D::RandomRange(Vector3D::Zero, Vector3D(1,1,1));
+		//for (unsigned int j = 0; j < CurrentFaces.GetSize(); j++)
+		//{
+		//	unsigned int ind = InModel.BoundingBox->Vertices.GetSize();
 
-			point.Position = CurrentFaces[j].Verticies[1].Position;
+		//	point.Position = CurrentFaces[j].Verticies[0].Position;
 
-			InModel.BoundingBox->Vertices.Add(point);
+		//	InModel.BoundingBox->Vertices.Add(point);
 
-			point.Position = CurrentFaces[j].Verticies[2].Position;
+		//	point.Position = CurrentFaces[j].Verticies[1].Position;
 
-			InModel.BoundingBox->Vertices.Add(point);
+		//	InModel.BoundingBox->Vertices.Add(point);
 
-			InModel.BoundingBox->Indices.Add(ind);
-			InModel.BoundingBox->Indices.Add(ind + 1);
-			InModel.BoundingBox->Indices.Add(ind + 2);
-		}
+		//	point.Position = CurrentFaces[j].Verticies[2].Position;
+
+		//	InModel.BoundingBox->Vertices.Add(point);
+
+		//	InModel.BoundingBox->Indices.Add(ind);
+		//	InModel.BoundingBox->Indices.Add(ind + 1);
+		//	InModel.BoundingBox->Indices.Add(ind + 2);
+		//}
 
 	}
 
@@ -293,9 +270,9 @@ void FractureObject::AddFaces(Array<Face>& InFaces)
 	{
 		Face face = InFaces[i];
 
-		for (unsigned int v = 0; v < face.Verticies.GetSize(); i++)
+		for (unsigned int v = 0; v < face.Verticies.GetSize(); v++)
 		{
-			AddToShape(face.Verticies[i]);
+			AddToShape(face.Verticies[v]);
 		}
 	}
 }
@@ -304,6 +281,8 @@ void FractureObject::AddToShape(Vertex Vert)
 {
 	unsigned int index;
 
+	std::cout << "first: " << Vert.first << " Inter: " << Vert.inter << " Last: " << Vert.last << std::endl;
+
 	if (verts.Contains(Vert, index))
 	{
 		Indicies.Add(index);
@@ -311,6 +290,8 @@ void FractureObject::AddToShape(Vertex Vert)
 	}
 	index = verts.GetSize();
 	Vert.Color = Color;
+
+	Vert.Position.Print();
 
 	glm::vec4 pos = transform.GetInverseModelMatrix() * glm::vec4(Vert.Position.X, Vert.Position.Y, Vert.Position.Z, 1);
 	Vert.Position = Vector3D(pos.x, pos.y, pos.z);
@@ -342,6 +323,15 @@ void FractureObject::Initialise()
 	glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)(offsetof(Vertex, Color)));
 
 	glBindVertexArray(0);
+
+	if (Indicies.GetSize() % 3!= 0)
+	{
+		if (Indicies.GetSize() % 3 == 1)
+		{
+			std::cout << "NOt Index 1left" << std::endl;
+		}
+		std::cout << "NOt Index" << std::endl;
+	}
 }
 
 

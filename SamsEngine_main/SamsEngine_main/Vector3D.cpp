@@ -26,6 +26,11 @@ Vector3D Vector3D::Normalised()
 {
 	const float length = GetLength();
 
+	if (length < 1e-6)
+	{
+		return Vector3D(0, 0, 0);
+	}
+
 	return Vector3D(X / length, Y / length, Z / length);
 }
 
@@ -142,6 +147,11 @@ bool Vector3D::GetIntersectionPoint(Vector3D& Mid, Vector3D& Normal, Vector3D& p
 bool Vector3D::IsAlmostEqual(const Vector3D& a, const Vector3D& b, const float range)
 {
 	return a - b < range;
+}
+
+void Vector3D::Print()
+{
+	std::cout << "Vector3D: " << X << ", " << Y << ", " << Z << std::endl;
 }
 
 Vector3D::~Vector3D()

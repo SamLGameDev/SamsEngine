@@ -71,6 +71,8 @@ public:
 
 	static bool IsAlmostEqual(const Vector3D& a, const Vector3D& b, const float range = 1e-6);
 
+	void Print();
+
 	~Vector3D();
 
 	float X;
