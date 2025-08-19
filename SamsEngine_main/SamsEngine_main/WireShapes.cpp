@@ -48,7 +48,13 @@ void WireObject::Initialise()
 	glBindVertexArray(VAO);
 	glBindBuffer(GL_ARRAY_BUFFER, VBO);
 
-	glBufferData(GL_ARRAY_BUFFER, Vertices.GetSize() * sizeof(Vertex), Vertices.GetFirstRef(), GL_STATIC_DRAW);
+	Array<Vertex> Points;
+	for (unsigned int i = 0; i < Vertices.GetSize(); i++)
+	{
+		Points.Add(*Vertices[i]);
+	}
+
+	glBufferData(GL_ARRAY_BUFFER, Points.GetSize() * sizeof(Vertex), Points.GetFirstRef(), GL_STATIC_DRAW);
 
 	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
 	glBufferData(GL_ELEMENT_ARRAY_BUFFER, Indices.GetSize() * sizeof(unsigned int), Indices.GetFirstRef(), GL_STATIC_DRAW);
@@ -110,15 +116,14 @@ WireObject* DrawWireCube(Vector3D Center, Vector3D HalfBounds, Vector3D Size, Ve
 
 	WireObject* object = new WireObject(&wireTransform, &wireShader);
 
-	Vertex Point;
-	Vertex* FrontTopLeft = new Vertex();
-	Vertex* FrontBottomLeft = new Vertex();
-	Vertex* FrontTopRight = new Vertex();
-	Vertex* FrontBottomRight = new Vertex();
-	Vertex* BackTopLeft = new Vertex();
-	Vertex* BackBottomLeft = new Vertex();
-	Vertex* BackTopRight = new Vertex();
-	Vertex* BackBottomRight = new Vertex();
+	ConnectingVertex* FrontTopLeft = new ConnectingVertex();
+	ConnectingVertex* FrontBottomLeft = new ConnectingVertex;
+	ConnectingVertex* FrontTopRight = new ConnectingVertex();
+	ConnectingVertex* FrontBottomRight = new ConnectingVertex();
+	ConnectingVertex* BackTopLeft = new ConnectingVertex();
+	ConnectingVertex* BackBottomLeft = new ConnectingVertex();
+	ConnectingVertex* BackTopRight = new ConnectingVertex();
+	ConnectingVertex* BackBottomRight = new ConnectingVertex();
 
 	FrontTopLeft->Position = HalfBounds;
 	FrontTopLeft->Color = Color;
@@ -211,34 +216,6 @@ WireObject* DrawWireCube(Vector3D Center, Vector3D HalfBounds, Vector3D Size, Ve
 	object->Indices.Add(7);
 	object->Indices.Add(6);
 
-	Face face;
-	face.Verticies.Add(object->Vertices[object->Indices[0]]);
-	face.Verticies.Add(object->Vertices[object->Indices[1]]);
-	face.Verticies.Add(object->Vertices[object->Indices[2]]);
-	face.Verticies.Add(object->Vertices[object->Indices[3]]);
-	object->Faces.Add(face);
-
-	face = Face();
-	face.Verticies.Add(object->Vertices[object->Indices[0]]);
-	face.Verticies.Add(object->Vertices[object->Indices[1]]);
-	face.Verticies.Add(object->Vertices[object->Indices[5]]);
-	face.Verticies.Add(object->Vertices[object->Indices[4]]);
-	object->Faces.Add(face);
-
-	face = Face();
-	face.Verticies.Add(object->Vertices[object->Indices[4]]);
-	face.Verticies.Add(object->Vertices[object->Indices[5]]);
-	face.Verticies.Add(object->Vertices[object->Indices[6]]);
-	face.Verticies.Add(object->Vertices[object->Indices[7]]);
-	object->Faces.Add(face);
-
-	face = Face();
-	face.Verticies.Add(object->Vertices[object->Indices[2]]);
-	face.Verticies.Add(object->Vertices[object->Indices[3]]);
-	face.Verticies.Add(object->Vertices[object->Indices[7]]);
-	face.Verticies.Add(object->Vertices[object->Indices[6]]);
-	object->Faces.Add(face);
-
 	//face = Face();
 	//face.Verticies.Add(object->Vertices[object->Indices[0]]);
 	//face.Verticies.Add(object->Vertices[object->Indices[3]]);
@@ -277,44 +254,30 @@ WireObject* DrawWirePlane(Vector3D Center, Vector3D Normal, Vector3D Size, Vecto
 
 	Vector3D Up = Vector3D::Cross(Right, Normal);
 
+	Vertex* TopLeft = new Vertex();
+	Vertex* BottomLeft = new Vertex();
+	Vertex* TopRight = new Vertex();
+	Vertex* BottomRight = new Vertex();
 
-	Vertex Point;
+	TopLeft->Position = Up + Right;
+	TopLeft->Color = Color;
 
-	Point.Color = Color;
+	BottomLeft->Position = -Up + Right;
+	BottomLeft->Color = Color;
 
-	Point.Position = Up + Right;
+	TopRight->Position = Up - Right;
+	TopRight->Color = Color;
 
-	object->Vertices.Add(Point);
-
-	Point.Position = Up - Right;
-
-	object->Vertices.Add(Point);
-
-	Point.Position =  -Up + Right;
-
-	object->Vertices.Add(Point);
-
-	Point.Position = -Up - Right;
-
-	object->Vertices.Add(Point);
+	BottomRight->Position = -Up - Right;
+	BottomRight->Color = Color;
 
 	object->Indices.Add(0);
 	object->Indices.Add(1);
 	object->Indices.Add(3);
 
 	object->Indices.Add(0);
-	object->Indices.Add(3);
 	object->Indices.Add(2);
-	
-
-	for (unsigned int Ind = 0; Ind + 2 < object->Indices.GetSize(); Ind += 3)
-	{
-		Face face;
-		face.Verticies.Add(object->Vertices[object->Indices[Ind]]);
-		face.Verticies.Add(object->Vertices[object->Indices[Ind + 1]]);
-		face.Verticies.Add(object->Vertices[object->Indices[Ind + 2]]);
-		object->Faces.Add(face);
-	}
+	object->Indices.Add(3);
 
 	object->Initialise();
 
@@ -332,30 +295,25 @@ WireObject* DrawWireLine(Vector3D Start, Vector3D End, Vector3D Color)
 	WireObject* object = new WireObject(&wireTransform, &wireShader);
 
 
-	Vertex Point;
+	Vertex* Point = new Vertex();;
 
-	Point.Color = Color;
+	Point->Color = Color;
 
-	Point.Position = Vector3D::Zero;
-
-	object->Vertices.Add(Point);
-
-	Point.Position = End - Start;
+	Point->Position = Vector3D::Zero;
 
 	object->Vertices.Add(Point);
+
+	Vertex* end = new Vertex();
+
+	end->Position = End - Start;
+
+	end->Color = Color;
+
+	object->Vertices.Add(end);
 
 	object->Indices.Add(0);
 	object->Indices.Add(1);
 	object->Indices.Add(0);
-
-	for (unsigned int Ind = 0; Ind + 2 < object->Indices.GetSize(); Ind += 3)
-	{
-		Face face;
-		face.Verticies.Add(object->Vertices[object->Indices[Ind]]);
-		face.Verticies.Add(object->Vertices[object->Indices[Ind + 1]]);
-		face.Verticies.Add(object->Vertices[object->Indices[Ind + 2]]);
-		object->Faces.Add(face);
-	}
 
 	object->Initialise();
 

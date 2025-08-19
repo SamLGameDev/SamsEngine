@@ -38,9 +38,9 @@ void Fracturerer::Fracture(Model& InModel, const unsigned int FracturePoints)
 
 			GetClosestPoint(remainingPoints, points, CurrentPoint, closestPoint);
 
-			Vector3D normal, Right, Up, planeCenter;
+			Vector3D normal, Right, Up;
 
-			DefinePlane(normal, CurrentPoint, closestPoint, Right, Up, planeCenter);
+			DefinePlane(normal, CurrentPoint, closestPoint, Right, Up);
 			//(CurrentPoint, CurrentPoint + (normal * 10), Vector3D(0.1, 0.1, 0.6));
 		//	std::cout << normal.X << ", " << normal.Y << ", " << normal.Z << std::endl;
 
@@ -53,10 +53,6 @@ void Fracturerer::Fracture(Model& InModel, const unsigned int FracturePoints)
 			bool bFirst = false;
 
 			Array<Face> CopyFace;
-
-			Array<ConnectingVertex*> Connections = reinterpret_cast<Array<ConnectingVertex*>>(InModel.BoundingBox->Vertices);
-
-
 
 			for (unsigned int i = 0; i < CurrentFaces.GetSize(); i++)
 			{
@@ -196,7 +192,7 @@ void Fracturerer::Fracture(Model& InModel, const unsigned int FracturePoints)
 
 }
 
-void Fracturerer::DefinePlane(Vector3D& normal, Vector3D& CurrentPoint, Vector3D& closestPoint, Vector3D& Right, Vector3D& Up, Vector3D& PlaneCenter)
+void Fracturerer::DefinePlane(Vector3D& normal, Vector3D& CurrentPoint, Vector3D& closestPoint, Vector3D& Right, Vector3D& Up)
 {
 	normal = (CurrentPoint - closestPoint).Normalised();
 
@@ -209,8 +205,6 @@ void Fracturerer::DefinePlane(Vector3D& normal, Vector3D& CurrentPoint, Vector3D
 	Right = Vector3D::Cross(normal, arbitraryUp).Normalised();
 
 	Up = Vector3D::Cross(Right, normal).Normalised();
-
-	PlaneCenter = CurrentPoint + (normal * ((CurrentPoint - closestPoint).GetLength() / 2));
 }
 
 void Fracturerer::CullPoints(Array<Vector3D>& remainingPoints, Vector3D& CurrentPoint, const Vector3D& normal)

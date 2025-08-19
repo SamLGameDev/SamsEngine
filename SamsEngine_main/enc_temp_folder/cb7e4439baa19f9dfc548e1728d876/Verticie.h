@@ -75,10 +75,6 @@ struct ConnectingVertex : public Vertex
 {
 public:
 
-	~ConnectingVertex();
-
 	Array<Vertex*> ConnectingPoints;
-
-	void DeepCopy(Array<ConnectingVertex*>& other, Array<ConnectingVertex*>& self);
 };
 
