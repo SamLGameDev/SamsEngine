@@ -38,13 +38,13 @@ void Fracturerer::Fracture(Model& InModel, const unsigned int FracturePoints)
 
 			GetClosestPoint(remainingPoints, points, CurrentPoint, closestPoint);
 
-			Vector3D normal, Right, Up;
+			Vector3D normal, Right, Up, PlaneCenter;
 
-			DefinePlane(normal, CurrentPoint, closestPoint, Right, Up);
+			DefinePlane(normal, CurrentPoint, closestPoint, Right, Up, PlaneCenter);
 			//(CurrentPoint, CurrentPoint + (normal * 10), Vector3D(0.1, 0.1, 0.6));
 		//	std::cout << normal.X << ", " << normal.Y << ", " << normal.Z << std::endl;
 
-			CullPoints(remainingPoints, CurrentPoint, normal);
+			CullPoints(remainingPoints, PlaneCenter, normal);
 
 			Face UnfinishedFace;
 
@@ -72,7 +72,7 @@ void Fracturerer::Fracture(Model& InModel, const unsigned int FracturePoints)
 
 					LineOriginWorld = Vector3D(glmLine.x, glmLine.y, glmLine.z);
 
-					if (Vector3D::Dot(normal, (LineOriginWorld - CurrentPoint).Normalised()) >= 0 && edge == 0)
+					if (Vector3D::Dot(normal, (LineOriginWorld - PlaneCenter).Normalised()) >= 0 && edge == 0)
 					{
 						Vertex v;
 						v.Position = LineOriginWorld;
@@ -88,7 +88,7 @@ void Fracturerer::Fracture(Model& InModel, const unsigned int FracturePoints)
 
 					Vector3D intersectionPoint;
 
-					if (Vector3D::GetIntersectionPoint(CurrentPoint, normal, LineOriginWorld, lineDIr, intersectionPoint))
+					if (Vector3D::GetIntersectionPoint(PlaneCenter, normal, LineOriginWorld, lineDIr, intersectionPoint))
 					{
 
 						Vertex v;
@@ -103,7 +103,7 @@ void Fracturerer::Fracture(Model& InModel, const unsigned int FracturePoints)
 					}
 					
 					
-					if (Vector3D::Dot(normal, (Vector3D(glmLine.x, glmLine.y, glmLine.z) - CurrentPoint).Normalised()) >= 0)
+					if (Vector3D::Dot(normal, (Vector3D(glmLine.x, glmLine.y, glmLine.z) - PlaneCenter).Normalised()) >= 0)
 					{
 						Vertex v;
 						v.Position = Vector3D(glmLine.x, glmLine.y, glmLine.z);
@@ -192,7 +192,7 @@ void Fracturerer::Fracture(Model& InModel, const unsigned int FracturePoints)
 
 }
 
-void Fracturerer::DefinePlane(Vector3D& normal, Vector3D& CurrentPoint, Vector3D& closestPoint, Vector3D& Right, Vector3D& Up)
+void Fracturerer::DefinePlane(Vector3D& normal, Vector3D& CurrentPoint, Vector3D& closestPoint, Vector3D& Right, Vector3D& Up, Vector3D& PlaneCenter)
 {
 	normal = (CurrentPoint - closestPoint).Normalised();
 
@@ -205,6 +205,8 @@ void Fracturerer::DefinePlane(Vector3D& normal, Vector3D& CurrentPoint, Vector3D
 	Right = Vector3D::Cross(normal, arbitraryUp).Normalised();
 
 	Up = Vector3D::Cross(Right, normal).Normalised();
+
+	PlaneCenter = (CurrentPoint + closestPoint) / 2;
 }
 
 void Fracturerer::CullPoints(Array<Vector3D>& remainingPoints, Vector3D& CurrentPoint, const Vector3D& normal)

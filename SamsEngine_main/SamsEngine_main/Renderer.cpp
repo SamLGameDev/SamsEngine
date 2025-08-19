@@ -36,7 +36,7 @@ void Renderer::RenderingLoop()
 {
 	float lastFrameTime = glfwGetTime();
 
-	Fracturerer::Fracture(*ItemsToRender[0], 2);
+	Fracturerer::Fracture(*ItemsToRender[0], 10);
 
 	while (!glfwWindowShouldClose(Camera::GetActiveWindow()->GetWindow()))
 	{
@@ -62,13 +62,13 @@ void Renderer::RenderingLoop()
 			}
 		}
 
-		//if (!WiresToDraw.IsEmpty())
-		//{
-		//	for (unsigned int i = 0; i < WiresToDraw.GetSize(); i++)
-		//	{
-		//		WiresToDraw[i]->Draw();
-		//	}
-		//}
+		if (!WiresToDraw.IsEmpty())
+		{
+			for (unsigned int i = 0; i < WiresToDraw.GetSize(); i++)
+			{
+				WiresToDraw[i]->Draw();
+			}
+		}
 
 		if (!FracturesToDraw.IsEmpty())
 		{
