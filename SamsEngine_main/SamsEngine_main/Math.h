@@ -15,7 +15,7 @@ public:
 		return std::abs(Value) < range;
 	}
 
-	static bool IsNearlyEqual(float& a, float& b, float range = 1e-6f);
+	static bool IsNearlyEqual(float a, float b, float range = 1e-6f);
 
 	static bool IsEven(int Value);
 

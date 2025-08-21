@@ -13,7 +13,7 @@ float Math::Determinant(Vector3D C0, Vector3D C1, Vector3D C2)
 	return d00 - d01 + d02;
 }
 
-bool Math::IsNearlyEqual(float& a, float& b, float range)
+bool Math::IsNearlyEqual(float a, float b, float range)
 {
 	return a - b < range;
 }

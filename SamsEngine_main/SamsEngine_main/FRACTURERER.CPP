@@ -4,6 +4,7 @@
 #include "Camera.h"
 #include "glm-1.0.1/glm/gtc/type_ptr.hpp"
 #include "Renderer.h"
+#include "Math.h"
 
 //TO-DO
 // remake this to use seperate objects for each fracture, this way we dont need to worry about re-meshing the mesh
@@ -44,6 +45,8 @@ void Fracturerer::Fracture(Model& InModel, const unsigned int FracturePoints)
 			//(CurrentPoint, CurrentPoint + (normal * 10), Vector3D(0.1, 0.1, 0.6));
 		//	std::cout << normal.X << ", " << normal.Y << ", " << normal.Z << std::endl;
 
+			DrawWireCube(PlaneCenter, Vector3D(1, 1, 1), Vector3D(0.1, 0.1, 0.1), Vector3D(0.5, 0.2, 0.2));
+
 			CullPoints(remainingPoints, PlaneCenter, normal);
 
 			Face UnfinishedFace;
@@ -54,84 +57,114 @@ void Fracturerer::Fracture(Model& InModel, const unsigned int FracturePoints)
 
 			Array<Face> CopyFace;
 
+			Array<Vector3D> IntersectionPoints;
+
+
 			for (unsigned int i = 0; i < CurrentFaces.GetSize(); i++)
 			{
-				Face face;
-				Array<Vector3D> IPs;
-				for (unsigned int edge = 0; edge < 4; edge++)
+				Face face = CurrentFaces[i];
+				Array<Vector3D> newVerts;
+				for (unsigned int j = 0; j < face.Verticies.GetSize(); j++)
 				{
-					Array<Vertex> verts = CurrentFaces[i].Verticies;
+					glm::vec4 ToWorld = glm::vec4(face.Verticies[j].Position.X, face.Verticies[j].Position.Y, face.Verticies[j].Position.Z, 1);
 
-					Vector3D LineOriginWorld = verts[edge].Position;
+					ToWorld = InModel.BoundingBox->WireTransform.GetModelMatrix() * ToWorld;
 
-					float next = (edge + 1) % verts.GetSize();
+					Vector3D current = Vector3D(ToWorld.x, ToWorld.y, ToWorld.z);
 
-					glm::vec4 glmLine = glm::vec4(LineOriginWorld.X, LineOriginWorld.Y, LineOriginWorld.Z, 1);
+					unsigned int nextVer = (j + 1) % face.Verticies.GetSize();
 
-					glmLine = InModel.BoundingBox->WireTransform.GetModelMatrix() * glmLine;
+					ToWorld = glm::vec4(face.Verticies[nextVer].Position.X, face.Verticies[nextVer].Position.Y, face.Verticies[nextVer].Position.Z, 1);
 
-					LineOriginWorld = Vector3D(glmLine.x, glmLine.y, glmLine.z);
+					ToWorld = InModel.BoundingBox->WireTransform.GetModelMatrix() * ToWorld;
 
-					if (Vector3D::Dot(normal, (LineOriginWorld - PlaneCenter).Normalised()) >= 0 && edge == 0)
+					Vector3D next = Vector3D(ToWorld.x, ToWorld.y, ToWorld.z);
+
+					Vector3D lineDir = (next - current);
+
+					if (Vector3D::Dot(normal, (current - PlaneCenter)) >= 0)
 					{
-						Vertex v;
-						v.Position = LineOriginWorld;
-						v.first = true;
-						face.Verticies.Add(v);
+						unsigned int index;
+						if (!newVerts.Contains(current, index))
+						{
+							newVerts.Add(current);
+						}
 					}
-
-					glmLine = glm::vec4(verts[next].Position.X, verts[next].Position.Y, verts[next].Position.Z, 1);
-
-					glmLine = InModel.BoundingBox->WireTransform.GetModelMatrix() * glmLine;
-
-					Vector3D lineDIr = (Vector3D(glmLine.x, glmLine.y, glmLine.z) - LineOriginWorld);
 
 					Vector3D intersectionPoint;
 
-					if (Vector3D::GetIntersectionPoint(PlaneCenter, normal, LineOriginWorld, lineDIr, intersectionPoint))
+					if (Vector3D::GetIntersectionPoint(PlaneCenter, normal, current, lineDir, intersectionPoint))
 					{
-
-						Vertex v;
-						v.Position = intersectionPoint;
-						v.inter = true;
-						face.Verticies.Add(v);
-
-
-						//Vertex v;
-						//v.Position = Vector3D(ToLocal.x, ToLocal.y, ToLocal.z);
-
+						newVerts.Add(intersectionPoint);
+						IntersectionPoints.Add(intersectionPoint);
 					}
-					
-					
-					if (Vector3D::Dot(normal, (Vector3D(glmLine.x, glmLine.y, glmLine.z) - PlaneCenter).Normalised()) >= 0)
+
+
+					if (Vector3D::Dot(normal, (next - PlaneCenter)) >= 0)
 					{
-						Vertex v;
-						v.Position = Vector3D(glmLine.x, glmLine.y, glmLine.z);
-						v.last = true;
-						face.Verticies.Add(v);
+						unsigned int index;
+						if (!newVerts.Contains(current, index))
+						{
+							newVerts.Add(current);
+						}
 					}
-					
-
-
 				}
 
-				if (face.Verticies.IsEmpty())
+				Face newFace;
+
+				for (unsigned int v = 0; v < newVerts.GetSize(); v++)
 				{
-					continue;
+					Vertex ver;
+					ver.Position = newVerts[v];
+					newFace.Verticies.Add(ver);
 				}
 
-				std::cout << "FaceNum: " << face.Verticies.GetSize() << std::endl;
+				CopyFace.Add(newFace);
 
-				CopyFace.Add(face);
-
+			
 			}
+
+			Face inter;
+
+			Vector3D p1 = IntersectionPoints[0];
+
+			Vertex ver;
+			ver.Position = p1;
+
+			inter.Verticies.Add(ver);
+
+			Vector3D dir = Right;
+
+			for (unsigned int o =1; o < IntersectionPoints.GetSize(); o++)
+			{
+				for (unsigned int h = 0; h < IntersectionPoints.GetSize(); h++)
+				{
+					if (Math::IsNearlyEqual(std::fabs(Vector3D::Dot(dir, (IntersectionPoints[h] - p1).Normalised())), 1))
+					{
+						ver.Position = IntersectionPoints[h];
+
+						if (dir == Right)
+						{
+							dir = Up;
+							break;
+						}
+						dir = Up;
+						break;
+
+					}
+				}
+			}
+
+			CopyFace.Add(inter);
+
+	
 
 			CurrentFaces = CopyFace;
 		}
 
 
-		//current point defo in world space
 		FractureObject* fracture = new FractureObject(CurrentFaces, CurrentPoint);
+		//current point defo in world space
 
 		//Vertex point;
 		//point.Color = Vector3D::RandomRange(Vector3D::Zero, Vector3D(1,1,1));
@@ -272,9 +305,11 @@ void FractureObject::AddFaces(Array<Face>& InFaces)
 	{
 		Face face = InFaces[i];
 
-		for (unsigned int v = 0; v < face.Verticies.GetSize(); v++)
+		for (unsigned int v = 0; v < face.Verticies.GetSize(); v+=2)
 		{
 			AddToShape(face.Verticies[v]);
+			AddToShape(face.Verticies[(v + 1) % face.Verticies.GetSize()]);
+			AddToShape(face.Verticies[(v + 2) % face.Verticies.GetSize()]);
 		}
 	}
 }

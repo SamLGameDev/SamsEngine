@@ -69,6 +69,8 @@ void Mesh::SetLightVariables(glm::mat4& view)
 
 	MeshShader.SetVec3("light.position", Vector3D(lightModel.x, lightModel.y, lightModel.z));
 
+	MeshShader.SetVec3("directional.direction", Vector3D(-0.2f, -1.0f, -0.3f));
+
 	MeshShader.SetFloat("material.shininess", 64.0f);
 
 	MeshShader.SetVec3("light.ambient", Vector3D(0.5f, 0.5f, 0.5f));
