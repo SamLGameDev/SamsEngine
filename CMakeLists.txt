@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.13)
+cmake_minimum_required(VERSION 4.0)
 
 # see https://vcpkg.io/en/docs/users/buildsystems/cmake-integration.html#visual-studio if using visual studio
 # On Linux-based distrubtions, use your package manager for dependeices
@@ -9,15 +9,18 @@ if(DEFINED ENV{VCPKG_ROOT} AND NOT DEFINED CMAKE_TOOLCHAIN_FILE)
       CACHE STRING "")
 endif()
 
+message(STATUS "VCPKG_ROOT = $ENV{VCPKG_ROOT}")
+message(STATUS "CMAKE_TOOLCHAIN_FILE = ${CMAKE_TOOLCHAIN_FILE}")
+
 # Use C++ 17
-set(CMAKE_CXX_STANDARD 17)
+set(CMAKE_CXX_STANDARD 20)
 
 # Option support (faster build times by disabling features)
 option(FAL_TESTS "Should we enable unit test support?" ON)
 option(FAL_DOCS "Should we attempt to build documentation?" ON)
 
 # Project details start here
-project(MyProjectName
+project(SamsEngine
 	VERSION 0.1
 	DESCRIPTION "A brief description of your project here"
 	LANGUAGES CXX
@@ -25,14 +28,10 @@ project(MyProjectName
 
 # integration for command-line users
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
-set(PROJECT_ROOT ${CMAKE_CURRENT_SOURCE_DIR})
+set(PROJECT_ROOT ${CMAKE_CURRENT_SOURCE_DIR})#
 
-add_executable( project )
 add_subdirectory( src )
-target_include_directories(project PUBLIC 
-	$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include/>
-	$<INSTALL_INTERFACE:include/>
-)
+
 
 # Testing support
 if (FAL_TESTS)
