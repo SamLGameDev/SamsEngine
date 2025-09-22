@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 4.0)
+cmake_minimum_required(VERSION 3.3)
 
 # see https://vcpkg.io/en/docs/users/buildsystems/cmake-integration.html#visual-studio if using visual studio
 # On Linux-based distrubtions, use your package manager for dependeices
@@ -48,3 +48,14 @@ if (FAL_DOCS)
 		message(STATUS "Doxygen not found, no docs will be built")
 	endif()
 endif()
+
+target_compile_definitions(SamsEngine PRIVATE DEBUG=0)
+
+target_compile_definitions(SamsEngine PRIVATE RELEASE=0)
+
+if(CMAKE_BUILD_TYPE STREQUAL "Debug")
+    target_compile_definitions(SamsEngine PRIVATE DEBUG=1)
+elseif(CMAKE_BUILD_TYPE STREQUAL "Release")
+    target_compile_definitions(SamsEngine PRIVATE RELEASE=1)
+endif()
+
