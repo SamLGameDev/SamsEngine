@@ -4,9 +4,16 @@
 #include <cstdlib>
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
+#include "StaticLibs/Inlcudes/Array.h"
 #include "Engine/Rendering/Shaders/Shader.h"
 
 int main(int argc, char* argv[]) {
+
+	Array<int> h = {5, 3 ,1};
+
+	std::cout << h[1];
+
+	
 
 	float OpenGLVersion = 3.3;
 

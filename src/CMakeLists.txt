@@ -16,5 +16,12 @@ target_link_libraries(SamsEngine PRIVATE glfw)
 find_package(glad REQUIRED)
 target_link_libraries(SamsEngine PRIVATE glad::glad)
 
-find_library(DataStructers REQUIRED)
-target_link_libraries(DataStructures)
+include_directories(${CMAKE_CURRENT_SOURCE_DIR}/StaticLibs/Includes)
+add_library(DataStructures STATIC IMPORTED)
+
+
+set_target_properties(DataStructures PROPERTIES
+    IMPORTED_LOCATION ${CMAKE_CURRENT_SOURCE_DIR}/StaticLibs/DataStructures.lib
+)
+
+target_link_libraries(SamsEngine PRIVATE DataStructures)
