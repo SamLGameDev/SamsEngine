@@ -1,6 +1,6 @@
 #pragma once
 
-#include "DataTypes/Array.h"
+#include "Array.h"
 #include <cstdint>
 #include <glad/glad.h>
 #include <string>

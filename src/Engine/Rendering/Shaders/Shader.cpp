@@ -322,17 +322,17 @@ bool Shader::DoesFragmentShaderExist() const
 
 std::string Shader::GetShaderLocation() const
 {
-	return std::string(PROJECT_ROOT_DIR) + "/" + StorageLocation + Name + ".vert";
+	return std::string(CONTENTS_DIR) + "/" + StorageLocation + Name + ".vert";
 }
 
 std::string Shader::GetGeometryLocation() const
 {
-	return std::string(PROJECT_ROOT_DIR) + "/" + StorageLocation + Name + ".geom";
+	return std::string(CONTENTS_DIR) + "/" + StorageLocation + Name + ".geom";
 }
 
 std::string Shader::GetFragmentLocation() const
 {
-	return std::string(PROJECT_ROOT_DIR) + "/" + StorageLocation + Name + ".frag";
+	return std::string(CONTENTS_DIR) + "/" + StorageLocation + Name + ".frag";
 }
 
 unsigned int Shader::CompileVertex() const

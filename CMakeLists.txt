@@ -15,6 +15,10 @@ message(STATUS "CMAKE_TOOLCHAIN_FILE = ${CMAKE_TOOLCHAIN_FILE}")
 # Use C++ 17
 set(CMAKE_CXX_STANDARD 20)
 
+set(Contents "${CMAKE_SOURCE_DIR}/Contents")
+
+
+
 # Option support (faster build times by disabling features)
 option(FAL_TESTS "Should we enable unit test support?" ON)
 option(FAL_DOCS "Should we attempt to build documentation?" ON)
@@ -59,3 +63,5 @@ elseif(CMAKE_BUILD_TYPE STREQUAL "Release")
     target_compile_definitions(SamsEngine PRIVATE RELEASE=1)
 endif()
 
+
+target_compile_definitions(SamsEngine PUBLIC CONTENTS_DIR="${Contents}")

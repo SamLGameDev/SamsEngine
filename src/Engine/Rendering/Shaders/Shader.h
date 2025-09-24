@@ -3,11 +3,10 @@
 #include <string>
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
-#include "StaticLibs/Includes/Array.h"
+#include "Array.h"
 #include "LinkedList.h"
 #include "Texture.h"
 #include "Vector3D.h"
-#include ""
 #include "CubeMap.h"
 
 class Shader

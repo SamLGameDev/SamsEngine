@@ -64,7 +64,7 @@ void CubeMap::GenerateByChannel(const std::uint8_t& nrChannels, const unsigned i
 
 std::string CubeMap::GetFullTexturePath(const std::string& FaceName) const
 {
-	return  std::string(PROJECT_ROOT_DIR) + "/" + TextureLocation + "/" + FaceName + ".jpg";
+	return  std::string(CONTENTS_DIR) + "/" + TextureLocation + "/" + FaceName + ".jpg";
 }
 
 unsigned char* CubeMap::LoadTexture(int* Width, int* Height, int* nrChannels, const std::string& FaceName) const
