@@ -4,46 +4,26 @@
 #include <cstdlib>
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
-#include "Array.h"
-#include "Shader.h"
+#include "SubsystemInitialiser.h"
+#include "Camera.h"
 
 int main(int argc, char* argv[]) {
 
 	
+	SubsystemInitialiser SubsystemManager;
 
-	float OpenGLVersion = 3.3;
+	ErrorCodes status = SubsystemManager.Init();
 
-	glfwInit();
-	glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, (int)OpenGLVersion);
-
-	//do this to get the first digit
-	glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, (int)(OpenGLVersion * 10) % 10);
-	glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
-	glfwWindowHint(GLFW_SAMPLES, 4);
-	GLFWwindow* Window = glfwCreateWindow(800, 600, "SamsEngine", NULL, NULL);
-
-	if (Window == NULL)
+	if (status == ERROR)
 	{
-#if DEBUG
-		std::cout << "Failed to create window" << std::endl;
-#endif
-		glfwTerminate();
-	}
-
-	glfwMakeContextCurrent(Window);
-
-	if (!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress))
-	{
-#if DEBUG
-		std::cout << "Failed to initialise glad" << std::endl;
-#endif
+		return EXIT_FAILURE;
 	}
 
 
 	while(true)
 	{
 		glfwPollEvents();
-		glfwSwapBuffers(Window);
+		glfwSwapBuffers(Camera::GetActiveWindow()->GetWindow());
 	}
 
 	std::cout << "Hello, world!" << std::endl;

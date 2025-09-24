@@ -1,6 +1,6 @@
 #pragma once
 
-#include "DataTypes/BaseDelegate.h"
+#include "BaseDelegate.h"
 /**
  * The Base class of the engine, anything that needs a tick or start should inherit from this
  */

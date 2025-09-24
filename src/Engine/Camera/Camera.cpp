@@ -1,8 +1,6 @@
 #include "Camera.h"
 #include <glm/gtc/matrix_transform.hpp>
 
-#include "BasicObject.h"
-#include "BasicObject.h"
 #include "Object.h"
 #include "UniformBufferFactory.h"
 

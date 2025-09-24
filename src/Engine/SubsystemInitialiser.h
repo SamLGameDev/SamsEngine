@@ -4,20 +4,30 @@
 #include "ErrorCodes.h"
 #include "FirstWindow.h"
 #include "InputManager.h"
-#include "ObjectFactory.h"
+
 #include "World.h"
+#include "Camera/Camera.h"
+#include "Renderer.h"
+
+#include <memory>
 
 class SubsystemInitialiser
 {
 public:
 
+	SubsystemInitialiser(){};
+
 	ErrorCodes Init();
 
 private:
 
-	FirstWindow Window;
+	std::unique_ptr<FirstWindow> Window;
 
-	InputManager inputManager;
+	std::unique_ptr<InputManager> inputManager;
 
-	World world;
+	std::unique_ptr<World> world;
+
+	std::unique_ptr<Camera> camera;
+
+	std::unique_ptr<Renderer> renderer;
 };

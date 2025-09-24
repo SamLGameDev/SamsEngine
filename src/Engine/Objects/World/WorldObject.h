@@ -1,7 +1,7 @@
 #pragma once
 
-#include "World/World.h"
-#include "Space/Transform.h"
+#include "World.h"
+#include "Transform.h"
 
 
 /**

@@ -32,8 +32,8 @@ T* CreateObjectPtr(Args... args) requires obj<T>
  * @tparam T The Type of object to create
  * @param args Any args the constructor of the object takes
  */
-template<obj T, typename... Args>
-T CreateObjectRaw(Args... args)
+template<typename T, typename... Args>
+T CreateObjectRaw(Args... args) requires obj<T>
 {
 	T object = T(args...);
 	object.Start();
