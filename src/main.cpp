@@ -5,7 +5,7 @@
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
 #include "StaticLibs/Inlcudes/Array.h"
-#include "Engine/Rendering/Shaders/Shader.h"
+#include "Shader.h"
 
 int main(int argc, char* argv[]) {
 
