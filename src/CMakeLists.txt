@@ -19,6 +19,7 @@ include_directories(Engine/Physics)
 include_directories(Engine/Physics/Collision)
 include_directories(Engine/Physics/Collision/Casters)
 include_directories(Engine/Lighting)
+include_directories(Engine/Components)
 
 add_executable(SamsEngine
     Engine/Rendering/Shaders/Shader.h
@@ -91,6 +92,8 @@ add_executable(SamsEngine
     Engine/Lighting/SpotLight.cpp
     Engine/Lighting/PointLight.h
     Engine/Lighting/PointLight.cpp
+    Engine/Components/StaticMeshComponent.h
+    Engine/Components/StaticMeshComponent.cpp
     PreprocessorDefinitions.h
     PreprocessorDefinitions.cpp
     main.cpp
