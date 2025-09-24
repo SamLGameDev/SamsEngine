@@ -6,6 +6,7 @@ include_directories(Engine/Rendering/Textures)
 include_directories(Engine/DataStructures)
 include_directories(Engine/Window)
 include_directories(Engine/ErrorHandling)
+include_directories(Engine/Input)
 
 
 add_executable(SamsEngine
@@ -35,6 +36,12 @@ add_executable(SamsEngine
     Engine/SubsystemInitialiser.cpp
     Engine/ErrorHandling/ErrorCodes.h
     Engine/ErrorHandling/ErrorCodes.cpp
+    Engine/Input/InputManager.h
+    Engine/Input/InputManager.cpp
+    Engine/Input/InputActionMouse.h
+    Engine/Input/InputActionMouse.cpp
+    Engine/Input/InputAction.h
+    Engine/Input/InputAction.cpp
     PreprocessorDefinitions.h
     PreprocessorDefinitions.cpp
     main.cpp

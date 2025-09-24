@@ -9,10 +9,6 @@
 
 int main(int argc, char* argv[]) {
 
-	Array<int> h = {5, 3 ,1};
-
-	std::cout << h[1];
-
 	
 
 	float OpenGLVersion = 3.3;

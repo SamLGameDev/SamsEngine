@@ -3,6 +3,7 @@
 
 #include "ErrorCodes.h"
 #include "FirstWindow.h"
+#include "InputManager.h"
 
 class SubsystemInitialiser
 {
@@ -13,5 +14,7 @@ public:
 private:
 
 	FirstWindow Window;
+
+	InputManager inputManager;
 
 };
