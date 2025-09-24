@@ -4,6 +4,8 @@ include_directories(Engine/Rendering)
 include_directories(Engine/Rendering/Shaders)
 include_directories(Engine/Rendering/Textures)
 include_directories(Engine/DataStructures)
+include_directories(Engine/Window)
+include_directories(Engine/ErrorHandling)
 
 
 add_executable(SamsEngine
@@ -27,6 +29,12 @@ add_executable(SamsEngine
     Engine/DataStructures/BaseDelegate.cpp
     Engine/DataStructures/Verticie.h
     Engine/DataStructures/Verticie.cpp
+    Engine/Window/FirstWindow.h
+    Engine/Window/FirstWindow.cpp
+    Engine/SubsystemInitialiser.h
+    Engine/SubsystemInitialiser.cpp
+    Engine/ErrorHandling/ErrorCodes.h
+    Engine/ErrorHandling/ErrorCodes.cpp
     PreprocessorDefinitions.h
     PreprocessorDefinitions.cpp
     main.cpp
