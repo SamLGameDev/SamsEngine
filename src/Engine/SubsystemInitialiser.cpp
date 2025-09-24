@@ -2,6 +2,7 @@
 
 #include <exception>
 #include <iostream>
+#include "WorldObject.h"
 
 ErrorCodes SubsystemInitialiser::Init()
 {
@@ -24,6 +25,20 @@ ErrorCodes SubsystemInitialiser::Init()
 		std::cout << error.what() << "\n";
 		return ERROR;
 	}
+
+	try
+	{
+		world = CreateObjectRaw<World>();
+		WorldObject::World = &world;
+
+	}
+	catch (const std::exception& error)
+	{
+		std::cout << error.what() << "\n";
+		return ERROR;
+	}
+
+
 
 	return SUCCEEDED;
 }

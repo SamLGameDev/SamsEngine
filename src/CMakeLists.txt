@@ -7,6 +7,9 @@ include_directories(Engine/DataStructures)
 include_directories(Engine/Window)
 include_directories(Engine/ErrorHandling)
 include_directories(Engine/Input)
+include_directories(Engine/Objects)
+include_directories(Engine/Objects/World)
+include_directories(Engine/Camera)
 
 
 add_executable(SamsEngine
@@ -42,6 +45,16 @@ add_executable(SamsEngine
     Engine/Input/InputActionMouse.cpp
     Engine/Input/InputAction.h
     Engine/Input/InputAction.cpp
+    Engine/Objects/Object.h
+    Engine/Objects/Object.cpp
+    Engine/Objects/ObjectFactory.h
+    Engine/Objects/ObjectFactory.cpp
+    Engine/Objects/World/World.h
+    Engine/Objects/World/World.cpp
+    Engine/Objects/World/WorldObject.h
+    Engine/Objects/World/WorldObject.cpp
+    Engine/Camera/Camera.h
+    Engine/Camera/Camera.cpp
     PreprocessorDefinitions.h
     PreprocessorDefinitions.cpp
     main.cpp
