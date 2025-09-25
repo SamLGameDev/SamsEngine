@@ -19,15 +19,17 @@ public:
 
 	ErrorCodes Init();
 
+	ErrorCodes ShutDown();
+
 private:
 
-	std::unique_ptr<FirstWindow> Window;
+	FirstWindow* Window;
 
-	std::unique_ptr<InputManager> inputManager;
+	InputManager* inputManager;
 
-	std::unique_ptr<World> world;
+	World* world;
 
-	std::unique_ptr<Camera> camera;
+	Camera* camera;
 
-	std::unique_ptr<Renderer> renderer;
+	Renderer* renderer;
 };

@@ -20,12 +20,39 @@ int main(int argc, char* argv[]) {
 	}
 
 
-	while(true)
+	float lastTime = glfwGetTime();
+
+	GLsync gsync = glFenceSync(GL_SYNC_GPU_COMMANDS_COMPLETE, 0);
+
+	while (!glfwWindowShouldClose(Camera::GetActiveWindow()->GetWindow()))
 	{
-		glfwPollEvents();
-		glfwSwapBuffers(Camera::GetActiveWindow()->GetWindow());
+		if (gsync)
+		{
+			while (true)
+			{
+				GLenum waitReturn = glClientWaitSync(gsync, GL_SYNC_FLUSH_COMMANDS_BIT, 1);
+				if (waitReturn & (GL_ALREADY_SIGNALED | GL_CONDITION_SATISFIED))
+				{
+					break;
+				}
+			}
+		}
+
+		const float time = glfwGetTime();
+		const float deltaTime = time - lastTime;
+		lastTime = time;
+		Object::TickDel.Broadcast(deltaTime);
+
+		if (gsync)
+		{
+			glDeleteSync(gsync);
+		}
+		gsync = glFenceSync(GL_SYNC_GPU_COMMANDS_COMPLETE, 0);
 	}
 
-	std::cout << "Hello, world!" << std::endl;
+	glfwTerminate();
+
+	SubsystemManager.ShutDown();
+
 	return EXIT_SUCCESS;
 }

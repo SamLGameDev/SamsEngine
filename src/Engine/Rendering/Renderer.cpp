@@ -88,7 +88,7 @@ void Renderer::SetUpPostProcessing()
 {
 	CreatePostProcessingScreen();
 
-	PostProcessingShader = Shader("ScreenShader", "Contents/Shaders/");
+	PostProcessingShader = Shader("ScreenShader", "Shaders/");
 
 	PostProcessingShader.Use();
 	PostProcessingShader.SetInt("screenTexture", 0);

@@ -9,7 +9,7 @@ ErrorCodes SubsystemInitialiser::Init()
 {
 	try
 	{
-		Window = std::make_unique<FirstWindow>();
+		Window = new FirstWindow();
 	}
 	catch (const std::exception& error)
 	{
@@ -19,7 +19,7 @@ ErrorCodes SubsystemInitialiser::Init()
 
 	try
 	{
-		inputManager = std::make_unique<InputManager>(Window->GetWindow());
+		inputManager = new InputManager(Window->GetWindow());
 	}
 	catch (const std::exception& error)
 	{
@@ -29,22 +29,8 @@ ErrorCodes SubsystemInitialiser::Init()
 
 	try
 	{
-		world = std::make_unique<World>(CreateObjectRaw<World>());
-		WorldObject::World = world.get();
-
-	}
-	catch (const std::exception& error)
-	{
-		std::cout << error.what() << "\n";
-		return ERROR;
-	}
-
-	try
-	{
-		camera = std::unique_ptr<Camera>(CreateObjectPtr<Camera>(Window.get(), inputManager.get()));
-		Camera::SetActiveCamera(camera.get());
-
-		Camera::SetActiveWindow(Window.get());
+		world = CreateObjectPtr<World>();
+		WorldObject::World = world;
 
 	}
 	catch (const std::exception& error)
@@ -55,8 +41,78 @@ ErrorCodes SubsystemInitialiser::Init()
 
 	try
 	{
-		renderer = std::unique_ptr<Renderer>(CreateObjectPtr<Renderer>(inputManager.get()));
+		camera = CreateObjectPtr<Camera>(Window, inputManager);
+		Camera::SetActiveCamera(camera);
 
+		Camera::SetActiveWindow(Window);
+
+	}
+	catch (const std::exception& error)
+	{
+		std::cout << error.what() << "\n";
+		return ERROR;
+	}
+
+	try
+	{
+		renderer = CreateObjectPtr<Renderer>(inputManager);
+
+	}
+	catch (const std::exception& error)
+	{
+		std::cout << error.what() << "\n";
+		return ERROR;
+	}
+
+	return SUCCEEDED;
+}
+
+ErrorCodes SubsystemInitialiser::ShutDown()
+{
+
+	try
+	{
+		delete renderer;
+	}
+	catch (const std::exception& error)
+	{
+		std::cout << error.what() << "\n";
+		return ERROR;
+	}
+
+	try
+	{
+		delete camera;
+	}
+	catch (const std::exception& error)
+	{
+		std::cout << error.what() << "\n";
+		return ERROR;
+	}
+
+	try
+	{
+		delete world;
+	}
+	catch (const std::exception& error)
+	{
+		std::cout << error.what() << "\n";
+		return ERROR;
+	}
+
+	try
+	{
+		delete inputManager;
+	}
+	catch (const std::exception& error)
+	{
+		std::cout << error.what() << "\n";
+		return ERROR;
+	}
+
+	try
+	{
+		delete Window;
 	}
 	catch (const std::exception& error)
 	{
