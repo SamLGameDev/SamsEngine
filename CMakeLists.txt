@@ -23,25 +23,31 @@ set(Contents "${CMAKE_SOURCE_DIR}/Contents")
 option(FAL_TESTS "Should we enable unit test support?" ON)
 option(FAL_DOCS "Should we attempt to build documentation?" ON)
 
-# Project details start here
+
 project(SamsEngine
 	VERSION 0.1
 	DESCRIPTION "A brief description of your project here"
 	LANGUAGES CXX
 	)
 
+
+
 # integration for command-line users
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 set(PROJECT_ROOT ${CMAKE_CURRENT_SOURCE_DIR})#
 
-add_subdirectory( src )
-
-
+message(STATUS "FAL_TESTS = ${FAL_TESTS}")
 # Testing support
 if (FAL_TESTS)
 	include(CTest)
+    enable_testing()
 	add_subdirectory(tests)
 endif()
+
+add_subdirectory( src )
+
+
+
 
 # Documentation support
 if (FAL_DOCS)
@@ -65,3 +71,155 @@ endif()
 
 
 target_compile_definitions(SamsEngine PUBLIC CONTENTS_DIR="${Contents}")
+
+
+include(GNUInstallDirs)
+
+add_library(EngineCore
+    "src/Engine/Rendering/Shaders/Shader.cpp"
+    "src/Engine/Rendering/Textures/CubeMap.cpp"
+    "src/Engine/Rendering/Textures/Texture.cpp"
+    "src/Engine/DataStructures/Array.cpp"
+    "src/Engine/DataStructures/LinkedList.cpp"
+    "src/Engine/DataStructures/Item.cpp"
+    "src/Engine/DataStructures/Vector2D.cpp"
+    "src/Engine/DataStructures/Vector3D.cpp"
+    "src/Engine/DataStructures/BaseDelegate.cpp"
+    "src/Engine/DataStructures/Verticie.cpp"
+    "src/Engine/Window/FirstWindow.cpp"
+    "src/Engine/SubsystemInitialiser.cpp"
+    "src/Engine/ErrorHandling/ErrorCodes.cpp"
+    "src/Engine/Input/InputManager.cpp"
+    "src/Engine/Input/InputActionMouse.cpp"
+    "src/Engine/Input/InputAction.cpp"
+    "src/Engine/Objects/Object.cpp"
+    "src/Engine/Objects/ObjectFactory.cpp"
+    "src/Engine/Objects/World/World.cpp"
+    "src/Engine/Objects/World/WorldObject.cpp"
+    "src/Engine/Camera/Camera.cpp"
+    "src/Engine/Rendering/Renderer.cpp"
+    "src/Engine/Objects/Placement/Transform.cpp"
+    "src/Engine/Rendering/Buffers/FrameBufferFactory.cpp"
+    "src/Engine/Rendering/Buffers/UniformBufferFactory.cpp"
+    "src/Engine/Objects/Placement/Meshes/Model.cpp"
+    "src/Engine/Objects/Placement/Meshes/Mesh.cpp"
+    "src/Engine/Objects/Placement/Debug/WireFrame/WireShapes.cpp"
+    "src/Engine/Math/MathCore.cpp"
+    "src/Engine/Physics/Collision/Casters/CollisionCast.cpp"
+    "src/Engine/Lighting/BaseLight.cpp"
+    "src/Engine/Lighting/LightManager.cpp"
+    "src/Engine/Lighting/DirectionalLight.cpp"
+    "src/Engine/Lighting/SpotLight.cpp"
+    "src/Engine/Lighting/PointLight.cpp"
+    "src/Engine/Components/StaticMeshComponent.cpp"
+    "src/PreprocessorDefinitions.cpp"
+    "src/main.cpp")
+
+set_target_properties(EngineCore
+                      PROPERTIES
+                      CMAKE_CXX_STANDARD 23
+                      CMAKE_CXX_STANDARD_REQUIRED ON
+                      CMAKE_CXX_EXTENSIONS OFF)
+
+target_include_directories(EngineCore
+                           PUBLIC
+                           "$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/src>"
+                           "$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/src/Engine>"
+                           "$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/src/Engine/DataStructures>"
+                           "$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/src/Engine/Camera>"
+                           "$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/src/Engine/Components>"                           
+                           "$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/src/Engine/ErrorHandling>"                           
+                           "$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/src/Engine/Input>"
+                           "$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/src/Engine/Lighting>"
+                           "$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/src/Engine/Math>"
+                           "$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/src/Engine/Objects>"
+                           "$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/src/Engine/Objects/Placement>"
+                           "$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/src/Engine/Objects/Placement/Debug>"
+                           "$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/src/Engine/Objects/Placement/Debug/WireFrame>"
+                           "$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/src/Engine/Objects/Placement/Meshes>"
+                           "$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/src/Engine/Objects/World>"
+                           "$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/src/Engine/Physics>"
+                           "$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/src/Engine/Physics/Collision>"
+                           "$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/src/Engine/Physics/Collision/Casters>"
+                           "$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/src/Engine/Rendering>"
+                           "$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/src/Engine/Rendering/Buffers>"
+                           "$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/src/Engine/Rendering/Shaders>"
+                           "$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/src/Engine/Rendering/Textures>"
+                           "$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/src/Engine/Window>"
+                 
+
+                           "$<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}>")
+
+install(TARGETS EngineCore
+        EXPORT EngineCoreTargets
+        LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
+        ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
+        RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
+        INCLUDES DESTINATION ${CMAKE_INSTALL_INCLUDEDIR})
+install(FILES
+    src/Engine/Rendering/Shaders/Shader.h 
+    src/Engine/Rendering/Textures/Texture.h
+    src/Engine/Rendering/Textures/CubeMap.h
+    src/Engine/DataStructures/Array.h
+    src/Engine/DataStructures/LinkedList.h
+    src/Engine/DataStructures/Item.h
+    src/Engine/DataStructures/Vector2D.h
+    src/Engine/DataStructures/Vector3D.h
+    src/Engine/DataStructures/BaseDelegate.h
+    src/Engine/DataStructures/Verticie.h
+    src/Engine/Window/FirstWindow.h
+    src/Engine/SubsystemInitialiser.h
+    src/Engine/ErrorHandling/ErrorCodes.h
+    src/Engine/Input/InputManager.h
+    src/Engine/Input/InputActionMouse.h
+    src/Engine/Input/InputAction.h
+    src/Engine/Objects/Object.h
+    src/Engine/Objects/ObjectFactory.h
+    src/Engine/Objects/World/World.h
+    src/Engine/Objects/World/WorldObject.h
+    src/Engine/Camera/Camera.h
+    src/Engine/Rendering/Renderer.h
+    src/Engine/Objects/Placement/Transform.h
+    src/Engine/Rendering/Buffers/FrameBufferFactory.h
+    src/Engine/Rendering/Buffers/UniformBufferFactory.h
+    src/Engine/Objects/Placement/Meshes/Model.h
+    src/Engine/Objects/Placement/Meshes/Mesh.h
+    src/Engine/Objects/Placement/Debug/WireFrame/WireShapes.h
+    src/Engine/Math/MathCore.h
+    src/Engine/Physics/Collision/Casters/CollisionCast.h
+    src/Engine/Lighting/BaseLight.h
+    src/Engine/Lighting/LightManager.h
+    src/Engine/Lighting/DirectionalLight.h
+    src/Engine/Lighting/SpotLight.h
+    src/Engine/Lighting/PointLight.h
+    src/Engine/Components/StaticMeshComponent.h
+    src/PreprocessorDefinitions.h
+    DESTINATION ${CMAKE_INSTALL_INCLUDEDIR})
+
+    find_package(glfw3 CONFIG REQUIRED)
+target_link_libraries(EngineCore PRIVATE glfw)
+
+find_package(glad REQUIRED)
+target_link_libraries(EngineCore PRIVATE glad::glad)
+
+find_package(glm REQUIRED)
+target_link_libraries(EngineCore PRIVATE glm::glm)
+
+find_package(assimp REQUIRED)
+target_link_libraries(EngineCore PRIVATE assimp::assimp)
+
+find_package(Stb REQUIRED)
+target_include_directories(EngineCore PRIVATE ${Stb_INCLUDE_DIR})
+
+target_compile_definitions(EngineCore PUBLIC CONTENTS_DIR="${Contents}")
+
+    install(EXPORT EngineCoreTargets FILE EngineCoreTargets.cmake NAMESPACE EngineCore:: DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/EngineCore)
+
+    include(CMakePackageConfigHelpers)
+
+    configure_package_config_file(${CMAKE_CURRENT_SOURCE_DIR}/Config.cmake.in
+                                  "${CMAKE_CURRENT_BINARY_DIR}/EngineCoreConfig.cmake"
+                                  INSTALL_DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/EngineCore)
+
+    install(FILES "${CMAKE_CURRENT_BINARY_DIR}/EngineCoreConfig.cmake" DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/EngineCore)
+    # Project details start here

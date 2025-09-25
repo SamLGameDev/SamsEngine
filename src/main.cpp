@@ -1,4 +1,3 @@
-#include <project/main.hpp>
 
 #include <iostream>
 #include <cstdlib>

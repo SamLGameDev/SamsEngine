@@ -1,0 +1,8 @@
+@PACKAGE_INIT@
+
+include("${CMAKE_CURRENT_LIST_DIR}/EngineCoreTargets.cmake")
+
+check_required_components(EngineCore)
+
+include(CMakeFindDependencyMacro)
+find_dependency(ZLIB REQUIRED)

@@ -5,7 +5,7 @@ else()
 	message(WARNING "Benchmark was not loaded, you will not have unit test support")
 endif()
 
-find_package(GTest)
+find_package(GTest CONFIG REQUIRED)
 if ( GTest_FOUND )
 	add_subdirectory( project-unit )
 else()
