@@ -54,6 +54,29 @@ public:
 		return *this;
 	}
 
+	bool operator==(const LinkedList& other) const
+	{
+		if (other.GetSize() != Size)
+		{
+			return false;
+		}
+
+		Item<T>* value = FirstItem;
+		Item<T>* otherValue = other.FirstItem;
+
+		while (value != nullptr)
+		{
+			if (value->GetValue() != otherValue->GetValue())
+			{
+				return false;
+			}
+			value = value->GetNext();
+			otherValue = otherValue->GetNext();
+		}
+		return true;
+
+	}
+
 	void Add(const T InItem)
 	{
 		auto* NewItem = new Item<T>(InItem);
@@ -79,7 +102,7 @@ public:
 		}
 	}
 
-	[[nodiscard]] int GetSize() const
+	[[nodiscard]] unsigned int GetSize() const
 	{
 		return Size;
 	}
@@ -124,6 +147,15 @@ public:
 		return Value;
 	}
 
+	void Remove(const T& Item)
+	{
+		unsigned int index;
+		if (Contains(Item, index))
+		{
+			RemoveAt(index);
+		}
+	}
+
 	void RemoveAt(const unsigned int Index)
 	{
 		Item<T>* item = FindItem(Index);
@@ -152,6 +184,8 @@ public:
 		}
 
 		delete item;
+
+		Size--;
 	}
 
 	void RemoveAll()
@@ -170,14 +204,15 @@ public:
 		Size = 0;
 	}
 
-	[[nodiscard]] bool Contains(const T InValue) const
+	bool Contains(const T InValue, unsigned int& Index) const
 	{
 		Item<T>* Value = FirstItem;
 
-		while (Value != nullptr)
+		for (unsigned int i = 0; i < Size; i++)
 		{
 			if (Value->GetValue() == InValue)
 			{
+				Index = i;
 				return true;
 			}
 			Value = Value->GetNext();

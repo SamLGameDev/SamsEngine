@@ -47,6 +47,23 @@ public:
 		return *this;
 	}
 
+	bool operator==(const Array& other) const
+	{
+		if (other.GetSize() != NumItems)
+		{
+			return false;
+		}
+
+		for (unsigned int i = 0; i < other.GetSize(); i++)
+		{
+			if (other[i] != DynamicArray[i])
+			{
+				return false;
+			}
+		}
+		return true;
+
+	}
 	[[nodiscard]] T operator[](const unsigned int Index) const
 	{
 		return GetItemAt(Index);

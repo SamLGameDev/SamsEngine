@@ -21,6 +21,11 @@ public:
 		Funcs.Add(InFunc);
 	}
 
+	void BindMember(const std::function<void(Args...)>& func)
+	{
+		Funcs.Add(func);
+	}
+
 	void Broadcast(Args... args)
 	{
 		for (int i = 0; i < Funcs.GetSize(); i++)
