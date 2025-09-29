@@ -5,6 +5,9 @@
 
 LinkedList<WireObject*> Renderer::WiresToDraw;
 
+LinkedList<Model*> Renderer::ItemsToRender;
+
+
 //LinkedList<FractureObject*> Renderer::FracturesToDraw;
 
 Renderer::Renderer(InputManager* InInputManager) : WorldObject()

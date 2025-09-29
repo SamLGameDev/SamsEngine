@@ -1,61 +1,67 @@
 
 #include <iostream>
 #include <cstdlib>
-#include <glad/glad.h>
-#include <GLFW/glfw3.h>
-#include "SubsystemInitialiser.h"
-#include "Camera.h"
+#include "Model.h"
+#include "Shader.h"
+#include <Engine/RuntimeEngine.h>
+#include "MeshObject.h"
+#include <ObjectFactory.h>
+
+#include <DirectionalLight.h>
+#include <PointLight.h>
+#include <SpotLight.h>
+
 
 int main(int argc, char* argv[]) {
 
-	
-	SubsystemInitialiser SubsystemManager;
 
-	ErrorCodes status = SubsystemManager.Init();
-
-	if (status == ERROR)
-	{
-		return EXIT_FAILURE;
-	}
+	RuntimeEngine Engine;
+	Engine.Init();
 
 
-	double lastTime = glfwGetTime();
+	const PointLight pointLight = PointLight(
+		Vector3D(0, 0, 0),
+		Vector3D(0.0f, 0.0f, 0.0f),
+		Vector3D(0.0f, 0.0f, 0.0f),
+		Vector3D(0, 0, 0),
+		16,
+		1,
+		0.09,
+		0.032);
 
-	GLsync gsync = glFenceSync(GL_SYNC_GPU_COMMANDS_COMPLETE, 0);
+
+	const DirectionalLight dirLight = DirectionalLight(
+		Vector3D(0.5f, 0.5f, 0.5f),
+		Vector3D(0.2f, 0.2f, 0.2f),
+		Vector3D(1, 1, 1),
+		16);
+
+	const auto spotLight = SpotLight(
+		Vector3D(0.5f, 0.5f, 0.5f),
+		Vector3D(1, 1, 1),
+		Vector3D(0.5, 0.5, 0.5),
+		64,
+		glm::cos(glm::radians(12.5f)),
+		glm::cos(glm::radians(17.5f)));
+
+
 
 	Shader LightShader = Shader("LightShader", "Shaders/");
 
 	Model backpack = Model("Models/BackPack/backpack.obj", LightShader);
 
-	while (!glfwWindowShouldClose(Camera::GetActiveWindow()->GetWindow()))
+	MeshObject Object1 = CreateObjectRaw<MeshObject>();
+	Object1.SMesh.SetMesh(&backpack);
+
+	backpack.DrawGroup = GL_LESS;
+
+	while (!RuntimeEngine::ShouldClose())
 	{
-		if (gsync)
-		{
-			while (true)
-			{
-				GLenum waitReturn = glClientWaitSync(gsync, GL_SYNC_FLUSH_COMMANDS_BIT, 1);
-				if (waitReturn & (GL_ALREADY_SIGNALED | GL_CONDITION_SATISFIED))
-				{
-					break;
-				}
-			}
-		}
-
-		const double time = glfwGetTime();
-		const double deltaTime = time - lastTime;
-		lastTime = time;
-		Object::TickDel.Broadcast(deltaTime);
-
-		if (gsync)
-		{
-			glDeleteSync(gsync);
-		}
-		gsync = glFenceSync(GL_SYNC_GPU_COMMANDS_COMPLETE, 0);
+		Engine.Loop();
 	}
 
-	glfwTerminate();
-
-	SubsystemManager.ShutDown();
+	Engine.ShutDown();
+	
 
 	return EXIT_SUCCESS;
 }

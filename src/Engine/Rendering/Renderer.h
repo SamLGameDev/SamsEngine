@@ -21,11 +21,11 @@ public:
 	 * Takes a model, and adds it to be rendered, we use instancing, so we only need to add a model once
 	 * @param Item RenderableItem
 	 */
-	void AddItemToRender(Model* Item);
+	static void AddItemToRender(Model* Item);
 
 	void Start() override;
 
-	LinkedList<Model*> ItemsToRender;
+	static LinkedList<Model*> ItemsToRender;
 
 	static LinkedList<WireObject*> WiresToDraw;
 	//static LinkedList<FractureObject*> FracturesToDraw;

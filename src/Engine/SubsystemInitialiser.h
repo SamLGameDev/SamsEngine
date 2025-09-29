@@ -8,6 +8,7 @@
 #include "World.h"
 #include "Camera/Camera.h"
 #include "Renderer.h"
+#include "LightManager.h"
 
 #include <memory>
 
@@ -32,4 +33,7 @@ private:
 	Camera* camera;
 
 	Renderer* renderer;
+
+	LightManager* lightManager;
+
 };

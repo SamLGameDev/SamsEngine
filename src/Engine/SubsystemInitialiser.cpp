@@ -64,11 +64,33 @@ ErrorCodes SubsystemInitialiser::Init()
 		return ERROR;
 	}
 
+	try
+	{
+		lightManager = new LightManager();
+
+	}
+	catch (const std::exception& error)
+	{
+		std::cout << error.what() << "\n";
+		return ERROR;
+	}
+
 	return SUCCEEDED;
 }
 
 ErrorCodes SubsystemInitialiser::ShutDown()
 {
+
+	try
+	{
+		delete lightManager;
+
+	}
+	catch (const std::exception& error)
+	{
+		std::cout << error.what() << "\n";
+		return ERROR;
+	}
 
 	try
 	{

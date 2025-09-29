@@ -1,6 +1,11 @@
 @PACKAGE_INIT@
 
-include("${CMAKE_CURRENT_LIST_DIR}/EngineCoreTargets.cmake")
+# Prefer build-tree targets if available
+if(EXISTS "${CMAKE_CURRENT_LIST_DIR}/EngineCoreTargets.cmake")
+    include("${CMAKE_CURRENT_LIST_DIR}/EngineCoreTargets.cmake")
+elseif(EXISTS "${CMAKE_CURRENT_LIST_DIR}/../EngineCoreTargets.cmake")
+    include("${CMAKE_CURRENT_LIST_DIR}/../EngineCoreTargets.cmake")
+endif()
 
 check_required_components(EngineCore)
 

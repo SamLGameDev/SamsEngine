@@ -7,6 +7,8 @@
 #include <assimp/Importer.hpp>
 #include <assimp/postprocess.h>
 
+#include "Renderer.h"
+
 Array<Texture> Model::LoadedTextures;
 
 Model::Model(const std::string& Path, const Shader& InShader)
@@ -37,6 +39,8 @@ Model::Model(const std::string& Path, const Shader& InShader)
 
 	BoundingBox = DrawWireCube(ModelTransform.TransCenter, ModelTransform.TransHalfBounds, Vector3D(1, 1, 1),
 		Vector3D(0.2f, 0.5f, 0.2f));
+
+	Renderer::AddItemToRender(this);
 }
 
 
