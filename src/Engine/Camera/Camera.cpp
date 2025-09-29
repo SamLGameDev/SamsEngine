@@ -71,7 +71,7 @@ void Camera::MoveRight()
 	Pos += glm::normalize(glm::cross(Front, Up)) * (Speed * World->GetDeltaTime());
 }
 
-void Camera::MouseCallback(const float Xpos, const float Ypos)
+void Camera::MouseCallback(const double Xpos, const double Ypos)
 {
 	if (bIsFirstMouse)
 	{
@@ -80,8 +80,8 @@ void Camera::MouseCallback(const float Xpos, const float Ypos)
 		bIsFirstMouse = false;
 	}
 
-	const float xOffset = (Xpos - LastX) * LookSpeed;
-	const float yOffset = (LastY - Ypos) * LookSpeed;
+	const double xOffset = (Xpos - LastX) * LookSpeed;
+	const double yOffset = (LastY - Ypos) * LookSpeed;
 
 	LastX = Xpos;
 	LastY = Ypos;
@@ -89,17 +89,12 @@ void Camera::MouseCallback(const float Xpos, const float Ypos)
 	Yaw += xOffset;
 	Pitch += yOffset;
 
-	const float rYaw = glm::radians(Yaw);
-	const float rPitch = glm::radians(Pitch);
+	const float rYaw = static_cast<float>(glm::radians(Yaw));
+	const float rPitch = static_cast<float>(glm::radians(Pitch));
 
-	if (Pitch > 89)
-	{
-		Pitch = 89;
-	}
-	if (Pitch < -89)
-	{
-		Pitch = -89;
-	}
+	Pitch = std::min<double>(Pitch, 89);
+
+	Pitch = std::max<double>(Pitch, -89);
 
 	Direction.x = glm::cos(rYaw) * glm::cos(rPitch);
 	Direction.y = glm::sin(rPitch);
@@ -139,10 +134,10 @@ glm::mat4 Camera::GetLook() const
 
 glm::mat4 Camera::GetProjection()
 {
-	const glm::mat4 projection = glm::perspective
+	const glm::mat4 projection = glm::perspective<float>
 	(
 		glm::radians(FOV),
-		FirstWindow::GetWindowWidth() / FirstWindow::GetWindowHeight(),
+		static_cast<float>(FirstWindow::GetWindowWidth()) / static_cast<float>(FirstWindow::GetWindowHeight()),
 		NearView,
 		FarView
 	);

@@ -1,5 +1,7 @@
 #pragma once
 #include <cstdint>
+
+#include "glad/glad.h"
 struct GLFWwindow;
 
 
@@ -16,21 +18,21 @@ public:
 		return Window;
 	}
 
-	static inline void SetWindowWidth(const float InWidth)
+	static inline void SetWindowWidth(const GLint InWidth)
 	{
 		Width = InWidth;
 	}
 
-	static inline void SetWindowHeight(const float InHeight)
+	static inline void SetWindowHeight(const GLint InHeight)
 	{
 		Height = InHeight;
 	}
 
-	[[nodiscard]] static inline float GetWindowWidth()
+	[[nodiscard]] static inline GLint GetWindowWidth()
 	{
 		return Width;
 	}
-	[[nodiscard]] static inline float GetWindowHeight()
+	[[nodiscard]] static inline GLint GetWindowHeight()
 	{
 		return Height;
 	}
@@ -39,11 +41,11 @@ private:
 
 	constexpr static std::uint8_t AntiAliasingSamples = 4;
 
-	constexpr static float OpenGLVersion = 4.6;
+	constexpr static float OpenGLVersion = 4.6f;
 
 	constexpr static char WindowName[] = {"SamsEngine"};
 
-	static float Width, Height;
+	static GLint Width, Height;
 
 	void Initialisation();
 

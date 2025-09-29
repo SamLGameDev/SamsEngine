@@ -31,7 +31,7 @@ private:
 	 * A pointer the the global time buffer for shaders, stores the time elapsed since program start \n
 	 * Buffer location = 1
 	 */
-	float* TimeBufferPtr;
+	double* TimeBufferPtr;
 
 
 	/**

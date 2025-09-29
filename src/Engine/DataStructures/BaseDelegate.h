@@ -28,7 +28,7 @@ public:
 
 	void Broadcast(Args... args)
 	{
-		for (int i = 0; i < Funcs.GetSize(); i++)
+		for (unsigned int i = 0; i < Funcs.GetSize(); i++)
 		{
 			Funcs[i](args...);
 		}

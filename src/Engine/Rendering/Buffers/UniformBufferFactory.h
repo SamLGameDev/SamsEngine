@@ -40,7 +40,7 @@ public:
 template<typename T>
 T* UniformBufferFactory::CreatePersistentUniformBuffer(const std::uint8_t location)
 {
-	const float size = sizeof(T);
+	const GLsizeiptr size = sizeof(T);
 
 	unsigned int UBO;
 	glGenBuffers(1, &UBO);

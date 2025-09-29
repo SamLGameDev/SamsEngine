@@ -19,7 +19,7 @@ public:
 	 * @param Method Reference to the method, using &Object::Func;
 	 */
 	template<typename T>
-	static void BindCallback(T* Obj, void (T::* Method)(float, float));
+	static void BindCallback(T* Obj, void (T::* Method)(double, double));
 
 protected:
 
@@ -27,7 +27,7 @@ protected:
 };
 
 template<typename T>
-inline void InputActionMouse::BindCallback(T* Obj, void(T::* Method)(float, float))
+inline void InputActionMouse::BindCallback(T* Obj, void(T::* Method)(double, double))
 {
-	InputManager::MouseCallback.BindMember(Obj, Method);
+	InputManager::MouseCallback.BindMember<T>(Obj, Method);
 }

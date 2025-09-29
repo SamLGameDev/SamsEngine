@@ -15,5 +15,5 @@ void World::Start()
 {
 	Object::Start();
 
-	TimeBufferPtr = UniformBufferFactory::CreatePersistentUniformBuffer<float>(1);
+	TimeBufferPtr = UniformBufferFactory::CreatePersistentUniformBuffer<double>(1);
 }

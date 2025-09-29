@@ -3,7 +3,7 @@
 #include <GLFW/glfw3.h>
 #include <iostream>
 
-float FirstWindow::Width = 800, FirstWindow::Height = 600;
+GLint FirstWindow::Width = 800, FirstWindow::Height = 600;
 
 FirstWindow::FirstWindow()
 {
@@ -19,10 +19,10 @@ FirstWindow::~FirstWindow()
 void FirstWindow::Initialisation()
 {
 	glfwInit();
-	glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, (int)OpenGLVersion);
+	glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, static_cast<int>(OpenGLVersion));
 
 	//do this to get the first digit
-	glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, (int)(OpenGLVersion * 10) % 10);
+	glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, static_cast<int>(OpenGLVersion * 10) % 10);
 	glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
 }
 

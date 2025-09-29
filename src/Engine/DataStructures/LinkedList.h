@@ -38,7 +38,7 @@ public:
 
 		Size = 0;
 
-		for (int i = 0; i < CopyList.GetSize(); i++)
+		for (unsigned int i = 0; i < CopyList.GetSize(); i++)
 		{
 			T nextItem = CopyList.Find(i);
 			Add(nextItem);
@@ -131,7 +131,7 @@ public:
 		if (Index <= Size / 2)
 		{
 			Value = FirstItem;
-			for (int i = 0; i < Index; i++)
+			for (unsigned int i = 0; i < Index; i++)
 			{
 				Value = Value->GetNext();
 			}
@@ -139,7 +139,7 @@ public:
 		else
 		{
 			Value = LastItem;
-			for (int i = Size - 1; i > Index; i--)
+			for (unsigned int i = Size - 1; i > Index; i--)
 			{
 				Value = Value->GetPrev();
 			}

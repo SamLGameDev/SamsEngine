@@ -1,7 +1,7 @@
 #include "InputManager.h"
 #include <GLFW/glfw3.h>
 
-MulticastDelegate<float, float> InputManager::MouseCallback;
+MulticastDelegate<double, double> InputManager::MouseCallback;
 
 InputManager::InputManager(GLFWwindow* Window)
 {

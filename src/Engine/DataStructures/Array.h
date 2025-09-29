@@ -89,7 +89,7 @@ public:
 		}
 		T* NewArray = new T[NumItems + 1];
 
-		for (int i = 0; i < NumItems; i++)
+		for (unsigned int i = 0; i < NumItems; i++)
 		{
 			NewArray[i] = std::move(GetItemAt(i));;
 		}
@@ -139,7 +139,7 @@ public:
 		return DynamicArray[Index];
 	}
 
-	[[nodiscard]] unsigned int GetSize() const
+	[[nodiscard]] size_t GetSize() const
 	{
 		return NumItems;
 	}
@@ -234,7 +234,7 @@ private:
 
 	T* DynamicArray = nullptr;
 
-	unsigned int NumItems;
+	size_t NumItems;
 
-	unsigned int ArraySize;
+	size_t ArraySize;
 };

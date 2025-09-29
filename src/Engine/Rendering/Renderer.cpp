@@ -106,7 +106,7 @@ void Renderer::Start()
 
 	PostProcessing = FrameBufferFactory::GenerateFrameBuffer(
 		&genTexture,
-		Vector2D(FirstWindow::GetWindowWidth(), FirstWindow::GetWindowHeight()));
+		Vector2D(static_cast<float>(FirstWindow::GetWindowWidth()), static_cast<float>(FirstWindow::GetWindowHeight())));
 
 	genTexture = TextureBuffer(GL_TEXTURE_2D_MULTISAMPLE, GL_RGB, FrameBufferFactory::GenerateTex2DMultiSampled);
 
@@ -118,7 +118,7 @@ void Renderer::Start()
 
 	AntiAliasing = FrameBufferFactory::GenerateFrameBuffer(
 		&genTexture, &genRenderer,
-		Vector2D(FirstWindow::GetWindowWidth(), FirstWindow::GetWindowHeight()));
+		Vector2D(static_cast<float>(FirstWindow::GetWindowWidth()), static_cast<float>(FirstWindow::GetWindowHeight())));
 
 	glEnable(GL_MULTISAMPLE);
 }

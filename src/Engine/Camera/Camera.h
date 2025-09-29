@@ -26,7 +26,7 @@ public:
 
 	void MoveRight();
 
-	void MouseCallback(float Xpos, float Ypos);
+	void MouseCallback(double Xpos, double Ypos);
 
 	[[nodiscard]] glm::vec3 GetPos() const
 	{
@@ -85,12 +85,12 @@ public:
 
 private:
 
-	float Yaw = -90;
-	float Pitch = 0;
+	double Yaw = -90;
+	double Pitch = 0;
 
 	bool bIsFirstMouse = true;
 
-	float LastX, LastY;
+	double LastX, LastY;
 
 	constexpr static float Speed = 3.0f;
 

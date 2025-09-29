@@ -15,7 +15,7 @@ public:
 
 	MulticastDelegate<GLFWwindow*> InputActions;
 
-	static MulticastDelegate<float, float> MouseCallback;
+	static MulticastDelegate<double, double> MouseCallback;
 };
 
 void mouse_callback(GLFWwindow* Window, double Xpos, double Ypos);
