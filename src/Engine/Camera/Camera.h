@@ -16,7 +16,7 @@ public:
 
 	void Start() override;
 
-	void Tick(const float& DeltaTime) override;
+	void Tick(const double& DeltaTime) override;
 
 	void MoveForward();
 

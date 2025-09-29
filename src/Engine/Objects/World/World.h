@@ -11,7 +11,7 @@ class World final : Object
 public:
 	World() = default;
 
-	void Tick(const float& InDeltaTime) override;
+	void Tick(const double& InDeltaTime) override;
 
 	void Start() override;
 

@@ -19,9 +19,13 @@ int main(int argc, char* argv[]) {
 	}
 
 
-	float lastTime = glfwGetTime();
+	double lastTime = glfwGetTime();
 
 	GLsync gsync = glFenceSync(GL_SYNC_GPU_COMMANDS_COMPLETE, 0);
+
+	Shader LightShader = Shader("LightShader", "Shaders/");
+
+	Model backpack = Model("Models/BackPack/backpack.obj", LightShader);
 
 	while (!glfwWindowShouldClose(Camera::GetActiveWindow()->GetWindow()))
 	{
@@ -37,8 +41,8 @@ int main(int argc, char* argv[]) {
 			}
 		}
 
-		const float time = glfwGetTime();
-		const float deltaTime = time - lastTime;
+		const double time = glfwGetTime();
+		const double deltaTime = time - lastTime;
 		lastTime = time;
 		Object::TickDel.Broadcast(deltaTime);
 

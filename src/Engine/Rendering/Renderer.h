@@ -31,7 +31,7 @@ public:
 	//static LinkedList<FractureObject*> FracturesToDraw;
 
 
-	void Tick(const float& DeltaTime) override;
+	void Tick(const double& DeltaTime) override;
 
 private:
 

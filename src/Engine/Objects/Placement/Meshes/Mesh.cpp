@@ -47,7 +47,7 @@ void Mesh::Draw(const Transform* ModelTransform, const Shader* InShader) const
 	InShader->SetVec3("cameraPos", Vector3D(camPos.x, camPos.y, camPos.z));
 
 	glBindVertexArray(VAO);
-	glDrawElementsInstanced(GL_TRIANGLES, Indices.GetSize(), GL_UNSIGNED_INT, 0, *Instances);
+	glDrawElementsInstanced(GL_TRIANGLES, static_cast<GLsizei>(Indices.GetSize()), GL_UNSIGNED_INT, 0, *Instances);
 	glBindVertexArray(0);
 	glUseProgram(0);
 }

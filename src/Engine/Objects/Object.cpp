@@ -1,8 +1,8 @@
 #include "Object.h"
 
-MulticastDelegate<const float&> Object::TickDel;
+MulticastDelegate<const double&> Object::TickDel;
 
-void Object::Tick(const float& DeltaTime)
+void Object::Tick(const double& DeltaTime)
 {
 }
 

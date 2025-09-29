@@ -127,7 +127,7 @@ private:
 	 */
 	static Array<Texture> LoadedTextures;
 #if DEBUG
-	float Time;
+	double Time;
 
 	unsigned int NumVertices = 0;
 #endif

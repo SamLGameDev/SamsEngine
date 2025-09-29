@@ -38,7 +38,7 @@ void WireObject::Draw() const
 	SetShaderVariables();
 
 	glBindVertexArray(VAO);
-	glDrawElements(GL_TRIANGLES, Indices.GetSize(), GL_UNSIGNED_INT, 0);
+	glDrawElements(GL_TRIANGLES, static_cast<GLsizei>(Indices.GetSize()), GL_UNSIGNED_INT, 0);
 	glBindVertexArray(0);
 
 	glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
@@ -91,7 +91,7 @@ std::unique_ptr<WireObject> DrawWireCube(const Vector3D& Center, const Vector3D&
 {
 	auto wireTransform = Transform(Center, Size, Vector3D(0, 0, 0));
 
-	auto wireShader = Shader("WireShader", "Contents/Shaders/WireShader/");
+	auto wireShader = Shader("WireShader", "Shaders/WireShader/");
 
 	auto object = std::make_unique<WireObject>(&wireTransform, &wireShader);
 
@@ -179,7 +179,7 @@ std::unique_ptr<WireObject> DrawWirePlane(const Vector3D& Center, const Vector3D
 {
 	auto wireTransform = Transform(Center, Size, Vector3D(0, 0, 0));
 
-	auto wireShader = Shader("WireShader", "Contents/Shaders/WireShader/");
+	auto wireShader = Shader("WireShader", "Shaders/WireShader/");
 
 	auto object = std::make_unique<WireObject>(&wireTransform, &wireShader);
 
@@ -228,7 +228,7 @@ std::unique_ptr<WireObject> DrawWireLine(const Vector3D& Start, const Vector3D& 
 
 	//TODO update this for GL_Line_SEGMENTS instead, needs a specific geom, and update to wire object
 
-	auto wireShader = Shader("WireShader", "Contents/Shaders/WireShader/");
+	auto wireShader = Shader("WireShader", "Shaders/WireShader/");
 
 	auto object = std::make_unique<WireObject>(&wireTransform, &wireShader);
 

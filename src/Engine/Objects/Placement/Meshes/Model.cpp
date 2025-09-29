@@ -36,7 +36,7 @@ Model::Model(const std::string& Path, const Shader& InShader)
 #endif
 
 	BoundingBox = DrawWireCube(ModelTransform.TransCenter, ModelTransform.TransHalfBounds, Vector3D(1, 1, 1),
-		Vector3D(0.2, 0.5, 0.2));
+		Vector3D(0.2f, 0.5f, 0.2f));
 }
 
 
@@ -99,7 +99,7 @@ void Model::AddInstance(const Transform* transform)
 
 	constexpr GLenum flags = GL_MAP_WRITE_BIT | GL_MAP_PERSISTENT_BIT | GL_MAP_COHERENT_BIT;
 
-	const float size = sizeof(glm::mat4) * Instances;
+	const GLsizeiptr size = sizeof(glm::mat4) * Instances;
 
 	//delete the old buffer, as the new one will need to be bigger
 	glDeleteBuffers(1, &ModelVBO);
@@ -374,7 +374,7 @@ bool Model::IsPointInsideModel(const Vector3D& Point) const
 
 	//If even hits, it's outside, as it would have passed through the mesh twice, odd for inside
 
-	if (MathCore::IsEven(Hits.GetSize()))
+	if (MathCore::IsEven(static_cast<int>(Hits.GetSize())))
 	{
 		return false;
 	}

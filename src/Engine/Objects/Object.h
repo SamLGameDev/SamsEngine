@@ -14,12 +14,12 @@ public:
 	 * Called every frame
 	 * @param DeltaTime The time since last frame
 	 */
-	virtual void Tick(const float& DeltaTime);
+	virtual void Tick(const double& DeltaTime);
 
 	/**
 	 * All objects tick functions, the main game loop broadcasts this
 	 */
-	static MulticastDelegate<const float&> TickDel;
+	static MulticastDelegate<const double&> TickDel;
 
 
 	/**

@@ -123,7 +123,7 @@ void Renderer::Start()
 	glEnable(GL_MULTISAMPLE);
 }
 
-void Renderer::Tick(const float& DeltaTime)
+void Renderer::Tick(const double& DeltaTime)
 {
 	Object::Tick(DeltaTime);
 

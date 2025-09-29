@@ -43,7 +43,7 @@ void Camera::Start()
 	ptr = UniformBufferFactory::CreatePersistentUniformBuffer<Transforms>(0);
 }
 
-void Camera::Tick(const float& DeltaTime)
+void Camera::Tick(const double& DeltaTime)
 {
 	Object::Tick(DeltaTime);
 

@@ -43,7 +43,7 @@ unsigned int FrameBufferFactory::GenerateTex2D(const TextureBuffer* TexData, con
 	glGenTextures(1, &texture);
 	glBindTexture(TexData->Target, texture);
 
-	glTexImage2D(TexData->Target, 0, TexData->Format, ScreenParams.X, ScreenParams.Y,
+	glTexImage2D(TexData->Target, 0, TexData->Format, static_cast<GLsizei>(ScreenParams.X), static_cast<GLsizei>(ScreenParams.Y),
 		0, TexData->Format, GL_UNSIGNED_BYTE, nullptr);
 
 	//TODO make a way for this to be passed in, so you have more control
@@ -62,7 +62,7 @@ unsigned int FrameBufferFactory::GenerateTex2DMultiSampled(const TextureBuffer* 
 	glGenTextures(1, &texture);
 	glBindTexture(TexData->Target, texture);
 
-	glTexImage2DMultisample(TexData->Target, 4, TexData->Format, ScreenParams.X, ScreenParams.Y,
+	glTexImage2DMultisample(TexData->Target, 4, TexData->Format, static_cast<GLsizei>(ScreenParams.X), static_cast<GLsizei>(ScreenParams.Y),
 		GL_TRUE);
 	glBindTexture(TexData->Target, 0);
 
@@ -77,7 +77,7 @@ unsigned int FrameBufferFactory::GenerateRenderer(const RenderBuffer* RenderData
 	glGenRenderbuffers(1, &rbo);
 	glBindRenderbuffer(RenderData->Target, rbo);
 
-	glRenderbufferStorage(RenderData->Target, RenderData->Format, ScreenParams.X, ScreenParams.Y);
+	glRenderbufferStorage(RenderData->Target, RenderData->Format, static_cast<GLsizei>(ScreenParams.X), static_cast<GLsizei>(ScreenParams.Y));
 
 	glFramebufferRenderbuffer(GL_FRAMEBUFFER, RenderData->Attachment, RenderData->Target, rbo);
 
@@ -90,8 +90,7 @@ unsigned int FrameBufferFactory::GenerateRendererMultiSampled(const RenderBuffer
 	glGenRenderbuffers(1, &rbo);
 	glBindRenderbuffer(RenderData->Target, rbo);
 
-	glRenderbufferStorageMultisample(RenderData->Target, 4, RenderData->Format, ScreenParams.X,
-		ScreenParams.Y);
+	glRenderbufferStorageMultisample(RenderData->Target, 4, RenderData->Format, static_cast<GLsizei>(ScreenParams.X), static_cast<GLsizei>(ScreenParams.Y));
 
 	glFramebufferRenderbuffer(GL_FRAMEBUFFER, RenderData->Attachment, RenderData->Target, rbo);
 
