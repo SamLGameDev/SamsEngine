@@ -87,6 +87,23 @@ public:
 		return X < value && Y < value && Z < value;
 	}
 
+
+	[[nodiscard]] bool operator<(const Vector3D& value) const
+	{
+		return X < value.X && Y < value.Y && Z < value.Z;
+	}
+
+
+	[[nodiscard]] bool operator>(const float& value) const
+	{
+		return X > value && Y > value && Z > value;
+	}
+	[[nodiscard]] bool operator>(const Vector3D& value) const
+	{
+		return X > value.X && Y > value.Y && Z > value.Z;
+	}
+
+
 	[[nodiscard]] Vector3D Normalised() const;
 
 	[[nodiscard]] float GetLength() const;
@@ -94,6 +111,9 @@ public:
 	[[nodiscard]] float GetSquaredLength() const;
 
 	[[nodiscard]] static Vector3D RandomRange(const Vector3D& min, const Vector3D& max);
+
+	[[nodiscard]] static bool WithinRange(const Vector3D& Value, const Vector3D& min, const Vector3D& max);
+
 
 	static void Clamp(Vector3D& Value, const Vector3D& MinRange, const Vector3D& MaxRange);
 
@@ -128,6 +148,7 @@ public:
 
 	static const Vector3D Up;
 	static const Vector3D Zero;
+	static const Vector3D One;
 };
 
 [[nodiscard]] inline Vector3D operator*(const float& multiplier, const Vector3D& vec)

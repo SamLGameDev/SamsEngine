@@ -9,6 +9,8 @@ Vector3D const Vector3D::Up = Vector3D(0, 1, 0);
 
 Vector3D const Vector3D::Zero = Vector3D(0, 0, 0);
 
+Vector3D const Vector3D::One = Vector3D(1, 1, 1);
+
 
 Vector3D::Vector3D(const float InX, const float InY, const float InZ)
 {
@@ -62,6 +64,11 @@ Vector3D Vector3D::RandomRange(const Vector3D& min, const Vector3D& max)
 	Clamp(point, Vector3D(minX, minY, minZ), Vector3D(maxX, maxY, maxZ));
 
 	return point;
+}
+
+bool Vector3D::WithinRange(const Vector3D& Value, const Vector3D& min, const Vector3D& max)
+{
+	return Value > min && Value < max;
 }
 
 void Vector3D::Clamp(Vector3D& Value, const Vector3D& MinRange, const Vector3D& MaxRange)

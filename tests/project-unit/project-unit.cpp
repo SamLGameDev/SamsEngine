@@ -19,29 +19,9 @@ TEST(Test1, Math)
 	ASSERT_EQ(expected, result);
 }
 
-TEST(Test2, Cross)
-{
-	Vector3D num = Vector3D(5, 5, 5);
 
-	Vector3D::Clamp(num, Vector3D(0, 0, 0), Vector3D(1, 1, 1));
 
-	num.Print();
-
-	Vector3D expected = Vector3D(0, 0, 1);
-
-	Vector3D right = Vector3D::Cross(Vector3D(0, -1, 0), Vector3D(1, 0, 0));
-
-	Vector3D Up = Vector3D::Cross(right, Vector3D(0, -1, 0));
-
-	right.Print();
-
-	Up.Print();
-
-	bool result = Up.Z == expected.Z;
-	ASSERT_EQ(Up.X, expected.Z);
-}
-
-TEST(ArrayTest1, Allocation)
+TEST(Array, Allocation)
 {
 	Array<int> test;
 
@@ -56,7 +36,7 @@ TEST(ArrayTest1, Allocation)
 	ASSERT_EQ(3, test[0]);
 }
 
-TEST(ArrayTest2, Searching)
+TEST(Array, Searching)
 {
 	Array<int> test;
 
@@ -79,7 +59,7 @@ TEST(ArrayTest2, Searching)
 	ASSERT_EQ(1, index);
 }
 
-TEST(ArrayTest3, Copying)
+TEST(Array, Copying)
 {
 	Array<int> test;
 
@@ -100,7 +80,7 @@ TEST(ArrayTest3, Copying)
 
 }
 
-TEST(DellegateTest1, Calling)
+TEST(Dellegate, Calling)
 {
 	MulticastDelegate<bool&> TestDel;
 
@@ -119,7 +99,7 @@ TEST(DellegateTest1, Calling)
 
 }
 
-TEST(LinkedList1, Allocation)
+TEST(LinkedList, Allocation)
 {
 	LinkedList<int> test;
 
@@ -135,7 +115,7 @@ TEST(LinkedList1, Allocation)
 
 }
 
-TEST(LinkedListTest2, Searching)
+TEST(LinkedList, Searching)
 {
 	LinkedList<int> test;
 
@@ -158,7 +138,7 @@ TEST(LinkedListTest2, Searching)
 	ASSERT_EQ(1, index);
 }
 
-TEST(LinkedListTest3, Copying)
+TEST(LinkedList, Copying)
 {
 	LinkedList<int> test;
 
@@ -184,7 +164,7 @@ TEST(LinkedListTest3, Copying)
 
 }
 
-TEST(Vector2DTest1, Creation)
+TEST(Vector2D, Creation)
 {
 	Vector2D test;
 
@@ -197,12 +177,156 @@ TEST(Vector2DTest1, Creation)
 
 }
 
-TEST(Vector2DTest1, copying)
+TEST(Vector2D, copying)
 {
-	Vector2D test = Vector2D(1, 6);
+	const Vector2D test = Vector2D(1, 6);
 
-	Vector2D copy = test;
+	const Vector2D copy = test;
 
 	ASSERT_EQ(test, copy);
 
+}
+
+
+TEST(Vector3D, Creation)
+{
+	Vector3D test;
+
+	ASSERT_EQ(test, Vector3D::Zero);
+
+	test = Vector3D(1, 6, 9);
+
+	ASSERT_EQ(test.X, 1);
+	ASSERT_EQ(test.Y, 6);
+	ASSERT_EQ(test.Z, 9);
+
+}
+
+
+TEST(Vector3D, copying)
+{
+	const Vector3D test = Vector3D(1, 6, 9);
+
+	const Vector3D copy = test;
+
+	ASSERT_EQ(test, copy);
+
+}
+
+
+TEST(Vector3D, Operators)
+{
+	Vector3D test = Vector3D(5, 5, 5);
+
+	ASSERT_EQ(test / 5, Vector3D::One);
+
+	ASSERT_EQ(test / Vector3D(2, 3, 1), Vector3D(2.5f, 1.666666667f, 5));
+
+	Vector3D negTest = Vector3D(-5, -5, -5);
+
+	ASSERT_EQ(-test, negTest);
+
+	ASSERT_EQ(test - Vector3D(1.3f, 8, 5), Vector3D(3.7f, -3, 0));
+
+	ASSERT_EQ(test * 2, Vector3D(10, 10, 10));
+	ASSERT_EQ(test * Vector3D(1.3f, 8, -5), Vector3D(6.5f, 40, -25));
+
+	ASSERT_EQ(test + 3, Vector3D(8, 8, 8));
+	ASSERT_EQ(test + Vector3D(1.3f, 8, -5), Vector3D(6.3f, 13, 0));
+
+	test += 8;
+
+	ASSERT_EQ(test, Vector3D(13, 13, 13));
+
+	test -= 8;
+
+	ASSERT_EQ(test, Vector3D(5, 5, 5));
+
+	ASSERT_EQ(test < 6, true);
+
+	ASSERT_EQ(test < Vector3D::One, false);
+
+	ASSERT_EQ(test > 9, false);
+
+	ASSERT_EQ(test > Vector3D::One, true);
+
+
+}
+
+TEST(Vector3D, Cross)
+{
+	Vector3D num = Vector3D(5, 5, 5);
+
+	Vector3D::Clamp(num, Vector3D(0, 0, 0), Vector3D(1, 1, 1));
+
+	const Vector3D expected = Vector3D(1, 0, 0);
+
+	const Vector3D right = Vector3D::Cross(Vector3D(0, -1, 0), Vector3D(1, 0, 0));
+
+	const Vector3D Up = Vector3D::Cross(right, Vector3D(0, -1, 0));
+
+	ASSERT_EQ(Up, expected);
+}
+
+TEST(Vector3D, Normalisation)
+{
+	const Vector3D test = Vector3D(5, 5, 5).Normalised();
+
+	ASSERT_EQ(test, Vector3D(0.57735026f, 0.57735026f, 0.57735026f));
+
+}
+
+TEST(Vector3D, Length)
+{
+	const Vector3D test = Vector3D(5, 5, 5);
+
+	ASSERT_EQ(test.GetLength(), 8.660254038f);
+
+	ASSERT_EQ(test.GetSquaredLength(), 75);
+}
+
+TEST(Vector3D, Random)
+{
+	const Vector3D test = Vector3D::RandomRange(Vector3D::One, Vector3D(9, 9, 9));
+
+	const bool bWithin = Vector3D::WithinRange(test, Vector3D::One, Vector3D(9, 9, 9));
+
+	ASSERT_EQ(bWithin, true);
+}
+
+TEST(Vector3D, Dot)
+{
+	const Vector3D test = Vector3D(3, 9, 1);
+
+	const float Dot = Vector3D::Dot(test, Vector3D(5, 3, 2));
+
+	ASSERT_EQ(Dot, 44);
+}
+
+TEST(Vector3D, Absolute)
+{
+	const Vector3D test = Vector3D(-3, 9, -1);
+
+	ASSERT_EQ(test.Abs(), Vector3D(3, 9, 1));
+}
+
+TEST(Vector3D, AlmostEqual)
+{
+	const Vector3D test = Vector3D(-3, 9, -1);
+
+	ASSERT_EQ(Vector3D::IsAlmostEqual(test, Vector3D(-3.00000003f, 9.00000002f, -1.00000000006f)), true);
+}
+
+
+TEST(Vector3D, PlaneLineIntersection)
+{
+	const Vector3D test = Vector3D(-3, 9, 1);
+
+	Vector3D out;
+
+	const bool bHit = Vector3D::GetIntersectionPointWithPlane(Vector3D::Zero, Vector3D(0, 0, 1), test, Vector3D(0, 0, -1), out);
+
+	ASSERT_EQ(bHit, true);
+
+	ASSERT_EQ(out, Vector3D(-3, 9, 0));
 }
