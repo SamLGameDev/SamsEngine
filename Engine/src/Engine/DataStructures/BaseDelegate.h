@@ -1,0 +1,40 @@
+#pragma once
+#include <functional>
+#include "LinkedList.h"
+
+template<typename... Args>
+class MulticastDelegate
+{
+	using FuncType = std::function<void(Args...)>;
+
+public:
+
+	MulticastDelegate() = default;
+
+	template<typename T>
+	void BindMember(T* Obj, void (T::* Method)(Args...))
+	{
+		FuncType InFunc = [Obj, Method](Args... args)
+			{
+				(Obj->*Method)(args...);
+			};
+		Funcs.Add(InFunc);
+	}
+
+	void BindMember(const std::function<void(Args...)>& func)
+	{
+		Funcs.Add(func);
+	}
+
+	void Broadcast(Args... args)
+	{
+		for (unsigned int i = 0; i < Funcs.GetSize(); i++)
+		{
+			Funcs[i](args...);
+		}
+	}
+
+private:
+
+	LinkedList<FuncType> Funcs;
+};
