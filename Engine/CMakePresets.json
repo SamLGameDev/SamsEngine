@@ -8,7 +8,8 @@
       "cacheVariables": {
         "CMAKE_BUILD_TYPE": "Debug",
         "CMAKE_TOOLCHAIN_FILE": "$env{VCPKG_ROOT}/scripts/buildsystems/vcpkg.cmake"
-      }
+      },
+      "installDir": "D:\\Projects\\University\\Comp305-Engine-SL295211\\Game"
     },
     {
       "name": "windows-release",

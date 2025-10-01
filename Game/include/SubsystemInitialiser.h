@@ -6,7 +6,7 @@
 #include "InputManager.h"
 
 #include "World.h"
-#include "Camera/Camera.h"
+#include "Camera.h"
 #include "Renderer.h"
 #include "LightManager.h"
 

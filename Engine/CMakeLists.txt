@@ -26,7 +26,7 @@ project(EngineCore LANGUAGES CXX)
 
 include(GNUInstallDirs)
 
-add_library(EngineCore
+add_library(EngineCore STATIC
     "src/Engine/Rendering/Shaders/Shader.cpp"
     "src/Engine/Rendering/Textures/CubeMap.cpp"
     "src/Engine/Rendering/Textures/Texture.cpp"

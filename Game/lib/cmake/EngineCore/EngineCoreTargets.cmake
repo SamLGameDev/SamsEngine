@@ -59,7 +59,7 @@ endif()
 add_library(EngineCore::EngineCore STATIC IMPORTED)
 
 set_target_properties(EngineCore::EngineCore PROPERTIES
-  INTERFACE_COMPILE_DEFINITIONS "CONTENTS_DIR=\"D:/SL295211/Comp305-Engine-SL295211/Engine/Contents\""
+  INTERFACE_COMPILE_DEFINITIONS "CONTENTS_DIR=\"D:/Projects/University/Comp305-Engine-SL295211/Engine/Contents\""
   INTERFACE_INCLUDE_DIRECTORIES "${_IMPORT_PREFIX}/include;${_IMPORT_PREFIX}/include"
   INTERFACE_LINK_LIBRARIES "\$<LINK_ONLY:glfw>;\$<LINK_ONLY:glad::glad>;\$<LINK_ONLY:glm::glm>;\$<LINK_ONLY:assimp::assimp>"
 )
