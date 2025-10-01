@@ -1,5 +1,6 @@
 #include "CubeMap.h"
 #include "stb_image.h"
+#include "CorePaths.h"
 
 #include <iostream>
 
@@ -64,7 +65,7 @@ void CubeMap::GenerateByChannel(const std::uint8_t& nrChannels, const unsigned i
 
 std::string CubeMap::GetFullTexturePath(const std::string& FaceName) const
 {
-	return  std::string(CONTENTS_DIR) + "/" + TextureLocation + "/" + FaceName + ".jpg";
+	return  CorePaths::Contents.Path + "/" + TextureLocation + "/" + FaceName + ".jpg";
 }
 
 unsigned char* CubeMap::LoadTexture(int* Width, int* Height, int* nrChannels, const std::string& FaceName) const

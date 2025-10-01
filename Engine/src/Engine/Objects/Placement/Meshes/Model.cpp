@@ -6,6 +6,7 @@
 #include <iostream>
 #include <assimp/Importer.hpp>
 #include <assimp/postprocess.h>
+#include "CorePaths.h"
 
 #include "Renderer.h"
 
@@ -19,7 +20,7 @@ Model::Model(const std::string& Path, const Shader& InShader)
 	std::cout << glfwGetTime() - Time << std::endl;
 #endif
 
-	StorageLocation =  std::string(CONTENTS_DIR) + "/" + Path;
+	StorageLocation =  CorePaths::Contents.Path + "/" + Path;
 
 	ModelShader = InShader;
 

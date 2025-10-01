@@ -3,6 +3,7 @@
 #include <fstream>
 #include <sstream>
 #include <iostream>
+#include "CorePaths.h"
 
 Shader::Shader()
 {
@@ -320,19 +321,24 @@ bool Shader::DoesFragmentShaderExist() const
 	return bDoesFileExist;
 }
 
+std::string Shader::GetPathUntyped() const
+{
+	return CorePaths::Contents.Path + "/" + StorageLocation + Name;
+}
+
 std::string Shader::GetShaderLocation() const
 {
-	return std::string(CONTENTS_DIR) + "/" + StorageLocation + Name + ".vert";
+	return GetPathUntyped() + ".vert";
 }
 
 std::string Shader::GetGeometryLocation() const
 {
-	return std::string(CONTENTS_DIR) + "/" + StorageLocation + Name + ".geom";
+	return GetPathUntyped() + ".geom";
 }
 
 std::string Shader::GetFragmentLocation() const
 {
-	return std::string(CONTENTS_DIR) + "/" + StorageLocation + Name + ".frag";
+	return GetPathUntyped() + ".frag";
 }
 
 unsigned int Shader::CompileVertex() const

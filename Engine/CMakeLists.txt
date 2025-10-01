@@ -63,6 +63,8 @@ add_library(EngineCore STATIC
     "src/Engine/Lighting/SpotLight.cpp"
     "src/Engine/Lighting/PointLight.cpp"
     "src/Engine/Components/StaticMeshComponent.cpp"
+    "src/Engine/FileSystem/Path.cpp"
+    "src/Engine/FileSystem/CorePaths.cpp"
     "src/PreprocessorDefinitions.cpp"
     "src/Engine/RuntimeEngine.cpp")
 
@@ -97,6 +99,7 @@ target_include_directories(EngineCore
                            "$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/src/Engine/Rendering/Shaders>"
                            "$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/src/Engine/Rendering/Textures>"
                            "$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/src/Engine/Window>"
+                           "$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/src/Engine/FileSystem>"
                  
 
                            "$<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}>")
@@ -144,6 +147,8 @@ install(FILES
     src/Engine/Lighting/SpotLight.h
     src/Engine/Lighting/PointLight.h
     src/Engine/Components/StaticMeshComponent.h
+    src/Engine/FileSystem/Path.h
+    src/Engine/FileSystem/CorePaths.h
     src/PreprocessorDefinitions.h
     src/Engine/RuntimeEngine.h
     DESTINATION ${CMAKE_INSTALL_INCLUDEDIR})
@@ -207,5 +212,15 @@ if (FAL_DOCS)
 	else()
 		message(STATUS "Doxygen not found, no docs will be built")
 	endif()
+endif()
+
+target_compile_definitions(EngineCore PRIVATE DEBUG=0)
+
+target_compile_definitions(EngineCore PRIVATE RELEASE=0)
+
+if(CMAKE_BUILD_TYPE STREQUAL "Debug")
+    target_compile_definitions(EngineCore PRIVATE DEBUG=1)
+elseif(CMAKE_BUILD_TYPE STREQUAL "Release")
+    target_compile_definitions(EngineCore PRIVATE RELEASE=1)
 endif()
 

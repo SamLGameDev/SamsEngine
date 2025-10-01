@@ -5,8 +5,21 @@
 #include "WorldObject.h"
 #include "ObjectFactory.h"
 
+
 ErrorCodes SubsystemInitialiser::Init()
 {
+
+	try
+	{
+		PathManager = new CorePaths;
+	}
+	catch (const std::exception& error)
+	{
+		std::cout << error.what() << "\n";
+		return ERROR;
+	}
+
+
 	try
 	{
 		Window = new FirstWindow();
@@ -135,6 +148,16 @@ ErrorCodes SubsystemInitialiser::ShutDown()
 	try
 	{
 		delete Window;
+	}
+	catch (const std::exception& error)
+	{
+		std::cout << error.what() << "\n";
+		return ERROR;
+	}
+
+	try
+	{
+		delete PathManager;
 	}
 	catch (const std::exception& error)
 	{

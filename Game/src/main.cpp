@@ -48,12 +48,24 @@ int main(int argc, char* argv[]) {
 
 	Shader LightShader = Shader("LightShader", "Shaders/");
 
-	Model backpack = Model("Models/BackPack/backpack.obj", LightShader);
+	Model backpack = Model("/Models/Areoplane/scene.gltf", LightShader);
+
+	Shader skyboxShader = Shader("SkyBoxShader", "Shaders/");
+	CubeMap skyBoxTexture = CubeMap("CubeMaps/Space/bkg/blue", "None");
+
+	Model skyBox = Model("Models/SkyBox/SkyBox.obj", skyboxShader);
 
 	MeshObject Object1 = CreateObjectRaw<MeshObject>();
 	Object1.SMesh.SetMesh(&backpack);
 
+	MeshObject Object2 = CreateObjectRaw<MeshObject>();
+	Object2.SMesh.SetMesh(&skyBox);
+
 	backpack.DrawGroup = GL_LESS;
+
+	//Skybox asset https://opengameart.org/content/space-skyboxes-0
+
+	skyBox.DrawGroup = GL_LEQUAL;
 
 	while (!RuntimeEngine::ShouldClose())
 	{

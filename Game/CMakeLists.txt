@@ -59,3 +59,4 @@ elseif(CMAKE_BUILD_TYPE STREQUAL "Release")
 endif()
 
 target_compile_definitions(SamsEngine PUBLIC CONTENTS_DIR="${Contents}")
+message(STATUS "Contents = ${Contents}")

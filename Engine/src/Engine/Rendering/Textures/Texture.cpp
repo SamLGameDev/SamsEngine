@@ -2,6 +2,7 @@
 #include "stb_image.h"
 #include <glad/glad.h>
 #include <iostream>
+#include "CorePaths.h"
 
 
 
@@ -92,7 +93,7 @@ void Texture::GenerateByChannel(const std::uint8_t& nrChannels, const unsigned i
 
 std::string Texture::GetFullTexturePath() const
 {
-	return  std::string(CONTENTS_DIR) + "/" + TextureLocation;
+	return  CorePaths::Contents.Path + "/" + TextureLocation;
 }
 
 unsigned char* Texture::LoadTexture(int* Width, int* Height, int* nrChannels) const
@@ -102,5 +103,13 @@ unsigned char* Texture::LoadTexture(int* Width, int* Height, int* nrChannels) co
 	const char* address = texPathStr.c_str();
 
 	unsigned char* data = stbi_load(address, Width, Height, nrChannels, 0);
+
+#if DEBUG
+	if (data == nullptr)
+	{
+		std::cout << "ERROR::TEXTURE::FAILED TO LOAD TEXTURE AT: " << address << "\n";
+	}
+#endif
+
 	return data;
 }

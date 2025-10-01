@@ -6,9 +6,10 @@
 #include "InputManager.h"
 
 #include "World.h"
-#include "Camera/Camera.h"
+#include "Camera.h"
 #include "Renderer.h"
 #include "LightManager.h"
+#include "CorePaths.h"
 
 #include <memory>
 
@@ -35,5 +36,7 @@ private:
 	Renderer* renderer;
 
 	LightManager* lightManager;
+
+	CorePaths* PathManager;
 
 };

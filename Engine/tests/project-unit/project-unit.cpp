@@ -6,6 +6,7 @@
 #include "BaseDelegate.h"
 #include <functional>
 #include "Vector2D.h"
+#include "CorePaths.h"
 
 int main(int argc, char** argv) {
 	::testing::InitGoogleTest(&argc, argv);
@@ -329,4 +330,11 @@ TEST(Vector3D, PlaneLineIntersection)
 	ASSERT_EQ(bHit, true);
 
 	ASSERT_EQ(out, Vector3D(-3, 9, 0));
+}
+
+TEST(FileSystem, Contents)
+{
+	CorePaths pathManager = CorePaths();
+
+	ASSERT_EQ(pathManager.Contents.Path, "D:\\Projects\\University\\Comp305-Engine-SL295211\\Engine\\Contents");
 }

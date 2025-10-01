@@ -160,6 +160,8 @@ private:
 	 */
 	[[nodiscard]] bool DoesFragmentShaderExist() const;
 
+	std::string GetPathUntyped() const;
+
 
 	/**
 	 * @return The full path to the vertex shader
