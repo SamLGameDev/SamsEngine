@@ -30,7 +30,7 @@ public:
 
 	[[nodiscard]] glm::vec3 GetPos() const
 	{
-		return Pos;
+		return {transform.Position.X, transform.Position.Y, transform.Position.Z};
 	}
 
 
@@ -83,6 +83,8 @@ public:
 		glm::mat4 Projection;
 	};
 
+	Transform transform;
+
 private:
 
 	double Yaw = -90;
@@ -107,7 +109,6 @@ private:
 
 	std::unique_ptr<InputActionMouse> Mouse;
 
-	glm::vec3 Pos = glm::vec3(0, 0, 3);
 	glm::vec3 Front = glm::vec3(0, 0, -1);
 	glm::vec3 Up = glm::vec3(0, 1, 0);
 

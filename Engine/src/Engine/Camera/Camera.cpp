@@ -53,22 +53,26 @@ void Camera::Tick(const double& DeltaTime)
 
 void Camera::MoveForward()
 {
-	Pos += (Speed * World->GetDeltaTime()) * Front;
+	glm::vec3 pos = (Speed * World->GetDeltaTime()) * Front;
+	transform.Position += Vector3D(pos.x, pos.y, pos.z);
 }
 
 void Camera::MoveBackwards()
 {
-	Pos -= (Speed * World->GetDeltaTime()) * Front;
+	glm::vec3 pos = (Speed * World->GetDeltaTime()) * Front;
+	transform.Position -= Vector3D(pos.x, pos.y, pos.z);
 }
 
 void Camera::MoveLeft()
 {
-	Pos -= glm::normalize(glm::cross(Front, Up)) * (Speed * World->GetDeltaTime());
+	glm::vec3 pos = glm::normalize(glm::cross(Front, Up)) * (Speed * World->GetDeltaTime());
+	transform.Position -= Vector3D(pos.x, pos.y, pos.z);
 }
 
 void Camera::MoveRight()
 {
-	Pos += glm::normalize(glm::cross(Front, Up)) * (Speed * World->GetDeltaTime());
+	glm::vec3 pos = glm::normalize(glm::cross(Front, Up)) * (Speed * World->GetDeltaTime());
+	transform.Position += Vector3D(pos.x, pos.y, pos.z);
 }
 
 void Camera::MouseCallback(const double Xpos, const double Ypos)
@@ -106,7 +110,9 @@ glm::mat4 Camera::GetLook() const
 {
 	//Thanks to learn Opengl for this part
 
-	const glm::vec3 zAxis = glm::normalize(Pos - (Front + Pos));
+	glm::vec3 pos = GetPos();
+
+	const glm::vec3 zAxis = glm::normalize(pos - (Front + pos));
 
 	const glm::vec3 xAxis = glm::normalize(glm::cross(glm::normalize(Up), zAxis));
 
@@ -114,9 +120,9 @@ glm::mat4 Camera::GetLook() const
 
 	// Create translation and rotation matrix
 	auto translation = glm::mat4(1.0f); // Identity matrix by default
-	translation[3][0] = -Pos.x; // Fourth column, first row
-	translation[3][1] = -Pos.y;
-	translation[3][2] = -Pos.z;
+	translation[3][0] = -pos.x; // Fourth column, first row
+	translation[3][1] = -pos.y;
+	translation[3][2] = -pos.z;
 
 	auto rotation = glm::mat4(1.0f);
 	rotation[0][0] = xAxis.x; // First column, first row

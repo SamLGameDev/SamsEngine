@@ -19,7 +19,7 @@ SpotLight::SpotLight(const Vector3D& Ambient, const Vector3D& Diffuse, const Vec
 
 void SpotLight::Implement(const Shader* InShader)
 {
-	const glm::vec4 lightModel = Camera::GetActiveCamera()->GetLook() * glm::vec4(Camera::GetActiveCamera()->GetPos(), 1);
+	const glm::vec4 lightModel = Camera::GetActiveCamera()->transform.GetModelMatrix() * glm::vec4(0, 0, 0, 1);
 
 	InShader->SetVec3("spotLight.position", Vector3D(lightModel.x, lightModel.y, lightModel.z));
 

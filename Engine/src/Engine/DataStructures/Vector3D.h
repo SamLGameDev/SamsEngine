@@ -75,11 +75,25 @@ public:
 		Z += other;
 	}
 
+	void operator+=(const Vector3D& other)
+	{
+		X += other.X;
+		Y += other.Y;
+		Z += other.Z;
+	}
+
 	void operator-=(const float& other)
 	{
 		X -= other;
 		Y -= other;
 		Z -= other;
+	}
+
+	void operator-=(const Vector3D& other)
+	{
+		X -= other.X;
+		Y -= other.Y;
+		Z -= other.Z;
 	}
 
 	[[nodiscard]] bool operator<(const float& value) const
