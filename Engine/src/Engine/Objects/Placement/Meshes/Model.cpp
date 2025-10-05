@@ -107,7 +107,9 @@ void Model::AddInstance(const Transform* transform)
 	const GLsizeiptr size = sizeof(glm::mat4) * Instances;
 
 	//delete the old buffer, as the new one will need to be bigger
+
 	glDeleteBuffers(1, &ModelVBO);
+
 	glGenBuffers(1, &ModelVBO);
 
 	glBindBuffer(GL_ARRAY_BUFFER, ModelVBO);
@@ -120,6 +122,7 @@ void Model::AddInstance(const Transform* transform)
 
 	for (Mesh& Mesh : Meshes)
 	{
+
 		glBindVertexArray(Mesh.VAO);
 
 		//set the shaders vertex location. we have to do 4 here as it's a mat4, so essentially 4 vec4
@@ -252,17 +255,28 @@ Mesh Model::ProcessMesh(aiMesh* InMesh, const aiScene* Scene)
 
 	time = glfwGetTime();
 #endif
+
+	mesh.MeshShader = ModelShader;
+
 	if (InMesh->mMaterialIndex != 0)
 	{
 		const aiMaterial* mat = Scene->mMaterials[InMesh->mMaterialIndex];
 
-		LoadMaterialTextures(mat, aiTextureType_DIFFUSE, diffuse);
+		LoadMaterialTextures(mat, aiTextureType_DIFFUSE, diffuse, mesh.MeshShader);
 
-		LoadMaterialTextures(mat, aiTextureType_SPECULAR, specular);
+		LoadMaterialTextures(mat, aiTextureType_SPECULAR, specular, mesh.MeshShader);
 
-		LoadMaterialTextures(mat, aiTextureType_HEIGHT, height);
+		LoadMaterialTextures(mat, aiTextureType_HEIGHT, height, mesh.MeshShader);
 
-		LoadMaterialTextures(mat, aiTextureType_AMBIENT, normal);
+		LoadMaterialTextures(mat, aiTextureType_AMBIENT, normal, mesh.MeshShader);
+
+		LoadMaterialTextures(mat, aiTextureType_BASE_COLOR, diffuse, mesh.MeshShader);
+
+		LoadMaterialTextures(mat, aiTextureType_GLTF_METALLIC_ROUGHNESS, specular, mesh.MeshShader);
+		LoadMaterialTextures(mat, aiTextureType_NORMALS, normal, mesh.MeshShader);
+
+
+		//TODO: Extend this to cover more types, like base color
 
 	}
 
@@ -272,8 +286,6 @@ Mesh Model::ProcessMesh(aiMesh* InMesh, const aiScene* Scene)
 
 	time = glfwGetTime();
 #endif
-
-	mesh.MeshShader = ModelShader;
 
 #if DEBUG
 
@@ -294,7 +306,7 @@ Mesh Model::ProcessMesh(aiMesh* InMesh, const aiScene* Scene)
 	return mesh;
 }
 
-void Model::LoadMaterialTextures(const aiMaterial* Mat, const aiTextureType& Type, const TextureType& TypeName)
+void Model::LoadMaterialTextures(const aiMaterial* Mat, const aiTextureType& Type, const TextureType& TypeName, Shader& MeshShader)
 {
 	for (unsigned int i = 0; i < Mat->GetTextureCount(Type); i++)
 	{
@@ -311,6 +323,7 @@ void Model::LoadMaterialTextures(const aiMaterial* Mat, const aiTextureType& Typ
 			if (texPath == Path)
 			{
 				bSkip = true;
+				MeshShader.AddTexture(LoadedTextures[index]);
 				break;
 			}
 		}
@@ -323,7 +336,7 @@ void Model::LoadMaterialTextures(const aiMaterial* Mat, const aiTextureType& Typ
 		const auto texture = Texture(Path, TypeName);
 
 		LoadedTextures.Add(texture);
-		ModelShader.AddTexture(texture);
+		MeshShader.AddTexture(texture);
 	}
 }
 

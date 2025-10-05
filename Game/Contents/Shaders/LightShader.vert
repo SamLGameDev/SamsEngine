@@ -12,8 +12,7 @@ out VS_OUT
 
 } Out;
 
-uniform mat4 Model; 
-uniform mat3 NormalModel;
+uniform mat4 Model;
 
 layout (std140, binding = 0) uniform Transforms
 {
@@ -42,6 +41,8 @@ void main()
 
    gl_Position = Projection * View *  aInstanceMatrix * vec4(aPos, 1.0);
    Out.FragPos = vec3((View * aInstanceMatrix * vec4(aPos, 1.0)));
+   mat3 NormalModel = mat3(transpose(inverse(View * aInstanceMatrix)));
+    
    Out.Normal = NormalModel * aNormal;
    Out.TexCoord = aTexture;
 }

@@ -109,7 +109,13 @@ unsigned char* Texture::LoadTexture(int* Width, int* Height, int* nrChannels) co
 	{
 		std::cout << "ERROR::TEXTURE::FAILED TO LOAD TEXTURE AT: " << address << "\n";
 	}
+	else
+	{
+		std::cout << "INFO::TEXTURE::LOADED TEXTURE AT: " << address << "\n";
+	}
 #endif
+
+
 
 	return data;
 }

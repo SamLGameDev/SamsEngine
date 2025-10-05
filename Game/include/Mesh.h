@@ -12,7 +12,21 @@ public:
 
 	Mesh(const Array<Vertex>& InVertices, const Array<unsigned int>& InIndices, const Shader& InShader);
 
-	Mesh(const Mesh& Copy);
+	~Mesh();
+	void Copy(const Mesh& Copy);
+
+	Mesh(const Mesh& copy);
+
+
+	Mesh& operator=(const Mesh& other)
+	{
+		if (this != &other)
+		{
+			Copy(other);
+		}
+		return *this;
+	}
+
 
 	void Draw(const Transform* ModelTransform) const;
 
@@ -20,13 +34,14 @@ public:
 
 	void RegenerateMesh();
 
+
 	Array<Vertex> Vertices;
 
 	Array<unsigned int> Indices;
 
 	Shader MeshShader;
 
-	unsigned int VAO;
+	GLuint VAO, VBO, EBO;
 
 	unsigned int* Instances;
 

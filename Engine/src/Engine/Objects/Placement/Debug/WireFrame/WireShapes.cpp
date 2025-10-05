@@ -16,17 +16,26 @@ WireObject::WireObject(const Transform* InTransform, const Shader* InShader)
 	Renderer::WiresToDraw.Add(this);
 }
 
-WireObject::WireObject(const WireObject& Copy)
+void WireObject::Copy(const WireObject& copy)
 {
-	WireTransform = Copy.WireTransform;
-	WireShader = Copy.WireShader;
-	Vertices = Copy.Vertices;
-	Indices = Copy.Indices;
-	VAO = Copy.VAO;
+	WireTransform = copy.WireTransform;
+	WireShader = copy.WireShader;
+	Vertices = copy.Vertices;
+	Indices = copy.Indices;
+	Initialise();
+}
+
+WireObject::WireObject(const WireObject& copy)
+{
+	Copy(copy);
 }
 
 WireObject::~WireObject()
 {
+
+	glDeleteBuffers(1, &EBO);
+	glDeleteBuffers(1, &VBO);
+	glDeleteVertexArrays(1, &VAO);
 }
 
 void WireObject::Draw() const
@@ -48,7 +57,6 @@ void WireObject::Draw() const
 
 void WireObject::Initialise()
 {
-	unsigned int VBO, EBO;
 
 	glGenVertexArrays(1, &VAO);
 	glGenBuffers(1, &VBO);
@@ -69,9 +77,6 @@ void WireObject::Initialise()
 	glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), reinterpret_cast<void*>((offsetof(Vertex, Color))));
 
 	glBindVertexArray(0);
-
-	glDeleteBuffers(1, &EBO);
-	glDeleteBuffers(1, &VBO);
 }
 
 void WireObject::SetShaderVariables() const

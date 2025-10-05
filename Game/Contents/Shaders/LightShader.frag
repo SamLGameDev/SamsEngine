@@ -3,6 +3,10 @@
 struct Material {
     sampler2D texture_diffuse1;
     sampler2D texture_diffuse2;
+    sampler2D texture_diffuse3;
+    sampler2D texture_diffuse4;
+    sampler2D texture_diffuse5;
+    sampler2D texture_diffuse6;
     sampler2D texture_specular1;
     sampler2D texture_height1;
     sampler2D texture_normal1;

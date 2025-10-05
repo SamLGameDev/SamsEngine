@@ -1,4 +1,7 @@
 #include "Renderer.h"
+
+#include <iostream>
+
 #include "InputManager.h"
 #include "Shader.h"
 #include "WireShapes.h"
@@ -40,6 +43,13 @@ Renderer::~Renderer()
 
 void Renderer::AddItemToRender(Model* Item)
 {
+	unsigned int index;
+	if (ItemsToRender.Contains(Item, index))
+	{
+		std::cout << "AlreadyInRenderer" << "\n";
+		return;
+	}
+
 	ItemsToRender.Add(Item);
 }
 

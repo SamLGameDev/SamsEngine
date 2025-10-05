@@ -48,7 +48,9 @@ int main(int argc, char* argv[]) {
 
 	Shader LightShader = Shader("LightShader", "Shaders/");
 
-	Model backpack = Model("/Models/Areoplane/scene.gltf", LightShader);
+	Model spider = Model("Models/Spider/obj/Only_Spider_with_Animations_Export.obj", LightShader);
+
+	Model backpack = Model("Models/BackPack/backpack.obj", LightShader);
 
 	Shader skyboxShader = Shader("SkyBoxShader", "Shaders/");
 	CubeMap skyBoxTexture = CubeMap("CubeMaps/Space/bkg/blue", "None");
@@ -56,12 +58,22 @@ int main(int argc, char* argv[]) {
 	Model skyBox = Model("Models/SkyBox/SkyBox.obj", skyboxShader);
 
 	MeshObject Object1 = CreateObjectRaw<MeshObject>();
-	Object1.SMesh.SetMesh(&backpack);
+	Object1.SMesh.SetMesh(&spider);
+	Object1.transform.Scale = Vector3D(0.1, 0.1, 0.1);
 
 	MeshObject Object2 = CreateObjectRaw<MeshObject>();
-	Object2.SMesh.SetMesh(&skyBox);
+	Object2.SMesh.SetMesh(&spider);
+	Object2.transform.Scale = Vector3D(0.2, 0.2, 0.2);
+	Object2.transform.Position = Vector3D(0, 0, -40);
+	Object2.transform.Rotation = Vector3D(0, 180, 0);
 
-	backpack.DrawGroup = GL_LESS;
+	MeshObject Object4 = CreateObjectRaw<MeshObject>();
+	Object1.SMesh.SetMesh(&backpack);
+
+	MeshObject Object3 = CreateObjectRaw<MeshObject>();
+	Object3.SMesh.SetMesh(&skyBox);
+
+	spider.DrawGroup = GL_LESS;
 
 	//Skybox asset https://opengameart.org/content/space-skyboxes-0
 

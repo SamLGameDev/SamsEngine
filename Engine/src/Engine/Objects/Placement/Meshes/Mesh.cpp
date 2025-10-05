@@ -19,14 +19,26 @@ Mesh::Mesh(const Array<Vertex>& InVertices, const Array<unsigned int>& InIndices
 	SetUpMesh();
 }
 
-Mesh::Mesh(const Mesh& Copy)
+Mesh::~Mesh()
+{	
+	glDeleteBuffers(1, &EBO);
+	glDeleteBuffers(1, &VBO);
+	glDeleteVertexArrays(1, &VAO);
+}
+
+
+Mesh::Mesh(const Mesh& copy)
+{
+	Copy(copy);
+}
+
+void Mesh::Copy(const Mesh& Copy)
 {
 	Vertices = Copy.Vertices;
 	Indices = Copy.Indices;
 	MeshShader = Copy.MeshShader;
-	VAO = Copy.VAO;
+	RegenerateMesh();
 }
-
 void Mesh::Draw(const Transform* ModelTransform) const
 {
 	Draw(ModelTransform, &MeshShader);
@@ -47,7 +59,7 @@ void Mesh::Draw(const Transform* ModelTransform, const Shader* InShader) const
 	InShader->SetVec3("cameraPos", Vector3D(camPos.x, camPos.y, camPos.z));
 
 	glBindVertexArray(VAO);
-	glDrawElementsInstanced(GL_TRIANGLES, static_cast<GLsizei>(Indices.GetSize()), GL_UNSIGNED_INT, 0, *Instances);
+	glDrawElementsInstanced(GL_TRIANGLES, static_cast<GLsizei>(Indices.GetSize()), GL_UNSIGNED_INT, nullptr, *Instances);
 	glBindVertexArray(0);
 	glUseProgram(0);
 }
@@ -84,13 +96,13 @@ void Mesh::RegenerateMesh()
 
 void Mesh::SetUpMesh()
 {
-	unsigned int VBO, EBO;
 
 	glGenVertexArrays(1, &VAO);
 	glGenBuffers(1, &VBO);
 	glGenBuffers(1, &EBO);
 
 	glBindVertexArray(VAO);
+
 	glBindBuffer(GL_ARRAY_BUFFER, VBO);
 
 	glBufferData(GL_ARRAY_BUFFER, Vertices.GetSize() * sizeof(Vertex), Vertices.GetFirstRef(), GL_STATIC_DRAW);
@@ -109,6 +121,4 @@ void Mesh::SetUpMesh()
 
 	glBindVertexArray(0);
 
-	glDeleteBuffers(1, &EBO);
-	glDeleteBuffers(1, &VBO);
 }

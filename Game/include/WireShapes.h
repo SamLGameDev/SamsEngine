@@ -15,7 +15,19 @@ public:
 
 	WireObject(const Transform* InTransform, const Shader* InShader);
 
-	WireObject(const WireObject& Copy);
+	WireObject& operator=(const WireObject& other)
+	{
+		if (&other != this)
+		{
+			Copy(other);
+
+		}
+		return *this;
+	}
+
+	void Copy(const WireObject& copy);
+
+	WireObject(const WireObject& copy);
 
 	~WireObject();
 
@@ -42,7 +54,7 @@ public:
 
 private:
 
-	unsigned int VAO;
+	GLuint VAO, VBO, EBO;
 
 	std::shared_ptr<Shader> WireShader;
 

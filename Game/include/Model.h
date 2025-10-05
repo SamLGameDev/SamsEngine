@@ -103,7 +103,7 @@ private:
 	 */
 	[[nodiscard]] Mesh ProcessMesh(aiMesh* InMesh, const aiScene* Scene);
 
-	void LoadMaterialTextures(const aiMaterial* Mat, const aiTextureType& Type, const TextureType& TypeName);
+	void LoadMaterialTextures(const aiMaterial* Mat, const aiTextureType& Type, const TextureType& TypeName, Shader& MeshShader);
 
 
 	/**
@@ -138,7 +138,7 @@ private:
 
 	Array<const Transform*> InstanceTransforms;
 
-	unsigned int ModelVBO;
+	GLuint ModelVBO;
 
 
 	/**
