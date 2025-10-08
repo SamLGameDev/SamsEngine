@@ -63,6 +63,7 @@ add_library(EngineCore STATIC
     "src/Engine/Lighting/SpotLight.cpp"
     "src/Engine/Lighting/PointLight.cpp"
     "src/Engine/Components/StaticMeshComponent.cpp"
+    "src/Engine/Fracturing/Voronoi.cpp"
     "src/Engine/FileSystem/Path.cpp"
     "src/Engine/FileSystem/CorePaths.cpp"
     "src/PreprocessorDefinitions.cpp"
@@ -100,6 +101,7 @@ target_include_directories(EngineCore
                            "$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/src/Engine/Rendering/Textures>"
                            "$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/src/Engine/Window>"
                            "$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/src/Engine/FileSystem>"
+                           "$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/src/Engine/Fracturing>"
                  
 
                            "$<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}>")
@@ -149,6 +151,7 @@ install(FILES
     src/Engine/Components/StaticMeshComponent.h
     src/Engine/FileSystem/Path.h
     src/Engine/FileSystem/CorePaths.h
+    src/Engine/Fracturing/Voronoi.h
     src/PreprocessorDefinitions.h
     src/Engine/RuntimeEngine.h
     DESTINATION ${CMAKE_INSTALL_INCLUDEDIR})

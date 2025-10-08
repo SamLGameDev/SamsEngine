@@ -336,5 +336,5 @@ TEST(FileSystem, Contents)
 {
 	CorePaths pathManager = CorePaths();
 
-	ASSERT_EQ(pathManager.Contents.Path, "D:\\Projects\\University\\Comp305-Engine-SL295211\\Engine\\Contents");
+	ASSERT_EQ(pathManager.Contents.Path, CONTENTS_DIR);
 }
