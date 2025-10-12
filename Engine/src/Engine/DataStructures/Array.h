@@ -184,6 +184,18 @@ public:
 		return false;
 	}
 
+	bool Contains(const T& Item) const
+	{
+		for (unsigned int i = 0; i < NumItems; i++)
+		{
+			if (DynamicArray[i] == Item)
+			{
+				return true;
+			}
+		}
+		return false;
+	}
+
 	void Remove(const T& Item)
 	{
 		unsigned int index;
@@ -206,6 +218,15 @@ public:
 			NumItems--;
 			ArraySize--;
 		}
+	}
+
+	void Empty()
+	{
+		delete[] DynamicArray;
+
+		ArraySize = 0;
+		NumItems = 0;
+		DynamicArray = new T[1];
 	}
 
 	[[nodiscard]] bool IsEmpty() const

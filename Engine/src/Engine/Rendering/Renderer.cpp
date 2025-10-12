@@ -5,13 +5,14 @@
 #include "InputManager.h"
 #include "Shader.h"
 #include "WireShapes.h"
+#include "Voronoi2D.h"
 
 LinkedList<WireObject*> Renderer::WiresToDraw;
 
 LinkedList<Model*> Renderer::ItemsToRender;
 
 
-//LinkedList<FractureObject*> Renderer::FracturesToDraw;
+Array<FracturePiece*> Renderer::FracturesToDraw;
 
 Renderer::Renderer(InputManager* InInputManager) : WorldObject()
 {
@@ -134,6 +135,9 @@ void Renderer::Start()
 		Vector2D(static_cast<float>(FirstWindow::GetWindowWidth()), static_cast<float>(FirstWindow::GetWindowHeight())));
 
 	glEnable(GL_MULTISAMPLE);
+
+
+	FractureShader = Shader("Voronoi2D", "Shaders/");
 }
 
 void Renderer::Tick(const double& DeltaTime)
@@ -167,37 +171,77 @@ void Renderer::DrawModels() const
 
 void Renderer::DrawFractures() const
 {
-	//if (!FracturesToDraw.IsEmpty())
-	//{
-	//	for (unsigned int i = 0; i < FracturesToDraw.GetSize(); i++)
-	//	{
-	//		//TODO get fracturing working, eventually
+	if (!FracturesToDraw.IsEmpty())
+	{
+		for (unsigned int i = 0; i < FracturesToDraw.GetSize(); i++)
+		{
+			//TODO get fracturing working, eventually
 
-	//		//FracturesToDraw[i]->Draw();
-	//	}
-	//}
+			FracturesToDraw[i]->Draw(&FractureShader);
+
+			//FracturesToDraw[i]->Draw();
+		}
+	}
+
+	//float vertices[] = {
+	//	 0.5f,  0.5f, 0.0f,  // top right
+	//	 0.5f, -0.5f, 0.0f,  // bottom right
+	//	-0.5f, -0.5f, 0.0f,  // bottom left
+	//	-0.5f,  0.5f, 0.0f   // top left 
+	//};
+	//unsigned int indices[] = {  // note that we start from 0!
+	//	0, 1, 3,   // first triangle
+	//	1, 2, 3    // second triangle
+	//};
+
+	//GLuint vao, vbo, ebo;
+
+	//glGenVertexArrays(1, &vao);
+	//glGenBuffers(1, &vbo);
+	//glGenBuffers(1, &ebo);
+
+	//glBindVertexArray(vao);
+
+	//glBindBuffer(GL_ARRAY_BUFFER, vbo);
+
+	//glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), &vertices, GL_STATIC_DRAW);
+
+	//glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ebo);
+
+	//glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices), &indices, GL_STATIC_DRAW);
+
+	//glEnableVertexAttribArray(0);
+	//glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0);
+
+	//glBindBuffer(GL_ARRAY_BUFFER, 0);
+	////glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
+
+	//FractureShader.Use();
+
+	//glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
+
 }
 
 void Renderer::RenderWorldObjets() const
 {
 
-	glBindFramebuffer(GL_FRAMEBUFFER, AntiAliasing.FBO);
+	glBindFramebuffer(GL_FRAMEBUFFER, 0);
 
-	glEnable(GL_DEPTH_TEST);
+	//glEnable(GL_DEPTH_TEST);
 
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
 
-	glEnable(GL_BLEND);
-	glEnable(GL_PROGRAM_POINT_SIZE);
-	glEnable(GL_CULL_FACE);
+	//glEnable(GL_BLEND);
+	//glEnable(GL_PROGRAM_POINT_SIZE);
+	////glEnable(GL_CULL_FACE);
 
-	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+	//glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
-	DrawWireObjects();
+	//DrawWireObjects();
 
 	DrawFractures();
 
-	DrawModels();
+	//DrawModels();
 
 }
 
@@ -245,7 +289,7 @@ void Renderer::RenderingLoop() const
 {
 	RenderWorldObjets();
 
-	RenderPostProcessing();
+	//RenderPostProcessing();
 
 	WindowInputManager->ProcessInput(Camera::GetActiveWindow()->GetWindow());
 

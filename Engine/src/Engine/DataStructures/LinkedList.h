@@ -45,6 +45,14 @@ public:
 		}
 	}
 
+	LinkedList(std::initializer_list<T> Init)
+	{
+		for (const T item : Init)
+		{
+			Add(item);
+		}
+	}
+
 	LinkedList& operator=(const LinkedList<T>& CopyList)
 	{
 		if (this != &CopyList)

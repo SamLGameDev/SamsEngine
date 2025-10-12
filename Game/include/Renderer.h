@@ -10,6 +10,8 @@ class Shape;
 class WireObject;
 class Shader;
 
+class FracturePiece;
+
 class Renderer final : public WorldObject
 {
 public:
@@ -28,7 +30,7 @@ public:
 	static LinkedList<Model*> ItemsToRender;
 
 	static LinkedList<WireObject*> WiresToDraw;
-	//static LinkedList<FractureObject*> FracturesToDraw;
+	static Array<FracturePiece*> FracturesToDraw;
 
 
 	void Tick(const double& DeltaTime) override;
@@ -68,4 +70,6 @@ private:
 	Buffers PostProcessing, AntiAliasing;
 
 	Shader PostProcessingShader;
+
+	Shader FractureShader;
 };

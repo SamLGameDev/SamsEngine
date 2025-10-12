@@ -7,6 +7,8 @@
 #include <functional>
 #include "Vector2D.h"
 #include "CorePaths.h"
+#include "RuntimeEngine.h"
+#include "Voronoi2D.h"
 
 int main(int argc, char** argv) {
 	::testing::InitGoogleTest(&argc, argv);
@@ -337,4 +339,20 @@ TEST(FileSystem, Contents)
 	CorePaths pathManager = CorePaths();
 
 	ASSERT_EQ(pathManager.Contents.Path, CONTENTS_DIR);
+}
+
+TEST(Vector2D, PerpendicularBisector)
+{
+	RuntimeEngine engine;
+	engine.Init();
+
+	Voronoi2D v;
+	v.FracturePlaneRandom(Vector2D(-1, 1), Vector2D(-1, -1), Vector2D(1, 1), Vector2D(1, -1));
+
+	while (!RuntimeEngine::ShouldClose())
+	{
+		engine.Loop();
+	}
+
+	engine.ShutDown();
 }

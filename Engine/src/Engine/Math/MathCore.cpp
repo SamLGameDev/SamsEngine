@@ -14,7 +14,7 @@ float MathCore::Determinant(const Vector3D& C0, const Vector3D& C1, const Vector
 
 bool MathCore::IsNearlyEqual(const float a, const float b, const float range)
 {
-	return a - b < range;
+	return std::abs(a - b) < range;
 }
 
 bool MathCore::IsEven(const int Value)

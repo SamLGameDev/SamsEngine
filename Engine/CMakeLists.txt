@@ -64,6 +64,7 @@ add_library(EngineCore STATIC
     "src/Engine/Lighting/PointLight.cpp"
     "src/Engine/Components/StaticMeshComponent.cpp"
     "src/Engine/Fracturing/Voronoi.cpp"
+    "src/Engine/Fracturing/Voronoi2D.cpp"
     "src/Engine/FileSystem/Path.cpp"
     "src/Engine/FileSystem/CorePaths.cpp"
     "src/PreprocessorDefinitions.cpp"
@@ -152,6 +153,7 @@ install(FILES
     src/Engine/FileSystem/Path.h
     src/Engine/FileSystem/CorePaths.h
     src/Engine/Fracturing/Voronoi.h
+    src/Engine/Fracturing/Voronoi2D.h
     src/PreprocessorDefinitions.h
     src/Engine/RuntimeEngine.h
     DESTINATION ${CMAKE_INSTALL_INCLUDEDIR})
