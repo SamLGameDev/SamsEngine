@@ -65,7 +65,7 @@ void Voronoi2D::FracturePlaneRandom(Vector2D TopLeft, Vector2D BottomLeft, Vecto
 
 	Array<Vector2D> points;
 
-	for (size_t i = 0; i < 100; i++)
+	for (size_t i = 0; i < 10; i++)
 	{
 		Vector2D point1 = Vector2D::RandomRange(BottomLeft, TopRight);
 

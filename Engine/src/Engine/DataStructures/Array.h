@@ -38,6 +38,25 @@ public:
 		DynamicArray = newArray;
 	}
 
+
+	explicit Array(size_t size)
+	{
+		NumItems = size;
+		ArraySize = size;
+		DynamicArray = new T[size];
+	}
+
+	explicit Array(T* First, T* Last)
+	{
+		NumItems = 0;
+		ArraySize = 0;
+		DynamicArray = new T[1];
+		for (T* i = First; i != Last; ++i)
+		{
+			Add(*i);
+		}
+	}
+
 	Array& operator=(const Array& other)
 	{
 		if (this != &other)

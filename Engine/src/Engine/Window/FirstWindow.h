@@ -37,6 +37,12 @@ public:
 		return Height;
 	}
 
+	enum GraphicsAPI : std::uint8_t
+	{
+		OpenGl,
+		Vulkan
+	};
+
 private:
 
 	constexpr static std::uint8_t AntiAliasingSamples = 4;
@@ -47,7 +53,7 @@ private:
 
 	static GLint Width, Height;
 
-	void Initialisation();
+	void Initialisation(const GraphicsAPI& API);
 
 	void CreateWindow();
 
