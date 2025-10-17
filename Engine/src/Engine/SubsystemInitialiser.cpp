@@ -33,6 +33,7 @@ ErrorCodes SubsystemInitialiser::Init()
 	try
 	{
 		APIManager = new GraphicsAPIConstructor();
+		APIManager->Init(Vulkan);
 	}
 	catch (const std::exception& error)
 	{

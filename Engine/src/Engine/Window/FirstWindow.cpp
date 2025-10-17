@@ -1,6 +1,7 @@
 #include "FirstWindow.h"
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
+#include <vulkan/vulkan_core.h>
 #include <iostream>
 
 GLint FirstWindow::Width = 800, FirstWindow::Height = 600;
