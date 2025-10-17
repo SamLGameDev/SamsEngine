@@ -2,11 +2,12 @@
 #pragma once
 
 #include <string>
-#include <vulkan/vulkan_core.h>
+
 
 #include "Array.h"
 #include "ErrorCodes.h"
 #include <optional>
+#include <vulkan/vulkan.h>
 
 
 struct QueueFamilyIndices
@@ -67,6 +68,7 @@ private:
 	VkPhysicalDevice GraphicsCard = VK_NULL_HANDLE;
 	VkDevice LogicalDevice;
 	VkQueue GraphicsQueue;
+	VkSurfaceKHR WindowsInterface;
 
 	QueueFamilyIndices Indices;
 

@@ -32,6 +32,16 @@ ErrorCodes SubsystemInitialiser::Init()
 
 	try
 	{
+		APIManager = new GraphicsAPIConstructor();
+	}
+	catch (const std::exception& error)
+	{
+		std::cout << error.what() << "\n";
+		return ERROR;
+	}
+
+	try
+	{
 		inputManager = new InputManager(Window->GetWindow());
 	}
 	catch (const std::exception& error)
@@ -144,6 +154,17 @@ ErrorCodes SubsystemInitialiser::ShutDown()
 		std::cout << error.what() << "\n";
 		return ERROR;
 	}
+
+	try
+	{
+		delete APIManager;
+	}
+	catch (const std::exception& error)
+	{
+		std::cout << error.what() << "\n";
+		return ERROR;
+	}
+
 
 	try
 	{

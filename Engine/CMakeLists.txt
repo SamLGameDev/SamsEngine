@@ -69,7 +69,8 @@ add_library(EngineCore STATIC
     "src/Engine/FileSystem/CorePaths.cpp"
     "src/PreprocessorDefinitions.cpp"
     "src/Engine/RuntimeEngine.cpp"
-    "src/Engine/GraphicsAPI/Vulkan/InitialiseVulkan.cpp")
+    "src/Engine/GraphicsAPI/Vulkan/InitialiseVulkan.cpp"
+    "src/Engine/GraphicsAPI/GraphicsAPIConstructor.cpp")
 
 set_target_properties(EngineCore
                       PROPERTIES
@@ -105,8 +106,7 @@ target_include_directories(EngineCore
                            "$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/src/Engine/FileSystem>"
                            "$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/src/Engine/Fracturing>"
                            "$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/src/Engine/GraphicsAPI>"
-                           "$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/src/Engine/GraphicsAPI/Vulkan>"
-                 
+                           "$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/src/Engine/GraphicsAPI/Vulkan>"                 
 
                            "$<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}>")
 
@@ -160,6 +160,7 @@ install(FILES
     src/PreprocessorDefinitions.h
     src/Engine/RuntimeEngine.h
     src/Engine/GraphicsAPI/Vulkan/InitialiseVulkan.h
+    src/Engine/GraphicsAPI/GraphicsAPIConstructor.h
     DESTINATION ${CMAKE_INSTALL_INCLUDEDIR})
 
     find_package(glfw3 CONFIG REQUIRED)

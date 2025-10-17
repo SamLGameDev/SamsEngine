@@ -2,7 +2,6 @@
 
 #include <iostream>
 #include <cstdint>
-#include <vulkan/vulkan_core.h>
 
 #include "GLFW/glfw3.h"
 
@@ -203,6 +202,11 @@ ErrorCodes InitialiseVulkan::Init()
 
 #if DEBUG
 	if (CreateDebugMessenger() == ERROR) return ERROR;
+
+	//if (glfwCreateWindowSurface(Instance, , nullptr, WindowsInterface) != VK_SUCCESS)
+	//{
+	//	return ERROR;
+	//}
 
 #endif
 

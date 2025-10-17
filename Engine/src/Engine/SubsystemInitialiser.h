@@ -10,6 +10,7 @@
 #include "Renderer.h"
 #include "LightManager.h"
 #include "CorePaths.h"
+#include "GraphicsAPIConstructor.h"
 
 #include <memory>
 
@@ -26,6 +27,8 @@ public:
 private:
 
 	FirstWindow* Window;
+
+	GraphicsAPIConstructor* APIManager;
 
 	InputManager* inputManager;
 

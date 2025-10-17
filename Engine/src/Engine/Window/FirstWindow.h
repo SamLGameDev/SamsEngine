@@ -37,23 +37,13 @@ public:
 		return Height;
 	}
 
-	enum GraphicsAPI : std::uint8_t
-	{
-		OpenGl,
-		Vulkan
-	};
-
 private:
 
 	constexpr static std::uint8_t AntiAliasingSamples = 4;
 
-	constexpr static float OpenGLVersion = 4.6f;
-
 	constexpr static char WindowName[] = {"SamsEngine"};
 
 	static GLint Width, Height;
-
-	void Initialisation(const GraphicsAPI& API);
 
 	void CreateWindow();
 
