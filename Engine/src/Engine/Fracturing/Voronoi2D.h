@@ -24,13 +24,17 @@ class FracturePiece
 {
 public:
 
-	FracturePiece(Array<Vector2D> cell);
+	FracturePiece(Array<Vector2D> cell, Vector2D Point);
 
 	void Draw(const Shader* InShader);
 
 	Vector3D color;
 
 private:
+
+	Shader PointShader;
+
+	GLuint PVAO, PVBO;
 
 
 	Array<float> Verts;

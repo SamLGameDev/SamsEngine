@@ -197,7 +197,7 @@ void Voronoi2D::FracturePlaneRandom(Vector2D TopLeft, Vector2D BottomLeft, Vecto
 			cell = newCell;
 		}
 
-		FracturePiece* frac = new FracturePiece(cell);
+		FracturePiece* frac = new FracturePiece(cell, point);
 	}
 
 }
@@ -216,7 +216,7 @@ bool Voronoi2D::IsPointInPolygon(Vector2D Point, Array<Vector2D> Polygon)
 
 	return true;
 }
-FracturePiece::FracturePiece(Array<Vector2D> cell)
+FracturePiece::FracturePiece(Array<Vector2D> cell, Vector2D Point)
 {
 
 //	cell = { {0, 1},  { 1,1 }, {1, -1}, {0, -1}, {0, -1}, {-1, -1}, {-1, 1}, {0, 1} };
@@ -291,7 +291,24 @@ FracturePiece::FracturePiece(Array<Vector2D> cell)
 
 	glBindVertexArray(0);
 
-	color = Vector3D::RandomRange(Vector3D::Zero, Vector3D(230, 230, 230));
+	glGenVertexArrays(1, &PVAO);
+	glGenBuffers(1, &PVBO);
+
+	glBindVertexArray(PVAO);
+
+	glBindBuffer(GL_ARRAY_BUFFER, PVBO);
+
+	Array<float> Points = { Point.X, Point.Y };
+
+	glBufferData(GL_ARRAY_BUFFER, 2 * sizeof(float), Points.GetFirstRef(), GL_STATIC_DRAW);
+
+	glEnableVertexAttribArray(0);
+	glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 2 * sizeof(float), (void*)0);
+
+
+	color = Vector3D::RandomRange(Vector3D(30, 30, 30), Vector3D(255, 255, 255));
+
+	PointShader = Shader("Point2D", "Shaders/");
 
 	Renderer::FracturesToDraw.Add(this);
 }
@@ -305,11 +322,19 @@ void FracturePiece::Draw(const Shader* InShader)
 
 	//TODO find a way to separate this from model
 	//used for reflection InShade
-
+	glPointSize(5);
 	glBindVertexArray(VAO);
 	//glBindBuffer(GL_ARRAY_BUFFER, VBO);
 	//glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
 	glDrawElements(GL_TRIANGLES, static_cast<GLsizei>(Inds.GetSize()), GL_UNSIGNED_INT, nullptr);
+	glBindVertexArray(0);
+	glUseProgram(0);
+
+	PointShader.Use();
+	glBindVertexArray(PVAO);
+	//glBindBuffer(GL_ARRAY_BUFFER, VBO);
+	//glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
+	glDrawArrays(GL_POINTS, 0, 1);
 	glBindVertexArray(0);
 	glUseProgram(0);
 }
