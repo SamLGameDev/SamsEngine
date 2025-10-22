@@ -1,4 +1,4 @@
-
+Rework to be academic
 ## Future plans
 
 I am going to be implementing a 3D Voronoi algorithm using Vulkan. Using Vulkan for this is important, as there will be a lot of different points to calculate, and being able to take advantage of the parallelism of Vulkan compared to OpenGL will massively improve performance.
