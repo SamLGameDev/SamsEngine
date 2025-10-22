@@ -1,5 +1,5 @@
 
-##Future plans
+## Future plans
 
 I am going to be implementing a 3D Voronoi algorithm using Vulkan. Using Vulkan for this is important, as there will be a lot of different points to calculate, and being able to take advantage of the parallelism of Vulkan compared to OpenGL will massively improve performance.
 
@@ -7,7 +7,7 @@ I am going to be implementing a 3D Voronoi algorithm using Vulkan. Using Vulkan 
 
 I’m going to be implementing it by adapting my current 2D algorithm to work in 3D. As a high-level overview, I will first generate some points in the bounding box of the mesh. Then, for each point, I will be creating a plane perpendicular bisector at the halfway point between the point closest to my current point, and the current point. Then, for each face of the bounding box, find the first intersection point, then record each vertex until you find the second intersection. Then check if the point is within this shape, if not, reverse it. then add this new face to a new array of new cell. Once this is done for all faces, we have the first cut. Then Check if any points are still within the bounds, if so, repeat for the next nearest point in bounds. After this, we have a fracture and just repeat the whole thing for every point.
 
-##Optimisation 
+## Optimisation 
 
 Currently, there are no major bottlenecks for my program, but here are some issues that will help my next 3D iteration run faster.
 
@@ -28,7 +28,7 @@ Copying the newcell to cell is inefficnet, so i can rewrite the program to use n
 
 Adding to my array is expensive, so ill rewrite the add method to allocate space to double the current size when running out, avoiding so many new allocations
 
-##References
+## References
 
 Voronoi 2D explanation https://www.youtube.com/watch?v=I6Fen2Ac-1U
 
