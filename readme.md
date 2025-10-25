@@ -1,7 +1,7 @@
 
 ## Description
 
-This project aims to impliment a 3D voronoi fracturing algorithm [1] using vulkan[2]. Vulkan has been chosen over alternatives like OpenGL[3] due to its ability to take advantage of the parallelism of modern GPU's [4], which will be cruicial in this project as there will be many points to calculate which can be calculated independently of one another. A triangulation algorithm will also be needed to generate a mesh from the fractured points, and as such delaunay triangulation [8] will be used. This should result in significant performance gains. For future work, this project would aim at implimenting a clipped voronoi diagram[7], allowing the fracturing of a complex 3D mesh.
+This project aims to implement a 3D voronoi fracturing algorithm [1] using vulkan[2]. Vulkan has been chosen over alternatives like OpenGL[3] due to its ability to take advantage of the parallelism of modern GPU's [4], which will be cruicial in this project as there will be many points to calculate which can be calculated independently of one another. A triangulation algorithm will also be needed to generate a mesh from the fractured points, and as such delaunay triangulation [8] will be used. This should result in significant performance gains. For future work, this project would aim at implimenting a clipped voronoi diagram[7], allowing the fracturing of a complex 3D mesh.
 
 ## Methodology
 This project is going to be implimented by adapting the current half plane clipping algorithm for 3D [5][6]. The pesudocode for that can be found in fig 1.
