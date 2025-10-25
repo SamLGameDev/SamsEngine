@@ -36,6 +36,7 @@ public:
 	{
 		return Height;
 	}
+	static GLFWwindow* Window;
 
 private:
 
@@ -49,5 +50,4 @@ private:
 
 	static void FrameBuffer_Size_Callback(GLFWwindow* InWindow, const int InWidth, const int InHeight);
 
-	GLFWwindow* Window;
 };

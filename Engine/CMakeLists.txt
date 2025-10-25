@@ -179,7 +179,7 @@ find_package(Stb REQUIRED)
 target_include_directories(EngineCore PRIVATE ${Stb_INCLUDE_DIR})
 
 find_package(Vulkan REQUIRED)
-target_link_libraries(EngineCore PRIVATE Vulkan::Vulkan)
+target_link_libraries(EngineCore PUBLIC Vulkan::Vulkan)
 
 target_compile_definitions(EngineCore PUBLIC CONTENTS_DIR="${Contents}")
 

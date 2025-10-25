@@ -1,4 +1,7 @@
 #pragma once
+
+#include <cstdint>
+
 struct Vector2D
 {
 public:
@@ -8,6 +11,10 @@ public:
 	constexpr Vector2D()noexcept : X(0), Y(0) {};
 
 	constexpr Vector2D(const float InX, const float InY)noexcept : X(InX), Y(InY) {};
+
+	constexpr Vector2D(const std::uint32_t InX, const std::uint32_t InY)noexcept : X(InX), Y(InY) {};
+
+	constexpr Vector2D(const int InX, const int InY)noexcept : X(InX), Y(InY) {};
 
 	[[nodiscard]] constexpr bool operator==(const Vector2D& other) const {
 		return	X == other.X && Y == other.Y;

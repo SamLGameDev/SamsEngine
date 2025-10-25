@@ -6,9 +6,10 @@
 
 GLint FirstWindow::Width = 800, FirstWindow::Height = 600;
 
+GLFWwindow* FirstWindow::Window;
+
 FirstWindow::FirstWindow()
 {
-	glfwInit();
 	CreateWindow();
 	//glViewport(0, 0, Width, Height);
 }

@@ -170,7 +170,7 @@ public:
 
 	bool Reallocate(const unsigned int Size)
 	{
-		if (Size > ArraySize)
+		if (Size < ArraySize)
 		{
 			return false;
 		}
@@ -179,10 +179,11 @@ public:
 
 		for (unsigned int i = 0; i < NumItems; i++)
 		{
-			NewArray[i] = std::move(GetItemAt(i));
+			NewArray[i] = GetItemAt(i);
 		}
 
 		ArraySize = Size;
+		NumItems = Size;
 
 		delete[] DynamicArray;
 		DynamicArray = NewArray;

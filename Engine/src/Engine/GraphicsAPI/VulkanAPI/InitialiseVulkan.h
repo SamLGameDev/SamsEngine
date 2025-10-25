@@ -7,18 +7,26 @@
 #include "Array.h"
 #include "ErrorCodes.h"
 #include <optional>
-#include <vulkan/vulkan.h>
+#include "vulkan/vulkan.h"
+
+struct SwapChainSupportDetails
+{
+	VkSurfaceCapabilitiesKHR Capabilities;
+	Array<VkSurfaceFormatKHR> Formats;
+	Array<VkPresentModeKHR> Presents;
+};
 
 
 struct QueueFamilyIndices
 {
 	std::optional<uint32_t> GraphicsFamily;
+	std::optional<uint32_t> PresentFamily;
 
 	float QueuePriority = 1;
 
 	bool IsComplete() const
 	{
-		return GraphicsFamily.has_value();
+		return GraphicsFamily.has_value() && PresentFamily.has_value();
 	}
 };
 
@@ -56,6 +64,7 @@ public:
 	ErrorCodes CreateDebugMessenger();
 	ErrorCodes FindGraphicsCard();
 	ErrorCodes CreateLogicalDevice();
+	void AttachToWindow();
 	ErrorCodes Init();
 
 	ErrorCodes Shutdown();
@@ -68,7 +77,18 @@ private:
 	VkPhysicalDevice GraphicsCard = VK_NULL_HANDLE;
 	VkDevice LogicalDevice;
 	VkQueue GraphicsQueue;
+	VkQueue PresentQueue;
 	VkSurfaceKHR WindowsInterface;
+	SwapChainSupportDetails SwapChainSupport;
+	VkSwapchainKHR SwapChain = VK_NULL_HANDLE;
+
+	Array<VkImage> SwapChainImages;
+
+	Array<VkImageView> SwapChainImageViews;
+
+	VkSurfaceFormatKHR SwapChainFomat;
+	VkExtent2D SwapChainExtent;
+
 
 	QueueFamilyIndices Indices;
 
@@ -78,6 +98,8 @@ private:
 
 	
 	const static Array<const char*> ValidationLayers;
+
+	const static Array<const char*> DeviceExtensions;
 
 	bool CheckValidationLayerSupport();
 
@@ -90,9 +112,20 @@ private:
 		const VkDebugUtilsMessengerCallbackDataEXT* pCallbackData,
 		void* pUserData
 	);
+	static bool DoesDeviceHaveRequiredExtensions(const VkPhysicalDevice& Device);
+	bool IsSwapChainSupported(const VkPhysicalDevice& Device, const VkSurfaceKHR& Surface);
 
-	static bool IsDeviceSuitable(const VkPhysicalDevice& Device);
+	bool IsDeviceSuitable(const VkPhysicalDevice& Device, const VkSurfaceKHR& Surface);
 
-	static QueueFamilyIndices FindQueueFamilies(const VkPhysicalDevice& Device);
+	static QueueFamilyIndices FindQueueFamilies(const VkPhysicalDevice& Device, const VkSurfaceKHR& Surface);
+
+	static VkSurfaceFormatKHR ChooseSwapChainFormat(const Array<VkSurfaceFormatKHR>& AvailableFormats);
+	static VkPresentModeKHR ChooseSwapChainPresent(const Array<VkPresentModeKHR>& AvailablePresents);
+	static VkExtent2D ChooseSwapChainExtent(const VkSurfaceCapabilitiesKHR& capabilities);
+
+	ErrorCodes CreateSwapChain();
+
+
+	ErrorCodes CreateImageViews();
 
 };

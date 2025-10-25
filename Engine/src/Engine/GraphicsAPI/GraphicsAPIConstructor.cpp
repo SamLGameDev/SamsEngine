@@ -1,5 +1,7 @@
 #include "GraphicsAPIConstructor.h"
+#include<glad/glad.h>
 #include "GLFW/glfw3.h"
+
 
 ErrorCodes GraphicsAPIConstructor::Init(const GraphicsAPI& Api)
 {
@@ -15,7 +17,24 @@ ErrorCodes GraphicsAPIConstructor::Init(const GraphicsAPI& Api)
 
 	if (Api == Vulkan)
 	{
-		vulkan.Init();
+		vulkan = new InitialiseVulkan();
+		vulkan->Init();
 	}
 	return SUCCEEDED;
+}
+
+void GraphicsAPIConstructor::AttachToWindow(const GraphicsAPI& Api)
+{
+	if (Api == Vulkan)
+	{
+		vulkan->AttachToWindow();
+	}
+}
+
+void GraphicsAPIConstructor::Shutdown(const GraphicsAPI& API)
+{
+	if (API == Vulkan)
+	{
+		delete vulkan;
+	}
 }

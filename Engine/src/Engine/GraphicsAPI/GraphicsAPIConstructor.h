@@ -13,9 +13,14 @@ class GraphicsAPIConstructor
 {
 public:
 
+
 	ErrorCodes Init(const GraphicsAPI& Api);
 
-	InitialiseVulkan vulkan;
+	void AttachToWindow(const GraphicsAPI& Api);
+
+	void Shutdown(const GraphicsAPI& API);
+
+	InitialiseVulkan* vulkan;
 
 	constexpr static float OpenGLVersion = 4.6f;
 

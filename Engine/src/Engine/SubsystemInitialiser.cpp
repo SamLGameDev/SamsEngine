@@ -19,17 +19,6 @@ ErrorCodes SubsystemInitialiser::Init()
 		return ERROR;
 	}
 
-
-	try
-	{
-		Window = new FirstWindow();
-	}
-	catch (const std::exception& error)
-	{
-		std::cout << error.what() << "\n";
-		return ERROR;
-	}
-
 	try
 	{
 		APIManager = new GraphicsAPIConstructor();
@@ -40,6 +29,18 @@ ErrorCodes SubsystemInitialiser::Init()
 		std::cout << error.what() << "\n";
 		return ERROR;
 	}
+
+	try
+	{
+		Window = new FirstWindow();
+		APIManager->AttachToWindow(Vulkan);
+	}
+	catch (const std::exception& error)
+	{
+		std::cout << error.what() << "\n";
+		return ERROR;
+	}
+
 
 	try
 	{
@@ -158,6 +159,7 @@ ErrorCodes SubsystemInitialiser::ShutDown()
 
 	try
 	{
+		APIManager->Shutdown(Vulkan);
 		delete APIManager;
 	}
 	catch (const std::exception& error)
