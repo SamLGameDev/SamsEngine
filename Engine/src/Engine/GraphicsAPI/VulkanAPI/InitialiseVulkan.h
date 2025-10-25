@@ -89,6 +89,11 @@ private:
 	VkSurfaceFormatKHR SwapChainFomat;
 	VkExtent2D SwapChainExtent;
 
+	VkRenderPass RenderPass;
+	VkPipelineLayout Layout;
+	VkPipeline GraphicsPipeline;
+
+	Array<VkFramebuffer> SwapChainFrameBuffers;
 
 	QueueFamilyIndices Indices;
 
