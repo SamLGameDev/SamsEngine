@@ -38,6 +38,17 @@ public:
 	}
 	static GLFWwindow* Window;
 
+	[[nodiscard]] static inline bool HasWindowBeenResized()
+	{
+		return bFrameBufferResized;
+	}
+
+
+	static void ResetWindowResize()
+	{
+		bFrameBufferResized = false;
+	}
+
 private:
 
 	constexpr static std::uint8_t AntiAliasingSamples = 4;
@@ -49,5 +60,7 @@ private:
 	void CreateWindow();
 
 	static void FrameBuffer_Size_Callback(GLFWwindow* InWindow, const int InWidth, const int InHeight);
+
+	static bool bFrameBufferResized;
 
 };

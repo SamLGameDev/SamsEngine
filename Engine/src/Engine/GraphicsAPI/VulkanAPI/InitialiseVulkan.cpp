@@ -405,6 +405,17 @@ void InitialiseVulkan::AttachToWindow()
 	renderPassCreateInfo.subpassCount = 1;
 	renderPassCreateInfo.pSubpasses = &subpassDescription;
 
+	VkSubpassDependency subpassDependency{};
+	subpassDependency.srcSubpass = VK_SUBPASS_EXTERNAL;
+	subpassDependency.dstSubpass = 0;
+	subpassDependency.srcStageMask = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT;
+	subpassDependency.srcAccessMask = 0;
+	subpassDependency.dstStageMask = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT;
+	subpassDependency.dstAccessMask = VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT;
+
+	renderPassCreateInfo.dependencyCount = 1;
+	renderPassCreateInfo.pDependencies= &subpassDependency;
+
 	vkCreateRenderPass(LogicalDevice, &renderPassCreateInfo, nullptr, &RenderPass);
 
 	VkGraphicsPipelineCreateInfo pipelineCreateInfo{};
@@ -430,30 +441,85 @@ void InitialiseVulkan::AttachToWindow()
 	vkDestroyShaderModule(LogicalDevice, vertShader, nullptr);
 	vkDestroyShaderModule(LogicalDevice, fragShader, nullptr);
 
-	SwapChainFrameBuffers.Reallocate(SwapChainImageViews.GetSize());
+	CreateFrameBuffer();
 
-	for (size_t i = 0; i < SwapChainImageViews.GetSize(); i++)
-	{
-		VkImageView attachments[] = { SwapChainImageViews[i] };
+	CreateCommandPool();
+	CreateCommandBuffers();
+	if (CreateSyncObjects() == ERROR) std::cout << "HELp \n";
 
-
-		VkFramebufferCreateInfo framebufferCreateInfo{};
-		framebufferCreateInfo.sType = VK_STRUCTURE_TYPE_FRAMEBUFFER_CREATE_INFO;
-		framebufferCreateInfo.renderPass = RenderPass;
-		framebufferCreateInfo.attachmentCount = 1;
-		framebufferCreateInfo.pAttachments = attachments;
-		framebufferCreateInfo.width = SwapChainExtent.width;
-		framebufferCreateInfo.height = SwapChainExtent.height;
-		framebufferCreateInfo.layers = 1;
-
-		vkCreateFramebuffer(LogicalDevice, &framebufferCreateInfo, nullptr, SwapChainFrameBuffers.GetItemAtRef(i));
-	}
-
+	size_t currentFrame = 0;
 
 	while (!glfwWindowShouldClose(FirstWindow::Window))
 	{
 		glfwPollEvents();
+
+		vkWaitForFences(LogicalDevice, 1, InFlightFences.GetItemAtRef(currentFrame), VK_TRUE, UINT64_MAX);
+
+		uint32_t imageIndex;
+		VkResult result = vkAcquireNextImageKHR(LogicalDevice, SwapChain, UINT64_MAX, ImageAvailableSemaphores[currentFrame], VK_NULL_HANDLE, &imageIndex);
+
+		if (result == VK_ERROR_OUT_OF_DATE_KHR)
+		{
+			RecreateSwapChain();
+			continue;
+		}
+		else if ( result != VK_SUCCESS && result != VK_SUBOPTIMAL_KHR)
+		{
+			return;
+		}
+
+		vkResetFences(LogicalDevice, 1, InFlightFences.GetItemAtRef(currentFrame));
+
+		vkResetCommandBuffer(CommandBuffers[currentFrame], 0);
+
+		RecordCommandBuffer(CommandBuffers[currentFrame], imageIndex);
+
+		VkSubmitInfo submitInfo{};
+		submitInfo.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO;
+
+		VkSemaphore waitSemaphores[] = { ImageAvailableSemaphores[currentFrame] };
+
+		VkPipelineStageFlags waitStages[] = {VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT};
+		submitInfo.waitSemaphoreCount = 1;
+		submitInfo.pWaitSemaphores = waitSemaphores;
+		submitInfo.pWaitDstStageMask = waitStages;
+
+		submitInfo.commandBufferCount = 1;
+		submitInfo.pCommandBuffers = CommandBuffers.GetItemAtRef(currentFrame);
+
+		VkSemaphore signalSemaphores[] = {RenderFinishedSemephores[currentFrame]};
+
+		submitInfo.signalSemaphoreCount = 1;
+		submitInfo.pSignalSemaphores = signalSemaphores;
+
+		if (vkQueueSubmit(GraphicsQueue, 1, &submitInfo, InFlightFences[currentFrame]) != VK_SUCCESS) break;
+
+		VkPresentInfoKHR presentInfo{};
+		presentInfo.sType = VK_STRUCTURE_TYPE_PRESENT_INFO_KHR;
+		presentInfo.pImageIndices = &imageIndex;
+
+		VkSwapchainKHR swapChains[] = {SwapChain};
+
+		presentInfo.pSwapchains = swapChains;
+		presentInfo.swapchainCount = 1;
+		presentInfo.waitSemaphoreCount = 1;
+		presentInfo.pWaitSemaphores = signalSemaphores;
+		presentInfo.pResults = nullptr;
+
+		result = vkQueuePresentKHR(GraphicsQueue, &presentInfo);
+
+		if (result == VK_ERROR_OUT_OF_DATE_KHR || result == VK_SUBOPTIMAL_KHR || FirstWindow::HasWindowBeenResized())
+		{
+			FirstWindow::ResetWindowResize();
+			RecreateSwapChain();
+		}
+		else if (result != VK_SUCCESS) return;
+
+		currentFrame = (currentFrame + 1) % MAX_FRAMES_IN_FLIGHT;
+
 	}
+
+	vkDeviceWaitIdle(LogicalDevice);
 
 	Shutdown();
 }
@@ -475,17 +541,12 @@ ErrorCodes InitialiseVulkan::Init()
 	return SUCCEEDED;
 }
 
-ErrorCodes InitialiseVulkan::Shutdown()
+void InitialiseVulkan::CleanUpSwapChain()
 {
-
 	for (auto framebuffer : SwapChainFrameBuffers)
 	{
 		vkDestroyFramebuffer(LogicalDevice, framebuffer, nullptr);
 	}
-
-	vkDestroyPipeline(LogicalDevice, GraphicsPipeline, nullptr);
-	vkDestroyPipelineLayout(LogicalDevice, Layout, nullptr);
-	vkDestroyRenderPass(LogicalDevice, RenderPass, nullptr);
 
 
 	for (VkImageView& view : SwapChainImageViews)
@@ -494,6 +555,30 @@ ErrorCodes InitialiseVulkan::Shutdown()
 	}
 
 	vkDestroySwapchainKHR(LogicalDevice, SwapChain, nullptr);
+}
+
+ErrorCodes InitialiseVulkan::Shutdown()
+{
+
+	for (size_t i = 0; i < MAX_FRAMES_IN_FLIGHT; i++)
+	{
+		vkDestroySemaphore(LogicalDevice, ImageAvailableSemaphores.GetItemAt(i), nullptr);
+
+		vkDestroySemaphore(LogicalDevice, RenderFinishedSemephores.GetItemAt(i), nullptr);
+
+		vkDestroyFence(LogicalDevice, InFlightFences.GetItemAt(i), nullptr);
+	}
+
+
+
+	vkDestroyCommandPool(LogicalDevice, CommandPool, nullptr);
+
+	vkDestroyPipeline(LogicalDevice, GraphicsPipeline, nullptr);
+	vkDestroyPipelineLayout(LogicalDevice, Layout, nullptr);
+	vkDestroyRenderPass(LogicalDevice, RenderPass, nullptr);
+
+
+	CleanUpSwapChain();
 
 	vkDestroySurfaceKHR(Instance, WindowsInterface, nullptr);
 
@@ -726,6 +811,85 @@ VkExtent2D InitialiseVulkan::ChooseSwapChainExtent(const VkSurfaceCapabilitiesKH
 
 }
 
+ErrorCodes InitialiseVulkan::CreateCommandPool()
+{
+	VkCommandPoolCreateInfo createInfo{};
+	createInfo.sType = VK_STRUCTURE_TYPE_COMMAND_POOL_CREATE_INFO;
+	createInfo.flags = VK_COMMAND_POOL_CREATE_RESET_COMMAND_BUFFER_BIT;
+	createInfo.queueFamilyIndex = Indices.GraphicsFamily.value();
+
+	if (vkCreateCommandPool(LogicalDevice, &createInfo, nullptr, &CommandPool) != VK_SUCCESS)
+	{
+		return ERROR;
+	}
+	return SUCCEEDED;
+}
+
+ErrorCodes InitialiseVulkan::CreateCommandBuffers()
+{
+	CommandBuffers.Reallocate(MAX_FRAMES_IN_FLIGHT);
+
+	VkCommandBufferAllocateInfo allocateInfo{};
+	allocateInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO;
+	allocateInfo.commandBufferCount = CommandBuffers.GetSize();
+	allocateInfo.commandPool = CommandPool;
+	allocateInfo.level = VK_COMMAND_BUFFER_LEVEL_PRIMARY;
+	if (vkAllocateCommandBuffers(LogicalDevice, &allocateInfo, CommandBuffers.GetFirstRef()) != VK_SUCCESS) return ERROR;
+	
+	return SUCCEEDED;
+}
+
+ErrorCodes InitialiseVulkan::RecordCommandBuffer(VkCommandBuffer Buffer, std::uint32_t ImageIndex)
+{
+	VkCommandBufferBeginInfo beginInfo{};
+	beginInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO;
+	beginInfo.pInheritanceInfo = nullptr;
+	beginInfo.flags = 0;
+
+	if (vkBeginCommandBuffer(Buffer, &beginInfo) != VK_SUCCESS) return ERROR;
+
+	VkRenderPassBeginInfo renderBeginInfo{};
+	renderBeginInfo.sType = VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO;
+	renderBeginInfo.renderPass = RenderPass;
+	renderBeginInfo.framebuffer = SwapChainFrameBuffers[ImageIndex];
+	renderBeginInfo.renderArea.offset = {0, 0};
+	renderBeginInfo.renderArea.extent = SwapChainExtent;
+	VkClearValue clearValue = { {{0, 0, 0, 1.f}} };
+	renderBeginInfo.clearValueCount = 1;
+	renderBeginInfo.pClearValues = &clearValue;
+
+	vkCmdBeginRenderPass(Buffer, &renderBeginInfo, VK_SUBPASS_CONTENTS_INLINE);
+
+	vkCmdBindPipeline(Buffer, VK_PIPELINE_BIND_POINT_GRAPHICS, GraphicsPipeline);
+
+
+	VkViewport viewport{};
+	viewport.x = 0;
+	viewport.y = 0;
+	viewport.width = SwapChainExtent.width;
+	viewport.height = SwapChainExtent.height;
+	viewport.minDepth = 0;
+	viewport.maxDepth = 1;
+
+	vkCmdSetViewport(Buffer, 0, 1, &viewport);
+
+	VkRect2D scissor;
+	scissor.extent = SwapChainExtent;
+	scissor.offset = { 0, 0 };
+	vkCmdSetScissor(Buffer, 0, 1, &scissor);
+
+	vkCmdDraw(Buffer, 3, 1, 0, 0);
+
+	vkCmdEndRenderPass(Buffer);
+
+	if (vkEndCommandBuffer(Buffer) != VK_SUCCESS) return ERROR;
+
+
+	return SUCCEEDED;
+
+
+}
+
 ErrorCodes InitialiseVulkan::CreateSwapChain()
 {
 	VkSurfaceFormatKHR format = ChooseSwapChainFormat(SwapChainSupport.Formats);
@@ -809,6 +973,78 @@ ErrorCodes InitialiseVulkan::CreateImageViews()
 
 		if (vkCreateImageView(LogicalDevice, &createInfo, nullptr, SwapChainImageViews.GetItemAtRef(i)) != VK_SUCCESS) return ERROR;
 	}
+
+	return SUCCEEDED;
+}
+
+ErrorCodes InitialiseVulkan::CreateFrameBuffer()
+{
+	SwapChainFrameBuffers.Reallocate(SwapChainImageViews.GetSize());
+
+	for (size_t i = 0; i < SwapChainImageViews.GetSize(); i++)
+	{
+		VkImageView attachments[] = { SwapChainImageViews[i] };
+
+
+		VkFramebufferCreateInfo framebufferCreateInfo{};
+		framebufferCreateInfo.sType = VK_STRUCTURE_TYPE_FRAMEBUFFER_CREATE_INFO;
+		framebufferCreateInfo.renderPass = RenderPass;
+		framebufferCreateInfo.attachmentCount = 1;
+		framebufferCreateInfo.pAttachments = attachments;
+		framebufferCreateInfo.width = SwapChainExtent.width;
+		framebufferCreateInfo.height = SwapChainExtent.height;
+		framebufferCreateInfo.layers = 1;
+
+		if (vkCreateFramebuffer(LogicalDevice, &framebufferCreateInfo, nullptr, SwapChainFrameBuffers.GetItemAtRef(i)) != VK_SUCCESS) return ERROR;
+	}
+	return SUCCEEDED;
+}
+
+ErrorCodes InitialiseVulkan::CreateSyncObjects()
+{
+
+	ImageAvailableSemaphores.Reallocate(MAX_FRAMES_IN_FLIGHT);
+	RenderFinishedSemephores.Reallocate(MAX_FRAMES_IN_FLIGHT);
+	InFlightFences.Reallocate(MAX_FRAMES_IN_FLIGHT);
+
+	VkSemaphoreCreateInfo semaphoreCreateInfo{};
+	semaphoreCreateInfo.sType = VK_STRUCTURE_TYPE_SEMAPHORE_CREATE_INFO;
+
+	VkFenceCreateInfo fenceCreateInfo{};
+	fenceCreateInfo.sType = VK_STRUCTURE_TYPE_FENCE_CREATE_INFO;
+	fenceCreateInfo.flags = VK_FENCE_CREATE_SIGNALED_BIT;
+
+	for (size_t i = 0; i < MAX_FRAMES_IN_FLIGHT; i++)
+	{
+		if (vkCreateSemaphore(LogicalDevice, &semaphoreCreateInfo, nullptr, ImageAvailableSemaphores.GetItemAtRef(i)) != VK_SUCCESS) return ERROR;
+
+		if (vkCreateSemaphore(LogicalDevice, &semaphoreCreateInfo, nullptr, RenderFinishedSemephores.GetItemAtRef(i)) != VK_SUCCESS) return ERROR;
+		if (vkCreateFence(LogicalDevice, &fenceCreateInfo, nullptr, InFlightFences.GetItemAtRef(i)) != VK_SUCCESS) return ERROR;
+	}
+
+	return SUCCEEDED;
+}
+
+ErrorCodes InitialiseVulkan::RecreateSwapChain()
+{
+	int width, height = 0;
+
+	glfwGetFramebufferSize(FirstWindow::Window, &width, &height);
+
+	while (width == 0 || height == 0)
+	{
+
+		glfwGetFramebufferSize(FirstWindow::Window, &width, &height);
+		glfwWaitEvents();
+	}
+
+	vkDeviceWaitIdle(LogicalDevice);
+
+	CleanUpSwapChain();
+
+	CreateSwapChain();
+	CreateImageViews();
+	CreateFrameBuffer();
 
 	return SUCCEEDED;
 }

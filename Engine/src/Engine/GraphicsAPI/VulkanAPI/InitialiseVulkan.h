@@ -66,6 +66,7 @@ public:
 	ErrorCodes CreateLogicalDevice();
 	void AttachToWindow();
 	ErrorCodes Init();
+	void CleanUpSwapChain();
 
 	ErrorCodes Shutdown();
 
@@ -92,6 +93,16 @@ private:
 	VkRenderPass RenderPass;
 	VkPipelineLayout Layout;
 	VkPipeline GraphicsPipeline;
+
+	VkCommandPool CommandPool;
+	Array<VkCommandBuffer> CommandBuffers;
+
+	Array<VkSemaphore> ImageAvailableSemaphores;
+	Array<VkSemaphore> RenderFinishedSemephores;
+	Array<VkFence> InFlightFences;
+
+	const size_t MAX_FRAMES_IN_FLIGHT = 2;
+
 
 	Array<VkFramebuffer> SwapChainFrameBuffers;
 
@@ -128,9 +139,19 @@ private:
 	static VkPresentModeKHR ChooseSwapChainPresent(const Array<VkPresentModeKHR>& AvailablePresents);
 	static VkExtent2D ChooseSwapChainExtent(const VkSurfaceCapabilitiesKHR& capabilities);
 
+	ErrorCodes CreateCommandPool();
+	ErrorCodes CreateCommandBuffers();
+
+	ErrorCodes RecordCommandBuffer(VkCommandBuffer Buffer, std::uint32_t ImageIndex);
+
 	ErrorCodes CreateSwapChain();
 
-
 	ErrorCodes CreateImageViews();
+
+	ErrorCodes CreateFrameBuffer();
+
+	ErrorCodes CreateSyncObjects();
+
+	ErrorCodes RecreateSwapChain();
 
 };

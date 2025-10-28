@@ -8,6 +8,8 @@ GLint FirstWindow::Width = 800, FirstWindow::Height = 600;
 
 GLFWwindow* FirstWindow::Window;
 
+bool FirstWindow::bFrameBufferResized = false;
+
 FirstWindow::FirstWindow()
 {
 	CreateWindow();
@@ -40,6 +42,8 @@ void FirstWindow::CreateWindow()
 #endif
 	}
 
+	glfwSetWindowUserPointer(Window, this);
+
 	glfwSetFramebufferSizeCallback(Window, FrameBuffer_Size_Callback);
 }
 
@@ -47,7 +51,10 @@ void FirstWindow::FrameBuffer_Size_Callback(GLFWwindow* Inwindow, const int InWi
 {
 	//TODO make this have a static delegate call, that will call all functions that need adjusting with frame size, like FBOS
 
-	glViewport(0, 0, InWidth, InHeight);
+	//glViewport(0, 0, InWidth, InHeight);
+
+	FirstWindow::bFrameBufferResized = true;
+
 	FirstWindow::Width = InWidth;
 	FirstWindow::Height = InHeight;
 }
