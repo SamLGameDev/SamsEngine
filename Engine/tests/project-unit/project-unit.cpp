@@ -9,6 +9,7 @@
 #include "CorePaths.h"
 #include "RuntimeEngine.h"
 #include "Voronoi2D.h"
+#include "RuntimeEngineVulkan.h"
 
 int main(int argc, char** argv) {
 	::testing::InitGoogleTest(&argc, argv);
@@ -343,7 +344,8 @@ TEST(FileSystem, Contents)
 
 TEST(Vector2D, PerpendicularBisector)
 {
-	RuntimeEngine engine;
+
+	Vulkan::RuntimeEngine engine;
 	engine.Init();
 
 	Voronoi2D v;

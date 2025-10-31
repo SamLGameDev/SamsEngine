@@ -28,6 +28,7 @@ include(GNUInstallDirs)
 
 add_library(EngineCore STATIC
     "src/Engine/Rendering/Shaders/Shader.cpp"
+    "src/Engine/Rendering/Shaders/VulkanShader.cpp"
     "src/Engine/Rendering/Textures/CubeMap.cpp"
     "src/Engine/Rendering/Textures/Texture.cpp"
     "src/Engine/DataStructures/Array.cpp"
@@ -38,7 +39,10 @@ add_library(EngineCore STATIC
     "src/Engine/DataStructures/BaseDelegate.cpp"
     "src/Engine/DataStructures/Verticie.cpp"
     "src/Engine/Window/FirstWindow.cpp"
+    "src/Engine/Window/Window.cpp"
+    "src/Engine/Window/VulkanWindow.cpp"
     "src/Engine/SubsystemInitialiser.cpp"
+    "src/Engine/GraphicsAPI/VulkanAPI/VulkanSubsystemInitialiser.cpp"
     "src/Engine/ErrorHandling/ErrorCodes.cpp"
     "src/Engine/Input/InputManager.cpp"
     "src/Engine/Input/InputActionMouse.cpp"
@@ -68,8 +72,16 @@ add_library(EngineCore STATIC
     "src/Engine/FileSystem/Path.cpp"
     "src/Engine/FileSystem/CorePaths.cpp"
     "src/PreprocessorDefinitions.cpp"
+    "src/Engine/GraphicsAPI/VulkanAPI/RuntimeEngineVulkan.cpp"
     "src/Engine/RuntimeEngine.cpp"
     "src/Engine/GraphicsAPI/VulkanAPI/InitialiseVulkan.cpp"
+    "src/Engine/GraphicsAPI/VulkanAPI/VulkanInstance.cpp"
+    "src/Engine/GraphicsAPI/VulkanAPI/VulkanLogicalDevice.cpp"
+    "src/Engine/GraphicsAPI/VulkanAPI/VulkanSwapChain.cpp"
+    "src/Engine/GraphicsAPI/VulkanAPI/VulkanGraphicsCard.cpp"
+    "src/Engine/GraphicsAPI/VulkanAPI/VulkanRenderPipeline.cpp"
+    "src/Engine/GraphicsAPI/VulkanAPI/VulkanImageView.cpp"
+    "src/Engine/GraphicsAPI/VulkanAPI/VulkanRenderPass.cpp"
     "src/Engine/GraphicsAPI/GraphicsAPIConstructor.cpp")
 
 set_target_properties(EngineCore
@@ -118,6 +130,7 @@ install(TARGETS EngineCore
         INCLUDES DESTINATION ${CMAKE_INSTALL_INCLUDEDIR})
 install(FILES
     src/Engine/Rendering/Shaders/Shader.h 
+    src/Engine/Rendering/Shaders/VulkanShader.h
     src/Engine/Rendering/Textures/Texture.h
     src/Engine/Rendering/Textures/CubeMap.h
     src/Engine/DataStructures/Array.h
@@ -128,7 +141,10 @@ install(FILES
     src/Engine/DataStructures/BaseDelegate.h
     src/Engine/DataStructures/Verticie.h
     src/Engine/Window/FirstWindow.h
+    src/Engine/Window/Window.h
+    src/Engine/Window/VulkanWindow.h
     src/Engine/SubsystemInitialiser.h
+    src/Engine/GraphicsAPI/VulkanAPI/VulkanSubsystemInitialiser.h
     src/Engine/ErrorHandling/ErrorCodes.h
     src/Engine/Input/InputManager.h
     src/Engine/Input/InputActionMouse.h
@@ -159,8 +175,16 @@ install(FILES
     src/Engine/Fracturing/Voronoi2D.h
     src/PreprocessorDefinitions.h
     src/Engine/RuntimeEngine.h
-    src/Engine/GraphicsAPI/Vulkan/InitialiseVulkanAPI.h
+    src/Engine/GraphicsAPI/VulkanAPI/RuntimeEngineVulkan.h
+    src/Engine/GraphicsAPI/VulkanAPI/InitialiseVulkan.h
+    src/Engine/GraphicsAPI/VulkanAPI/VulkanGraphicsCard.h
+    src/Engine/GraphicsAPI/VulkanAPI/VulkanLogicalDevice.h
+    src/Engine/GraphicsAPI/VulkanAPI/VulkanSwapChain.h
+    src/Engine/GraphicsAPI/VulkanAPI/VulkanImageView.h
+    src/Engine/GraphicsAPI/VulkanAPI/VulkanRenderPipeline.h
+    src/Engine/GraphicsAPI/VulkanAPI/VulkanRenderPass.h
     src/Engine/GraphicsAPI/GraphicsAPIConstructor.h
+    src/Engine/GraphicsAPI/VulkanAPI/VulkanInstance.h
     DESTINATION ${CMAKE_INSTALL_INCLUDEDIR})
 
     find_package(glfw3 CONFIG REQUIRED)

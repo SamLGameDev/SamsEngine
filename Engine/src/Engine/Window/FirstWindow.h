@@ -1,11 +1,12 @@
 #pragma once
 #include <cstdint>
 
+#include "Window.h"
 #include "glad/glad.h"
 struct GLFWwindow;
 
 
-class FirstWindow final
+class FirstWindow final : public Window 
 {
 public:
 
@@ -51,15 +52,10 @@ public:
 
 private:
 
-	constexpr static std::uint8_t AntiAliasingSamples = 4;
-
-	constexpr static char WindowName[] = {"SamsEngine"};
-
-	static GLint Width, Height;
-
 	void CreateWindow();
 
-	static void FrameBuffer_Size_Callback(GLFWwindow* InWindow, const int InWidth, const int InHeight);
+
+	void OnWindowResize() override;
 
 	static bool bFrameBufferResized;
 

@@ -22,7 +22,7 @@ ErrorCodes SubsystemInitialiser::Init()
 	try
 	{
 		APIManager = new GraphicsAPIConstructor();
-		APIManager->Init(Vulkan);
+		APIManager->Init(DEPRECIATEDVulkan);
 	}
 	catch (const std::exception& error)
 	{
@@ -33,7 +33,7 @@ ErrorCodes SubsystemInitialiser::Init()
 	try
 	{
 		Window = new FirstWindow();
-		APIManager->AttachToWindow(Vulkan);
+		APIManager->AttachToWindow(DEPRECIATEDVulkan);
 	}
 	catch (const std::exception& error)
 	{
@@ -159,7 +159,7 @@ ErrorCodes SubsystemInitialiser::ShutDown()
 
 	try
 	{
-		APIManager->Shutdown(Vulkan);
+		APIManager->Shutdown(DEPRECIATEDVulkan);
 		delete APIManager;
 	}
 	catch (const std::exception& error)

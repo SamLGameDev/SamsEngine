@@ -6,7 +6,7 @@
 enum GraphicsAPI : std::uint8_t
 {
 	OpenGl,
-	Vulkan
+	DEPRECIATEDVulkan
 };
 
 class GraphicsAPIConstructor

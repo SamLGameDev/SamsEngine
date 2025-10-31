@@ -15,7 +15,7 @@ ErrorCodes GraphicsAPIConstructor::Init(const GraphicsAPI& Api)
 	}
 
 
-	if (Api == Vulkan)
+	if (Api == DEPRECIATEDVulkan)
 	{
 		vulkan = new InitialiseVulkan();
 		vulkan->Init();
@@ -25,7 +25,7 @@ ErrorCodes GraphicsAPIConstructor::Init(const GraphicsAPI& Api)
 
 void GraphicsAPIConstructor::AttachToWindow(const GraphicsAPI& Api)
 {
-	if (Api == Vulkan)
+	if (Api == DEPRECIATEDVulkan)
 	{
 		vulkan->AttachToWindow();
 	}
@@ -33,7 +33,7 @@ void GraphicsAPIConstructor::AttachToWindow(const GraphicsAPI& Api)
 
 void GraphicsAPIConstructor::Shutdown(const GraphicsAPI& API)
 {
-	if (API == Vulkan)
+	if (API == DEPRECIATEDVulkan)
 	{
 		delete vulkan;
 	}

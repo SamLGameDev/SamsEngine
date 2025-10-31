@@ -1,0 +1,171 @@
+#include "VulkanGraphicsCard.h"
+#include <iostream>
+#include "VulkanInstance.h"
+#include "VulkanLogicalDevice.h"
+
+namespace Vulkan
+{
+
+	ErrorCodes UGraphicsCard::Init()
+	{
+		if (FindGraphicsCard() == ERROR) return ERROR;
+
+		LogicalDevice = new ULogicalDevice(this);
+
+		return SUCCEEDED;
+	}
+
+	ErrorCodes UGraphicsCard::FindGraphicsCard()
+	{
+		std::uint32_t NumDevices;
+		vkEnumeratePhysicalDevices(SInstance::GetInstance()->VulkanInstance, &NumDevices, nullptr);
+
+		if (NumDevices == 0)
+		{
+			std::cout << "ERROR::VULKAN::NO PHYSICAL DEVICES FOUND";
+			return ERROR;
+		}
+
+		Array<VkPhysicalDevice> physicalDevices(NumDevices);
+		vkEnumeratePhysicalDevices(SInstance::GetInstance()->VulkanInstance, &NumDevices, physicalDevices.GetFirstRef());
+
+		for (const VkPhysicalDevice& device : physicalDevices)
+		{
+			if (IsDeviceSuitable(device, SInstance::GetInstance()->WindowsInterface))
+			{
+				GraphicsCard = device;
+				Indices = FindQueueFamilies(GraphicsCard, SInstance::GetInstance()->WindowsInterface);
+				return SUCCEEDED;
+			}
+		}
+		std::cerr << "ERROR::VULKAN::GPU::NO SUITABLE GRAPHICS CARD";
+		return ERROR;
+	}
+
+	bool UGraphicsCard::IsDeviceSuitable(const VkPhysicalDevice& Device, const VkSurfaceKHR& Surface)
+	{
+
+		VkPhysicalDeviceProperties deviceProperties;
+		vkGetPhysicalDeviceProperties(Device, &deviceProperties);
+
+		VkPhysicalDeviceFeatures deviceFeatures;
+		vkGetPhysicalDeviceFeatures(Device, &deviceFeatures);
+
+		const bool bHasRequiredExtensions = DoesDeviceHaveRequiredExtensions(Device);
+
+		const bool bSwapChainSupported = IsSwapChainSupported(Device, Surface);
+
+
+		bool suitable = deviceProperties.deviceType == VK_PHYSICAL_DEVICE_TYPE_DISCRETE_GPU &&
+			deviceFeatures.fragmentStoresAndAtomics &&
+			deviceFeatures.geometryShader &&
+			FindQueueFamilies(Device, Surface).IsComplete() && bHasRequiredExtensions && bSwapChainSupported;
+
+#if DEBUG
+		if (suitable)
+		{
+			std::cout << deviceProperties.deviceName << "\n";
+		}
+#endif
+
+
+		return suitable;
+	}
+
+	bool UGraphicsCard::DoesDeviceHaveRequiredExtensions(const VkPhysicalDevice& Device)
+	{
+		uint32_t extensionCount;
+		vkEnumerateDeviceExtensionProperties(Device, nullptr, &extensionCount, nullptr);
+
+		Array<VkExtensionProperties> extensions(extensionCount);
+		vkEnumerateDeviceExtensionProperties(Device, nullptr, &extensionCount, extensions.GetFirstRef());
+
+		for (const char* requiredExtension : DeviceExtensions)
+		{
+			bool contains = false;
+			for (VkExtensionProperties extension : extensions)
+			{
+				if (std::strcmp(extension.extensionName, requiredExtension) == 0)
+				{
+					contains = true;
+					break;
+				}
+			}
+			if (!contains)
+			{
+				return false;
+			}
+
+		}
+		return true;
+	}
+
+	bool UGraphicsCard::IsSwapChainSupported(const VkPhysicalDevice& Device, const VkSurfaceKHR& Surface)
+	{
+		vkGetPhysicalDeviceSurfaceCapabilitiesKHR(Device, Surface, &SwapChainSupport.Capabilities);
+
+		std::uint32_t formatCount;
+		vkGetPhysicalDeviceSurfaceFormatsKHR(Device, Surface, &formatCount, nullptr);
+
+		if (formatCount != 0)
+		{
+			SwapChainSupport.Formats.Reallocate(formatCount);
+			vkGetPhysicalDeviceSurfaceFormatsKHR(Device, Surface, &formatCount, SwapChainSupport.Formats.GetFirstRef());
+		}
+
+		std::uint32_t presentsModeCount;
+		vkGetPhysicalDeviceSurfacePresentModesKHR(Device, Surface, &presentsModeCount, nullptr);
+
+		if (presentsModeCount != 0)
+		{
+			SwapChainSupport.Presents.Reallocate(presentsModeCount);
+			vkGetPhysicalDeviceSurfacePresentModesKHR(Device, Surface, &presentsModeCount, SwapChainSupport.Presents.GetFirstRef());
+		}
+
+		return !SwapChainSupport.Presents.IsEmpty() && !SwapChainSupport.Formats.IsEmpty();
+	}
+
+	QueueFamilyIndices UGraphicsCard::FindQueueFamilies(const VkPhysicalDevice& Device, const VkSurfaceKHR& Surface)
+	{
+		QueueFamilyIndices indices;
+
+		std::uint32_t queueFamilyCount;
+		vkGetPhysicalDeviceQueueFamilyProperties(Device, &queueFamilyCount, nullptr);
+
+		Array<VkQueueFamilyProperties> queueFamily(queueFamilyCount);
+		vkGetPhysicalDeviceQueueFamilyProperties(Device, &queueFamilyCount, queueFamily.GetFirstRef());
+
+		for (size_t i = 0; i < queueFamily.GetSize(); i++)
+		{
+			if (queueFamily[i].queueFlags & VK_QUEUE_GRAPHICS_BIT)
+			{
+				indices.GraphicsFamily = i;
+			}
+
+			VkBool32 bHasSurfaceSupport = false;
+			vkGetPhysicalDeviceSurfaceSupportKHR(Device, i, Surface, &bHasSurfaceSupport);
+
+			if (bHasSurfaceSupport)
+			{
+				indices.PresentFamily = i;
+			}
+
+			if (indices.IsComplete()) break;
+		}
+
+		return indices;
+	}
+
+	ErrorCodes UGraphicsCard::ShutDown()
+	{
+		delete LogicalDevice;
+
+		return SUCCEEDED;
+	
+	}
+
+	UGraphicsCard::UGraphicsCard()
+	{
+		Init();
+	}
+}
