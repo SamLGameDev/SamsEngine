@@ -1,25 +1,14 @@
 #pragma once
-#include "VulkanShader.h"
+#include "OpenGLShader.h"
 #include <fstream>
 #include <sstream>
 #include <iostream>
-#include <vulkan/vulkan_core.h>
-
 #include "CorePaths.h"
-#include "VulkanInstance.h"
-#include "VulkanLogicalDevice.h"
-#include "VulkanRenderPipeline.h"
 
-namespace Vulkan
-{
+namespace OpenGL {
 
 	Shader::Shader()
 	{
-	}
-
-	Shader::~Shader()
-	{
-		delete Pipeline;
 	}
 
 	Shader::Shader(const std::string_view& InName, const std::string_view& InStorageLocation)
@@ -40,30 +29,60 @@ namespace Vulkan
 			}
 		}
 
-		ShaderStages.Add(CompileVertex());
-		ShaderStages.Add(CompileGeometry());
-		ShaderStages.Add(CompileFragment());
+		const unsigned int vertex = CompileVertex();
 
-		Pipeline = new URenderPipeline(*this);
-
-		for (const VkPipelineShaderStageCreateInfo& stage: ShaderStages)
+		if (vertex == -1)
 		{
-			vkDestroyShaderModule(*SInstance::GetInstance()->GraphicsCard->GetLogicalDevice()->GetVulkanLogicalDevice(), stage.module, nullptr);
+			return;
 		}
 
+		if (!DoesGeometryShaderExist())
+		{
+			const bool bIsSuccessful = CreateDefaultGeometryFile();
+			if (!bIsSuccessful)
+			{
+#if DEBUG
+				std::cout << "ERROR::SHADER::GEOMETRY::SHADER NOT CREATED" << '\n';
+#endif
+				return;
+			};
+		}
+
+		const unsigned int geometry = CompileGeometry();
+
+		if (geometry == -1)
+		{
+			return;
+		}
+
+		if (!DoesFragmentShaderExist())
+		{
+			const bool bIsSuccessful = CreateDefaultFragmentFile();
+			if (!bIsSuccessful)
+			{
+#if DEBUG
+				std::cout << "ERROR::SHADER::FRAGMENT::SHADER NOT CREATED" << '\n';
+#endif
+				return;
+			};
+		}
+
+		const unsigned int fragment = CompileFragment();
+
+		if (fragment == -1)
+		{
+			return;
+		}
+
+		CreateProgram(vertex, fragment, geometry);
 	}
 
-	BaseShader* Shader::CreateVulkanShader(const std::string_view& InName, const std::string_view& InStorageLocation)
+	void Shader::Use() const
 	{
-		return new Shader(InName, InStorageLocation);
+		glUseProgram(ID);
 	}
 
-	void Shader::Use()
-	{
-		vkCmdBindPipeline(SInstance::GetInstance()->GraphicsCard->GetRenderer()->GetCurrentBuffer(), VK_PIPELINE_BIND_POINT_GRAPHICS, Pipeline->GetPipeline());
-	}
-
-	void Shader::SetFloat(const std::string_view& InName, const float& Value)
+	void Shader::SetFloat(const std::string_view& InName, const float& Value) const
 	{
 		glUniform1f(glGetUniformLocation(ID, InName.data()), Value);
 	}
@@ -311,91 +330,102 @@ namespace Vulkan
 
 	std::string Shader::GetShaderLocation() const
 	{
-		return GetPathUntyped() + "Vert.spv";
+		return GetPathUntyped() + ".vert";
 	}
 
 	std::string Shader::GetGeometryLocation() const
 	{
-		return GetPathUntyped() + "Geom.spv";
+		return GetPathUntyped() + ".geom";
 	}
 
 	std::string Shader::GetFragmentLocation() const
 	{
-		return GetPathUntyped() + "Frag.spv";
+		return GetPathUntyped() + ".frag";
 	}
 
-	VkPipelineShaderStageCreateInfo Shader::CompileVertex() const
+	unsigned int Shader::CompileVertex() const
 	{
+		int  success;
 
 		const std::string vertexCodeString = ReadFileContents(GetShaderLocation());
 
-		VkShaderModuleCreateInfo createInfo{};
-		createInfo.sType = VK_STRUCTURE_TYPE_SHADER_MODULE_CREATE_INFO;
-		createInfo.codeSize = vertexCodeString.size();
-		createInfo.pCode = reinterpret_cast<const uint32_t*>(vertexCodeString.data());
+		const char* vertexCode = vertexCodeString.c_str();
 
-		VkShaderModule vertShader;
+		const unsigned int vertex = glCreateShader(GL_VERTEX_SHADER);
+		glShaderSource(vertex, 1, &vertexCode, NULL);
+		glCompileShader(vertex);
 
-		vkCreateShaderModule(*SInstance::GetInstance()->GraphicsCard->GetLogicalDevice()->GetVulkanLogicalDevice(), &createInfo, nullptr, &vertShader);
+		glGetShaderiv(vertex, GL_COMPILE_STATUS, &success);
 
-		VkPipelineShaderStageCreateInfo vertPipelineCreateInfo{};
-		vertPipelineCreateInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO;
-		vertPipelineCreateInfo.stage = VK_SHADER_STAGE_VERTEX_BIT;
-		vertPipelineCreateInfo.module = vertShader;
-		vertPipelineCreateInfo.pName = "main";
+		if (!success)
+		{
+#if DEBUG
+			char infoLog[512];
+			glGetShaderInfoLog(vertex, 512, NULL, infoLog);
+			std::cout << "ERROR::SHADER::VERTEX::" << Name << "::COMPILATION_FAILED\n" << infoLog << std::endl;
+#endif
+			return -1;
+		}
 
-		return vertPipelineCreateInfo;
+		return vertex;
 	}
 
-	VkPipelineShaderStageCreateInfo Shader::CompileGeometry() const
+	unsigned int Shader::CompileGeometry() const
 	{
-		const std::string geomCodeString = ReadFileContents(GetGeometryLocation());
+		int  success;
 
-		VkShaderModuleCreateInfo createInfo{};
-		createInfo.sType = VK_STRUCTURE_TYPE_SHADER_MODULE_CREATE_INFO;
-		createInfo.codeSize = geomCodeString.size();
-		createInfo.pCode = reinterpret_cast<const uint32_t*>(geomCodeString.data());
+		const std::string geometryCodeString = ReadFileContents(GetGeometryLocation());
 
-		VkShaderModule geomShader;
+		const char* geometryCode = geometryCodeString.c_str();
 
-		vkCreateShaderModule(*SInstance::GetInstance()->GraphicsCard->GetLogicalDevice()->GetVulkanLogicalDevice(), &createInfo, nullptr, &geomShader);
+		const unsigned int geometry = glCreateShader(GL_GEOMETRY_SHADER);
+		glShaderSource(geometry, 1, &geometryCode, NULL);
+		glCompileShader(geometry);
 
-		VkPipelineShaderStageCreateInfo geomPipelineCreateInfo{};
-		geomPipelineCreateInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO;
-		geomPipelineCreateInfo.stage = VK_SHADER_STAGE_GEOMETRY_BIT;
-		geomPipelineCreateInfo.module = geomShader;
-		geomPipelineCreateInfo.pName = "main";
+		glGetShaderiv(geometry, GL_COMPILE_STATUS, &success);
 
-		return geomPipelineCreateInfo;
+		if (!success)
+		{
+#if DEBUG
+			char infoLog[512];
+			glGetShaderInfoLog(geometry, 512, NULL, infoLog);
+			std::cout << "ERROR::SHADER::GEOMETRY::" << Name << "::COMPILATION_FAILED\n" << infoLog << std::endl;
+#endif
+			return -1;
+		}
+
+		return geometry;
 	}
 
-	VkPipelineShaderStageCreateInfo Shader::CompileFragment() const
+	unsigned int Shader::CompileFragment() const
 	{
-		const std::string fragCodeString = ReadFileContents(GetFragmentLocation());
+		int  success;
 
-		VkShaderModuleCreateInfo createInfo{};
-		createInfo.sType = VK_STRUCTURE_TYPE_SHADER_MODULE_CREATE_INFO;
-		createInfo.codeSize = fragCodeString.size();
-		createInfo.pCode = reinterpret_cast<const uint32_t*>(fragCodeString.data());
+		const std::string fragmentCodeString = ReadFileContents(GetFragmentLocation());
 
-		VkShaderModule fragShader;
+		const char* fragmentCode = fragmentCodeString.data();
 
-		vkCreateShaderModule(*SInstance::GetInstance()->GraphicsCard->GetLogicalDevice()->GetVulkanLogicalDevice(), &createInfo, nullptr, &fragShader);
+		const unsigned int fragment = glCreateShader(GL_FRAGMENT_SHADER);
 
-		VkPipelineShaderStageCreateInfo fragPipelineCreateInfo{};
-		fragPipelineCreateInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO;
-		fragPipelineCreateInfo.stage = VK_SHADER_STAGE_FRAGMENT_BIT;
-		fragPipelineCreateInfo.module = fragShader;
-		fragPipelineCreateInfo.pName = "main";
+		glShaderSource(fragment, 1, &fragmentCode, NULL);
+		glCompileShader(fragment);
+		glGetShaderiv(fragment, GL_COMPILE_STATUS, &success);
 
-		return fragPipelineCreateInfo;
+		if (!success)
+		{
+#if DEBUG
+			char infoLog[512];
+			glGetShaderInfoLog(fragment, 512, NULL, infoLog);
+			std::cout << "ERROR::SHADER::FRAGMENT::" << Name << "::COMPILATION_FAILED\n" << infoLog << std::endl;
+#endif
+			return -1;
+		}
+
+		return fragment;
 	}
 
 	void Shader::CreateProgram(const unsigned int& vertex, const unsigned int& fragment, const unsigned int& geometry)
 	{
-
-
-
 		int  success;
 
 		ID = glCreateProgram();
@@ -421,7 +451,7 @@ namespace Vulkan
 
 	std::string Shader::ReadFileContents(const std::string_view& Location) const
 	{
-		std::ifstream File(Location.data(), std::ios::binary);
+		std::ifstream File;
 		File.open(Location.data());
 		std::stringstream Buffer;
 		Buffer << File.rdbuf();

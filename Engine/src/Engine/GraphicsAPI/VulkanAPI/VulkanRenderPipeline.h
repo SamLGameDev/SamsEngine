@@ -26,9 +26,16 @@ namespace Vulkan
 
 		ErrorCodes ShutDown();
 
+		const VkPipeline& GetPipeline()const
+		{
+			return Pipeline;
+		}
+
 	private:
 
 		VkPipelineLayout Layout;
+
+		VkPipeline Pipeline;
 
 	};
 }

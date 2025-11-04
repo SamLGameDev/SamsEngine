@@ -3,6 +3,7 @@
 
 #include "ErrorCodes.h"
 #include "GraphicsAPIConstructor.h"
+#include "VulkanFrameBuffer.h"
 
 
 namespace Vulkan
@@ -27,6 +28,8 @@ namespace Vulkan
 		VkPresentModeKHR ChooseSwapChainPresent(const Array<VkPresentModeKHR>& AvailablePresents);
 		VkExtent2D ChooseSwapChainExtent(const VkSurfaceCapabilitiesKHR& capabilities);
 		ErrorCodes CreateImageViews();
+		void CreateFrameBuffers();
+		ErrorCodes RecreateSwapChain();
 
 		ErrorCodes ShutDown();
 
@@ -45,6 +48,20 @@ namespace Vulkan
 			return SwapChainFormat;
 		}
 
+		const VkSwapchainKHR& GetSwapChain() const
+		{
+			return SwapChain;
+		}
+
+		const Array<UFrameBuffer>& GetFrameBuffers()const
+		{
+			return FrameBuffers;
+		}
+
+		Array<UImageView>& GetSwapChainImageViews()
+		{
+			return SwapChainImageViews;
+		}
 	private:
 
 		VkSwapchainKHR SwapChain;
@@ -57,6 +74,8 @@ namespace Vulkan
 		VkExtent2D SwapChainExtent;
 
 		Array<UImageView> SwapChainImageViews;
+
+		Array<UFrameBuffer> FrameBuffers;
 
 	};
 }

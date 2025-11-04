@@ -20,9 +20,9 @@ FirstWindow::~FirstWindow()
 void FirstWindow::CreateWindow()
 {
 	glfwWindowHint(GLFW_SAMPLES, AntiAliasingSamples);
-	Window = glfwCreateWindow(Width, Height, WindowName, NULL, NULL);
+	DisplayWindow = glfwCreateWindow(Width, Height, WindowName, NULL, NULL);
 
-	if (Window == NULL)
+	if (DisplayWindow == NULL)
 	{
 #if DEBUG
 		std::cout << "Failed to create window" << std::endl;
@@ -30,7 +30,7 @@ void FirstWindow::CreateWindow()
 		glfwTerminate();
 	}
 
-	glfwMakeContextCurrent(Window);
+	glfwMakeContextCurrent(DisplayWindow);
 
 	if (!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress))
 	{
@@ -39,9 +39,9 @@ void FirstWindow::CreateWindow()
 #endif
 	}
 
-	glfwSetWindowUserPointer(Window, this);
+	glfwSetWindowUserPointer(DisplayWindow, this);
 
-	glfwSetFramebufferSizeCallback(Window, FrameBuffer_Size_Callback);
+	glfwSetFramebufferSizeCallback(DisplayWindow, FrameBuffer_Size_Callback);
 }
 
 void FirstWindow::OnWindowResize()

@@ -13,28 +13,6 @@ namespace Vulkan
 {
 
 
-	//struct SwapChainSupportDetails
-	//{
-	//	VkSurfaceCapabilitiesKHR Capabilities;
-	//	Array<VkSurfaceFormatKHR> Formats;
-	//	Array<VkPresentModeKHR> Presents;
-	//};
-
-
-	//struct QueueFamilyIndices
-	//{
-	//	std::optional<uint32_t> GraphicsFamily;
-	//	std::optional<uint32_t> PresentFamily;
-
-	//	float QueuePriority = 1;
-
-	//	bool IsComplete() const
-	//	{
-	//		return GraphicsFamily.has_value() && PresentFamily.has_value();
-	//	}
-	//};
-
-
 	inline VkResult CreateDebugMessageUtilsMessengerEXT(
 		VkInstance instance, const VkDebugUtilsMessengerCreateInfoEXT* pCreateInfo, const VkAllocationCallbacks* pAllocator, VkDebugUtilsMessengerEXT* pDebugMessenger)
 	{
@@ -66,11 +44,8 @@ namespace Vulkan
 		ErrorCodes CreateVulkan();
 		static void PopulateDebugMessengerCreateInfo(VkDebugUtilsMessengerCreateInfoEXT& createInfo);
 		ErrorCodes CreateDebugMessenger();
-		ErrorCodes FindGraphicsCard();
-		ErrorCodes CreateLogicalDevice();
-		void AttachToWindow();
+	
 		ErrorCodes Init();
-		void CleanUpSwapChain();
 
 		ErrorCodes Shutdown();
 
@@ -79,38 +54,6 @@ namespace Vulkan
 
 		VkInstance Instance;
 		VkDebugUtilsMessengerEXT DebugMessenger;
-		VkPhysicalDevice GraphicsCard = VK_NULL_HANDLE;
-		VkDevice LogicalDevice;
-		VkQueue GraphicsQueue;
-		VkQueue PresentQueue;
-		VkSurfaceKHR WindowsInterface;
-		SwapChainSupportDetails SwapChainSupport;
-		VkSwapchainKHR SwapChain = VK_NULL_HANDLE;
-
-		Array<VkImage> SwapChainImages;
-
-		Array<VkImageView> SwapChainImageViews;
-
-		VkSurfaceFormatKHR SwapChainFomat;
-		VkExtent2D SwapChainExtent;
-
-		VkRenderPass RenderPass;
-		VkPipelineLayout Layout;
-		VkPipeline GraphicsPipeline;
-
-		VkCommandPool CommandPool;
-		Array<VkCommandBuffer> CommandBuffers;
-
-		Array<VkSemaphore> ImageAvailableSemaphores;
-		Array<VkSemaphore> RenderFinishedSemephores;
-		Array<VkFence> InFlightFences;
-
-		const size_t MAX_FRAMES_IN_FLIGHT = 2;
-
-
-		Array<VkFramebuffer> SwapChainFrameBuffers;
-
-		QueueFamilyIndices Indices;
 
 		constexpr static uint32_t ApplicationVersion = VK_MAKE_VERSION(1, 0, 0);
 		constexpr static uint32_t EngineVersion = VK_MAKE_VERSION(1, 0, 0);
@@ -118,8 +61,6 @@ namespace Vulkan
 
 
 		const static Array<const char*> ValidationLayers;
-
-		const static Array<const char*> DeviceExtensions;
 
 		bool CheckValidationLayerSupport();
 
@@ -132,31 +73,5 @@ namespace Vulkan
 			const VkDebugUtilsMessengerCallbackDataEXT* pCallbackData,
 			void* pUserData
 		);
-		static bool DoesDeviceHaveRequiredExtensions(const VkPhysicalDevice& Device);
-		bool IsSwapChainSupported(const VkPhysicalDevice& Device, const VkSurfaceKHR& Surface);
-
-		bool IsDeviceSuitable(const VkPhysicalDevice& Device, const VkSurfaceKHR& Surface);
-
-		static QueueFamilyIndices FindQueueFamilies(const VkPhysicalDevice& Device, const VkSurfaceKHR& Surface);
-
-		static VkSurfaceFormatKHR ChooseSwapChainFormat(const Array<VkSurfaceFormatKHR>& AvailableFormats);
-		static VkPresentModeKHR ChooseSwapChainPresent(const Array<VkPresentModeKHR>& AvailablePresents);
-		static VkExtent2D ChooseSwapChainExtent(const VkSurfaceCapabilitiesKHR& capabilities);
-
-		ErrorCodes CreateCommandPool();
-		ErrorCodes CreateCommandBuffers();
-
-		ErrorCodes RecordCommandBuffer(VkCommandBuffer Buffer, std::uint32_t ImageIndex);
-
-		ErrorCodes CreateSwapChain();
-
-		ErrorCodes CreateImageViews();
-
-		ErrorCodes CreateFrameBuffer();
-
-		ErrorCodes CreateSyncObjects();
-
-		ErrorCodes RecreateSwapChain();
-
 	};
 }

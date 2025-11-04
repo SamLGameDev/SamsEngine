@@ -348,8 +348,8 @@ TEST(Vector2D, PerpendicularBisector)
 	Vulkan::RuntimeEngine engine;
 	engine.Init();
 
-	Voronoi2D v;
-	v.FracturePlaneRandom(Vector2D(-1, 1), Vector2D(-1, -1), Vector2D(1, 1), Vector2D(1, -1));
+	//Voronoi2D v;
+	//v.FracturePlaneRandom(Vector2D(-1, 1), Vector2D(-1, -1), Vector2D(1, 1), Vector2D(1, -1));
 
 	while (!RuntimeEngine::ShouldClose())
 	{

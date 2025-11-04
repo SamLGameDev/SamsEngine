@@ -1,5 +1,8 @@
 #include "RuntimeEngineVulkan.h"
 #include "Camera.h"
+#include "VulkanInstance.h"
+#include "VulkanLogicalDevice.h"
+#include "VulkanRenderer.h"
 
 namespace Vulkan
 {
@@ -17,46 +20,26 @@ namespace Vulkan
 
 		TimeLastFrame = glfwGetTime();
 
-		Gsync = glFenceSync(GL_SYNC_GPU_COMMANDS_COMPLETE, 0);
-
 		return SUCCEEDED;
 	}
 
 	ErrorCodes RuntimeEngine::Loop()
 	{
-		if (Gsync)
-		{
-			while (true)
-			{
-				GLenum waitReturn = glClientWaitSync(Gsync, GL_SYNC_FLUSH_COMMANDS_BIT, 1);
-				if (waitReturn & (GL_ALREADY_SIGNALED | GL_CONDITION_SATISFIED))
-				{
-					break;
-				}
-			}
-		}
 
-		const double time = glfwGetTime();
-		const double deltaTime = time - TimeLastFrame;
-		TimeLastFrame = time;
-		Object::TickDel.Broadcast(deltaTime);
-
-		if (Gsync)
-		{
-			glDeleteSync(Gsync);
-		}
-		Gsync = glFenceSync(GL_SYNC_GPU_COMMANDS_COMPLETE, 0);
+		SInstance::GetInstance()->GraphicsCard->GetRenderer()->Render();
 
 		return SUCCEEDED;
 	}
 
 	ErrorCodes RuntimeEngine::ShutDown()
 	{
-		glfwTerminate();
+		vkDeviceWaitIdle(*SInstance::GetInstance()->GraphicsCard->GetLogicalDevice()->GetVulkanLogicalDevice());
 
 		SubsystemManager->ShutDown();
 
 		delete SubsystemManager;
+
+		glfwTerminate();
 
 		return SUCCEEDED;
 	}

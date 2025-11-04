@@ -21,8 +21,7 @@ ErrorCodes SubsystemInitialiser::Init()
 
 	try
 	{
-		APIManager = new GraphicsAPIConstructor();
-		APIManager->Init(DEPRECIATEDVulkan);
+		//TODO add opengl initialiser
 	}
 	catch (const std::exception& error)
 	{
@@ -33,7 +32,6 @@ ErrorCodes SubsystemInitialiser::Init()
 	try
 	{
 		Window = new FirstWindow();
-		APIManager->AttachToWindow(DEPRECIATEDVulkan);
 	}
 	catch (const std::exception& error)
 	{
@@ -150,17 +148,6 @@ ErrorCodes SubsystemInitialiser::ShutDown()
 	try
 	{
 		delete inputManager;
-	}
-	catch (const std::exception& error)
-	{
-		std::cout << error.what() << "\n";
-		return ERROR;
-	}
-
-	try
-	{
-		APIManager->Shutdown(DEPRECIATEDVulkan);
-		delete APIManager;
 	}
 	catch (const std::exception& error)
 	{

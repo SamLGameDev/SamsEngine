@@ -12,6 +12,10 @@ namespace Vulkan
 
 		LogicalDevice = new ULogicalDevice(this);
 
+		CreateRenderer();
+
+		LogicalDevice->GetSwapChain()->CreateFrameBuffers();
+
 		return SUCCEEDED;
 	}
 
@@ -156,8 +160,17 @@ namespace Vulkan
 		return indices;
 	}
 
+
+	void UGraphicsCard::CreateRenderer()
+	{
+
+		Renderer = new URenderer(this);
+	}
+
 	ErrorCodes UGraphicsCard::ShutDown()
 	{
+		delete Renderer;
+
 		delete LogicalDevice;
 
 		return SUCCEEDED;
@@ -166,6 +179,5 @@ namespace Vulkan
 
 	UGraphicsCard::UGraphicsCard()
 	{
-		Init();
 	}
 }

@@ -5,79 +5,26 @@
 #include <iostream>
 #include "CorePaths.h"
 
+
+std::function<BaseShader*(const std::string_view& InName, const std::string_view& InStorageLocation)> Shader::ShaderCreationFunc;
+
 Shader::Shader()
 {
 }
 
+Shader::~Shader()
+{
+	delete RealShader;
+}
+
 Shader::Shader(const std::string_view& InName, const std::string_view& InStorageLocation)
 {
-	StorageLocation = InStorageLocation;
-
-	Name = InName;
-
-	if (!DoesVertexShaderExist())
-	{
-		const bool bIsSuccessful = CreateDefaultShaderFile();
-		if (!bIsSuccessful)
-		{
-#if DEBUG
-			std::cout << "ERROR::SHADER::VERTEX::SHADER NOT CREATED" << '\n';
-#endif
-			return;
-		}
-	}
-
-	const unsigned int vertex = CompileVertex();
-
-	if (vertex == -1)
-	{
-		return;
-	}
-
-	if (!DoesGeometryShaderExist())
-	{
-		const bool bIsSuccessful = CreateDefaultGeometryFile();
-		if (!bIsSuccessful)
-		{
-#if DEBUG
-			std::cout << "ERROR::SHADER::GEOMETRY::SHADER NOT CREATED" << '\n';
-#endif
-			return;
-		};
-	}
-
-	const unsigned int geometry = CompileGeometry();
-
-	if (geometry == -1)
-	{
-		return;
-	}
-
-	if (!DoesFragmentShaderExist())
-	{
-		const bool bIsSuccessful = CreateDefaultFragmentFile();
-		if (!bIsSuccessful)
-		{
-#if DEBUG
-			std::cout << "ERROR::SHADER::FRAGMENT::SHADER NOT CREATED" << '\n';
-#endif
-			return;
-		};
-	}
-
-	const unsigned int fragment = CompileFragment();
-
-	if (fragment == -1)
-	{
-		return;
-	}
-
-	CreateProgram(vertex, fragment, geometry);
+	RealShader = ShaderCreationFunc(InName, InStorageLocation);
 }
 
 void Shader::Use() const
 {
-	glUseProgram(ID);
+	RealShader->Use();
 }
 
 void Shader::SetFloat(const std::string_view& InName, const float& Value) const

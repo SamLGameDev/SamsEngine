@@ -6,6 +6,8 @@
 #include "ObjectFactory.h"
 #include "VulkanInstance.h"
 #include "VulkanWindow.h"
+#include "Shader.h"
+#include "VulkanShader.h"
 
 namespace Vulkan
 {
@@ -44,10 +46,13 @@ namespace Vulkan
 			return ERROR;
 		}
 
+		::Shader::ShaderCreationFunc = Vulkan::Shader::CreateVulkanShader;
+
 		try
 		{
-			GraphicsCard = new UGraphicsCard();
-			SInstance::GetInstance()->GraphicsCard = GraphicsCard;
+			SInstance::GetInstance()->GraphicsCard = new UGraphicsCard();
+			GraphicsCard = SInstance::GetInstance()->GraphicsCard;
+			GraphicsCard->Init();
 		}
 		catch (const std::exception& error)
 		{
@@ -55,20 +60,9 @@ namespace Vulkan
 			return ERROR;
 		}
 
-		try
+	/*	try
 		{
-			RenderPass = new URenderPass();
-			SInstance::GetInstance()->RenderPass = RenderPass;
-		}
-		catch (const std::exception& error)
-		{
-			std::cerr << error.what() << "\n";
-			return ERROR;
-		}
-
-		try
-		{
-			inputManager = new InputManager(Window->GetWindow());
+			inputManager = new InputManager();
 		}
 		catch (const std::exception& error)
 		{
@@ -122,7 +116,7 @@ namespace Vulkan
 		{
 			std::cout << error.what() << "\n";
 			return ERROR;
-		}
+		}*/
 
 		return SUCCEEDED;
 	}
@@ -174,17 +168,6 @@ namespace Vulkan
 		try
 		{
 			delete inputManager;
-		}
-		catch (const std::exception& error)
-		{
-			std::cout << error.what() << "\n";
-			return ERROR;
-		}
-
-		try
-		{
-			APIManager->Shutdown(DEPRECIATEDVulkan);
-			delete APIManager;
 		}
 		catch (const std::exception& error)
 		{

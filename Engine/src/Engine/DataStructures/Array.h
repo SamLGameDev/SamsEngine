@@ -83,6 +83,12 @@ public:
 		return true;
 
 	}
+
+	bool operator==(const nullptr_t null)
+	{
+		return this == null;
+	}
+
 	[[nodiscard]] T operator[](const unsigned int Index) const
 	{
 		return GetItemAt(Index);
@@ -212,6 +218,29 @@ public:
 			{
 				return true;
 			}
+		}
+		return false;
+	}
+
+	bool Replace(const T& ToReplace, const T& NewItem)
+	{
+		for (unsigned int i = 0; i < NumItems; i++)
+		{
+			if (DynamicArray[i] == ToReplace)
+			{
+				DynamicArray[i] = NewItem;
+				return true;
+			}
+		}
+		return false;
+	}
+
+	bool Replace(const size_t Index, const T& Item)
+	{
+		if (NumItems > Index)
+		{
+			DynamicArray[Index] = Item;
+			return true;
 		}
 		return false;
 	}

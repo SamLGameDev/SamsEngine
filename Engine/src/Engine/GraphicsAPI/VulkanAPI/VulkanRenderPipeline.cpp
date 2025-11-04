@@ -122,7 +122,7 @@ namespace Vulkan
 
 		VkGraphicsPipelineCreateInfo pipelineCreateInfo{};
 		pipelineCreateInfo.sType = VK_STRUCTURE_TYPE_GRAPHICS_PIPELINE_CREATE_INFO;
-		pipelineCreateInfo.stageCount = 2;
+		pipelineCreateInfo.stageCount = InShader.GetShaderStages().GetSize();
 		pipelineCreateInfo.pStages = InShader.GetShaderStages().GetFirstRef();
 		pipelineCreateInfo.pInputAssemblyState = &inputAssemblyCreateInfo;
 		pipelineCreateInfo.pVertexInputState = &vertexInputStateCreateInfo;
@@ -144,6 +144,8 @@ namespace Vulkan
 
 	ErrorCodes URenderPipeline::ShutDown()
 	{
+		vkDestroyPipeline(*SInstance::GetInstance()->GraphicsCard->GetLogicalDevice()->GetVulkanLogicalDevice(), Pipeline, nullptr);
+		vkDestroyPipelineLayout(*SInstance::GetInstance()->GraphicsCard->GetLogicalDevice()->GetVulkanLogicalDevice(), Layout, nullptr);
 		return SUCCEEDED;
 	}
 }

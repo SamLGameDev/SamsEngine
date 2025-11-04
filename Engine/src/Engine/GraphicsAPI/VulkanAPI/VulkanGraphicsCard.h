@@ -3,6 +3,7 @@
 
 #include "ErrorCodes.h"
 #include "GraphicsAPIConstructor.h"
+#include "VulkanRenderer.h"
 
 namespace Vulkan
 {
@@ -75,6 +76,13 @@ namespace Vulkan
 			return LogicalDevice;
 		}
 
+		URenderer* GetRenderer()
+		{
+			return Renderer;
+		};
+
+		void CreateRenderer();
+
 		ErrorCodes ShutDown();
 
 	private:
@@ -89,12 +97,17 @@ namespace Vulkan
 
 		QueueFamilyIndices Indices;
 
-#if DEBUG
-		const Array<const char*> ValidationLayers = { "VK_LAYER_KHRONOS_validation" };
-#endif
-#if RELEASE
-		const Array<const char*> ValidationLayers;
-#endif
+		URenderer* Renderer;
 
+		const Array<const char*> ValidationLayers = { "VK_LAYER_KHRONOS_validation" };
+//#if DEBUG
+//		const Array<const char*> ValidationLayers = { "VK_LAYER_KHRONOS_validation" };
+//#endif
+//#if RELEASE
+//		const Array<const char*> ValidationLayers;
+//#endif
+//#ifndef ValidationLayers
+//		const Array<const char*> ValidationLayers;
+//#endif
 	};
 }

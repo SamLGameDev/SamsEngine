@@ -8,7 +8,7 @@
 namespace Vulkan
 {
 
-	std::optional<SInstance*> SInstance::Instance = nullptr;
+	std::optional<SInstance*> SInstance::Instance;
 
 	
 	ErrorCodes SInstance::ShutDown()

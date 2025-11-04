@@ -23,7 +23,6 @@ namespace Vulkan
 	{
 		ShutDown();
 	}
-
 	ErrorCodes USwapChain::Init()
 	{
 		if (CreateSwapChain() == ERROR)
@@ -165,14 +164,68 @@ namespace Vulkan
 			createInfo.subresourceRange.baseArrayLayer = 0;
 			createInfo.subresourceRange.layerCount = 1;
 
-			SwapChainImageViews.Add(UImageView(this, createInfo));
+			SwapChainImageViews.Replace(i, UImageView(this, createInfo));
+
+			createInfo.subresourceRange.layerCount = 1;
 		}
+
+		return SUCCEEDED;
+	}
+
+	void USwapChain::CreateFrameBuffers()
+	{
+		FrameBuffers.Reallocate(SwapChainImageViews.GetSize());
+
+		for (size_t i = 0; i < SwapChainImageViews.GetSize(); i++)
+		{
+			VkImageView attachments[] = { SwapChainImageViews[i].GetVulkanImageView() };
+
+			VkFramebufferCreateInfo framebufferCreateInfo{};
+			framebufferCreateInfo.sType = VK_STRUCTURE_TYPE_FRAMEBUFFER_CREATE_INFO;
+			framebufferCreateInfo.renderPass = SInstance::GetInstance()->RenderPass->GetVulkanRenderPass();
+			framebufferCreateInfo.attachmentCount = 1;
+			framebufferCreateInfo.pAttachments = attachments;
+			framebufferCreateInfo.width = SwapChainExtent.width;
+			framebufferCreateInfo.height = SwapChainExtent.height;
+			framebufferCreateInfo.layers = 1;
+
+			FrameBuffers.Replace(i, UFrameBuffer(framebufferCreateInfo));
+		}
+	}
+
+
+	ErrorCodes USwapChain::RecreateSwapChain()
+	{
+		int width, height = 0;
+
+		glfwGetFramebufferSize(Window::GetWindowInstance()->GetWindow(), &width, &height);
+
+		while (width == 0 || height == 0)
+		{
+
+			glfwGetFramebufferSize(Window::GetWindowInstance()->GetWindow(), &width, &height);
+			glfwWaitEvents();
+		}
+
+		vkDeviceWaitIdle(*OwningDevice->GetVulkanLogicalDevice());
+
+		ShutDown();
+
+		CreateSwapChain();
+		CreateImageViews();
+		CreateFrameBuffers();
 
 		return SUCCEEDED;
 	}
 
 	ErrorCodes USwapChain::ShutDown()
 	{
+
+		for (auto& buffer : FrameBuffers)
+		{
+			buffer.ShutDown();
+		}
+
 		for (UImageView view : SwapChainImageViews)
 		{
 			view.ShutDown();

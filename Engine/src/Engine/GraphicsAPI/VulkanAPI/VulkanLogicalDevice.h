@@ -12,7 +12,7 @@ namespace Vulkan
 	class ULogicalDevice
 	{
 	public:
-
+		void CreateSwapChain();
 		ULogicalDevice(UGraphicsCard* InOwningCard);
 		~ULogicalDevice();
 
@@ -31,9 +31,14 @@ namespace Vulkan
 			return &LogicalDevice;
 		}
 
-		const USwapChain* GetSwapChain() const
+		USwapChain* GetSwapChain() const
 		{
 			return SwapChain;
+		}
+
+		const VkQueue& GetGraphicsQueue() const
+		{
+			return GraphicsQueue;
 		}
 
 

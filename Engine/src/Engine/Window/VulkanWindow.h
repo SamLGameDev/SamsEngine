@@ -3,7 +3,6 @@
 
 #include "Window.h"
 #include "glad/glad.h"
-struct GLFWwindow;
 
 namespace Vulkan
 {

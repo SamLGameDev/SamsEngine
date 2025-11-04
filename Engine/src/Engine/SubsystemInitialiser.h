@@ -28,8 +28,6 @@ private:
 
 	FirstWindow* Window;
 
-	GraphicsAPIConstructor* APIManager;
-
 	InputManager* inputManager;
 
 	World* world;

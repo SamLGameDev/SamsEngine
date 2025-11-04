@@ -8,12 +8,16 @@
 
 namespace Vulkan
 {
+	void ULogicalDevice::CreateSwapChain()
+	{
+		SwapChain = new USwapChain(this);
+	}
 
 	ULogicalDevice::ULogicalDevice(UGraphicsCard* InOwningCard)
 	{
 		OwningCard = InOwningCard;
 		Init();
-		SwapChain = new USwapChain(this);
+		CreateSwapChain();
 	}
 
 	ULogicalDevice::~ULogicalDevice()
@@ -51,6 +55,7 @@ namespace Vulkan
 
 
 		VkPhysicalDeviceFeatures deviceFeatures{};
+		deviceFeatures.geometryShader = VK_TRUE;
 
 		const Array<const char*>& deviceExtensions = OwningCard->GetDeviceExtensions();
 
@@ -73,6 +78,7 @@ namespace Vulkan
 		deviceCreateInfo.enabledLayerCount = validationLayers.GetSize();
 		deviceCreateInfo.ppEnabledLayerNames = validationLayers.GetFirstRef();
 #endif
+
 
 		if (vkCreateDevice(*OwningCard->GetVulkanPhysicalDevice(), &deviceCreateInfo, nullptr, &LogicalDevice) != VK_SUCCESS)
 		{

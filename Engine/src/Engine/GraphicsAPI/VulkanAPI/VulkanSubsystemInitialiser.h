@@ -50,7 +50,5 @@ namespace Vulkan
 
 		UGraphicsCard* GraphicsCard;
 
-		URenderPass* RenderPass;
-
 	};
 }

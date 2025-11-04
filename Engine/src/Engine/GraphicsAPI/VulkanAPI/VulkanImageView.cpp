@@ -39,7 +39,10 @@ namespace Vulkan
 
 	ErrorCodes UImageView::ShutDown()
 	{
-		vkDestroyImageView(*OwningSwapChain->GetOwningDevice()->GetVulkanLogicalDevice(), ImageView, nullptr);
+		if (ImageView == VK_NULL_HANDLE) return SUCCEEDED;
+
+		//vkDestroyImageView(*OwningSwapChain->GetOwningDevice()->GetVulkanLogicalDevice(), ImageView, nullptr);
 		ImageView = VK_NULL_HANDLE;
+		return SUCCEEDED;
 	}
 }

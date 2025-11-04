@@ -3,7 +3,6 @@
 
 #include "Window.h"
 #include "glad/glad.h"
-struct GLFWwindow;
 
 
 class FirstWindow final : public Window 
@@ -16,7 +15,7 @@ public:
 
 	[[nodiscard]] inline GLFWwindow* GetWindow() const
 	{
-		return Window;
+		return DisplayWindow;
 	}
 
 	static inline void SetWindowWidth(const GLint InWidth)
@@ -37,7 +36,6 @@ public:
 	{
 		return Height;
 	}
-	static GLFWwindow* Window;
 
 	[[nodiscard]] static inline bool HasWindowBeenResized()
 	{

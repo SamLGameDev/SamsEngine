@@ -28,6 +28,8 @@ include(GNUInstallDirs)
 
 add_library(EngineCore STATIC
     "src/Engine/Rendering/Shaders/Shader.cpp"
+    "src/Engine/Rendering/Shaders/BaseShader.cpp"
+    "src/Engine/Rendering/Shaders/OpenGLShader.cpp"
     "src/Engine/Rendering/Shaders/VulkanShader.cpp"
     "src/Engine/Rendering/Textures/CubeMap.cpp"
     "src/Engine/Rendering/Textures/Texture.cpp"
@@ -53,6 +55,7 @@ add_library(EngineCore STATIC
     "src/Engine/Objects/World/WorldObject.cpp"
     "src/Engine/Camera/Camera.cpp"
     "src/Engine/Rendering/Renderer.cpp"
+    "src/Engine/Rendering/VulkanRenderer.cpp"
     "src/Engine/Objects/Placement/Transform.cpp"
     "src/Engine/Rendering/Buffers/FrameBufferFactory.cpp"
     "src/Engine/Rendering/Buffers/UniformBufferFactory.cpp"
@@ -82,6 +85,7 @@ add_library(EngineCore STATIC
     "src/Engine/GraphicsAPI/VulkanAPI/VulkanRenderPipeline.cpp"
     "src/Engine/GraphicsAPI/VulkanAPI/VulkanImageView.cpp"
     "src/Engine/GraphicsAPI/VulkanAPI/VulkanRenderPass.cpp"
+    "src/Engine/GraphicsAPI/VulkanAPI/VulkanFrameBuffer.cpp"
     "src/Engine/GraphicsAPI/GraphicsAPIConstructor.cpp")
 
 set_target_properties(EngineCore
@@ -130,6 +134,8 @@ install(TARGETS EngineCore
         INCLUDES DESTINATION ${CMAKE_INSTALL_INCLUDEDIR})
 install(FILES
     src/Engine/Rendering/Shaders/Shader.h 
+    src/Engine/Rendering/Shaders/BaseShader.h
+    src/Engine/Rendering/Shaders/OpenGLShader.h
     src/Engine/Rendering/Shaders/VulkanShader.h
     src/Engine/Rendering/Textures/Texture.h
     src/Engine/Rendering/Textures/CubeMap.h
@@ -154,6 +160,7 @@ install(FILES
     src/Engine/Objects/World/World.h
     src/Engine/Objects/World/WorldObject.h
     src/Engine/Camera/Camera.h
+    src/Engine/Rendering/VulkanRenderer.h
     src/Engine/Rendering/Renderer.h
     src/Engine/Objects/Placement/Transform.h
     src/Engine/Rendering/Buffers/FrameBufferFactory.h
@@ -183,6 +190,7 @@ install(FILES
     src/Engine/GraphicsAPI/VulkanAPI/VulkanImageView.h
     src/Engine/GraphicsAPI/VulkanAPI/VulkanRenderPipeline.h
     src/Engine/GraphicsAPI/VulkanAPI/VulkanRenderPass.h
+    src/Engine/GraphicsAPI/VulkanAPI/VulkanFrameBuffer.h
     src/Engine/GraphicsAPI/GraphicsAPIConstructor.h
     src/Engine/GraphicsAPI/VulkanAPI/VulkanInstance.h
     DESTINATION ${CMAKE_INSTALL_INCLUDEDIR})
