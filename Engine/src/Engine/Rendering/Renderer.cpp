@@ -225,9 +225,9 @@ void Renderer::DrawFractures() const
 void Renderer::RenderWorldObjets() const
 {
 
-	glBindFramebuffer(GL_FRAMEBUFFER, 0);
+	glBindFramebuffer(GL_FRAMEBUFFER, AntiAliasing.FBO);
 
-	//glEnable(GL_DEPTH_TEST);
+	glEnable(GL_DEPTH_TEST);
 
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
 
@@ -237,11 +237,11 @@ void Renderer::RenderWorldObjets() const
 
 	//glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
-	//DrawWireObjects();
+	DrawWireObjects();
 
-	DrawFractures();
+	//DrawFractures();
 
-	//DrawModels();
+	DrawModels();
 
 }
 
@@ -289,7 +289,7 @@ void Renderer::RenderingLoop() const
 {
 	RenderWorldObjets();
 
-	//RenderPostProcessing();
+	RenderPostProcessing();
 
 	WindowInputManager->ProcessInput(Camera::GetActiveWindow()->GetWindow());
 

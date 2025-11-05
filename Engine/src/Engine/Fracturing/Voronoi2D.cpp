@@ -80,7 +80,7 @@ void Voronoi2D::FracturePlaneRandom(Vector2D TopLeft, Vector2D BottomLeft, Vecto
 			point1 = Vector2D::RandomRange(BottomLeft, TopRight);
 		}
 
-		points.Add(Vector2D::RandomRange(BottomLeft, TopRight));
+		points.Add(point1);
 	}
 
 	//points = { {0, 0},{0.2, -0.7}, Vector2D(-1, -1)};

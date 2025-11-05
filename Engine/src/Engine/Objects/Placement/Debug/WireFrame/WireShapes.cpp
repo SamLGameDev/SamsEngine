@@ -133,47 +133,54 @@ std::unique_ptr<WireObject> DrawWireCube(const Vector3D& Center, const Vector3D&
 
 	//Faces aren't used currently, maybe something fracturing will use, when i next work on it
 
-	/*Face face;
-	face.Verticies.Add(object->Vertices[object->Indices[0]]);
-	face.Verticies.Add(object->Vertices[object->Indices[1]]);
-	face.Verticies.Add(object->Vertices[object->Indices[2]]);
-	face.Verticies.Add(object->Vertices[object->Indices[3]]);
+	//Top right, bottom right, bottom left, top left
+	Face face;
+	face.Vertices.Add(object->Vertices[0].Position);
+	face.Vertices.Add(object->Vertices[1].Position);
+	face.Vertices.Add(object->Vertices[2].Position);
+	face.Vertices.Add(object->Vertices[3].Position);
 	object->Faces.Add(face);
 
+	//back top right, back bottom right, front bottom right, front top right
 	face = Face();
-	face.Verticies.Add(object->Vertices[object->Indices[0]]);
-	face.Verticies.Add(object->Vertices[object->Indices[1]]);
-	face.Verticies.Add(object->Vertices[object->Indices[5]]);
-	face.Verticies.Add(object->Vertices[object->Indices[4]]);
+	face.Vertices.Add(object->Vertices[4].Position);
+	face.Vertices.Add(object->Vertices[5].Position);
+	face.Vertices.Add(object->Vertices[1].Position);
+	face.Vertices.Add(object->Vertices[0].Position);
 	object->Faces.Add(face);
 
+	//back top left, back bottom left, back bottom right, back top right
 	face = Face();
-	face.Verticies.Add(object->Vertices[object->Indices[4]]);
-	face.Verticies.Add(object->Vertices[object->Indices[5]]);
-	face.Verticies.Add(object->Vertices[object->Indices[6]]);
-	face.Verticies.Add(object->Vertices[object->Indices[7]]);
+	face.Vertices.Add(object->Vertices[7].Position);
+	face.Vertices.Add(object->Vertices[6].Position);
+	face.Vertices.Add(object->Vertices[5].Position);
+	face.Vertices.Add(object->Vertices[4].Position);
 	object->Faces.Add(face);
 
+
+	//front top left, front bottom left, back bottom left, back top left
 	face = Face();
-	face.Verticies.Add(object->Vertices[object->Indices[2]]);
-	face.Verticies.Add(object->Vertices[object->Indices[3]]);
-	face.Verticies.Add(object->Vertices[object->Indices[7]]);
-	face.Verticies.Add(object->Vertices[object->Indices[6]]);
-	object->Faces.Add(face);*/
+	face.Vertices.Add(object->Vertices[3].Position);
+	face.Vertices.Add(object->Vertices[2].Position);
+	face.Vertices.Add(object->Vertices[6].Position);
+	face.Vertices.Add(object->Vertices[7].Position);
+	object->Faces.Add(face);
 
-	//face = Face();
-	//face.Verticies.Add(object->Vertices[object->Indices[0]]);
-	//face.Verticies.Add(object->Vertices[object->Indices[3]]);
-	//face.Verticies.Add(object->Vertices[object->Indices[7]]);
-	//face.Verticies.Add(object->Vertices[object->Indices[3]]);
-	//object->Faces.Add(face);
+	//back top right, front top right, front top left, back top left
+	face = Face();
+	face.Vertices.Add(object->Vertices[4].Position);
+	face.Vertices.Add(object->Vertices[0].Position);
+	face.Vertices.Add(object->Vertices[3].Position);
+	face.Vertices.Add(object->Vertices[7].Position);
+	object->Faces.Add(face);
 
-	//face = Face();
-	//face.Verticies.Add(object->Vertices[object->Indices[1]]);
-	//face.Verticies.Add(object->Vertices[object->Indices[2]]);
-	//face.Verticies.Add(object->Vertices[object->Indices[6]]);
-	//face.Verticies.Add(object->Vertices[object->Indices[5]]);
-	//object->Faces.Add(face);
+	//back bottom right, front bottom right, front bottom left, back bottom left
+	face = Face();
+	face.Vertices.Add(object->Vertices[5].Position);
+	face.Vertices.Add(object->Vertices[1].Position);
+	face.Vertices.Add(object->Vertices[2].Position);
+	face.Vertices.Add(object->Vertices[6].Position);
+	object->Faces.Add(face);
 
 	object->Initialise();
 
