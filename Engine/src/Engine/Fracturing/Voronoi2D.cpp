@@ -10,6 +10,9 @@
 
 #include "WireShapes.h";
 
+Shader FracturePiece::PointShader;
+
+
 //Possible floaing point error causing points to break
 
 bool Voronoi2D::GetIntersection(float a, float b, float c,  Vector2D From, Vector2D To, Vector2D& intersection)
@@ -60,6 +63,9 @@ bool Voronoi2D::GetIntersection(float a, float b, float c,  Vector2D From, Vecto
 
 void Voronoi2D::FracturePlaneRandom(Vector2D TopLeft, Vector2D BottomLeft, Vector2D TopRight, Vector2D BottomRight)
 {
+
+	FracturePiece::PointShader = Shader("Point2D", "Shaders/");
+
 
 	Vector2D center = BottomLeft + (TopRight / 2);
 
@@ -308,7 +314,6 @@ FracturePiece::FracturePiece(Array<Vector2D> cell, Vector2D Point)
 
 	color = Vector3D::RandomRange(Vector3D(30, 30, 30), Vector3D(255, 255, 255));
 
-	PointShader = Shader("Point2D", "Shaders/");
 
 	Renderer::FracturesToDraw.Add(this);
 }

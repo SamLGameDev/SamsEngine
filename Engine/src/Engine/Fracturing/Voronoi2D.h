@@ -29,10 +29,11 @@ public:
 	void Draw(const Shader* InShader);
 
 	Vector3D color;
+	static Shader PointShader;
+
 
 private:
 
-	Shader PointShader;
 
 	GLuint PVAO, PVBO;
 
