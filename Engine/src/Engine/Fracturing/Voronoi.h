@@ -11,10 +11,37 @@ public:
 
 	void FracturePlaneRandom(Model& InModel);
 	static void DefinePlane(Vector3D& normal, Vector3D& CurrentPoint, Vector3D& closestPoint, Vector3D& Right, Vector3D& Up, Vector3D& PlaneCenter);
+	bool IsPointInPolygon(Vector3D Point, Array<Vector3D> Polygon);
 
 private:
 
 	std::vector<std::unique_ptr<WireObject>> TestSquare;
 
+	Array<Face> fractureFaces;
 
+
+};
+class FracturePiece3D
+{
+public:
+
+	FracturePiece3D(Array<Vector3D> cell, Vector3D Point);
+
+	void Draw(const Shader* InShader);
+
+	Vector3D color;
+	static Shader PointShader;
+
+
+private:
+
+
+	GLuint PVAO, PVBO;
+
+
+	Array<float> Verts;
+
+	Array<unsigned int> Inds;
+
+	GLuint VAO, VBO, EBO;
 };

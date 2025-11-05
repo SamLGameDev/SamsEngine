@@ -176,7 +176,7 @@ void Model::LoadModel()
 
 	ModelTransform.CalculateBounds();
 
-	ProcessNode(scene->mRootNode, scene);
+	//ProcessNode(scene->mRootNode, scene);
 }
 
 void Model::ProcessNode(const aiNode* Node, const aiScene* Scene)
