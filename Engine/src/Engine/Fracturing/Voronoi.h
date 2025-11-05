@@ -11,7 +11,7 @@ public:
 
 	void FracturePlaneRandom(Model& InModel);
 	static void DefinePlane(Vector3D& normal, Vector3D& CurrentPoint, Vector3D& closestPoint, Vector3D& Right, Vector3D& Up, Vector3D& PlaneCenter);
-	bool IsPointInPolygon(Vector3D Point, Array<Vector3D> Polygon);
+	bool IsPointInPolygon(Vector3D Point, Array<Vector3D> Polygon, Vector3D center);
 
 private:
 

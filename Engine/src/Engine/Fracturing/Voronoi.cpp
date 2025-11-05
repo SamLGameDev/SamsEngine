@@ -3,6 +3,7 @@
 #include "transform.h"
 #include <iostream>
 
+#include "MathCore.h"
 #include "Renderer.h"
 
 void Voronoi::FracturePlaneRandom(Model& InModel)
@@ -15,27 +16,29 @@ void Voronoi::FracturePlaneRandom(Model& InModel)
 
 	//FracturePiece3D::PointShader = Shader("Point3D", "Shaders/");
 
-	//for (size_t i = 0; i < 100; i++)
-	//{
-	//	Vector3D point1 = InModel.ModelTransform.GetRandomPointInBounds();
+	for (size_t i = 0; i < 100; i++)
+	{
+		Vector3D point1 = InModel.ModelTransform.GetRandomPointInBounds();
 
-	//	while (points.Contains(point1))
-	//	{
-	//		point1 = InModel.ModelTransform.GetRandomPointInBounds();
-	//	}
-	//	TestSquare.push_back(DrawWireCube(point1, { 0.5, 0.5, 0.5 }, { 0.1f, 0.1f, 0.1f }, { 0.5, 0.5, 0.5 }));
+		while (points.Contains(point1))
+		{
+			point1 = InModel.ModelTransform.GetRandomPointInBounds();
+		}
+		TestSquare.push_back(DrawWireCube(point1, { 0.5, 0.5, 0.5 }, { 0.1f, 0.1f, 0.1f }, { 0.5, 0.5, 0.5 }));
 
-	//	points.Add(point1);
-	//}
+		points.Add(point1);
+	}
 
-	//points = { {0.1, 0.1, 0.1}, {0.8, 0.4, 0.2}, {0.4, 0.8, 0.6} };
-	points = { {0.1, 0.1, 0.1}, {0.8, 0.4, 0.2} };
+	//points = { {0.1, 0.1, 0.1}, {0.8, 0.4, 0.2}, {0.4, 0.8, 0.6}, {0.6, 0.2, 0.1} };
+	//points = { {0.1, 0.1, 0.1}, {0.8, 0.4, 0.2} };
 	for (Vector3D& point : points)
 	{
+		auto color = Vector3D::RandomRange(Vector3D(30, 30, 30), Vector3D(255, 255, 255));
+		TestSquare.push_back(DrawWireCube(point, { 0.5, 0.5, 0.5 }, { 0.1f, 0.1f, 0.1f }, color / 255));
 	}
 
 
-	for (size_t i = 0; i < points.GetSize() -1; i++)
+	for (size_t i = 0; i < points.GetSize(); i++)
 	{
 		Vector3D currentPoint = points[i];
 
@@ -53,6 +56,8 @@ void Voronoi::FracturePlaneRandom(Model& InModel)
 			Face intersectFace;
 
 			DefinePlane(normal, currentPoint, comparedPoint, right, up, center);
+
+			//TestSquare.push_back(DrawWirePlane(center, normal, { 5, 5, 5 }, { 1, 1, 1 }));
 
 			for (size_t f = 0; f < Faces.GetSize(); f++)
 			{
@@ -130,7 +135,7 @@ void Voronoi::FracturePlaneRandom(Model& InModel)
 						newFace.Vertices.Add(toVert);
 					}
 
-					if (!IsPointInPolygon(currentPoint, newFace.Vertices))
+					if (!IsPointInPolygon(normal, newFace.Vertices, center))
 					{
 						newFace.Vertices.Empty();
 
@@ -148,28 +153,54 @@ void Voronoi::FracturePlaneRandom(Model& InModel)
 						}
 
 						if (from != firstIntersection) newFace.Vertices.Add(firstIntersection);
-					}
 
-					if (!intersectFace.Vertices.Contains(firstIntersection)) intersectFace.Vertices.Add(firstIntersection);
-					if (!intersectFace.Vertices.Contains(secondIntersection)) intersectFace.Vertices.Add(secondIntersection);
+						bool bAddFirst = true, bAddSecond = true;
+						for (auto vert : intersectFace.Vertices)
+						{
+							if (Vector3D::IsAlmostEqual(vert, firstIntersection)) bAddFirst = false;
+
+							if (Vector3D::IsAlmostEqual(vert, secondIntersection)) bAddSecond = false;
+						}
+
+						if (bAddSecond) intersectFace.Vertices.Add(secondIntersection);
+						if (bAddFirst) intersectFace.Vertices.Add(firstIntersection);
+					}
+					else
+					{
+
+						bool bAddFirst = true, bAddSecond = true;
+						for (auto vert : intersectFace.Vertices)
+						{
+							if (Vector3D::IsAlmostEqual(vert, firstIntersection)) bAddFirst = false;
+
+							if (Vector3D::IsAlmostEqual(vert, secondIntersection)) bAddSecond = false;
+						}
+
+						if (bAddFirst) intersectFace.Vertices.Add(firstIntersection);
+
+						if (bAddSecond) intersectFace.Vertices.Add(secondIntersection);
+					}
 				}
 				newFaces.Add(newFace);
 			}
 			newFaces.Add(intersectFace);
+
 			Faces = newFaces;
 		}
 		auto color = Vector3D::RandomRange(Vector3D(30, 30, 30), Vector3D(255, 255, 255));
 		for (auto& face : Faces)
 		{
+		//Face face = Faces[5];
 			if (fractureFaces.Contains(face))
 			{
 				continue;
 			}
+
 			FracturePiece3D* frac = new FracturePiece3D(face.Vertices, currentPoint);
 			frac->color = color;
 			fractureFaces.Add(face);
 		}
-		TestSquare.push_back(DrawWireCube(currentPoint, { 0.5, 0.5, 0.5 }, { 0.1f, 0.1f, 0.1f }, color/255));
+		//TestSquare.push_back(DrawWireCube(currentPoint, { 0.5, 0.5, 0.5 }, { 0.1f, 0.1f, 0.1f }, color/255));
 
 	}
 
@@ -191,18 +222,27 @@ void Voronoi::DefinePlane(Vector3D& normal, Vector3D& CurrentPoint, Vector3D& cl
 	PlaneCenter = (CurrentPoint + closestPoint) / 2;
 }
 
-bool Voronoi::IsPointInPolygon(Vector3D Point, Array<Vector3D> Polygon)
+bool Voronoi::IsPointInPolygon(Vector3D Point, Array<Vector3D> Polygon, Vector3D center)
 {
+	size_t t = 0;
 
 	for (size_t i = 0; i < Polygon.GetSize(); i++)
 	{
-		Vector3D t = { Polygon[i] - Polygon[(i + 1) % Polygon.GetSize()] };
-		Vector3D u = { Point - Polygon[(i + 1) % Polygon.GetSize()] };
-		Vector3D v = { Polygon[(i + 2) % Polygon.GetSize()] - Polygon[(i + 1) % Polygon.GetSize()]  };
+		//Vector3D t = { Polygon[i] - Polygon[(i + 1) % Polygon.GetSize()] };
+		//Vector3D u = { Point - Polygon[(i + 1) % Polygon.GetSize()] };
+		//Vector3D v = { Polygon[(i + 2) % Polygon.GetSize()] - Polygon[(i + 1) % Polygon.GetSize()]  };
 
-		if (!(Vector3D::Cross(t, u) * Vector3D::Cross(t, v) >= Vector3D::Zero && Vector3D::Cross(v, u) * Vector3D::Cross(v, t) >= Vector3D::Zero)) return false;
+		//if (!(Vector3D::Cross(t, u) * Vector3D::Cross(t, v) >= Vector3D::Zero && Vector3D::Cross(v, u) * Vector3D::Cross(v, t) >= Vector3D::Zero)) return false;
+
+		float d = Vector3D::Dot(Point, (Polygon[i] - center).Normalised());
+
+		if (d < 0 && !MathCore::IsNearlyZero(d)) t++ ;
+
+		std::cout << t << "\n";
 
 	}
+
+	if (t > 0)return false;
 
 	return true;
 }
@@ -307,7 +347,7 @@ void FracturePiece3D::Draw(const Shader* InShader)
 	InShader->SetVec3("Color", color);
 
 	//std::cout << "DrawCalled";
-
+	//glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
 	//TODO find a way to separate this from model
 	//used for reflection InShade
 	glPointSize(5);
@@ -317,7 +357,7 @@ void FracturePiece3D::Draw(const Shader* InShader)
 	glDrawElements(GL_TRIANGLES, static_cast<GLsizei>(Inds.GetSize()), GL_UNSIGNED_INT, nullptr);
 	glBindVertexArray(0);
 	glUseProgram(0);
-
+	glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
 	/*PointShader.Use();
 	glBindVertexArray(PVAO);*/
 	//glBindBuffer(GL_ARRAY_BUFFER, VBO);

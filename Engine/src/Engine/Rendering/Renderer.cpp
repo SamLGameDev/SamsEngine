@@ -240,7 +240,7 @@ void Renderer::DrawFractures() const
 void Renderer::RenderWorldObjets() const
 {
 
-	glBindFramebuffer(GL_FRAMEBUFFER, AntiAliasing.FBO);
+	glBindFramebuffer(GL_FRAMEBUFFER, 0);
 
 	glEnable(GL_DEPTH_TEST);
 
@@ -304,7 +304,7 @@ void Renderer::RenderingLoop() const
 {
 	RenderWorldObjets();
 
-	RenderPostProcessing();
+	//RenderPostProcessing();
 
 	WindowInputManager->ProcessInput(Camera::GetActiveWindow()->GetWindow());
 
