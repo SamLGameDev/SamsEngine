@@ -164,7 +164,7 @@ namespace Vulkan
 			createInfo.subresourceRange.baseArrayLayer = 0;
 			createInfo.subresourceRange.layerCount = 1;
 
-			SwapChainImageViews.Replace(i, UImageView(this, createInfo));
+			SwapChainImageViews[i]=  UImageView(this, createInfo);
 
 			createInfo.subresourceRange.layerCount = 1;
 		}
@@ -189,7 +189,7 @@ namespace Vulkan
 			framebufferCreateInfo.height = SwapChainExtent.height;
 			framebufferCreateInfo.layers = 1;
 
-			FrameBuffers.Replace(i, UFrameBuffer(framebufferCreateInfo));
+			FrameBuffers[i] =  UFrameBuffer(framebufferCreateInfo);
 		}
 	}
 

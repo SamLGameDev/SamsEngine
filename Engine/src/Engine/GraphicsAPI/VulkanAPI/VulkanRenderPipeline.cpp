@@ -21,6 +21,7 @@ namespace Vulkan
 
 	URenderPipeline::~URenderPipeline()
 	{
+		ShutDown();
 	}
 
 	ErrorCodes URenderPipeline::Init(Shader& InShader)

@@ -40,7 +40,7 @@ namespace Vulkan
 	{
 		if (FrameBuffer == VK_NULL_HANDLE) return SUCCEEDED;
 
-		//vkDestroyFramebuffer(*SInstance::GetInstance()->GraphicsCard->GetLogicalDevice()->GetVulkanLogicalDevice(), FrameBuffer, nullptr);
+		vkDestroyFramebuffer(*SInstance::GetInstance()->GraphicsCard->GetLogicalDevice()->GetVulkanLogicalDevice(), FrameBuffer, nullptr);
 		FrameBuffer = VK_NULL_HANDLE;
 		return SUCCEEDED;
 	}

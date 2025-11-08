@@ -124,61 +124,82 @@ namespace Vulkan
 	ErrorCodes SubsystemInitialiser::ShutDown()
 	{
 
+	///*	try
+	//	{
+	//		delete lightManager;
+
+	//	}
+	//	catch (const std::exception& error)
+	//	{
+	//		std::cout << error.what() << "\n";
+	//		return ERROR;
+	//	}
+
+	//	try
+	//	{
+	//		delete renderer;
+	//	}
+	//	catch (const std::exception& error)
+	//	{
+	//		std::cout << error.what() << "\n";
+	//		return ERROR;
+	//	}
+
+	//	try
+	//	{
+	//		delete camera;
+	//	}
+	//	catch (const std::exception& error)
+	//	{
+	//		std::cout << error.what() << "\n";
+	//		return ERROR;
+	//	}
+
+	//	try
+	//	{
+	//		delete world;
+	//	}
+	//	catch (const std::exception& error)
+	//	{
+	//		std::cout << error.what() << "\n";
+	//		return ERROR;
+	//	}
+
+	//	try
+	//	{
+	//		delete inputManager;
+	//	}
+	//	catch (const std::exception& error)
+	//	{
+	//		std::cout << error.what() << "\n";
+	//		return ERROR;
+	//	}*/
+
 		try
 		{
-			delete lightManager;
-
+			GraphicsCard->ShutDown();
+			SInstance::GetInstance()->ShutDown();
 		}
 		catch (const std::exception& error)
 		{
-			std::cout << error.what() << "\n";
+			std::cerr << error.what() << "\n";
 			return ERROR;
 		}
-
-		try
-		{
-			delete renderer;
-		}
-		catch (const std::exception& error)
-		{
-			std::cout << error.what() << "\n";
-			return ERROR;
-		}
-
-		try
-		{
-			delete camera;
-		}
-		catch (const std::exception& error)
-		{
-			std::cout << error.what() << "\n";
-			return ERROR;
-		}
-
-		try
-		{
-			delete world;
-		}
-		catch (const std::exception& error)
-		{
-			std::cout << error.what() << "\n";
-			return ERROR;
-		}
-
-		try
-		{
-			delete inputManager;
-		}
-		catch (const std::exception& error)
-		{
-			std::cout << error.what() << "\n";
-			return ERROR;
-		}
-
 
 		try
 		{
 			delete Window;
+		}
+		catch (const std::exception& error)
+		{
+			std::cout << error.what() << "\n";
+			return ERROR;
+		}
+
+		try
+		{
+			APIConstructer->Shutdown();
+			delete APIConstructer;
 		}
 		catch (const std::exception& error)
 		{

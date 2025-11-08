@@ -89,12 +89,22 @@ public:
 		return this == null;
 	}
 
-	[[nodiscard]] T operator[](const unsigned int Index) const
+	[[nodiscard]] const T& operator[](const unsigned int Index) const
 	{
-		return GetItemAt(Index);
+		return GetItemAtRef(Index);
+	}
+	[[nodiscard]] T& operator[](const unsigned int Index)
+	{
+		return GetItemAtRef(Index);
 	}
 
-	[[nodiscard]] T* GetItemAtRef(const unsigned int Index) const
+
+	[[nodiscard]] T& GetItemAtRef(const unsigned int Index) const
+	{
+		return DynamicArray[Index];
+	}
+
+	[[nodiscard]] T* GetItemAtPtr(const unsigned int Index) const
 	{
 		return &DynamicArray[Index];
 	}

@@ -87,10 +87,10 @@ namespace Vulkan
 
 		for (size_t i = 0; i < MAX_FRAMES_IN_FLIGHT; i++)
 		{
-			if (vkCreateSemaphore(*OwningCard->GetLogicalDevice()->GetVulkanLogicalDevice(), &semaphoreCreateInfo, nullptr, ImageAvailableSemaphores.GetItemAtRef(i)) != VK_SUCCESS) return ERROR;
+			if (vkCreateSemaphore(*OwningCard->GetLogicalDevice()->GetVulkanLogicalDevice(), &semaphoreCreateInfo, nullptr, ImageAvailableSemaphores.GetItemAtPtr(i)) != VK_SUCCESS) return ERROR;
 
-			if (vkCreateSemaphore(*OwningCard->GetLogicalDevice()->GetVulkanLogicalDevice(), &semaphoreCreateInfo, nullptr, RenderFinishedSemaphores.GetItemAtRef(i)) != VK_SUCCESS) return ERROR;
-			if (vkCreateFence(*OwningCard->GetLogicalDevice()->GetVulkanLogicalDevice(), &fenceCreateInfo, nullptr, InFlightFences.GetItemAtRef(i)) != VK_SUCCESS) return ERROR;
+			if (vkCreateSemaphore(*OwningCard->GetLogicalDevice()->GetVulkanLogicalDevice(), &semaphoreCreateInfo, nullptr, RenderFinishedSemaphores.GetItemAtPtr(i)) != VK_SUCCESS) return ERROR;
+			if (vkCreateFence(*OwningCard->GetLogicalDevice()->GetVulkanLogicalDevice(), &fenceCreateInfo, nullptr, InFlightFences.GetItemAtPtr(i)) != VK_SUCCESS) return ERROR;
 		}
 
 		return SUCCEEDED;
@@ -100,7 +100,7 @@ namespace Vulkan
 	{
 		glfwPollEvents();
 
-		vkWaitForFences(*OwningCard->GetLogicalDevice()->GetVulkanLogicalDevice(), 1, InFlightFences.GetItemAtRef(CurrentFrame), VK_TRUE, UINT64_MAX);
+		vkWaitForFences(*OwningCard->GetLogicalDevice()->GetVulkanLogicalDevice(), 1, InFlightFences.GetItemAtPtr(CurrentFrame), VK_TRUE, UINT64_MAX);
 
 		uint32_t imageIndex;
 		VkResult result = vkAcquireNextImageKHR(*OwningCard->GetLogicalDevice()->GetVulkanLogicalDevice(), OwningCard->GetLogicalDevice()->GetSwapChain()->GetSwapChain(), UINT64_MAX, ImageAvailableSemaphores[CurrentFrame], VK_NULL_HANDLE, &imageIndex);
@@ -115,7 +115,12 @@ namespace Vulkan
 			return;
 		}
 
-		vkResetFences(*OwningCard->GetLogicalDevice()->GetVulkanLogicalDevice(), 1, InFlightFences.GetItemAtRef(CurrentFrame));
+		//if (imagesInFlight[imageIndex] != VK_NULL_HANDLE)
+		//{
+		//	vkWaitForFences(*OwningCard->GetLogicalDevice()->GetVulkanLogicalDevice(), 1, &imagesInFlight[imageIndex], VK_TRUE, UINT64_MAX);
+		//}
+
+		vkResetFences(*OwningCard->GetLogicalDevice()->GetVulkanLogicalDevice(), 1, InFlightFences.GetItemAtPtr(CurrentFrame));
 
 		vkResetCommandBuffer(CommandBuffers[CurrentFrame], 0);
 
@@ -134,9 +139,9 @@ namespace Vulkan
 		submitInfo.pWaitDstStageMask = waitStages;
 
 		submitInfo.commandBufferCount = 1;
-		submitInfo.pCommandBuffers = CommandBuffers.GetItemAtRef(CurrentFrame);
+		submitInfo.pCommandBuffers = CommandBuffers.GetItemAtPtr(CurrentFrame);
 
-		VkSemaphore signalSemaphores[] = { RenderFinishedSemaphores[CurrentFrame] };
+		VkSemaphore signalSemaphores[] = { RenderFinishedSemaphores[imageIndex] };
 
 		submitInfo.signalSemaphoreCount = 1;
 		submitInfo.pSignalSemaphores = signalSemaphores;
@@ -179,7 +184,7 @@ namespace Vulkan
 		VkRenderPassBeginInfo renderBeginInfo{};
 		renderBeginInfo.sType = VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO;
 		renderBeginInfo.renderPass = SInstance::GetInstance()->RenderPass->GetVulkanRenderPass();
-		renderBeginInfo.framebuffer = OwningCard->GetLogicalDevice()->GetSwapChain()->GetFrameBuffers().GetItemAtRef(ImageIndex)->GetFrameBuffer();
+		renderBeginInfo.framebuffer = OwningCard->GetLogicalDevice()->GetSwapChain()->GetFrameBuffers().GetItemAtPtr(ImageIndex)->GetFrameBuffer();
 		renderBeginInfo.renderArea.offset = { 0, 0 };
 		renderBeginInfo.renderArea.extent = OwningCard->GetLogicalDevice()->GetSwapChain()->GetSwapChainExtent();
 		VkClearValue clearValue = { {{0, 0, 0, 1.f}} };
@@ -219,6 +224,9 @@ namespace Vulkan
 
 	ErrorCodes URenderer::ShutDown()
 	{
+
+		delete Test;
+
 		for (size_t i = 0; i < MAX_FRAMES_IN_FLIGHT; i++)
 		{
 			vkDestroySemaphore(*OwningCard->GetLogicalDevice()->GetVulkanLogicalDevice(), ImageAvailableSemaphores.GetItemAt(i), nullptr);

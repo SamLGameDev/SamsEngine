@@ -7,7 +7,7 @@
 #include "VulkanFrameBuffer.h"
 #include "VulkanRenderPass.h"
 
-constexpr std::uint8_t MAX_FRAMES_IN_FLIGHT = 2;
+constexpr std::uint8_t MAX_FRAMES_IN_FLIGHT = 3;
 
 namespace Vulkan
 {

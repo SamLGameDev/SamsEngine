@@ -13,11 +13,6 @@ namespace Vulkan
 	
 	ErrorCodes SInstance::ShutDown()
 	{
-
-		vkDestroySurfaceKHR(VulkanInstance, WindowsInterface, nullptr);
-
-		vkDestroyInstance(VulkanInstance, nullptr);
-
 		return SUCCEEDED;
 	}
 

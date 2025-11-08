@@ -93,6 +93,7 @@ namespace Vulkan
 
 	ErrorCodes ULogicalDevice::ShutDown()
 	{
+		SwapChain->ShutDown();
 		vkDestroyDevice(LogicalDevice, nullptr);
 		return SUCCEEDED;
 	}

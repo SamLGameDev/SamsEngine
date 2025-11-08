@@ -26,7 +26,7 @@ namespace Vulkan
 	public:
 
 		Shader();
-		~Shader();
+		~Shader()override;
 
 		/**
 		 * loads the shader at that location. It loads all parts of the shader, so vert, geom, and frag
