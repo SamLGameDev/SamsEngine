@@ -9,6 +9,6 @@ layout (std140, binding = 0) uniform Transforms
 };
 void main()
 {
-   gl_Position = Projection* View * vec4(aPos, 1);
+   gl_Position = Projection* View * Model * vec4(aPos, 1);
    
 }

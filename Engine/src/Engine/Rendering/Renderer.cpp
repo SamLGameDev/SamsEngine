@@ -246,7 +246,7 @@ void Renderer::RenderWorldObjets() const
 
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
 
-	glEnable(GL_BLEND);
+	//glEnable(GL_BLEND);
 	//glEnable(GL_PROGRAM_POINT_SIZE);
 	////glEnable(GL_CULL_FACE);
 

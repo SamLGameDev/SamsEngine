@@ -29,6 +29,7 @@ void FirstWindow::Initialisation()
 void FirstWindow::CreateWindow()
 {
 	glfwWindowHint(GLFW_SAMPLES, AntiAliasingSamples);
+	glfwWindowHint(GLFW_DEPTH_BITS, 64);
 	Window = glfwCreateWindow(Width, Height, WindowName, NULL, NULL);
 
 	if (Window == NULL)

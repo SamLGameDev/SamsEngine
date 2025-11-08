@@ -4,6 +4,7 @@
 #include "Vector3D.h"
 #include "Model.h"
 #include "WireShapes.h"
+#include "WorldObject.h"
 
 class Voronoi
 {
@@ -21,7 +22,7 @@ private:
 
 
 };
-class FracturePiece3D
+class FracturePiece3D : WorldObject
 {
 public:
 
@@ -29,8 +30,16 @@ public:
 
 	void Draw(const Shader* InShader);
 
+	void Start() override;
+
+	void Tick(const double& DeltaTime) override;
+
 	Vector3D color;
 	static Shader PointShader;
+
+	Vector3D dir;
+
+	Transform transform;
 
 
 private:

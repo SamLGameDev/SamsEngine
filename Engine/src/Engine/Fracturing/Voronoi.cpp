@@ -4,11 +4,12 @@
 #include <iostream>
 
 #include "MathCore.h"
+#include "ObjectFactory.h"
 #include "Renderer.h"
+#include "glm/gtc/type_ptr.hpp"
 
 void Voronoi::FracturePlaneRandom(Model& InModel)
 {
-	Vector3D center = InModel.BoundingBox->WireTransform.TransCenter;
 
 	Array<Vector3D> points;
 
@@ -16,20 +17,20 @@ void Voronoi::FracturePlaneRandom(Model& InModel)
 
 	//FracturePiece3D::PointShader = Shader("Point3D", "Shaders/");
 
-	for (size_t i = 0; i < 100; i++)
-	{
-		Vector3D point1 = InModel.ModelTransform.GetRandomPointInBounds();
+	//for (size_t i = 0; i < 500; i++)
+	//{
+	//	Vector3D point1 = InModel.ModelTransform.GetRandomPointInBounds();
 
-		while (points.Contains(point1))
-		{
-			point1 = InModel.ModelTransform.GetRandomPointInBounds();
-		}
-		TestSquare.push_back(DrawWireCube(point1, { 0.5, 0.5, 0.5 }, { 0.1f, 0.1f, 0.1f }, { 0.5, 0.5, 0.5 }));
+	//	while (points.Contains(point1))
+	//	{
+	//		point1 = InModel.ModelTransform.GetRandomPointInBounds();
+	//	}
+	//	TestSquare.push_back(DrawWireCube(point1, { 0.5, 0.5, 0.5 }, { 0.1f, 0.1f, 0.1f }, { 0.5, 0.5, 0.5 }));
 
-		points.Add(point1);
-	}
+	//	points.Add(point1);
+	//}
 
-	//points = { {0.1, 0.1, 0.1}, {0.8, 0.4, 0.2}, {0.4, 0.8, 0.6}, {0.6, 0.2, 0.1} };
+	points = { {0.1, 0.1, 0.1}, {0.8, 0.4, 0.2}, {0.4, 0.8, 0.6}, {0.6, 0.2, 0.1} };
 	//points = { {0.1, 0.1, 0.1}, {0.8, 0.4, 0.2} };
 	for (Vector3D& point : points)
 	{
@@ -44,14 +45,20 @@ void Voronoi::FracturePlaneRandom(Model& InModel)
 
 		Array<Face> Faces = InModel.BoundingBox->Faces;
 
+		Vector3D normal, right, up, center;
+
 		for (size_t j = 0; j < points.GetSize(); j++)
 		{
 			if (j == i)continue;
 
-			Array<Face> newFaces;
 			Vector3D comparedPoint = points[j];
 
-			Vector3D normal, right, up, center;
+			float dot = Vector3D::Dot(normal, (comparedPoint - center).Normalised());
+
+			if (dot < 0 && !MathCore::IsNearlyZero(dot) && normal != Vector3D::Zero) continue;
+
+			Array<Face> newFaces;
+
 
 			Face intersectFace;
 
@@ -188,18 +195,29 @@ void Voronoi::FracturePlaneRandom(Model& InModel)
 			Faces = newFaces;
 		}
 		auto color = Vector3D::RandomRange(Vector3D(30, 30, 30), Vector3D(255, 255, 255));
+		//for (auto& face : Faces)
+		//{
+		////Face face = Faces[5];
+		//	if (fractureFaces.Contains(face))
+		//	{
+		//		continue;
+		//	}
+
+		//	FracturePiece3D* frac = CreateObjectPtr<FracturePiece3D>(face.Vertices, currentPoint);
+		//	frac->color = color;
+		//	fractureFaces.Add(face);
+		//}
+
+		Array<Vector3D> test;
 		for (auto& face : Faces)
 		{
-		//Face face = Faces[5];
-			if (fractureFaces.Contains(face))
-			{
-				continue;
-			}
+			test.Add(face.Vertices);
 
-			FracturePiece3D* frac = new FracturePiece3D(face.Vertices, currentPoint);
-			frac->color = color;
-			fractureFaces.Add(face);
 		}
+
+		FracturePiece3D* frac = CreateObjectPtr<FracturePiece3D>(test, currentPoint);
+		frac->color = color;
+
 		//TestSquare.push_back(DrawWireCube(currentPoint, { 0.5, 0.5, 0.5 }, { 0.1f, 0.1f, 0.1f }, color/255));
 
 	}
@@ -224,26 +242,14 @@ void Voronoi::DefinePlane(Vector3D& normal, Vector3D& CurrentPoint, Vector3D& cl
 
 bool Voronoi::IsPointInPolygon(Vector3D Point, Array<Vector3D> Polygon, Vector3D center)
 {
-	size_t t = 0;
 
 	for (size_t i = 0; i < Polygon.GetSize(); i++)
 	{
-		//Vector3D t = { Polygon[i] - Polygon[(i + 1) % Polygon.GetSize()] };
-		//Vector3D u = { Point - Polygon[(i + 1) % Polygon.GetSize()] };
-		//Vector3D v = { Polygon[(i + 2) % Polygon.GetSize()] - Polygon[(i + 1) % Polygon.GetSize()]  };
-
-		//if (!(Vector3D::Cross(t, u) * Vector3D::Cross(t, v) >= Vector3D::Zero && Vector3D::Cross(v, u) * Vector3D::Cross(v, t) >= Vector3D::Zero)) return false;
-
 		float d = Vector3D::Dot(Point, (Polygon[i] - center).Normalised());
 
-		if (d < 0 && !MathCore::IsNearlyZero(d)) t++ ;
-
-		std::cout << t << "\n";
+		if (d < 0 && !MathCore::IsNearlyZero(d)) return false ;
 
 	}
-
-	if (t > 0)return false;
-
 	return true;
 }
 
@@ -274,13 +280,16 @@ FracturePiece3D::FracturePiece3D(Array<Vector3D> cell, Vector3D Point)
 		Verts.Add(vert.Z);
 	}
 
+	dir = Vector3D::RandomRange(Vector3D::Zero, Vector3D(100, 100, 100));
+
+	dir = dir.Normalised();
+
 	//std::cout << "Inds: ";
 	//for (size_t i = 0; i < cell.GetSize() || i % 3 != 0; i++)
 	//{
 	//	Inds.Add(i % cell.GetSize());
 	//	std::cout << i % cell.GetSize();
 	//}
-
 	for (size_t i = 1; i + 1 < cell.GetSize(); i++)
 	{
 		Inds.Add(0);
@@ -345,6 +354,7 @@ void FracturePiece3D::Draw(const Shader* InShader)
 {
 	InShader->Use();
 	InShader->SetVec3("Color", color);
+	InShader->SetMatrix4fv("Model", glm::value_ptr(transform.GetModelMatrix()));
 
 	//std::cout << "DrawCalled";
 	//glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
@@ -365,5 +375,22 @@ void FracturePiece3D::Draw(const Shader* InShader)
 	//glDrawArrays(GL_POINTS, 0, 1);
 	//glBindVertexArray(0);
 	//glUseProgram(0);
+}
+
+void FracturePiece3D::Start()
+{
+	WorldObject::Start();
+}
+
+void FracturePiece3D::Tick(const double& DeltaTime)
+{
+	WorldObject::Tick(DeltaTime);
+
+	//if (glfwGetTime() > 10)
+	//{
+
+	//	transform.Position = transform.Position + (dir * 5) * DeltaTime;
+	//}
+
 }
 
