@@ -77,6 +77,10 @@ add_library(EngineCore STATIC
     "src/PreprocessorDefinitions.cpp"
     "src/Engine/GraphicsAPI/VulkanAPI/RuntimeEngineVulkan.cpp"
     "src/Engine/RuntimeEngine.cpp"
+    "src/Engine/GraphicsAPI/DataBuffers/DataBuffers.cpp"
+    "src/Engine/GraphicsAPI/DataBuffers/BaseDataBuffers.cpp"
+    "src/Engine/GraphicsAPI/DataBuffers/DataBuffersVulkan.cpp"
+    "src/Engine/GraphicsAPI/DataBuffers/DataBuffersOpenGL.cpp"
     "src/Engine/GraphicsAPI/VulkanAPI/InitialiseVulkan.cpp"
     "src/Engine/GraphicsAPI/VulkanAPI/VulkanInstance.cpp"
     "src/Engine/GraphicsAPI/VulkanAPI/VulkanLogicalDevice.cpp"
@@ -122,7 +126,8 @@ target_include_directories(EngineCore
                            "$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/src/Engine/FileSystem>"
                            "$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/src/Engine/Fracturing>"
                            "$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/src/Engine/GraphicsAPI>"
-                           "$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/src/Engine/GraphicsAPI/VulkanAPI>"                 
+                           "$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/src/Engine/GraphicsAPI/VulkanAPI>"
+                           "$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/src/Engine/GraphicsAPI/DataBuffers>"
 
                            "$<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}>")
 
@@ -182,6 +187,10 @@ install(FILES
     src/Engine/Fracturing/Voronoi2D.h
     src/PreprocessorDefinitions.h
     src/Engine/RuntimeEngine.h
+    src/Engine/GraphicsAPI/DataBuffers/DataBuffers.h
+    src/Engine/GraphicsAPI/DataBuffers/BaseDataBuffers.h
+    src/Engine/GraphicsAPI/DataBuffers/DataBuffersOpenGL.h
+    src/Engine/GraphicsAPI/DataBuffers/DataBuffersVulkan.h
     src/Engine/GraphicsAPI/VulkanAPI/RuntimeEngineVulkan.h
     src/Engine/GraphicsAPI/VulkanAPI/InitialiseVulkan.h
     src/Engine/GraphicsAPI/VulkanAPI/VulkanGraphicsCard.h

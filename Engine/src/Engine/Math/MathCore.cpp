@@ -1,4 +1,7 @@
 #include "MathCore.h"
+
+#include <random>
+
 #include "Vector3D.h"
 
 float MathCore::Determinant(const Vector3D& C0, const Vector3D& C1, const Vector3D& C2)

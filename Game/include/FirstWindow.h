@@ -1,11 +1,11 @@
 #pragma once
 #include <cstdint>
 
+#include "Window.h"
 #include "glad/glad.h"
-struct GLFWwindow;
 
 
-class FirstWindow final
+class FirstWindow final : public Window 
 {
 public:
 
@@ -15,7 +15,7 @@ public:
 
 	[[nodiscard]] inline GLFWwindow* GetWindow() const
 	{
-		return Window;
+		return DisplayWindow;
 	}
 
 	static inline void SetWindowWidth(const GLint InWidth)
@@ -37,21 +37,24 @@ public:
 		return Height;
 	}
 
+	[[nodiscard]] static inline bool HasWindowBeenResized()
+	{
+		return bFrameBufferResized;
+	}
+
+
+	static void ResetWindowResize()
+	{
+		bFrameBufferResized = false;
+	}
+
 private:
-
-	constexpr static std::uint8_t AntiAliasingSamples = 4;
-
-	constexpr static float OpenGLVersion = 4.6f;
-
-	constexpr static char WindowName[] = {"SamsEngine"};
-
-	static GLint Width, Height;
-
-	void Initialisation();
 
 	void CreateWindow();
 
-	static void FrameBuffer_Size_Callback(GLFWwindow* InWindow, const int InWidth, const int InHeight);
 
-	GLFWwindow* Window;
+	void OnWindowResize() override;
+
+	static bool bFrameBufferResized;
+
 };

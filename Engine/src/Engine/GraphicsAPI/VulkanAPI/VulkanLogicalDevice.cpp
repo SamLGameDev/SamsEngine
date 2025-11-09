@@ -59,11 +59,16 @@ namespace Vulkan
 
 		const Array<const char*>& deviceExtensions = OwningCard->GetDeviceExtensions();
 
+		VkPhysicalDeviceVertexInputDynamicStateFeaturesEXT vertexInputDynamicStateFeatures{};
+		vertexInputDynamicStateFeatures.sType =
+			VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_VERTEX_INPUT_DYNAMIC_STATE_FEATURES_EXT;
+		vertexInputDynamicStateFeatures.vertexInputDynamicState = VK_TRUE;
+
 		VkDeviceCreateInfo deviceCreateInfo{};
 		deviceCreateInfo.sType = VK_STRUCTURE_TYPE_DEVICE_CREATE_INFO;
 		deviceCreateInfo.pQueueCreateInfos = uniqueQueues.GetFirstRef();
 		deviceCreateInfo.queueCreateInfoCount = uniqueQueues.GetSize();
-
+		deviceCreateInfo.pNext = &vertexInputDynamicStateFeatures;
 		deviceCreateInfo.pEnabledFeatures = &deviceFeatures;
 		deviceCreateInfo.enabledExtensionCount = deviceExtensions.GetSize();
 		deviceCreateInfo.ppEnabledExtensionNames = deviceExtensions.GetFirstRef();

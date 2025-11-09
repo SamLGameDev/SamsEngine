@@ -10,6 +10,7 @@
 #include "Renderer.h"
 #include "LightManager.h"
 #include "CorePaths.h"
+#include "GraphicsAPIConstructor.h"
 
 #include <memory>
 

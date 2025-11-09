@@ -5,6 +5,7 @@
 #include <complex.h>
 #include <GLFW/glfw3.h>
 
+#include "DataBuffers.h"
 #include "Vector2D.h"
 #include "VulkanImageView.h"
 #include "VulkanInstance.h"
@@ -38,6 +39,15 @@ namespace Vulkan
 		if (CreateSyncObjects() == ERROR) return ERROR;
 
 		Test = new Shader("triangle", "/Shaders/");
+
+		DataBuffers::GenBuffer(vao);
+
+		DataBuffers::BindVertexInfo(vao, 0, testPositions.GetSize(), sizeof(Vector2D), 0);
+
+		DataBuffers::BindVertexInfo(vao, 1, 0, sizeof(Vector3D), 0);
+
+		DataBuffers::BufferData(vao, testPositions.GetSize() * sizeof(Vector2D), testPositions.GetFirstRef(), BufferTargets::Vertex);
+		DataBuffers::BufferData(vao, testColors.GetSize() * sizeof(Vector3D), testColors.GetFirstRef(), BufferTargets::Vertex);
 
 		return SUCCEEDED;
 	}
@@ -115,11 +125,6 @@ namespace Vulkan
 			return;
 		}
 
-		//if (imagesInFlight[imageIndex] != VK_NULL_HANDLE)
-		//{
-		//	vkWaitForFences(*OwningCard->GetLogicalDevice()->GetVulkanLogicalDevice(), 1, &imagesInFlight[imageIndex], VK_TRUE, UINT64_MAX);
-		//}
-
 		vkResetFences(*OwningCard->GetLogicalDevice()->GetVulkanLogicalDevice(), 1, InFlightFences.GetItemAtPtr(CurrentFrame));
 
 		vkResetCommandBuffer(CommandBuffers[CurrentFrame], 0);
@@ -194,6 +199,10 @@ namespace Vulkan
 		vkCmdBeginRenderPass(Buffer, &renderBeginInfo, VK_SUBPASS_CONTENTS_INLINE);
 
 		Test->Use();
+
+		DataBuffers::BindBuffer(vao);
+
+		DataBuffers::DrawVertexData(vao);
 
 		VkViewport viewport{};
 		viewport.x = 0;

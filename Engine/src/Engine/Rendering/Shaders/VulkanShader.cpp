@@ -306,7 +306,7 @@ namespace Vulkan
 
 	std::string Shader::GetPathUntyped() const
 	{
-		return CorePaths::Contents.Path + "/" + StorageLocation + Name;
+		return CorePaths::Contents.Path  + StorageLocation + Name;
 	}
 
 	std::string Shader::GetShaderLocation() const

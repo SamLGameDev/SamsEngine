@@ -129,6 +129,21 @@ namespace Vulkan
 		return !SwapChainSupport.Presents.IsEmpty() && !SwapChainSupport.Formats.IsEmpty();
 	}
 
+	uint32_t UGraphicsCard::FindMemoryType(uint32_t TypeFilter, VkMemoryPropertyFlags Properties)
+	{
+		VkPhysicalDeviceMemoryProperties properties;
+		vkGetPhysicalDeviceMemoryProperties(GraphicsCard, &properties);
+
+		for (size_t i = 0; i < properties.memoryTypeCount; i++)
+		{
+			if (TypeFilter & (1 << i) && (properties.memoryTypes[i].propertyFlags & Properties) == Properties)
+			{
+				return i;
+			}
+		}
+		throw std::runtime_error("Cant find a suitable memory type");
+	}
+
 	QueueFamilyIndices UGraphicsCard::FindQueueFamilies(const VkPhysicalDevice& Device, const VkSurfaceKHR& Surface)
 	{
 		QueueFamilyIndices indices;

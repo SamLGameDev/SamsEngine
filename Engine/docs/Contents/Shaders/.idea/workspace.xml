@@ -1,0 +1,114 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="AutoImportSettings">
+    <option name="autoReloadType" value="SELECTIVE" />
+  </component>
+  <component name="BackendCodeEditorMiscSettings">
+    <option name="/Default/RiderDebugger/RiderRestoreDecompile/RestoreDecompileSetting/@EntryValue" value="false" type="bool" />
+  </component>
+  <component name="CMakeProjectFlavorService">
+    <option name="flavorId" value="CMakePlainProjectFlavor" />
+  </component>
+  <component name="CMakeSettings">
+    <configurations>
+      <configuration PROFILE_NAME="Debug" ENABLED="true" CONFIG_NAME="Debug" />
+    </configurations>
+  </component>
+  <component name="ChangeListManager">
+    <list default="true" id="8d2b808b-852d-4904-8b4e-05992246fb54" name="Changes" comment="">
+      <change beforePath="$PROJECT_DIR$/../../CMakeLists.txt" beforeDir="false" afterPath="$PROJECT_DIR$/../../CMakeLists.txt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/TriangleShaderCompiler.bat" beforeDir="false" afterPath="$PROJECT_DIR$/TriangleShaderCompiler.bat" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/triangle.frag" beforeDir="false" afterPath="$PROJECT_DIR$/triangle.frag" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/triangle.vert" beforeDir="false" afterPath="$PROJECT_DIR$/triangle.vert" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/triangleVert.spv" beforeDir="false" afterPath="$PROJECT_DIR$/triangleVert.spv" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../src/Engine/DataStructures/Array.h" beforeDir="false" afterPath="$PROJECT_DIR$/../../src/Engine/DataStructures/Array.h" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../src/Engine/GraphicsAPI/GraphicsAPIConstructor.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/../../src/Engine/GraphicsAPI/GraphicsAPIConstructor.cpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../src/Engine/GraphicsAPI/GraphicsAPIConstructor.h" beforeDir="false" afterPath="$PROJECT_DIR$/../../src/Engine/GraphicsAPI/GraphicsAPIConstructor.h" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../src/Engine/GraphicsAPI/VulkanAPI/InitialiseVulkan.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/../../src/Engine/GraphicsAPI/VulkanAPI/InitialiseVulkan.cpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../src/Engine/GraphicsAPI/VulkanAPI/InitialiseVulkan.h" beforeDir="false" afterPath="$PROJECT_DIR$/../../src/Engine/GraphicsAPI/VulkanAPI/InitialiseVulkan.h" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../src/Engine/GraphicsAPI/VulkanAPI/RuntimeEngineVulkan.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/../../src/Engine/GraphicsAPI/VulkanAPI/RuntimeEngineVulkan.cpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../src/Engine/GraphicsAPI/VulkanAPI/RuntimeEngineVulkan.h" beforeDir="false" afterPath="$PROJECT_DIR$/../../src/Engine/GraphicsAPI/VulkanAPI/RuntimeEngineVulkan.h" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../src/Engine/GraphicsAPI/VulkanAPI/VulkanGraphicsCard.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/../../src/Engine/GraphicsAPI/VulkanAPI/VulkanGraphicsCard.cpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../src/Engine/GraphicsAPI/VulkanAPI/VulkanGraphicsCard.h" beforeDir="false" afterPath="$PROJECT_DIR$/../../src/Engine/GraphicsAPI/VulkanAPI/VulkanGraphicsCard.h" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../src/Engine/GraphicsAPI/VulkanAPI/VulkanImageView.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/../../src/Engine/GraphicsAPI/VulkanAPI/VulkanImageView.cpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../src/Engine/GraphicsAPI/VulkanAPI/VulkanImageView.h" beforeDir="false" afterPath="$PROJECT_DIR$/../../src/Engine/GraphicsAPI/VulkanAPI/VulkanImageView.h" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../src/Engine/GraphicsAPI/VulkanAPI/VulkanInstance.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/../../src/Engine/GraphicsAPI/VulkanAPI/VulkanInstance.cpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../src/Engine/GraphicsAPI/VulkanAPI/VulkanLogicalDevice.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/../../src/Engine/GraphicsAPI/VulkanAPI/VulkanLogicalDevice.cpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../src/Engine/GraphicsAPI/VulkanAPI/VulkanLogicalDevice.h" beforeDir="false" afterPath="$PROJECT_DIR$/../../src/Engine/GraphicsAPI/VulkanAPI/VulkanLogicalDevice.h" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../src/Engine/GraphicsAPI/VulkanAPI/VulkanRenderPass.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/../../src/Engine/GraphicsAPI/VulkanAPI/VulkanRenderPass.cpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../src/Engine/GraphicsAPI/VulkanAPI/VulkanRenderPipeline.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/../../src/Engine/GraphicsAPI/VulkanAPI/VulkanRenderPipeline.cpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../src/Engine/GraphicsAPI/VulkanAPI/VulkanRenderPipeline.h" beforeDir="false" afterPath="$PROJECT_DIR$/../../src/Engine/GraphicsAPI/VulkanAPI/VulkanRenderPipeline.h" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../src/Engine/GraphicsAPI/VulkanAPI/VulkanSubsystemInitialiser.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/../../src/Engine/GraphicsAPI/VulkanAPI/VulkanSubsystemInitialiser.cpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../src/Engine/GraphicsAPI/VulkanAPI/VulkanSubsystemInitialiser.h" beforeDir="false" afterPath="$PROJECT_DIR$/../../src/Engine/GraphicsAPI/VulkanAPI/VulkanSubsystemInitialiser.h" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../src/Engine/GraphicsAPI/VulkanAPI/VulkanSwapChain.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/../../src/Engine/GraphicsAPI/VulkanAPI/VulkanSwapChain.cpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../src/Engine/GraphicsAPI/VulkanAPI/VulkanSwapChain.h" beforeDir="false" afterPath="$PROJECT_DIR$/../../src/Engine/GraphicsAPI/VulkanAPI/VulkanSwapChain.h" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../src/Engine/Rendering/Shaders/Shader.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/../../src/Engine/Rendering/Shaders/Shader.cpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../src/Engine/Rendering/Shaders/Shader.h" beforeDir="false" afterPath="$PROJECT_DIR$/../../src/Engine/Rendering/Shaders/Shader.h" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../src/Engine/Rendering/Shaders/VulkanShader.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/../../src/Engine/Rendering/Shaders/VulkanShader.cpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../src/Engine/Rendering/Shaders/VulkanShader.h" beforeDir="false" afterPath="$PROJECT_DIR$/../../src/Engine/Rendering/Shaders/VulkanShader.h" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../src/Engine/SubsystemInitialiser.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/../../src/Engine/SubsystemInitialiser.cpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../src/Engine/SubsystemInitialiser.h" beforeDir="false" afterPath="$PROJECT_DIR$/../../src/Engine/SubsystemInitialiser.h" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../src/Engine/Window/FirstWindow.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/../../src/Engine/Window/FirstWindow.cpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../src/Engine/Window/FirstWindow.h" beforeDir="false" afterPath="$PROJECT_DIR$/../../src/Engine/Window/FirstWindow.h" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../src/Engine/Window/VulkanWindow.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/../../src/Engine/Window/VulkanWindow.cpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../src/Engine/Window/VulkanWindow.h" beforeDir="false" afterPath="$PROJECT_DIR$/../../src/Engine/Window/VulkanWindow.h" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../tests/project-unit/project-unit.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/../../tests/project-unit/project-unit.cpp" afterDir="false" />
+    </list>
+    <option name="SHOW_DIALOG" value="false" />
+    <option name="HIGHLIGHT_CONFLICTS" value="true" />
+    <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
+    <option name="LAST_RESOLUTION" value="IGNORE" />
+  </component>
+  <component name="ClangdSettings">
+    <option name="formatViaClangd" value="false" />
+  </component>
+  <component name="Git.Settings">
+    <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$/../../.." />
+  </component>
+  <component name="ProjectColorInfo">{
+  &quot;associatedIndex&quot;: 6
+}</component>
+  <component name="ProjectId" id="33viSZL4DgCPJE3j04Pabcp38BU" />
+  <component name="ProjectViewState">
+    <option name="hideEmptyMiddlePackages" value="true" />
+    <option name="showLibraryContents" value="true" />
+  </component>
+  <component name="PropertiesComponent">{
+  &quot;keyToString&quot;: {
+    &quot;RunOnceActivity.RadMigrateCodeStyle&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.cidr.known.project.marker&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.git.unshallow&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.readMode.enableVisualFormatting&quot;: &quot;true&quot;,
+    &quot;cf.first.check.clang-format&quot;: &quot;false&quot;,
+    &quot;cidr.known.project.marker&quot;: &quot;true&quot;,
+    &quot;git-widget-placeholder&quot;: &quot;Vulkan&quot;,
+    &quot;node.js.detected.package.eslint&quot;: &quot;true&quot;,
+    &quot;node.js.detected.package.tslint&quot;: &quot;true&quot;,
+    &quot;node.js.selected.package.eslint&quot;: &quot;(autodetect)&quot;,
+    &quot;node.js.selected.package.tslint&quot;: &quot;(autodetect)&quot;,
+    &quot;nodejs_package_manager_path&quot;: &quot;npm&quot;,
+    &quot;vue.rearranger.settings.migration&quot;: &quot;true&quot;
+  }
+}</component>
+  <component name="TaskManager">
+    <task active="true" id="Default" summary="Default task">
+      <changelist id="8d2b808b-852d-4904-8b4e-05992246fb54" name="Changes" comment="" />
+      <created>1760203948156</created>
+      <option name="number" value="Default" />
+      <option name="presentableId" value="Default" />
+      <updated>1760203948156</updated>
+      <workItem from="1760203949690" duration="1020000" />
+      <workItem from="1762106964427" duration="8000" />
+      <workItem from="1762109435457" duration="2390000" />
+    </task>
+    <servers />
+  </component>
+  <component name="TypeScriptGeneratedFilesManager">
+    <option name="version" value="3" />
+  </component>
+  <component name="UnityProjectConfiguration" hasMinimizedUI="false" />
+  <component name="VcsManagerConfiguration">
+    <option name="CLEAR_INITIAL_COMMIT_MESSAGE" value="true" />
+  </component>
+</project>

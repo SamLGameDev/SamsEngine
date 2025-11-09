@@ -8,24 +8,22 @@
 #include "Texture.h"
 #include "Vector3D.h"
 #include "CubeMap.h"
-#include "BaseShader.h"
-#include <functional>
 
-class Shader
+class BaseShader
 {
 public:
 
-	Shader();
-	~Shader();
+	BaseShader();
+	virtual ~BaseShader(){};
 
 	/**
 	 * loads the shader at that location. It loads all parts of the shader, so vert, geom, and frag
 	 * @param InName The name of the shader to load
 	 * @param InStorageLocation starts from where the main file is located. i.e. Contents/Shader/
 	 */
-	Shader(const std::string_view& InName, const std::string_view& InStorageLocation);
+	BaseShader(const std::string_view& InName, const std::string_view& InStorageLocation){};
 
-	Shader(const Shader& Other)
+	BaseShader(const BaseShader& Other)
 	{
 		StorageLocation = Other.GetRawStorageLocation();
 		Name = Other.GetName();
@@ -34,7 +32,7 @@ public:
 		Map = Other.Map;
 	}
 
-	Shader& operator=(const Shader& Other) {
+	BaseShader& operator=(const BaseShader& Other) {
 		if (this != &Other) { // prevent self-assignment
 			StorageLocation = Other.StorageLocation;
 			Name = Other.Name;
@@ -45,66 +43,67 @@ public:
 		return *this;
 	}
 
+
 	/**
 	 * Activates the shader to be applied to draw calls
 	 */
-	void Use() const;
+	virtual void Use() = 0;
 
 
 	/**
 	 * Sets the shaders uniform float value
 	 */
-	void SetFloat(const std::string_view& InName, const float& Value) const;
+	virtual void SetFloat(const std::string_view& InName, const float& Value) = 0;
 
 	/**
 	 * Sets the shaders uniform int value
 	 */
-	void SetInt(const std::string_view& InName, const int& Value) const;
+	virtual void SetInt(const std::string_view& InName, const int& Value) const = 0;
 
 	/**
 	 * Sets the shaders uniform mat4 value
 	 */
-	void SetMatrix4fv(const std::string_view& InName, const GLfloat* Value) const;
+	virtual void SetMatrix4fv(const std::string_view& InName, const GLfloat* Value) const = 0;
 
 	/**
 	 * Sets the shaders uniform mat3 value
 	 */
-	void SetMatrix3fv(const std::string_view& InName, const GLfloat* Value) const;
+	virtual void SetMatrix3fv(const std::string_view& InName, const GLfloat* Value) const = 0;
 
 	/**
 	 * Sets the shaders uniform vec4 value
 	 */
-	void SetVec4(const std::string_view& InName, const Array<float>& Value) const;
+	virtual void SetVec4(const std::string_view& InName, const Array<float>& Value) const = 0;
 
 	/**
 	 * Sets the shaders uniform vec3 value
 	 */
-	void SetVec3(const std::string_view& InName, const Array<float>& Value) const;
+	virtual void SetVec3(const std::string_view& InName, const Array<float>& Value) const = 0;
 
 	/**
 	 * Sets the shaders uniform vec3 value
 	 */
-	void SetVec3(const std::string_view& InName, const Vector3D& Value) const;
+	virtual void SetVec3(const std::string_view& InName, const Vector3D& Value) const = 0;
 
 
 	/**
 	 * Apply all the textures for the next set of rendered objects
 	 */
-	void ApplyTextures() const;
+	virtual void ApplyTextures() const = 0;
 
-	void AddTexture(const Texture InTexture);
-	void AddTexture(const Array<Texture>& InTexture);
+	virtual void AddTexture(const Texture InTexture) = 0;
+	virtual void AddTexture(const Array<Texture>& InTexture) = 0;
 
 
 	/**
 	 * @return The folder containing the shaders
 	 */
-	[[nodiscard]] std::string GetRawStorageLocation() const
+	virtual [[nodiscard]] std::string GetRawStorageLocation() const
 	{
 		return StorageLocation;
 	}
 
-	[[nodiscard]] std::string GetName() const
+	virtual [[nodiscard]] std::string GetName() const
 	{
 		return Name;
 	}
@@ -112,20 +111,17 @@ public:
 	/**
 	 * @return The assigned buffer of the shader program
 	 */
-	[[nodiscard]] unsigned int GetID() const
+	virtual [[nodiscard]] unsigned int GetID() const
 	{
 		return ID;
 	}
 
-	[[nodiscard]] LinkedList<Texture> GetTextures() const
+	virtual [[nodiscard]] LinkedList<Texture> GetTextures() const
 	{
 		return Textures;
 	}
 
-	void AddCubeMap(const CubeMap& InMap);
-
-
-	static std::function<BaseShader* (const std::string_view& InName, const std::string_view& InStorageLocation)> ShaderCreationFunc;
+	virtual void AddCubeMap(const CubeMap& InMap) = 0;
 
 private:
 
@@ -134,74 +130,58 @@ private:
 	 * Creates a default vertex file for rendering an object
 	 * @return true if file successfully created
 	 */
-	bool CreateDefaultShaderFile() const;
+	virtual bool CreateDefaultShaderFile() const = 0;
 
 	/**
 	 * Creates a default geometry file for rendering an object
 	 * @return true if file successfully created
 	 */
-	bool CreateDefaultGeometryFile() const;
+	virtual bool CreateDefaultGeometryFile() const = 0;
 
 	/**
 	 * Creates a default fragment file for rendering an object
 	 * @return true if file successfully created
 	 */
-	bool CreateDefaultFragmentFile() const;
+	virtual bool CreateDefaultFragmentFile() const = 0;
 
 
 	/**
 	 * @return true if the vertex file exists
 	 */
-	[[nodiscard]] bool DoesVertexShaderExist() const;
+	virtual [[nodiscard]] bool DoesVertexShaderExist() const = 0;
 
 	/**
 	 * @return true if the geometry file exists
 	 */
-	[[nodiscard]] bool DoesGeometryShaderExist() const;
+	virtual [[nodiscard]] bool DoesGeometryShaderExist() const = 0;
 
 	/**
 	 * @return true if the fragment file exists
 	 */
-	[[nodiscard]] bool DoesFragmentShaderExist() const;
+	virtual [[nodiscard]] bool DoesFragmentShaderExist() const = 0;
 
-	std::string GetPathUntyped() const;
+	virtual std::string GetPathUntyped() const = 0;
 
 
 	/**
 	 * @return The full path to the vertex shader
 	 */
-	[[nodiscard]] std::string GetShaderLocation() const;
+	virtual [[nodiscard]] std::string GetShaderLocation() const = 0;
 
 	/**
 	 * @return The full path to the geometry shader
 	 */
-	[[nodiscard]] std::string GetGeometryLocation() const;
+	virtual [[nodiscard]] std::string GetGeometryLocation() const = 0;
 
 	/**
 	 * @return The full path to the fragment shader
 	 */
-	[[nodiscard]] std::string GetFragmentLocation() const;
+	virtual [[nodiscard]] std::string GetFragmentLocation() const = 0;
 
 
+	virtual void CreateProgram(const unsigned int& vertex, const unsigned int& fragment, const unsigned int& geometry) = 0;
 
-	/**
-	 * @return The buffer of the vertex shader, if -1 means it failed
-	 */
-	[[nodiscard]] unsigned int CompileVertex() const;
-
-	/**
-	 * @return The buffer of the Geometry shader, if -1 means it failed
-	 */
-	[[nodiscard]] unsigned int CompileGeometry() const;
-
-	/**
-	 * @return The buffer of the Fragment shader, if -1 means it failed
-	 */
-	[[nodiscard]] unsigned int CompileFragment() const;
-
-	void CreateProgram(const unsigned int& vertex, const unsigned int& fragment, const unsigned int& geometry);
-
-	[[nodiscard]] std::string ReadFileContents(const std::string_view& Location) const;
+	virtual [[nodiscard]] std::string ReadFileContents(const std::string_view& Location) const = 0;
 
 	std::string StorageLocation;
 
@@ -212,6 +192,4 @@ private:
 	LinkedList<Texture> Textures;
 
 	CubeMap Map;
-
-	BaseShader* RealShader;
 };

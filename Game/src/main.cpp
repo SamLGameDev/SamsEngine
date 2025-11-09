@@ -11,12 +11,13 @@
 #include <PointLight.h>
 #include <SpotLight.h>
 #include <Voronoi2D.h>
+#include <RuntimeEngineVulkan.h>
 
 
 int main(int argc, char* argv[]) {
 
 
-	RuntimeEngine Engine;
+	Vulkan::RuntimeEngine Engine;
 	Engine.Init();
 
 
@@ -80,8 +81,8 @@ int main(int argc, char* argv[]) {
 
 	//skyBox.DrawGroup = GL_LEQUAL;
 
-	Voronoi2D v;
-	v.FracturePlaneRandom(Vector2D(-1, 1), Vector2D(-1, -1), Vector2D(1, 1), Vector2D(1, -1));
+	//Voronoi2D v;
+	//v.FracturePlaneRandom(Vector2D(-1, 1), Vector2D(-1, -1), Vector2D(1, 1), Vector2D(1, -1));
 
 
 	while (!RuntimeEngine::ShouldClose())

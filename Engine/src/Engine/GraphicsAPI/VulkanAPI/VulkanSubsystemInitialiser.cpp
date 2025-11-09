@@ -2,6 +2,9 @@
 
 #include <exception>
 #include <iostream>
+
+#include "DataBuffers.h"
+#include "DataBuffersVulkan.h"
 #include "WorldObject.h"
 #include "ObjectFactory.h"
 #include "VulkanInstance.h"
@@ -47,6 +50,8 @@ namespace Vulkan
 		}
 
 		::Shader::ShaderCreationFunc = Vulkan::Shader::CreateVulkanShader;
+
+		::DataBuffers::APIBufferInstance = new Vulkan::DataBuffers();
 
 		try
 		{
@@ -174,6 +179,8 @@ namespace Vulkan
 	//		std::cout << error.what() << "\n";
 	//		return ERROR;
 	//	}*/
+
+		 delete ::DataBuffers::APIBufferInstance;
 
 		try
 		{

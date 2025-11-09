@@ -38,6 +38,25 @@ public:
 		DynamicArray = newArray;
 	}
 
+
+	explicit Array(size_t size)
+	{
+		NumItems = size;
+		ArraySize = size;
+		DynamicArray = new T[size];
+	}
+
+	explicit Array(T* First, T* Last)
+	{
+		NumItems = 0;
+		ArraySize = 0;
+		DynamicArray = new T[1];
+		for (T* i = First; i != Last; ++i)
+		{
+			Add(*i);
+		}
+	}
+
 	Array& operator=(const Array& other)
 	{
 		if (this != &other)
@@ -64,12 +83,28 @@ public:
 		return true;
 
 	}
-	[[nodiscard]] T operator[](const unsigned int Index) const
+
+	bool operator==(const nullptr_t null)
 	{
-		return GetItemAt(Index);
+		return this == null;
 	}
 
-	[[nodiscard]] T* GetItemAtRef(const unsigned int Index) const
+	[[nodiscard]] const T& operator[](const unsigned int Index) const
+	{
+		return GetItemAtRef(Index);
+	}
+	[[nodiscard]] T& operator[](const unsigned int Index)
+	{
+		return GetItemAtRef(Index);
+	}
+
+
+	[[nodiscard]] T& GetItemAtRef(const unsigned int Index) const
+	{
+		return DynamicArray[Index];
+	}
+
+	[[nodiscard]] T* GetItemAtPtr(const unsigned int Index) const
 	{
 		return &DynamicArray[Index];
 	}
@@ -77,6 +112,11 @@ public:
 	[[nodiscard]] T* GetFirstRef()const
 	{
 		return DynamicArray;
+	}
+
+	[[nodiscard]] T* GetLastPtr() 
+	{
+		return &DynamicArray[NumItems - 1];
 	}
 
 	void Add(const T item)
@@ -151,7 +191,7 @@ public:
 
 	bool Reallocate(const unsigned int Size)
 	{
-		if (Size > ArraySize)
+		if (Size < ArraySize)
 		{
 			return false;
 		}
@@ -160,10 +200,11 @@ public:
 
 		for (unsigned int i = 0; i < NumItems; i++)
 		{
-			NewArray[i] = std::move(GetItemAt(i));
+			NewArray[i] = GetItemAt(i);
 		}
 
 		ArraySize = Size;
+		NumItems = Size;
 
 		delete[] DynamicArray;
 		DynamicArray = NewArray;
@@ -192,6 +233,29 @@ public:
 			{
 				return true;
 			}
+		}
+		return false;
+	}
+
+	bool Replace(const T& ToReplace, const T& NewItem)
+	{
+		for (unsigned int i = 0; i < NumItems; i++)
+		{
+			if (DynamicArray[i] == ToReplace)
+			{
+				DynamicArray[i] = NewItem;
+				return true;
+			}
+		}
+		return false;
+	}
+
+	bool Replace(const size_t Index, const T& Item)
+	{
+		if (NumItems > Index)
+		{
+			DynamicArray[Index] = Item;
+			return true;
 		}
 		return false;
 	}

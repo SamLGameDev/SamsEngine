@@ -114,6 +114,11 @@ public:
 		return DynamicArray;
 	}
 
+	[[nodiscard]] T* GetLastPtr() 
+	{
+		return &DynamicArray[NumItems - 1];
+	}
+
 	void Add(const T item)
 	{
 		if (NumItems + 1 < ArraySize)
