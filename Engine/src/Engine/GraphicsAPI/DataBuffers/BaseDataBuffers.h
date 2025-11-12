@@ -6,7 +6,8 @@
 enum BufferTargets : uint8_t
 {
 	Vertex,
-	Indices
+	Indices,
+	Transfer
 };
 
 
@@ -24,6 +25,8 @@ public:
 	virtual void BindBuffer(const uint32_t& ID) = 0;
 
 	virtual void BufferData(const uint32_t& ID, const size_t& Size, void* Data, const BufferTargets& Target) = 0;
+
+	virtual void BufferDataIndex(const uint32_t ID, const size_t& Size, void* Data) = 0;
 
 	virtual void DrawVertexData(const uint32_t& ID) = 0;
 };

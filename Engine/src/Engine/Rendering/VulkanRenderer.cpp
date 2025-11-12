@@ -18,7 +18,6 @@ namespace Vulkan
 	URenderer::URenderer(UGraphicsCard* InOwningCard)
 	{
 		OwningCard = InOwningCard;
-		Init();
 	}
 
 	URenderer::~URenderer()
@@ -47,6 +46,7 @@ namespace Vulkan
 		DataBuffers::BindVertexInfo(vao, 1, 0, sizeof(Vector3D), 0);
 
 		DataBuffers::BufferData(vao, testPositions.GetSize() * sizeof(Vector2D), testPositions.GetFirstRef(), BufferTargets::Vertex);
+		DataBuffers::BufferDataIndex(vao, indices.GetSize() * sizeof(uint16_t), indices.GetFirstRef());
 		DataBuffers::BufferData(vao, testColors.GetSize() * sizeof(Vector3D), testColors.GetFirstRef(), BufferTargets::Vertex);
 
 		return SUCCEEDED;
@@ -63,6 +63,13 @@ namespace Vulkan
 		{
 			return ERROR;
 		}
+
+		VkCommandPoolCreateInfo transferCreateInfo{};
+		transferCreateInfo.flags = VK_COMMAND_POOL_CREATE_TRANSIENT_BIT;
+		transferCreateInfo.sType = VK_STRUCTURE_TYPE_COMMAND_POOL_CREATE_INFO;
+		transferCreateInfo.queueFamilyIndex = SInstance::GetInstance()->GraphicsCard->GetFoundQueueFamilies().GraphicsFamily.value();
+		vkCreateCommandPool(*SInstance::GetInstance()->GraphicsCard->GetLogicalDevice()->GetVulkanLogicalDevice(),
+			&transferCreateInfo, nullptr, &TransferPool);
 		return SUCCEEDED;
 	}
 
@@ -102,6 +109,9 @@ namespace Vulkan
 			if (vkCreateSemaphore(*OwningCard->GetLogicalDevice()->GetVulkanLogicalDevice(), &semaphoreCreateInfo, nullptr, RenderFinishedSemaphores.GetItemAtPtr(i)) != VK_SUCCESS) return ERROR;
 			if (vkCreateFence(*OwningCard->GetLogicalDevice()->GetVulkanLogicalDevice(), &fenceCreateInfo, nullptr, InFlightFences.GetItemAtPtr(i)) != VK_SUCCESS) return ERROR;
 		}
+
+		vkCreateFence(*SInstance::GetInstance()->GraphicsCard->GetLogicalDevice()->GetVulkanLogicalDevice(),
+			&fenceCreateInfo, nullptr, &CopyFence);
 
 		return SUCCEEDED;
 	}
@@ -219,7 +229,7 @@ namespace Vulkan
 		scissor.offset = { 0, 0 };
 		vkCmdSetScissor(Buffer, 0, 1, &scissor);
 
-		vkCmdDraw(Buffer, 3, 1, 0, 0);
+		vkCmdDrawIndexed(Buffer, static_cast<uint32_t>(indices.GetSize()), 1, 0, 0, 0);
 
 		vkCmdEndRenderPass(Buffer);
 
@@ -244,8 +254,11 @@ namespace Vulkan
 
 			vkDestroyFence(*OwningCard->GetLogicalDevice()->GetVulkanLogicalDevice(), InFlightFences.GetItemAt(i), nullptr);
 		}
+		vkDestroyFence(*OwningCard->GetLogicalDevice()->GetVulkanLogicalDevice(), CopyFence, nullptr);
 
 		vkDestroyCommandPool(*OwningCard->GetLogicalDevice()->GetVulkanLogicalDevice(), CommandPool, nullptr);
+		vkDestroyCommandPool(*OwningCard->GetLogicalDevice()->GetVulkanLogicalDevice(), TransferPool, nullptr);
+
 
 		delete RenderPass;
 

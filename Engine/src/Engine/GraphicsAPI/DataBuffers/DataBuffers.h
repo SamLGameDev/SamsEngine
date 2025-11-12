@@ -19,5 +19,7 @@ public:
 
 	static void DrawVertexData(const uint32_t& ID);
 
+	static void BufferDataIndex(const uint32_t ID, const size_t& Size, void* Data);
+
 	static BaseDataBuffers* APIBufferInstance;
 };

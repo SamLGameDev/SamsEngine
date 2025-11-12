@@ -36,3 +36,8 @@ void DataBuffers::DrawVertexData(const uint32_t& ID)
 	APIBufferInstance->DrawVertexData(ID);
 }
 
+void DataBuffers::BufferDataIndex(const uint32_t ID, const size_t& Size, void* Data)
+{
+	APIBufferInstance->BufferDataIndex(ID, Size, Data);
+}
+

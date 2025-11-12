@@ -97,16 +97,30 @@ namespace Vulkan
 
 		void CreateRenderPass();
 
+		VkCommandPool* GetTransferPool()
+		{
+			return &TransferPool;
+		}
+
+		VkFence& GetCopyFence()
+		{
+			return CopyFence;
+		}
+
 	private:
 
 		VkCommandPool CommandPool;
 		Array<VkCommandBuffer> CommandBuffers;
+
+		VkCommandPool TransferPool;
 
 		UGraphicsCard* OwningCard;
 
 		Array<VkSemaphore> ImageAvailableSemaphores;
 		Array<VkSemaphore> RenderFinishedSemaphores;
 		Array<VkFence> InFlightFences;
+
+		VkFence CopyFence;
 
 		URenderPass* RenderPass;
 
@@ -117,16 +131,20 @@ namespace Vulkan
 		VkCommandBuffer CurrentBuffer;
 
 		Array<Vector2D> testPositions = {
-	{0.0f, -0.5f},
+	{-0.5f, -0.5f},
+	{0.5f, -0.5f},
 	{0.5f, 0.5f},
 	{-0.5f, 0.5f}
 		};
 		Array<Vector3D> testColors = {
 		{1.0f, 0.0f, 0.0f},
 		{0.0f, 1.0f, 0.0f},
-		{0.0f, 0.0f, 1.0f}
+		{0.0f, 0.0f, 1.0f},
+			{ 1, 1, 1, }
 		};
-
+		const Array<uint16_t> indices = {
+	0, 1, 2, 2, 3, 0
+		};
 		uint32_t vao;
 	};
 }

@@ -180,6 +180,7 @@ namespace Vulkan
 	{
 
 		Renderer = new URenderer(this);
+		Renderer->Init();
 	}
 
 	ErrorCodes UGraphicsCard::ShutDown()

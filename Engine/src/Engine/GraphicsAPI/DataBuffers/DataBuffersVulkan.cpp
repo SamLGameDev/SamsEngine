@@ -25,6 +25,14 @@ namespace Vulkan
 		{
 			vkFreeMemory(*SInstance::GetInstance()->GraphicsCard->GetLogicalDevice()->GetVulkanLogicalDevice(), memory, nullptr);
 		}
+
+		vkDestroyBuffer(*SInstance::GetInstance()->GraphicsCard->GetLogicalDevice()->GetVulkanLogicalDevice(), IndexBuffer, nullptr);
+		vkFreeMemory(*SInstance::GetInstance()->GraphicsCard->GetLogicalDevice()->GetVulkanLogicalDevice(), IndexMemory, nullptr);
+	}
+
+	DataBuffers::DataBuffers()
+	{
+		
 	}
 
 	void Vulkan::DataBuffers::GenBuffer(const size_t& Number, Array<uint32_t>& IDs)
@@ -88,46 +96,133 @@ namespace Vulkan
 		);
 	}
 
-	void Vulkan::DataBuffers::BufferData(const uint32_t& ID, const size_t& Size, void* Data, const BufferTargets& Target)
+	VkBuffer DataBuffers::CreateBuffer(const size_t& Size, const VkBufferUsageFlags& Target,
+	                                   const VkMemoryPropertyFlags& Properties, VkDeviceMemory& OutMemory)
 	{
+		VkBuffer buffer;
+
 		VkBufferCreateInfo bufferInfo{};
 		bufferInfo.sType = VK_STRUCTURE_TYPE_BUFFER_CREATE_INFO;
 		bufferInfo.size = Size;
-		bufferInfo.usage = TargetToVulkan.at(Target);
+		bufferInfo.usage = Target;
 		bufferInfo.sharingMode = VK_SHARING_MODE_EXCLUSIVE;
 
-		DataBuffer& buffer = RegisteredBuffers.at(ID);
-		buffer.Buffers.Reallocate(buffer.Buffers.GetSize() + 1);
-
 		if (vkCreateBuffer(*SInstance::GetInstance()->GraphicsCard->GetLogicalDevice()->GetVulkanLogicalDevice(),
-			&bufferInfo, nullptr, buffer.Buffers.GetLastPtr()) != VK_SUCCESS)
+		                   &bufferInfo, nullptr, &buffer) != VK_SUCCESS)
 		{
 			throw std::runtime_error("Failed to Buffer Data");
 		};
 		VkMemoryRequirements requirements;
-		vkGetBufferMemoryRequirements(*SInstance::GetInstance()->GraphicsCard->GetLogicalDevice()->GetVulkanLogicalDevice(), *buffer.Buffers.GetLastPtr(), &requirements);
+		vkGetBufferMemoryRequirements(*SInstance::GetInstance()->GraphicsCard->GetLogicalDevice()->GetVulkanLogicalDevice(), buffer, &requirements);
 
 		VkMemoryAllocateInfo allocateInfo{};
 		allocateInfo.sType = VK_STRUCTURE_TYPE_MEMORY_ALLOCATE_INFO;
 		allocateInfo.allocationSize = requirements.size;
 		allocateInfo.memoryTypeIndex = SInstance::GetInstance()->GraphicsCard->FindMemoryType(requirements.memoryTypeBits,
-			VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT);
+			Properties);
 
-		buffer.BufferMemory.Reallocate(buffer.BufferMemory.GetSize() + 1);
-
-		if (vkAllocateMemory(*SInstance::GetInstance()->GraphicsCard->GetLogicalDevice()->GetVulkanLogicalDevice(), &allocateInfo, nullptr, buffer.BufferMemory.GetLastPtr()) != VK_SUCCESS)
+		if (vkAllocateMemory(*SInstance::GetInstance()->GraphicsCard->GetLogicalDevice()->GetVulkanLogicalDevice(), &allocateInfo, nullptr, &OutMemory) != VK_SUCCESS)
 		{
 			throw std::runtime_error("Failed to create buffer memory");
 		}
 
 		vkBindBufferMemory(*SInstance::GetInstance()->GraphicsCard->GetLogicalDevice()->GetVulkanLogicalDevice(),
-			*buffer.Buffers.GetLastPtr(), *buffer.BufferMemory.GetLastPtr(), 0);
+		                   buffer, OutMemory, 0);
+
+		return buffer;
+	}
+
+	void Vulkan::DataBuffers::BufferData(const uint32_t& ID, const size_t& Size, void* Data, const BufferTargets& Target)
+	{
+		DataBuffer& buffer = RegisteredBuffers.at(ID);
+		
+		VkDeviceMemory stagingMemory;
+
+		VkBuffer stagingBuffer = CreateBuffer(Size, VK_BUFFER_USAGE_TRANSFER_SRC_BIT, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT, stagingMemory);
+
 
 		void* data;
-		vkMapMemory(*SInstance::GetInstance()->GraphicsCard->GetLogicalDevice()->GetVulkanLogicalDevice(), *buffer.BufferMemory.GetLastPtr(), 0, bufferInfo.size, 0, &data);
-		memcpy(data, Data, bufferInfo.size);
-		vkUnmapMemory(*SInstance::GetInstance()->GraphicsCard->GetLogicalDevice()->GetVulkanLogicalDevice(), *buffer.BufferMemory.GetLastPtr());
+		vkMapMemory(*SInstance::GetInstance()->GraphicsCard->GetLogicalDevice()->GetVulkanLogicalDevice(), stagingMemory, 0, Size, 0, &data);
+		memcpy(data, Data, Size);
+		vkUnmapMemory(*SInstance::GetInstance()->GraphicsCard->GetLogicalDevice()->GetVulkanLogicalDevice(), stagingMemory);
+		VkDeviceMemory destinationMemory;
+		buffer.Buffers.Add(CreateBuffer(ID, TargetToVulkan.at(Transfer) | TargetToVulkan.at(Target), VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT, destinationMemory));
 
+		buffer.BufferMemory.Add(destinationMemory);
+
+		CopyBuffer(stagingBuffer,*buffer.Buffers.GetLastPtr(), Size);
+
+
+		vkDestroyBuffer(*SInstance::GetInstance()->GraphicsCard->GetLogicalDevice()->GetVulkanLogicalDevice(), stagingBuffer, nullptr);
+		vkFreeMemory(*SInstance::GetInstance()->GraphicsCard->GetLogicalDevice()->GetVulkanLogicalDevice(), stagingMemory, nullptr);
+
+	}
+
+	void DataBuffers::BufferDataIndex(const uint32_t ID, const size_t& Size, void* Data)
+	{
+		DataBuffer& buffer = RegisteredBuffers.at(ID);
+
+		VkDeviceMemory stagingMemory;
+
+		VkBuffer stagingBuffer = CreateBuffer(Size, VK_BUFFER_USAGE_TRANSFER_SRC_BIT, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT, stagingMemory);
+
+
+		void* data;
+		vkMapMemory(*SInstance::GetInstance()->GraphicsCard->GetLogicalDevice()->GetVulkanLogicalDevice(), stagingMemory, 0, Size, 0, &data);
+		memcpy(data, Data, Size);
+		vkUnmapMemory(*SInstance::GetInstance()->GraphicsCard->GetLogicalDevice()->GetVulkanLogicalDevice(), stagingMemory);
+		VkDeviceMemory destinationMemory;
+		buffer.IndexBuffer = CreateBuffer(ID, TargetToVulkan.at(Transfer) | VK_BUFFER_USAGE_INDEX_BUFFER_BIT, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT, destinationMemory);
+
+		buffer.IndexMemory = destinationMemory;
+
+		CopyBuffer(stagingBuffer, buffer.IndexBuffer, Size);
+
+
+		vkDestroyBuffer(*SInstance::GetInstance()->GraphicsCard->GetLogicalDevice()->GetVulkanLogicalDevice(), stagingBuffer, nullptr);
+		vkFreeMemory(*SInstance::GetInstance()->GraphicsCard->GetLogicalDevice()->GetVulkanLogicalDevice(), stagingMemory, nullptr);
+	}
+
+	void DataBuffers::CopyBuffer(const VkBuffer& SrcBuffer, VkBuffer& DstBuffer, const VkDeviceSize& Size)
+	{
+
+		VkCommandPool* transferPool = SInstance::GetInstance()->GraphicsCard->GetRenderer()->GetTransferPool();
+
+		VkCommandBufferAllocateInfo allocInfo{};
+		allocInfo.commandBufferCount = 1;
+		allocInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO;
+		allocInfo.level = VK_COMMAND_BUFFER_LEVEL_PRIMARY;
+		allocInfo.commandPool = *transferPool;
+
+		VkCommandBuffer cBuffer;
+		vkAllocateCommandBuffers(*SInstance::GetInstance()->GraphicsCard->GetLogicalDevice()->GetVulkanLogicalDevice(), &allocInfo, &cBuffer);
+
+		VkCommandBufferBeginInfo beginInfo{};
+		beginInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO;
+		beginInfo.flags = VK_COMMAND_BUFFER_USAGE_ONE_TIME_SUBMIT_BIT;
+		vkBeginCommandBuffer(cBuffer, &beginInfo);
+
+		VkBufferCopy copyBuffer{};
+		copyBuffer.srcOffset = 0;
+		copyBuffer.dstOffset = 0;
+		copyBuffer.size = Size;
+		vkCmdCopyBuffer(cBuffer, SrcBuffer, DstBuffer, 1, &copyBuffer);
+
+		vkEndCommandBuffer(cBuffer);
+
+		VkSubmitInfo sInfo{};
+		sInfo.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO;
+		sInfo.commandBufferCount = 1;
+		sInfo.pCommandBuffers = &cBuffer;
+
+		VkFence& copyFence = SInstance::GetInstance()->GraphicsCard->GetRenderer()->GetCopyFence();
+
+		vkResetFences(*SInstance::GetInstance()->GraphicsCard->GetLogicalDevice()->GetVulkanLogicalDevice(), 1, &copyFence);
+
+		vkQueueSubmit(SInstance::GetInstance()->GraphicsCard->GetLogicalDevice()->GetGraphicsQueue(), 1, &sInfo, copyFence);
+		vkWaitForFences(*SInstance::GetInstance()->GraphicsCard->GetLogicalDevice()->GetVulkanLogicalDevice(), 1, &copyFence, VK_TRUE, UINT64_MAX);
+
+		vkFreeCommandBuffers(*SInstance::GetInstance()->GraphicsCard->GetLogicalDevice()->GetVulkanLogicalDevice(), *transferPool, 1, &cBuffer);
 	}
 
 	void Vulkan::DataBuffers::DrawVertexData(const uint32_t& ID)
@@ -137,5 +232,7 @@ namespace Vulkan
 		VkDeviceSize offsets[] = { 0, 0 };
 		vkCmdBindVertexBuffers(SInstance::GetInstance()->GraphicsCard->GetRenderer()->GetCurrentBuffer(),
 			0, buffer.Buffers.GetSize(), buffer.Buffers.GetFirstRef(), offsets);
+
+		vkCmdBindIndexBuffer(SInstance::GetInstance()->GraphicsCard->GetRenderer()->GetCurrentBuffer(), buffer.IndexBuffer, 0, VK_INDEX_TYPE_UINT16);
 	}
 }
