@@ -6,6 +6,17 @@
 class WorldObject;
 
 
+struct GlobalTransforms
+{
+	glm::mat4 View;
+	glm::mat4 Projection;
+};
+
+struct PerInstanceTransforms
+{
+	glm::mat4 Model;
+};
+
 /**
  * Main class that dictates an objects position
  */

@@ -68,6 +68,9 @@ namespace Vulkan
 
 		void CopyBuffer(const VkBuffer& SrcBuffer, VkBuffer& DstBuffer, const VkDeviceSize& Size);
 
+		void* GenerateUniformDataBuffer(const uint32_t ID, const size_t& Size);
+
+		BaseDataBuffer* GetBuffer(const uint32_t& ID) override;
 
 		void DrawVertexData(const uint32_t& ID) override;
 

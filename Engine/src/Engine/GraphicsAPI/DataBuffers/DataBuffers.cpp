@@ -31,6 +31,16 @@ void DataBuffers::BufferData(const uint32_t& ID, const size_t& Size, void* Data,
 	APIBufferInstance->BufferData(ID, Size, Data, Target);
 }
 
+void* DataBuffers::GenerateUniformDataBuffer(const uint32_t ID, const size_t& Size)
+{
+	return APIBufferInstance->GenerateUniformDataBuffer(ID, Size);
+}
+
+BaseDataBuffer* DataBuffers::GetBuffer(const uint32_t& ID)
+{
+	return APIBufferInstance->GetBuffer(ID);
+}
+
 void DataBuffers::DrawVertexData(const uint32_t& ID)
 {
 	APIBufferInstance->DrawVertexData(ID);

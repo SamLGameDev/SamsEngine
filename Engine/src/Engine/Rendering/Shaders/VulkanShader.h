@@ -69,6 +69,9 @@ namespace Vulkan
 		 */
 		void SetFloat(const std::string_view& InName, const float& Value) override;
 
+		void SetUniformBuffer(const size_t& Location, const void* Data, const size_t& Size) override;
+
+
 		/**
 		 * Sets the shaders uniform int value
 		 */
@@ -231,5 +234,10 @@ namespace Vulkan
 		CubeMap Map;
 
 		URenderPipeline* Pipeline;
+
+		Array<uint32_t> UnifromBufferID;
+		Array<void*> UniformMappedData;
 	};
+
+
 }

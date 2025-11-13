@@ -2,15 +2,19 @@
 #include "VulkanLogicalDevice.h"
 #include "VulkanGraphicsCard.h"
 #define GLFW_INCLUDE_VULKAN
+#include <chrono>
 #include <complex.h>
 #include <GLFW/glfw3.h>
 
 #include "DataBuffers.h"
+#include "Transform.h"
 #include "Vector2D.h"
 #include "VulkanImageView.h"
 #include "VulkanInstance.h"
 #include "Window.h"
 #include "VulkanImageView.h"
+#include "glm/ext/matrix_clip_space.hpp"
+#include "glm/ext/matrix_transform.hpp"
 
 
 namespace Vulkan
@@ -36,6 +40,18 @@ namespace Vulkan
 		if (CreateCommandBuffers() == ERROR) return ERROR;
 
 		if (CreateSyncObjects() == ERROR) return ERROR;
+
+		VkDescriptorPoolSize dPoolSize{};
+		dPoolSize.type = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
+		dPoolSize.descriptorCount = 2;
+
+		VkDescriptorPoolCreateInfo dPoolCreateInfo{};
+		dPoolCreateInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_POOL_CREATE_INFO;
+		dPoolCreateInfo.pPoolSizes = &dPoolSize;
+		dPoolCreateInfo.poolSizeCount = 1;
+		dPoolCreateInfo.maxSets = 2;
+
+		vkCreateDescriptorPool(*OwningCard->GetLogicalDevice()->GetVulkanLogicalDevice(), &dPoolCreateInfo, nullptr, &DescriptorPool);
 
 		Test = new Shader("triangle", "/Shaders/");
 
@@ -214,6 +230,25 @@ namespace Vulkan
 
 		DataBuffers::DrawVertexData(vao);
 
+		static auto startTime = std::chrono::high_resolution_clock::now();
+
+		auto currentTime = std::chrono::high_resolution_clock::now();
+		float time = std::chrono::duration<float, std::chrono::seconds::period>(currentTime - startTime).count();
+
+		PerInstanceTransforms ubo;
+		ubo.Model = glm::rotate(glm::mat4(1.0f), time * glm::radians(90.0f), glm::vec3(0.0f, 0.0f, 1.0f));
+
+		GlobalTransforms g;
+		g.View = glm::lookAt(glm::vec3(2.0f, 2.0f, 2.0f), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 0.0f, 1.0f));
+
+		g.Projection = glm::perspective(glm::radians(45.0f), OwningCard->GetLogicalDevice()->GetSwapChain()->GetSwapChainExtent().width / (float)OwningCard->GetLogicalDevice()->GetSwapChain()->GetSwapChainExtent().height, 0.1f, 10.0f);
+
+
+		g.Projection[1][1] *= -1;
+		Test->SetUniformBuffer(0, &g, sizeof(GlobalTransforms));
+
+		Test->SetUniformBuffer(1, &ubo, sizeof(PerInstanceTransforms));
+
 		VkViewport viewport{};
 		viewport.x = 0;
 		viewport.y = 0;
@@ -256,6 +291,7 @@ namespace Vulkan
 		}
 		vkDestroyFence(*OwningCard->GetLogicalDevice()->GetVulkanLogicalDevice(), CopyFence, nullptr);
 
+		vkDestroyDescriptorPool(*OwningCard->GetLogicalDevice()->GetVulkanLogicalDevice(), DescriptorPool, nullptr);
 		vkDestroyCommandPool(*OwningCard->GetLogicalDevice()->GetVulkanLogicalDevice(), CommandPool, nullptr);
 		vkDestroyCommandPool(*OwningCard->GetLogicalDevice()->GetVulkanLogicalDevice(), TransferPool, nullptr);
 

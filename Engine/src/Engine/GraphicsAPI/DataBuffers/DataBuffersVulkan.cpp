@@ -225,6 +225,26 @@ namespace Vulkan
 		vkFreeCommandBuffers(*SInstance::GetInstance()->GraphicsCard->GetLogicalDevice()->GetVulkanLogicalDevice(), *transferPool, 1, &cBuffer);
 	}
 
+	void* DataBuffers::GenerateUniformDataBuffer(const uint32_t ID, const size_t& Size)
+	{
+		DataBuffer& buffer = RegisteredBuffers.at(ID);
+
+		VkDeviceMemory stagingMemory;
+
+		buffer.Buffers.Add(CreateBuffer(Size, VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT, stagingMemory));
+		buffer.BufferMemory.Add(stagingMemory);
+
+		void* data;
+		vkMapMemory(*SInstance::GetInstance()->GraphicsCard->GetLogicalDevice()->GetVulkanLogicalDevice(), stagingMemory, 0, Size, 0, &data);
+
+		return data;
+	}
+
+	BaseDataBuffer* DataBuffers::GetBuffer(const uint32_t& ID)
+	{
+		return &RegisteredBuffers.at(ID);
+	}
+
 	void Vulkan::DataBuffers::DrawVertexData(const uint32_t& ID)
 	{
 		const DataBuffer& buffer = RegisteredBuffers.at(ID);

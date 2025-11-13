@@ -6,6 +6,9 @@
 #include <vulkan/vulkan_core.h>
 
 #include "CorePaths.h"
+#include "DataBuffers.h"
+#include "DataBuffersVulkan.h"
+#include "Transform.h"
 #include "VulkanInstance.h"
 #include "VulkanLogicalDevice.h"
 #include "VulkanRenderPipeline.h"
@@ -51,6 +54,44 @@ namespace Vulkan
 			vkDestroyShaderModule(*SInstance::GetInstance()->GraphicsCard->GetLogicalDevice()->GetVulkanLogicalDevice(), stage.module, nullptr);
 		}
 
+		VkDeviceSize GlobalSize = sizeof(GlobalTransforms);
+
+		VkDeviceSize LocalSize = sizeof(PerInstanceTransforms);
+
+		Array<VkDeviceSize> sizes = {GlobalSize, LocalSize};
+
+		size_t index = 0;
+
+		for (const auto& size : sizes)
+		{
+			uint32_t id;
+			::DataBuffers::GenBuffer(id);
+
+			UnifromBufferID.Add(id);
+			UniformMappedData.Add(::DataBuffers::GenerateUniformDataBuffer(id, size));
+
+			DataBuffer* buffer = dynamic_cast<DataBuffer*>(::DataBuffers::GetBuffer(id));
+
+			VkDescriptorBufferInfo dBufferInfo{};
+			dBufferInfo.buffer = *buffer->Buffers.GetLastPtr();
+			dBufferInfo.offset = 0;
+			dBufferInfo.range = size;
+
+			VkWriteDescriptorSet descriptorWrite{};
+			descriptorWrite.sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
+			descriptorWrite.pBufferInfo = &dBufferInfo;
+			descriptorWrite.descriptorCount = 1;
+			descriptorWrite.descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
+			descriptorWrite.dstSet = Pipeline->GetDescriptorSet();
+			descriptorWrite.dstBinding = index;
+			descriptorWrite.dstArrayElement = 0;
+			descriptorWrite.pImageInfo = nullptr;
+			descriptorWrite.pTexelBufferView = nullptr;
+			vkUpdateDescriptorSets(*SInstance::GetInstance()->GraphicsCard->GetLogicalDevice()->GetVulkanLogicalDevice(),
+				1, &descriptorWrite, 0, nullptr);
+			index++;
+		}
+
 	}
 
 	BaseShader* Shader::CreateVulkanShader(const std::string_view& InName, const std::string_view& InStorageLocation)
@@ -61,11 +102,20 @@ namespace Vulkan
 	void Shader::Use()
 	{
 		vkCmdBindPipeline(SInstance::GetInstance()->GraphicsCard->GetRenderer()->GetCurrentBuffer(), VK_PIPELINE_BIND_POINT_GRAPHICS, Pipeline->GetPipeline());
+
+		vkCmdBindDescriptorSets(SInstance::GetInstance()->GraphicsCard->GetRenderer()->GetCurrentBuffer(), VK_PIPELINE_BIND_POINT_GRAPHICS, Pipeline->GetPipelineLayout(),
+			0, 1, &Pipeline->GetDescriptorSet(), 0, nullptr);
 	}
 
 	void Shader::SetFloat(const std::string_view& InName, const float& Value)
 	{
 		glUniform1f(glGetUniformLocation(ID, InName.data()), Value);
+	}
+
+	void Shader::SetUniformBuffer(const size_t& Location, const void* Data, const size_t& Size)
+	{
+		void* data = UniformMappedData[Location];
+		memcpy(data, Data, Size);
 	}
 
 	void Shader::SetInt(const std::string_view& InName, const int& Value) const

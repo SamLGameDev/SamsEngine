@@ -10,6 +10,14 @@ enum BufferTargets : uint8_t
 	Transfer
 };
 
+class BaseDataBuffer
+{
+public:
+
+	virtual ~BaseDataBuffer() = default;
+};
+
+
 
 class BaseDataBuffers
 {
@@ -28,11 +36,10 @@ public:
 
 	virtual void BufferDataIndex(const uint32_t ID, const size_t& Size, void* Data) = 0;
 
+	virtual void* GenerateUniformDataBuffer(const uint32_t ID, const size_t& Size) = 0;
+
+	
+	virtual BaseDataBuffer* GetBuffer(const uint32_t& ID) = 0;
+
 	virtual void DrawVertexData(const uint32_t& ID) = 0;
 };
-
-class BaseDataBuffer
-{
-	
-};
-

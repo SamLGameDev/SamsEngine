@@ -6,7 +6,18 @@ layout(location = 1) in vec3 aColor;
 
 layout(location = 0) out vec3 fragColors;
 
+layout (std140, binding = 0) uniform Transforms
+{
+     mat4 View; 
+     mat4 Projection; 
+};
+
+layout (std140, binding = 1) uniform InstanceTransform
+{
+	mat4 Model;
+};
+
 void main() {
-    gl_Position = vec4(aPos, 0.0, 1.0);
+    gl_Position = Projection * View * Model * vec4(aPos, 0.0, 1.0);
     fragColors = aColor;
 }

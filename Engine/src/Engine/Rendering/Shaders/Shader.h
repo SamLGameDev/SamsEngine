@@ -50,6 +50,7 @@ public:
 	 */
 	void Use() const;
 
+	void SetUniformBuffer(const size_t& Location, const void* Data, const size_t& Size);
 
 	/**
 	 * Sets the shaders uniform float value

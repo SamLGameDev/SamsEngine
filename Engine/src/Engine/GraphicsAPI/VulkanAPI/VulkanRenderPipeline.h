@@ -31,11 +31,25 @@ namespace Vulkan
 			return Pipeline;
 		}
 
+		const VkDescriptorSet& GetDescriptorSet() const
+		{
+			return DescriptorSet;
+		}
+
+		const VkPipelineLayout& GetPipelineLayout()const
+		{
+			return Layout;
+		}
+
 	private:
 
 		VkPipelineLayout Layout;
 
 		VkPipeline Pipeline;
+
+		VkDescriptorSetLayout DescriptorLayout;
+
+		VkDescriptorSet DescriptorSet;
 
 	};
 }

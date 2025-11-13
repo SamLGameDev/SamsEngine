@@ -27,6 +27,11 @@ void Shader::Use() const
 	RealShader->Use();
 }
 
+void Shader::SetUniformBuffer(const size_t& Location, const void* Data, const size_t& Size)
+{
+	RealShader->SetUniformBuffer(Location, Data, Size);
+}
+
 void Shader::SetFloat(const std::string_view& InName, const float& Value) const
 {
 	glUniform1f(glGetUniformLocation(ID, InName.data()), Value);

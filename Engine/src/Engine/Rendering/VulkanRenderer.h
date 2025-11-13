@@ -107,12 +107,19 @@ namespace Vulkan
 			return CopyFence;
 		}
 
+		VkDescriptorPool* GetDescriptorPool()
+		{
+			return &DescriptorPool;
+		}
+
 	private:
 
 		VkCommandPool CommandPool;
 		Array<VkCommandBuffer> CommandBuffers;
 
 		VkCommandPool TransferPool;
+
+		VkDescriptorPool DescriptorPool;
 
 		UGraphicsCard* OwningCard;
 

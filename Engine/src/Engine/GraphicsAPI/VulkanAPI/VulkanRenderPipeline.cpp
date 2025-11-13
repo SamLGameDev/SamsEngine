@@ -26,6 +26,34 @@ namespace Vulkan
 
 	ErrorCodes URenderPipeline::Init(Shader& InShader)
 	{
+		Array<VkDescriptorSetLayoutBinding> descriptors;
+		for (size_t i=  0; i < 2 ; i++)
+		{
+			VkDescriptorSetLayoutBinding descriptor{};
+			descriptor.binding = i;
+			descriptor.descriptorCount = 1;
+			descriptor.pImmutableSamplers = nullptr;
+			descriptor.descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
+			descriptor.stageFlags = VK_SHADER_STAGE_VERTEX_BIT;
+			descriptors.Add(descriptor);
+		}
+	
+
+		VkDescriptorSetLayoutCreateInfo descriptorLayoutCreateInfo{};
+		descriptorLayoutCreateInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_LAYOUT_CREATE_INFO;
+		descriptorLayoutCreateInfo.bindingCount = 2;
+		descriptorLayoutCreateInfo.pBindings = descriptors.GetFirstRef();
+
+		vkCreateDescriptorSetLayout(*SInstance::GetInstance()->GraphicsCard->GetLogicalDevice()->GetVulkanLogicalDevice(), &descriptorLayoutCreateInfo, nullptr, &DescriptorLayout);
+
+		VkDescriptorSetAllocateInfo dAllocInfo{};
+		dAllocInfo.descriptorPool = *SInstance::GetInstance()->GraphicsCard->GetRenderer()->GetDescriptorPool();
+		dAllocInfo.descriptorSetCount = 1;
+		dAllocInfo.pSetLayouts = &DescriptorLayout;
+		dAllocInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_ALLOCATE_INFO;
+
+		vkAllocateDescriptorSets(*SInstance::GetInstance()->GraphicsCard->GetLogicalDevice()->GetVulkanLogicalDevice(),
+			&dAllocInfo, &DescriptorSet);
 
 		Array<VkDynamicState> dynamicStates = { VK_DYNAMIC_STATE_VIEWPORT, VK_DYNAMIC_STATE_SCISSOR, VK_DYNAMIC_STATE_VERTEX_INPUT_BINDING_STRIDE_EXT, VK_DYNAMIC_STATE_VERTEX_INPUT_EXT };
 
@@ -76,7 +104,7 @@ namespace Vulkan
 		rasterizationCreateInfo.polygonMode = VK_POLYGON_MODE_FILL;
 		rasterizationCreateInfo.lineWidth = 1;
 		rasterizationCreateInfo.cullMode = VK_CULL_MODE_BACK_BIT;
-		rasterizationCreateInfo.frontFace = VK_FRONT_FACE_CLOCKWISE;
+		rasterizationCreateInfo.frontFace = VK_FRONT_FACE_COUNTER_CLOCKWISE;
 		rasterizationCreateInfo.depthBiasEnable = VK_FALSE;
 		rasterizationCreateInfo.depthBiasConstantFactor = 0;
 		rasterizationCreateInfo.depthBiasSlopeFactor = 0;
@@ -114,10 +142,10 @@ namespace Vulkan
 
 		VkPipelineLayoutCreateInfo layoutCreateInfo{};
 		layoutCreateInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_LAYOUT_CREATE_INFO;
-		layoutCreateInfo.setLayoutCount = 0;
+		layoutCreateInfo.setLayoutCount = 1;
 		layoutCreateInfo.pushConstantRangeCount = 0;
 		layoutCreateInfo.pPushConstantRanges = nullptr;
-		layoutCreateInfo.pSetLayouts = nullptr;
+		layoutCreateInfo.pSetLayouts = &DescriptorLayout;
 
 		vkCreatePipelineLayout(*SInstance::GetInstance()->GraphicsCard->GetLogicalDevice()->GetVulkanLogicalDevice(), &layoutCreateInfo, nullptr, &Layout);
 
@@ -145,6 +173,7 @@ namespace Vulkan
 
 	ErrorCodes URenderPipeline::ShutDown()
 	{
+		vkDestroyDescriptorSetLayout(*SInstance::GetInstance()->GraphicsCard->GetLogicalDevice()->GetVulkanLogicalDevice(), DescriptorLayout, nullptr);
 		vkDestroyPipeline(*SInstance::GetInstance()->GraphicsCard->GetLogicalDevice()->GetVulkanLogicalDevice(), Pipeline, nullptr);
 		vkDestroyPipelineLayout(*SInstance::GetInstance()->GraphicsCard->GetLogicalDevice()->GetVulkanLogicalDevice(), Layout, nullptr);
 		return SUCCEEDED;

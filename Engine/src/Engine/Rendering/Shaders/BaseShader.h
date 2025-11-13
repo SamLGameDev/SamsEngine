@@ -49,7 +49,7 @@ public:
 	 */
 	virtual void Use() = 0;
 
-
+	virtual void SetUniformBuffer(const size_t& Location, const void* Data, const size_t& Size) = 0;
 	/**
 	 * Sets the shaders uniform float value
 	 */
