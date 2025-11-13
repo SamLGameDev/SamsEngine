@@ -57,13 +57,24 @@ namespace Vulkan
 
 		DataBuffers::GenBuffer(vao);
 
-		DataBuffers::BindVertexInfo(vao, 0, testPositions.GetSize(), sizeof(Vector2D), 0);
+		DataBuffers::BindVertexInfo(vao, 0, testPositions.GetSize(), sizeof(Vector3D), 0);
 
 		DataBuffers::BindVertexInfo(vao, 1, 0, sizeof(Vector3D), 0);
 
-		DataBuffers::BufferData(vao, testPositions.GetSize() * sizeof(Vector2D), testPositions.GetFirstRef(), BufferTargets::Vertex);
+		DataBuffers::BufferData(vao, testPositions.GetSize() * sizeof(Vector3D), testPositions.GetFirstRef(), BufferTargets::Vertex);
 		DataBuffers::BufferDataIndex(vao, indices.GetSize() * sizeof(uint16_t), indices.GetFirstRef());
 		DataBuffers::BufferData(vao, testColors.GetSize() * sizeof(Vector3D), testColors.GetFirstRef(), BufferTargets::Vertex);
+
+
+		DataBuffers::GenBuffer(vao2);
+
+		DataBuffers::BindVertexInfo(vao2, 0, testPositions2.GetSize(), sizeof(Vector3D), 0);
+
+		DataBuffers::BindVertexInfo(vao2, 1, 0, sizeof(Vector3D), 0);
+
+		DataBuffers::BufferData(vao2, testPositions2.GetSize() * sizeof(Vector3D), testPositions2.GetFirstRef(), BufferTargets::Vertex);
+		DataBuffers::BufferDataIndex(vao2, indices.GetSize() * sizeof(uint16_t), indices.GetFirstRef());
+		DataBuffers::BufferData(vao2,testColors.GetSize() * sizeof(Vector3D), testColors.GetFirstRef(), BufferTargets::Vertex);
 
 		return SUCCEEDED;
 	}
@@ -263,6 +274,11 @@ namespace Vulkan
 		scissor.extent = OwningCard->GetLogicalDevice()->GetSwapChain()->GetSwapChainExtent();
 		scissor.offset = { 0, 0 };
 		vkCmdSetScissor(Buffer, 0, 1, &scissor);
+
+		vkCmdDrawIndexed(Buffer, static_cast<uint32_t>(indices.GetSize()), 1, 0, 0, 0);
+		DataBuffers::BindBuffer(vao2);
+
+		DataBuffers::DrawVertexData(vao2);
 
 		vkCmdDrawIndexed(Buffer, static_cast<uint32_t>(indices.GetSize()), 1, 0, 0, 0);
 

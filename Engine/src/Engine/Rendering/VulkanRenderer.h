@@ -137,11 +137,11 @@ namespace Vulkan
 
 		VkCommandBuffer CurrentBuffer;
 
-		Array<Vector2D> testPositions = {
-	{-0.5f, -0.5f},
-	{0.5f, -0.5f},
-	{0.5f, 0.5f},
-	{-0.5f, 0.5f}
+		Array<Vector3D> testPositions = {
+	{-0.5f, -0.5f, 0.0f}, 
+	{0.5f, -0.5f, 0.0f}, 
+	{0.5f, 0.5f, 0.0f}, 
+	{-0.5f, 0.5f, 0.0f}
 		};
 		Array<Vector3D> testColors = {
 		{1.0f, 0.0f, 0.0f},
@@ -152,6 +152,13 @@ namespace Vulkan
 		const Array<uint16_t> indices = {
 	0, 1, 2, 2, 3, 0
 		};
-		uint32_t vao;
+		uint32_t vao, vao2;
+
+		Array<Vector3D> testPositions2 = {
+{-0.5f, -0.5f, -0.5f},
+{0.5f, -0.5f, -0.5f},
+{0.5f, 0.5f, -0.5f},
+{-0.5f, 0.5f, -0.5f}
+		};
 	};
 }

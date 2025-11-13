@@ -1,4 +1,6 @@
 #include "DataBuffersVulkan.h"
+
+#include <iostream>
 #include<glad/glad.h>
 
 #include "MathCore.h"
@@ -78,7 +80,7 @@ namespace Vulkan
 		attributeDescription.binding = Location;
 		attributeDescription.location = Location;
 		attributeDescription.offset = Offset;
-		attributeDescription.format = Location == 1 ? VK_FORMAT_R32G32B32_SFLOAT : VK_FORMAT_R32G32_SFLOAT;
+		attributeDescription.format = VK_FORMAT_R32G32B32_SFLOAT;
 		attributeDescription.pNext = nullptr;
 		buffer.AttributeDescriptions.Add(attributeDescription);
 	}
@@ -134,27 +136,34 @@ namespace Vulkan
 
 	void Vulkan::DataBuffers::BufferData(const uint32_t& ID, const size_t& Size, void* Data, const BufferTargets& Target)
 	{
-		DataBuffer& buffer = RegisteredBuffers.at(ID);
-		
-		VkDeviceMemory stagingMemory;
+		try
+		{
+			DataBuffer& buffer = RegisteredBuffers.at(ID);
 
-		VkBuffer stagingBuffer = CreateBuffer(Size, VK_BUFFER_USAGE_TRANSFER_SRC_BIT, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT, stagingMemory);
+			VkDeviceMemory stagingMemory;
 
-
-		void* data;
-		vkMapMemory(*SInstance::GetInstance()->GraphicsCard->GetLogicalDevice()->GetVulkanLogicalDevice(), stagingMemory, 0, Size, 0, &data);
-		memcpy(data, Data, Size);
-		vkUnmapMemory(*SInstance::GetInstance()->GraphicsCard->GetLogicalDevice()->GetVulkanLogicalDevice(), stagingMemory);
-		VkDeviceMemory destinationMemory;
-		buffer.Buffers.Add(CreateBuffer(ID, TargetToVulkan.at(Transfer) | TargetToVulkan.at(Target), VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT, destinationMemory));
-
-		buffer.BufferMemory.Add(destinationMemory);
-
-		CopyBuffer(stagingBuffer,*buffer.Buffers.GetLastPtr(), Size);
+			VkBuffer stagingBuffer = CreateBuffer(Size, VK_BUFFER_USAGE_TRANSFER_SRC_BIT, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT, stagingMemory);
 
 
-		vkDestroyBuffer(*SInstance::GetInstance()->GraphicsCard->GetLogicalDevice()->GetVulkanLogicalDevice(), stagingBuffer, nullptr);
-		vkFreeMemory(*SInstance::GetInstance()->GraphicsCard->GetLogicalDevice()->GetVulkanLogicalDevice(), stagingMemory, nullptr);
+			void* data;
+			vkMapMemory(*SInstance::GetInstance()->GraphicsCard->GetLogicalDevice()->GetVulkanLogicalDevice(), stagingMemory, 0, Size, 0, &data);
+			memcpy(data, Data, Size);
+			vkUnmapMemory(*SInstance::GetInstance()->GraphicsCard->GetLogicalDevice()->GetVulkanLogicalDevice(), stagingMemory);
+			VkDeviceMemory destinationMemory;
+			buffer.Buffers.Add(CreateBuffer(Size, TargetToVulkan.at(Transfer) | TargetToVulkan.at(Target), VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT, destinationMemory));
+
+			buffer.BufferMemory.Add(destinationMemory);
+
+			CopyBuffer(stagingBuffer, *buffer.Buffers.GetLastPtr(), Size);
+
+
+			vkDestroyBuffer(*SInstance::GetInstance()->GraphicsCard->GetLogicalDevice()->GetVulkanLogicalDevice(), stagingBuffer, nullptr);
+			vkFreeMemory(*SInstance::GetInstance()->GraphicsCard->GetLogicalDevice()->GetVulkanLogicalDevice(), stagingMemory, nullptr);
+		}
+		catch (const std::exception& error)
+		{
+			std::cerr << error.what();
+		}
 
 	}
 
@@ -172,7 +181,7 @@ namespace Vulkan
 		memcpy(data, Data, Size);
 		vkUnmapMemory(*SInstance::GetInstance()->GraphicsCard->GetLogicalDevice()->GetVulkanLogicalDevice(), stagingMemory);
 		VkDeviceMemory destinationMemory;
-		buffer.IndexBuffer = CreateBuffer(ID, TargetToVulkan.at(Transfer) | VK_BUFFER_USAGE_INDEX_BUFFER_BIT, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT, destinationMemory);
+		buffer.IndexBuffer = CreateBuffer(Size, TargetToVulkan.at(Transfer) | VK_BUFFER_USAGE_INDEX_BUFFER_BIT, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT, destinationMemory);
 
 		buffer.IndexMemory = destinationMemory;
 
