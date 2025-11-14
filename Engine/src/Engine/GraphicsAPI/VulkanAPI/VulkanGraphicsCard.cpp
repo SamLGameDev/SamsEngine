@@ -175,6 +175,38 @@ namespace Vulkan
 		return indices;
 	}
 
+	VkFormat UGraphicsCard::FindSupportedFormat(const Array<VkFormat>& Candidates, const VkImageTiling& Tilling,
+		const VkFormatFeatureFlags& Features) const
+	{
+		for (const auto& format : Candidates)
+		{
+			VkFormatProperties props;
+			vkGetPhysicalDeviceFormatProperties(GraphicsCard, format, &props);
+
+			if (Tilling == VK_IMAGE_TILING_LINEAR && (props.linearTilingFeatures & Features) == Features)
+			{
+				return format;
+			}
+
+			if (Tilling == VK_IMAGE_TILING_OPTIMAL && (props.optimalTilingFeatures & Features) == Features)
+			{
+				return format;
+			}
+		}
+		throw std::runtime_error("Failed to find Supported format");
+	}
+
+	VkFormat UGraphicsCard::FindDepthFormat() const
+	{
+		return FindSupportedFormat({ VK_FORMAT_D32_SFLOAT_S8_UINT, VK_FORMAT_D24_UNORM_S8_UINT, VK_FORMAT_D32_SFLOAT },
+			VK_IMAGE_TILING_OPTIMAL, VK_FORMAT_FEATURE_DEPTH_STENCIL_ATTACHMENT_BIT);
+	}
+
+	bool UGraphicsCard::HadStencilAttachment(const VkFormat& Format) const
+	{
+		return Format == VK_FORMAT_D32_SFLOAT_S8_UINT || Format == VK_FORMAT_D24_UNORM_S8_UINT || Format == VK_FORMAT_D16_UNORM_S8_UINT;
+	}
+
 
 	void UGraphicsCard::CreateRenderer()
 	{

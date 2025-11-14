@@ -33,6 +33,9 @@ add_library(EngineCore STATIC
     "src/Engine/Rendering/Shaders/VulkanShader.cpp"
     "src/Engine/Rendering/Textures/CubeMap.cpp"
     "src/Engine/Rendering/Textures/Texture.cpp"
+    "src/Engine/Rendering/Textures/OpenGLTexture.cpp"
+    "src/Engine/Rendering/Textures/VulkanTexture.cpp"
+    "src/Engine/Rendering/Textures/BaseTexture.cpp"
     "src/Engine/DataStructures/Array.cpp"
     "src/Engine/DataStructures/LinkedList.cpp"
     "src/Engine/DataStructures/Item.cpp"
@@ -143,6 +146,9 @@ install(FILES
     src/Engine/Rendering/Shaders/OpenGLShader.h
     src/Engine/Rendering/Shaders/VulkanShader.h
     src/Engine/Rendering/Textures/Texture.h
+    src/Engine/Rendering/Textures/VulkanTexture.h
+    src/Engine/Rendering/Textures/OpenGLTexture.h
+    src/Engine/Rendering/Textures/BaseTexture.h
     src/Engine/Rendering/Textures/CubeMap.h
     src/Engine/DataStructures/Array.h
     src/Engine/DataStructures/LinkedList.h

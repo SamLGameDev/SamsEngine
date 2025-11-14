@@ -32,6 +32,10 @@ namespace Vulkan
 
 		if (CreateImageViews() == ERROR) return ERROR;
 
+		VkFormat depthFormat = OwningDevice->GetOwningCard()->FindDepthFormat();
+
+
+
 		return SUCCEEDED;
 	}
 	ErrorCodes USwapChain::CreateSwapChain()

@@ -50,6 +50,12 @@ namespace Vulkan
 
 		QueueFamilyIndices FindQueueFamilies(const VkPhysicalDevice& Device, const VkSurfaceKHR& Surface);
 
+		VkFormat FindSupportedFormat(const Array<VkFormat>& Candidates, const VkImageTiling& Tilling, const VkFormatFeatureFlags& Features) const;
+
+		VkFormat FindDepthFormat() const;
+
+		bool HadStencilAttachment(const VkFormat& Format) const;
+
 		const QueueFamilyIndices& GetFoundQueueFamilies() const
 		{
 			return Indices;
