@@ -56,6 +56,7 @@ namespace Vulkan
 
 		VkPhysicalDeviceFeatures deviceFeatures{};
 		deviceFeatures.geometryShader = VK_TRUE;
+		deviceFeatures.samplerAnisotropy = VK_TRUE;
 
 		const Array<const char*>& deviceExtensions = OwningCard->GetDeviceExtensions();
 

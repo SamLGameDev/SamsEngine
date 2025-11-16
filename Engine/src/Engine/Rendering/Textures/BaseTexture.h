@@ -18,72 +18,54 @@ enum TextureType : std::int8_t
 };
 
 
-class Texture
+class BaseTexture
 {
 public:
 
-	Texture();
-
+	BaseTexture() = default;
+	virtual ~BaseTexture(){};
 
 	/**
 	 * loads the texture at that location. Srgb for diffuse, rgb for everything else
 	 * @param InTextureLocation starts from where the main file is located. i.e. Contents/Textures/texture
 	 */
-	Texture(const std::string_view& InTextureLocation, const TextureType& InType);
+	BaseTexture(const std::string_view& InTextureLocation, const TextureType& InType) {};
 
 	/**
 	 * Generate a texture according to how many channels it has, i.e. 3 for rgb, 4 for rgba
 	 */
-	void GenerateByChannel(const std::uint8_t& nrChannels, const unsigned int& width, const unsigned int& height, const unsigned char* data) const;
-
-	inline Texture(const Texture& Other)
-	{
-		//only need to copy the location, ID, and type, as its already beem generated and bound at creation
-
-		TextureLocation = Other.GetTextureLocation();
-		ID = Other.GetID();
-		Type = Other.Type;
-	}
+	virtual void GenerateByChannel(const std::uint8_t& nrChannels, const unsigned int& width, const unsigned int& height, const unsigned char* data) const = 0;
 
 	/**
 	 * @return The buffer ID assigned to this texture
 	 */
-	[[nodiscard]] inline unsigned int GetID() const
-	{
-		return ID;
-	}
-
-	/**
-	 * @return The texture location, not the full path
-	 */
-	[[nodiscard]] inline std::string GetTextureLocation() const
-	{
-		return TextureLocation;
-	}
+	[[nodiscard]] virtual inline unsigned int GetID() const = 0;
+		/**
+		 * @return The texture location, not the full path
+		 */
+		[[nodiscard]] virtual  inline std::string GetTextureLocation() const = 0;
 
 	/**
 	 * @return Gets the full Path to the input faces texture
 	 */
-	[[nodiscard]] std::string GetFullTexturePath()const;
+	[[nodiscard]] virtual std::string GetFullTexturePath()const=  0;
 
 	/**
 	* @return The textures type, i.e. diffuse
 	*/
- 	[[nodiscard]] inline TextureType GetType() const
-	{
-		return Type;
-	}
+	[[nodiscard]] virtual inline TextureType GetType() const = 0;
+
+protected:
+	uint32_t ID;
 
 private:
 
 	/**
 	 * loads the specified texture from disk
 	 */
-	[[nodiscard]] unsigned char* LoadTexture(int* Width, int* Height, int* nrChannels) const;
+	[[nodiscard]] virtual unsigned char* LoadTexture(int* Width, int* Height, int* nrChannels) const = 0;
 
 	std::string TextureLocation;
-
-	unsigned int ID;
 
 	TextureType Type;
 

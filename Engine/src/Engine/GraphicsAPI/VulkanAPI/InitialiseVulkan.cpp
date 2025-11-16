@@ -37,7 +37,6 @@ ErrorCodes InitialiseVulkan::CreateVulkan()
 	}
 #endif
 
-
 	glfwWindowHint(GLFW_CLIENT_API, GLFW_NO_API);
 
 	VkApplicationInfo appInfo{};

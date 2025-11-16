@@ -11,6 +11,8 @@
 #include "VulkanWindow.h"
 #include "Shader.h"
 #include "VulkanShader.h"
+#include "VulkanTexture.h"
+#include "Texture.h"
 
 namespace Vulkan
 {
@@ -50,6 +52,8 @@ namespace Vulkan
 		}
 
 		::Shader::ShaderCreationFunc = Vulkan::Shader::CreateVulkanShader;
+
+		::Texture::TextureCreationFunc = Vulkan::Texture::CreateVulkanTexture;
 
 		::DataBuffers::APIBufferInstance = new Vulkan::DataBuffers();
 

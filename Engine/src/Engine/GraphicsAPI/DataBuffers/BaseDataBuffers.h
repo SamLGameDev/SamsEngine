@@ -10,6 +10,12 @@ enum BufferTargets : uint8_t
 	Transfer
 };
 
+enum BufferFormat : uint8_t
+{
+	Vector2,
+	Vector3,
+};
+
 class BaseDataBuffer
 {
 public:
@@ -26,9 +32,13 @@ public:
 	BaseDataBuffers() = default;
 	virtual ~BaseDataBuffers() = default;
 
-	virtual void BindVertexInfo(const uint32_t& ID, const size_t& Location, const size_t& Size, const size_t& Stride, const size_t& Offset) = 0;
+	virtual void BindVertexInfo(const uint32_t& ID, const size_t& Location, const size_t& Size, const size_t& Stride, const size_t& Offset, const
+	                            BufferFormat& Format) = 0;
 	virtual void GenBuffer(const size_t& Number, Array<uint32_t>& IDs) = 0;
 	virtual void GenBuffer(uint32_t& ID) = 0;
+
+	virtual void GenTexture(const size_t& Number, Array<uint32_t>& IDs) = 0;
+	virtual void GenTexture(uint32_t& ID) = 0;
 
 	virtual void BindBuffer(const uint32_t& ID) = 0;
 
@@ -38,8 +48,12 @@ public:
 
 	virtual void* GenerateUniformDataBuffer(const uint32_t ID, const size_t& Size) = 0;
 
+	virtual void BufferTexture(const uint32_t& ID, const unsigned char* Pixels, const uint32_t& Width, const uint32_t& Height) = 0;
+
+
 	
 	virtual BaseDataBuffer* GetBuffer(const uint32_t& ID) = 0;
+	virtual BaseDataBuffer* GetTexture(const uint32_t& ID) = 0;
 
 	virtual void DrawVertexData(const uint32_t& ID) = 0;
 };

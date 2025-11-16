@@ -205,6 +205,30 @@ namespace Vulkan
 
 	void Shader::AddTexture(const Texture InTexture)
 	{
+
+		TextureBuffer* buffer = dynamic_cast<TextureBuffer*>(::DataBuffers::GetTexture(InTexture.GetID()));
+
+		VkDescriptorImageInfo imageInfo{};
+		imageInfo.sampler = SInstance::GetInstance()->GraphicsCard->GetRenderer()->GetSampler();
+		imageInfo.imageLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
+		imageInfo.imageView = buffer->ImageViews[0];
+
+		VkWriteDescriptorSet descriptorWrite{};
+		descriptorWrite.sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
+		descriptorWrite.pBufferInfo = nullptr;
+		descriptorWrite.descriptorCount = 1;
+		descriptorWrite.descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
+		descriptorWrite.dstSet = Pipeline->GetDescriptorSet();
+		descriptorWrite.dstBinding = 2;
+		descriptorWrite.dstArrayElement = 0;
+		descriptorWrite.pImageInfo = &imageInfo;
+		descriptorWrite.pTexelBufferView = nullptr;
+
+		VkDevice dev = *SInstance::GetInstance()->GraphicsCard->GetLogicalDevice()->GetVulkanLogicalDevice();
+
+		vkUpdateDescriptorSets(dev,
+			1, &descriptorWrite, 0, nullptr);
+
 		Textures.Add(InTexture);
 	}
 

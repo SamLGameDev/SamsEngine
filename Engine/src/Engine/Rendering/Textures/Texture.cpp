@@ -4,7 +4,7 @@
 #include <iostream>
 #include "CorePaths.h"
 
-
+std::function<BaseTexture* (const std::string_view& InTextureLocation, const TextureType& InType)> Texture::TextureCreationFunc;
 
 const std::map<TextureType, GLint> Texture::ColorChannel =
 {
@@ -27,36 +27,17 @@ Texture::Texture()
 
 Texture::Texture(const std::string_view& InTextureLocation, const TextureType& InType)
 {
-	TextureLocation = InTextureLocation;
+	RealTexture = TextureCreationFunc(InTextureLocation, InType);
+}
 
-	Type = InType;
-
-	int width, height, nrChannels;
-
-	unsigned char* data = LoadTexture(&width, &height, &nrChannels);
-
-	if (!data)
+Texture::~Texture()
+{
+	if (RealTexture != nullptr)
 	{
-#if DEBUG
-		std::cout << "Failed to load texture" << std::endl;
-#endif
 		return;
 	}
 
-	glGenTextures(1, &ID);
-	glActiveTexture(GL_TEXTURE0);
-	glBindTexture(GL_TEXTURE_2D, ID);
-
-	//TODO enable texture parameters to be set on construction, enabling more control
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST_MIPMAP_NEAREST);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-
-	GenerateByChannel(nrChannels, width, height, data);
-
-	glGenerateMipmap(GL_TEXTURE_2D);
-	stbi_image_free(data);
+	delete RealTexture;
 }
 
 void Texture::GenerateByChannel(const std::uint8_t& nrChannels, const unsigned int& width, const unsigned int& height, const unsigned char* data) const

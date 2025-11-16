@@ -6,6 +6,7 @@
 #include <complex.h>
 #include <GLFW/glfw3.h>
 
+#include "CorePaths.h"
 #include "DataBuffers.h"
 #include "Transform.h"
 #include "Vector2D.h"
@@ -41,40 +42,77 @@ namespace Vulkan
 
 		if (CreateSyncObjects() == ERROR) return ERROR;
 
+		Array<VkDescriptorPoolSize> poolSizes;
+
 		VkDescriptorPoolSize dPoolSize{};
 		dPoolSize.type = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
 		dPoolSize.descriptorCount = 2;
 
+		poolSizes.Add(dPoolSize);
+		dPoolSize.type = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
+		dPoolSize.descriptorCount = 1;
+		poolSizes.Add(dPoolSize);
+
 		VkDescriptorPoolCreateInfo dPoolCreateInfo{};
 		dPoolCreateInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_POOL_CREATE_INFO;
-		dPoolCreateInfo.pPoolSizes = &dPoolSize;
-		dPoolCreateInfo.poolSizeCount = 1;
+		dPoolCreateInfo.pPoolSizes = poolSizes.GetFirstRef();
+		dPoolCreateInfo.poolSizeCount = poolSizes.GetSize();
 		dPoolCreateInfo.maxSets = 2;
 
 		vkCreateDescriptorPool(*OwningCard->GetLogicalDevice()->GetVulkanLogicalDevice(), &dPoolCreateInfo, nullptr, &DescriptorPool);
 
+		VkSamplerCreateInfo samplerCreateInfo{};
+		samplerCreateInfo.sType = VK_STRUCTURE_TYPE_SAMPLER_CREATE_INFO;
+		samplerCreateInfo.magFilter = VK_FILTER_LINEAR;
+		samplerCreateInfo.minFilter = VK_FILTER_LINEAR;
+		samplerCreateInfo.addressModeU = VK_SAMPLER_ADDRESS_MODE_REPEAT;
+		samplerCreateInfo.addressModeV = VK_SAMPLER_ADDRESS_MODE_REPEAT;
+		samplerCreateInfo.addressModeW = VK_SAMPLER_ADDRESS_MODE_REPEAT;
+		samplerCreateInfo.anisotropyEnable = VK_TRUE;
+		samplerCreateInfo.maxAnisotropy = SInstance::GetInstance()->GraphicsCard->GetDeviceProperties().limits.maxSamplerAnisotropy;
+		samplerCreateInfo.borderColor = VK_BORDER_COLOR_INT_OPAQUE_BLACK;
+		samplerCreateInfo.unnormalizedCoordinates = VK_FALSE;
+		samplerCreateInfo.compareEnable = VK_FALSE;
+		samplerCreateInfo.compareOp = VK_COMPARE_OP_ALWAYS;
+		samplerCreateInfo.mipmapMode = VK_SAMPLER_MIPMAP_MODE_LINEAR;
+		samplerCreateInfo.mipLodBias = 0;
+		samplerCreateInfo.minLod = 0;
+		samplerCreateInfo.maxLod = 0;
+
+		if (vkCreateSampler(*SInstance::GetInstance()->GraphicsCard->GetLogicalDevice()->GetVulkanLogicalDevice(),
+			&samplerCreateInfo, nullptr, &Sampler) != VK_SUCCESS)
+		{
+			throw std::runtime_error("Failed to create texture sampler");
+		}
+
+
 		Test = new Shader("triangle", "/Shaders/");
+
+		Texture* testtex = new Texture("/Models/Statue/texture.jpg", TextureType::diffuse);
+
+		Test->AddTexture(*testtex);
 
 		DataBuffers::GenBuffer(vao);
 
-		DataBuffers::BindVertexInfo(vao, 0, testPositions.GetSize(), sizeof(Vector3D), 0);
+		DataBuffers::BindVertexInfo(vao, 0, testPositions.GetSize(), sizeof(Vector3D), 0, Vector3);
 
-		DataBuffers::BindVertexInfo(vao, 1, 0, sizeof(Vector3D), 0);
+		DataBuffers::BindVertexInfo(vao, 1, 0, sizeof(Vector3D), 0, Vector3);
+		DataBuffers::BindVertexInfo(vao, 2, 0, sizeof(Vector2D), 0, Vector2);
 
 		DataBuffers::BufferData(vao, testPositions.GetSize() * sizeof(Vector3D), testPositions.GetFirstRef(), BufferTargets::Vertex);
 		DataBuffers::BufferDataIndex(vao, indices.GetSize() * sizeof(uint16_t), indices.GetFirstRef());
 		DataBuffers::BufferData(vao, testColors.GetSize() * sizeof(Vector3D), testColors.GetFirstRef(), BufferTargets::Vertex);
+		DataBuffers::BufferData(vao, testTexCoor.GetSize() * sizeof(Vector2D), testTexCoor.GetFirstRef(), BufferTargets::Vertex);
 
+		/*DataBuffers::GenBuffer(vao2);
 
-		DataBuffers::GenBuffer(vao2);
+		DataBuffers::BindVertexInfo(vao2, 0, testPositions2.GetSize(), sizeof(Vector3D), 0, Vector3);
 
-		DataBuffers::BindVertexInfo(vao2, 0, testPositions2.GetSize(), sizeof(Vector3D), 0);
-
-		DataBuffers::BindVertexInfo(vao2, 1, 0, sizeof(Vector3D), 0);
+		DataBuffers::BindVertexInfo(vao2, 1, 0, sizeof(Vector3D), 0, Vector3);
 
 		DataBuffers::BufferData(vao2, testPositions2.GetSize() * sizeof(Vector3D), testPositions2.GetFirstRef(), BufferTargets::Vertex);
 		DataBuffers::BufferDataIndex(vao2, indices.GetSize() * sizeof(uint16_t), indices.GetFirstRef());
-		DataBuffers::BufferData(vao2,testColors.GetSize() * sizeof(Vector3D), testColors.GetFirstRef(), BufferTargets::Vertex);
+		DataBuffers::BufferData(vao2,testColors.GetSize() * sizeof(Vector3D), testColors.GetFirstRef(), BufferTargets::Vertex);*/
 
 		return SUCCEEDED;
 	}
@@ -276,11 +314,11 @@ namespace Vulkan
 		vkCmdSetScissor(Buffer, 0, 1, &scissor);
 
 		vkCmdDrawIndexed(Buffer, static_cast<uint32_t>(indices.GetSize()), 1, 0, 0, 0);
-		DataBuffers::BindBuffer(vao2);
+		////DataBuffers::BindBuffer(vao2);
 
-		DataBuffers::DrawVertexData(vao2);
+		////DataBuffers::DrawVertexData(vao2);
 
-		vkCmdDrawIndexed(Buffer, static_cast<uint32_t>(indices.GetSize()), 1, 0, 0, 0);
+		////vkCmdDrawIndexed(Buffer, static_cast<uint32_t>(indices.GetSize()), 1, 0, 0, 0);
 
 		vkCmdEndRenderPass(Buffer);
 
@@ -296,6 +334,8 @@ namespace Vulkan
 	{
 
 		delete Test;
+
+		vkDestroySampler(*SInstance::GetInstance()->GraphicsCard->GetLogicalDevice()->GetVulkanLogicalDevice(), Sampler, nullptr);
 
 		for (size_t i = 0; i < MAX_FRAMES_IN_FLIGHT; i++)
 		{

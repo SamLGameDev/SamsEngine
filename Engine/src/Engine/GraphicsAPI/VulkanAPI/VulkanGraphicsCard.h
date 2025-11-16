@@ -91,6 +91,11 @@ namespace Vulkan
 			return Renderer;
 		};
 
+		VkPhysicalDeviceProperties GetDeviceProperties() const
+		{
+			return Properties;
+		}
+
 		void CreateRenderer();
 
 		ErrorCodes ShutDown();
@@ -108,6 +113,8 @@ namespace Vulkan
 		QueueFamilyIndices Indices;
 
 		URenderer* Renderer;
+
+		VkPhysicalDeviceProperties Properties;
 
 		const Array<const char*> ValidationLayers = { "VK_LAYER_KHRONOS_validation" };
 //#if DEBUG

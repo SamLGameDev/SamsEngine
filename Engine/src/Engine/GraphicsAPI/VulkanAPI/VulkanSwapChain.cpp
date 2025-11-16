@@ -168,9 +168,7 @@ namespace Vulkan
 			createInfo.subresourceRange.baseArrayLayer = 0;
 			createInfo.subresourceRange.layerCount = 1;
 
-			SwapChainImageViews[i]=  UImageView(this, createInfo);
-
-			createInfo.subresourceRange.layerCount = 1;
+			SwapChainImageViews[i] = UImageView(this, createInfo);
 		}
 
 		return SUCCEEDED;

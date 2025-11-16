@@ -112,6 +112,11 @@ namespace Vulkan
 			return &DescriptorPool;
 		}
 
+		VkSampler GetSampler() const
+		{
+			return Sampler;
+		}
+
 	private:
 
 		VkCommandPool CommandPool;
@@ -126,6 +131,8 @@ namespace Vulkan
 		Array<VkSemaphore> ImageAvailableSemaphores;
 		Array<VkSemaphore> RenderFinishedSemaphores;
 		Array<VkFence> InFlightFences;
+
+		VkSampler Sampler;
 
 		VkFence CopyFence;
 
@@ -149,6 +156,9 @@ namespace Vulkan
 		{0.0f, 0.0f, 1.0f},
 			{ 1, 1, 1, }
 		};
+
+		Array<Vector2D> testTexCoor = { {1, 0 }, { 0, 0 }, {0, 1}, {1, 1} };
+	
 		const Array<uint16_t> indices = {
 	0, 1, 2, 2, 3, 0
 		};

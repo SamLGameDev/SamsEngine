@@ -37,11 +37,19 @@ namespace Vulkan
 			descriptor.stageFlags = VK_SHADER_STAGE_VERTEX_BIT;
 			descriptors.Add(descriptor);
 		}
+		VkDescriptorSetLayoutBinding descriptor{};
+		descriptor.binding = 2;
+		descriptor.descriptorCount = 1;
+		descriptor.pImmutableSamplers = nullptr;
+		descriptor.descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
+		descriptor.stageFlags = VK_SHADER_STAGE_FRAGMENT_BIT;
+		descriptors.Add(descriptor);
+
 	
 
 		VkDescriptorSetLayoutCreateInfo descriptorLayoutCreateInfo{};
 		descriptorLayoutCreateInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_LAYOUT_CREATE_INFO;
-		descriptorLayoutCreateInfo.bindingCount = 2;
+		descriptorLayoutCreateInfo.bindingCount = descriptors.GetSize();
 		descriptorLayoutCreateInfo.pBindings = descriptors.GetFirstRef();
 
 		vkCreateDescriptorSetLayout(*SInstance::GetInstance()->GraphicsCard->GetLogicalDevice()->GetVulkanLogicalDevice(), &descriptorLayoutCreateInfo, nullptr, &DescriptorLayout);

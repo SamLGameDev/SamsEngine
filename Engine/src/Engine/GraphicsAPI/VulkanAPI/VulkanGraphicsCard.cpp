@@ -49,8 +49,7 @@ namespace Vulkan
 	bool UGraphicsCard::IsDeviceSuitable(const VkPhysicalDevice& Device, const VkSurfaceKHR& Surface)
 	{
 
-		VkPhysicalDeviceProperties deviceProperties;
-		vkGetPhysicalDeviceProperties(Device, &deviceProperties);
+		vkGetPhysicalDeviceProperties(Device, &Properties);
 
 		VkPhysicalDeviceFeatures deviceFeatures;
 		vkGetPhysicalDeviceFeatures(Device, &deviceFeatures);
@@ -60,15 +59,16 @@ namespace Vulkan
 		const bool bSwapChainSupported = IsSwapChainSupported(Device, Surface);
 
 
-		bool suitable = deviceProperties.deviceType == VK_PHYSICAL_DEVICE_TYPE_DISCRETE_GPU &&
+		bool suitable = Properties.deviceType == VK_PHYSICAL_DEVICE_TYPE_DISCRETE_GPU &&
 			deviceFeatures.fragmentStoresAndAtomics &&
 			deviceFeatures.geometryShader &&
+			deviceFeatures.samplerAnisotropy &&
 			FindQueueFamilies(Device, Surface).IsComplete() && bHasRequiredExtensions && bSwapChainSupported;
 
 #if DEBUG
 		if (suitable)
 		{
-			std::cout << deviceProperties.deviceName << "\n";
+			std::cout << Properties.deviceName << "\n";
 		}
 #endif
 

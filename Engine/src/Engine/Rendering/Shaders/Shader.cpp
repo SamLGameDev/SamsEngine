@@ -124,7 +124,7 @@ void Shader::ApplyTextures() const
 
 void Shader::AddTexture(const Texture InTexture)
 {
-	Textures.Add(InTexture);
+	RealShader->AddTexture(InTexture);
 }
 
 void Shader::AddTexture(const Array<Texture>& InTexture)

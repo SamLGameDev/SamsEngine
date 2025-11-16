@@ -2,21 +2,10 @@
 #include <string>
 #include <map>
 #include <cstdint>
+#include "BaseTexture.h"
+#include <functional>
 
 #include "glad/glad.h"
-
-
-/**
- * Type of the texture, used to decided how its loaded, and what the shader does with it
- */
-enum TextureType : std::int8_t
-{
-	diffuse,
-	specular,
-	normal,
-	height,
-};
-
 
 class Texture
 {
@@ -31,6 +20,8 @@ public:
 	 */
 	Texture(const std::string_view& InTextureLocation, const TextureType& InType);
 
+	~Texture();
+
 	/**
 	 * Generate a texture according to how many channels it has, i.e. 3 for rgb, 4 for rgba
 	 */
@@ -42,6 +33,7 @@ public:
 
 		TextureLocation = Other.GetTextureLocation();
 		ID = Other.GetID();
+		RealTexture = Other.RealTexture;
 		Type = Other.Type;
 	}
 
@@ -50,7 +42,7 @@ public:
 	 */
 	[[nodiscard]] inline unsigned int GetID() const
 	{
-		return ID;
+		return RealTexture->GetID();
 	}
 
 	/**
@@ -73,6 +65,8 @@ public:
 	{
 		return Type;
 	}
+	static std::function<BaseTexture* (const std::string_view& InTextureLocation, const TextureType& InType)> TextureCreationFunc;
+	BaseTexture* RealTexture;
 
 private:
 

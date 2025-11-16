@@ -342,6 +342,137 @@ TEST(FileSystem, Contents)
 	ASSERT_EQ(pathManager.Contents.Path, CONTENTS_DIR);
 }
 
+char* itoa(int Value, int Base)
+{
+	//convert to long long to handle INT_MIN
+	long long extendedVal = Value;
+
+	//Negate the value so maths works, and we know to add a sign
+	bool negate = false;
+	if (Value < 0)
+	{
+		extendedVal = -extendedVal;
+		negate = true;
+	}
+
+	//Base 1 is an edge case, as it will cause an infinite loop otherwise, as val / 1 == val
+	if (Base == 1)
+	{
+		char* valueAsChar = new char[extendedVal+1 + negate];
+
+		//always set negative, will be overriden if not negative
+		valueAsChar[0] = '-';
+		for (unsigned int i = 0 + negate; i < extendedVal + negate; i++)
+		{
+			valueAsChar[i] = '1';
+		}
+		valueAsChar[extendedVal + negate] = '\0';
+		return valueAsChar;
+	}
+
+	unsigned int bufferSize = 0 + negate;
+	long long copyVal = extendedVal;
+
+	do
+	{
+		copyVal /= Base;
+		bufferSize++;
+	} while (copyVal > 0);
+
+	//add one more to buffer size for null terminator
+
+	char* valueAsChar = new char[bufferSize+1];
+	unsigned int index = bufferSize - 1;
+	do 
+	{
+		const long long val = extendedVal % Base;
+
+		//Start from 0 if a less than 10, or from A if greater
+		// will work up to Base 36, but cannot guarantee Character set ordering from there.
+
+		valueAsChar[index] = val > 9 ? (val - 10) + 'A' : val + '0';
+
+		extendedVal /= Base;
+
+		index--;
+	}while (extendedVal > 0);
+
+	if (negate)
+	{
+		valueAsChar[0] = '-';
+	}
+
+	valueAsChar[bufferSize] = '\0';
+
+	return valueAsChar;
+}
+
+void BuildStringFromMatrix(int* Matrix, int NumRows, int NumColumns,
+	char* OutBuffer)
+{
+	std::string output;
+
+	int left = 0;
+	int right = NumColumns - 1;
+	
+	int top = 0;
+	int bottom = NumRows - 1;
+
+	auto getMatrixIndexAsNum = [&](const size_t& Row, const size_t& Col)
+		{
+			return std::to_string(Matrix[Row * NumColumns + Col]);
+		};
+	
+	auto addToOutput = [&](const size_t& Row, const size_t& Col)
+		{
+			output += ", " + getMatrixIndexAsNum(Row, Col);
+		};
+
+	//bring the borders closer each iteration, until they pass each other
+	while (top <= bottom && left <= right)
+	{
+
+		for (int i = left; i <= right; i++)
+		{
+			if (output.empty())
+			{
+				output = getMatrixIndexAsNum(top, i);
+			}
+			else
+			{
+				addToOutput(top, i);
+			}
+		}
+		top++;
+		for (int i = top; i <= bottom; i++)
+		{
+			addToOutput(i, right);
+		}
+		right--;
+
+		if (top <= bottom) {
+
+			for (int i = right; i >= left; i--)
+			{
+				addToOutput(bottom, i);
+
+			}
+		}
+		bottom--;
+		if (left <= right) {
+			for (int i = bottom; i >= top; i--)
+			{
+				addToOutput(i, left);
+			}
+		}
+		left++;
+		
+
+	}
+
+	output += '\0';
+	memcpy(OutBuffer, output.data(), output.size());
+}
 TEST(Vector2D, PerpendicularBisector)
 {
 
