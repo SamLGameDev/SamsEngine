@@ -48,6 +48,8 @@ public:
 
 	virtual void* GenerateUniformDataBuffer(const uint32_t ID, const size_t& Size) = 0;
 
+	virtual void GenerateDepthBuffer(const uint32& ID, const Vector2D& Size) = 0;
+
 	virtual void BufferTexture(const uint32_t& ID, const unsigned char* Pixels, const uint32_t& Width, const uint32_t& Height) = 0;
 
 

@@ -117,6 +117,11 @@ namespace Vulkan
 			return Sampler;
 		}
 
+		UGraphicsCard* GetOwningCard() const
+		{
+			return OwningCard;
+		}
+
 	private:
 
 		VkCommandPool CommandPool;

@@ -88,9 +88,12 @@ namespace Vulkan
 		void CopyBuffer(const VkBuffer& SrcBuffer, VkBuffer& DstBuffer, const VkDeviceSize& Size);
 
 		void* GenerateUniformDataBuffer(const uint32_t ID, const size_t& Size) override;
+
+		void GenerateDepthBuffer(const uint32& ID, const Vector2D& Size) override;
+
 		void GetTransferStages(const VkImageLayout& OldLayout, const VkImageLayout& NewLayout,
 		                       VkImageMemoryBarrier& imageBarrier, VkPipelineStageFlags& srcStage,
-		                       VkPipelineStageFlags& dstStage);
+		                       VkPipelineStageFlags& dstStage, const VkFormat& Format);
 
 		void TransitionimageLayout(const VkImage& Image, const VkFormat& Format, const VkImageLayout& OldLayout, const VkImageLayout& NewLayout);
 
@@ -98,7 +101,7 @@ namespace Vulkan
 
 		void CreateImage(const uint32_t& Width, const uint32_t& Height, const VkFormat& Format, const VkImageTiling& Tilling, const
 		                 VkImageUsageFlags& Usage, const VkMemoryPropertyFlags& Properties, VkImage& Image, VkDeviceMemory& Memory);
-		VkImageView CreateImageView(const VkImage& Image, const VkFormat& Format);
+		VkImageView CreateImageView(const VkImage& Image, const VkFormat& Format, const VkImageAspectFlags& AspectFlags);
 
 		void BufferTexture(const uint32_t& ID, const unsigned char* Pixels, const uint32_t& Width, const uint32_t& Height)override;
 

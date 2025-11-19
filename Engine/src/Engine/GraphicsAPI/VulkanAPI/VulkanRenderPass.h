@@ -19,6 +19,9 @@ namespace Vulkan
 	public:
 
 		URenderPass();
+
+		URenderPass(URenderer* InOwningRenderer);
+
 		~URenderPass();
 		ErrorCodes CreateRenderPass();
 
@@ -34,6 +37,8 @@ namespace Vulkan
 	private:
 
 		VkRenderPass RenderPass;
+
+		URenderer* OwningRenderer;
 
 	};
 }

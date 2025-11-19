@@ -302,8 +302,32 @@ namespace Vulkan
 		return data;
 	}
 
+	void DataBuffers::GenerateDepthBuffer(const uint32& ID, const Vector2D& Size)
+	{
+
+		TextureBuffer& buffer = RegisteredTextures.at(ID);
+
+		VkImage image;
+		VkDeviceMemory = memory;
+
+
+		VkFormat format = SInstance::GetInstance()->GraphicsCard->FindDepthFormat();
+		CreateImage(Size.X, Size.Y, format, VK_IMAGE_TILLING_OPTIMAL, VK_IMAGE_USAGE_DEPTH_STENCIL_ATTACHMENT_BIT, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT, image, memory);
+
+		TransitionimageLayout(image, format, VK_IMAGE_LAYOUT_UNDEFINED, VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL)
+
+
+		buffer.ImageViews.Add(CreateImageView(image, format, VK_IMAGE_ASPECT_DEPTH_BIT));
+		buffer.Images.Add(image);
+		buffer.BufferMemory.Add(memory);
+
+
+
+
+	}
+
 	void DataBuffers::GetTransferStages(const VkImageLayout& OldLayout, const VkImageLayout& NewLayout, VkImageMemoryBarrier& imageBarrier, VkPipelineStageFlags
-	                                    & srcStage, VkPipelineStageFlags& dstStage)
+	                                    & srcStage, VkPipelineStageFlags& dstStage, const VkFormat& Format)
 	{
 		if (OldLayout == VK_IMAGE_LAYOUT_UNDEFINED && NewLayout == VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL)
 		{
@@ -323,6 +347,22 @@ namespace Vulkan
 			srcStage = VK_PIPELINE_STAGE_TRANSFER_BIT;
 			dstStage = VK_PIPELINE_STAGE_FRAGMENT_SHADER_BIT;
 			return;
+		}
+
+		if (NewLayout == VK_IMAGE_LAYOUT_DEPTH_STENCIl_ATTACHMENT_OPYIMAL)
+		{
+			imageBarrier.subresourceRange.aspectMask = VK_IMAGE_ASPECT_DEPTH_BIT;
+			imageBarrier.srcAccessMask = 0;
+			imageBarrier.dstAccessMask = VK_ACCESS_DEPTH_STENCIL_ATTCHMENT_READ_BIT | VK_ACCESS_DEPTH_STENCIL_ATTACHMENT_WRITE_BIT;
+			srcStage = VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT;
+			dstStage = VK_PIPELINE_STATE_EARLY_FRAGMENT_TESTS_BIT;
+
+			if (SInstance::GetInstance()->GraphicsCard->HadStencilAttachment(Format))
+			{
+				imageBarrier.aspectMask |= VK_IMAGE_ASPECT_STENCIl_BIT;
+			}
+
+
 		}
 
 		throw std::runtime_error("Unsupported Barrier layout");
@@ -423,14 +463,14 @@ namespace Vulkan
 		vkBindImageMemory(*SInstance::GetInstance()->GraphicsCard->GetLogicalDevice()->GetVulkanLogicalDevice(), Image, Memory, 0);
 	}
 
-	VkImageView DataBuffers::CreateImageView(const VkImage& Image, const VkFormat& Format)
+	VkImageView DataBuffers::CreateImageView(const VkImage& Image, const VkFormat& Format. const VkImageAspectFlags& AspectFlags)
 	{
 		VkImageViewCreateInfo imageViewCreateInfo{};
 		imageViewCreateInfo.sType = VK_STRUCTURE_TYPE_IMAGE_VIEW_CREATE_INFO;
 		imageViewCreateInfo.image = Image;
 		imageViewCreateInfo.viewType = VK_IMAGE_VIEW_TYPE_2D;
 		imageViewCreateInfo.format = Format;
-		imageViewCreateInfo.subresourceRange.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
+		imageViewCreateInfo.subresourceRange.aspectMask = AspectFlags;
 		imageViewCreateInfo.subresourceRange.baseArrayLayer = 0;
 		imageViewCreateInfo.subresourceRange.baseMipLevel = 0;
 		imageViewCreateInfo.subresourceRange.layerCount = 1;
@@ -478,7 +518,7 @@ namespace Vulkan
 		vkDestroyBuffer(*SInstance::GetInstance()->GraphicsCard->GetLogicalDevice()->GetVulkanLogicalDevice(), stagingBuffer, nullptr);
 		vkFreeMemory(*SInstance::GetInstance()->GraphicsCard->GetLogicalDevice()->GetVulkanLogicalDevice(), stagingMemory, nullptr);
 
-		texture.ImageViews.Add(CreateImageView(image, VK_FORMAT_R8G8B8A8_SRGB));
+		texture.ImageViews.Add(CreateImageView(image, VK_FORMAT_R8G8B8A8_SRGB, VK_IMAGE_ASPECT_COLOR_BIT));
 
 		texture.Images.Add(image);
 		texture.BufferMemory.Add(memory);

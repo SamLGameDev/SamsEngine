@@ -70,4 +70,7 @@ void DataBuffers::BufferDataIndex(const uint32_t ID, const size_t& Size, void* D
 {
 	APIBufferInstance->BufferDataIndex(ID, Size, Data);
 }
-
+void DataBuffers::GenerateDepthBuffer(const uint32& ID, const Vector2D& Size)
+{
+	APIBufferInstance->GenerateDepthBuffer(ID, Size);
+}
