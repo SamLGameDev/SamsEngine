@@ -7,6 +7,7 @@
 
 namespace Vulkan
 {
+	class URenderer;
 	class ULogicalDevice;
 	class UImageView;
 }

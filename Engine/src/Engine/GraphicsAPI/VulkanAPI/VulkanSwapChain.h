@@ -77,5 +77,7 @@ namespace Vulkan
 
 		Array<UFrameBuffer> FrameBuffers;
 
+		uint32_t DepthBufferID;
+
 	};
 }

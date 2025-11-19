@@ -157,6 +157,18 @@ namespace Vulkan
 
 		vkCreatePipelineLayout(*SInstance::GetInstance()->GraphicsCard->GetLogicalDevice()->GetVulkanLogicalDevice(), &layoutCreateInfo, nullptr, &Layout);
 
+		VkPipelineDepthStencilStateCreateInfo depthCreateInfo{};
+		depthCreateInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_DEPTH_STENCIL_STATE_CREATE_INFO;
+		depthCreateInfo.depthTestEnable = VK_TRUE;
+		depthCreateInfo.depthWriteEnable = VK_TRUE;
+		depthCreateInfo.depthCompareOp = VK_COMPARE_OP_LESS;
+		depthCreateInfo.depthBoundsTestEnable = VK_FALSE;
+		depthCreateInfo.minDepthBounds = 0;
+		depthCreateInfo.maxDepthBounds = 1;
+		depthCreateInfo.stencilTestEnable = VK_FALSE;
+		depthCreateInfo.front = {};
+		depthCreateInfo.back = {};
+
 		VkGraphicsPipelineCreateInfo pipelineCreateInfo{};
 		pipelineCreateInfo.sType = VK_STRUCTURE_TYPE_GRAPHICS_PIPELINE_CREATE_INFO;
 		pipelineCreateInfo.stageCount = InShader.GetShaderStages().GetSize();
@@ -166,7 +178,7 @@ namespace Vulkan
 		pipelineCreateInfo.pViewportState = &viewportStateCreateInfo;
 		pipelineCreateInfo.pRasterizationState = &rasterizationCreateInfo;
 		pipelineCreateInfo.pColorBlendState = &colorBlendStateCreateInfo;
-		pipelineCreateInfo.pDepthStencilState = nullptr;
+		pipelineCreateInfo.pDepthStencilState = &depthCreateInfo;
 		pipelineCreateInfo.pDynamicState = &dynamicStatesCreateInfo;
 		pipelineCreateInfo.pMultisampleState = &multisampleCreateInfo;
 		pipelineCreateInfo.layout = Layout;

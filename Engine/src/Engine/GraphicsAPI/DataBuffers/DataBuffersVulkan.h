@@ -89,7 +89,7 @@ namespace Vulkan
 
 		void* GenerateUniformDataBuffer(const uint32_t ID, const size_t& Size) override;
 
-		void GenerateDepthBuffer(const uint32& ID, const Vector2D& Size) override;
+		void GenerateDepthBuffer(const uint32_t& ID, const Vector2D& Size) override;
 
 		void GetTransferStages(const VkImageLayout& OldLayout, const VkImageLayout& NewLayout,
 		                       VkImageMemoryBarrier& imageBarrier, VkPipelineStageFlags& srcStage,

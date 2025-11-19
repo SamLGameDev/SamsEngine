@@ -104,7 +104,7 @@ namespace Vulkan
 		DataBuffers::BufferData(vao, testColors.GetSize() * sizeof(Vector3D), testColors.GetFirstRef(), BufferTargets::Vertex);
 		DataBuffers::BufferData(vao, testTexCoor.GetSize() * sizeof(Vector2D), testTexCoor.GetFirstRef(), BufferTargets::Vertex);
 
-		/*DataBuffers::GenBuffer(vao2);
+		DataBuffers::GenBuffer(vao2);
 
 		DataBuffers::BindVertexInfo(vao2, 0, testPositions2.GetSize(), sizeof(Vector3D), 0, Vector3);
 
@@ -112,7 +112,7 @@ namespace Vulkan
 
 		DataBuffers::BufferData(vao2, testPositions2.GetSize() * sizeof(Vector3D), testPositions2.GetFirstRef(), BufferTargets::Vertex);
 		DataBuffers::BufferDataIndex(vao2, indices.GetSize() * sizeof(uint16_t), indices.GetFirstRef());
-		DataBuffers::BufferData(vao2,testColors.GetSize() * sizeof(Vector3D), testColors.GetFirstRef(), BufferTargets::Vertex);*/
+		DataBuffers::BufferData(vao2,testColors.GetSize() * sizeof(Vector3D), testColors.GetFirstRef(), BufferTargets::Vertex);
 
 		return SUCCEEDED;
 	}
@@ -260,6 +260,10 @@ namespace Vulkan
 		beginInfo.flags = 0;
 
 		if (vkBeginCommandBuffer(Buffer, &beginInfo) != VK_SUCCESS) return ERROR;
+		
+		Array<VkClearValue> clearValues(2);
+		clearValues[0].color = { 0,0 ,0,1 };
+		clearValues[1].depthStencil = { 1, 0 };
 
 		VkRenderPassBeginInfo renderBeginInfo{};
 		renderBeginInfo.sType = VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO;
@@ -267,9 +271,8 @@ namespace Vulkan
 		renderBeginInfo.framebuffer = OwningCard->GetLogicalDevice()->GetSwapChain()->GetFrameBuffers().GetItemAtPtr(ImageIndex)->GetFrameBuffer();
 		renderBeginInfo.renderArea.offset = { 0, 0 };
 		renderBeginInfo.renderArea.extent = OwningCard->GetLogicalDevice()->GetSwapChain()->GetSwapChainExtent();
-		VkClearValue clearValue = { {{0, 0, 0, 1.f}} };
-		renderBeginInfo.clearValueCount = 1;
-		renderBeginInfo.pClearValues = &clearValue;
+		renderBeginInfo.clearValueCount = clearValues.GetSize();
+		renderBeginInfo.pClearValues = clearValues.GetFirstRef();
 
 		vkCmdBeginRenderPass(Buffer, &renderBeginInfo, VK_SUBPASS_CONTENTS_INLINE);
 
@@ -314,11 +317,11 @@ namespace Vulkan
 		vkCmdSetScissor(Buffer, 0, 1, &scissor);
 
 		vkCmdDrawIndexed(Buffer, static_cast<uint32_t>(indices.GetSize()), 1, 0, 0, 0);
-		////DataBuffers::BindBuffer(vao2);
+		DataBuffers::BindBuffer(vao2);
 
-		////DataBuffers::DrawVertexData(vao2);
+		DataBuffers::DrawVertexData(vao2);
 
-		////vkCmdDrawIndexed(Buffer, static_cast<uint32_t>(indices.GetSize()), 1, 0, 0, 0);
+		vkCmdDrawIndexed(Buffer, static_cast<uint32_t>(indices.GetSize()), 1, 0, 0, 0);
 
 		vkCmdEndRenderPass(Buffer);
 
@@ -359,6 +362,6 @@ namespace Vulkan
 
 	void URenderer::CreateRenderPass()
 	{
-		RenderPass = new URenderPass();
+		RenderPass = new URenderPass(this);
 	}
 }

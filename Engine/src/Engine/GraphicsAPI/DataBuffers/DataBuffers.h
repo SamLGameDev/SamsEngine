@@ -23,7 +23,7 @@ public:
 	static void BufferData(const uint32_t& ID, const size_t& Size, void* Data, const BufferTargets& Target);
 
 	static void* GenerateUniformDataBuffer(const uint32_t& ID, const size_t& Size);
-	static void GenerateDepthBuffer(const uint32& ID, const Vector2D& Size);
+	static void GenerateDepthBuffer(const uint32_t& ID, const Vector2D& Size);
 
 	static void BufferTexture(const uint32_t& ID, const unsigned char* Pixels, const uint32_t& Width, const uint32_t& Height);
 

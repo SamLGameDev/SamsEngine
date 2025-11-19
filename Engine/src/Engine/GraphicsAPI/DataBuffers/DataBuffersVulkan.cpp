@@ -302,19 +302,19 @@ namespace Vulkan
 		return data;
 	}
 
-	void DataBuffers::GenerateDepthBuffer(const uint32& ID, const Vector2D& Size)
+	void DataBuffers::GenerateDepthBuffer(const uint32_t& ID, const Vector2D& Size)
 	{
 
 		TextureBuffer& buffer = RegisteredTextures.at(ID);
 
 		VkImage image;
-		VkDeviceMemory = memory;
+		VkDeviceMemory memory;
 
 
 		VkFormat format = SInstance::GetInstance()->GraphicsCard->FindDepthFormat();
-		CreateImage(Size.X, Size.Y, format, VK_IMAGE_TILLING_OPTIMAL, VK_IMAGE_USAGE_DEPTH_STENCIL_ATTACHMENT_BIT, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT, image, memory);
+		CreateImage(Size.X, Size.Y, format, VK_IMAGE_TILING_OPTIMAL, VK_IMAGE_USAGE_DEPTH_STENCIL_ATTACHMENT_BIT, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT, image, memory);
 
-		TransitionimageLayout(image, format, VK_IMAGE_LAYOUT_UNDEFINED, VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL)
+		TransitionimageLayout(image, format, VK_IMAGE_LAYOUT_UNDEFINED, VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL);
 
 
 		buffer.ImageViews.Add(CreateImageView(image, format, VK_IMAGE_ASPECT_DEPTH_BIT));
@@ -349,19 +349,19 @@ namespace Vulkan
 			return;
 		}
 
-		if (NewLayout == VK_IMAGE_LAYOUT_DEPTH_STENCIl_ATTACHMENT_OPYIMAL)
+		if (NewLayout == VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL)
 		{
 			imageBarrier.subresourceRange.aspectMask = VK_IMAGE_ASPECT_DEPTH_BIT;
 			imageBarrier.srcAccessMask = 0;
-			imageBarrier.dstAccessMask = VK_ACCESS_DEPTH_STENCIL_ATTCHMENT_READ_BIT | VK_ACCESS_DEPTH_STENCIL_ATTACHMENT_WRITE_BIT;
+			imageBarrier.dstAccessMask = VK_ACCESS_DEPTH_STENCIL_ATTACHMENT_READ_BIT | VK_ACCESS_DEPTH_STENCIL_ATTACHMENT_WRITE_BIT;
 			srcStage = VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT;
-			dstStage = VK_PIPELINE_STATE_EARLY_FRAGMENT_TESTS_BIT;
+			dstStage = VK_PIPELINE_STAGE_EARLY_FRAGMENT_TESTS_BIT;
 
 			if (SInstance::GetInstance()->GraphicsCard->HadStencilAttachment(Format))
 			{
-				imageBarrier.aspectMask |= VK_IMAGE_ASPECT_STENCIl_BIT;
+				imageBarrier.subresourceRange.aspectMask |= VK_IMAGE_ASPECT_STENCIL_BIT;
 			}
-
+			return;
 
 		}
 
@@ -390,7 +390,7 @@ namespace Vulkan
 		VkPipelineStageFlags srcStage;
 		VkPipelineStageFlags dstStage;
 
-		GetTransferStages(OldLayout, NewLayout, imageBarrier, srcStage, dstStage);
+		GetTransferStages(OldLayout, NewLayout, imageBarrier, srcStage, dstStage, Format);
 
 		vkCmdPipelineBarrier(cBuffer, srcStage, dstStage,
 			0, 0,
@@ -463,7 +463,7 @@ namespace Vulkan
 		vkBindImageMemory(*SInstance::GetInstance()->GraphicsCard->GetLogicalDevice()->GetVulkanLogicalDevice(), Image, Memory, 0);
 	}
 
-	VkImageView DataBuffers::CreateImageView(const VkImage& Image, const VkFormat& Format. const VkImageAspectFlags& AspectFlags)
+	VkImageView DataBuffers::CreateImageView(const VkImage& Image, const VkFormat& Format, const VkImageAspectFlags& AspectFlags)
 	{
 		VkImageViewCreateInfo imageViewCreateInfo{};
 		imageViewCreateInfo.sType = VK_STRUCTURE_TYPE_IMAGE_VIEW_CREATE_INFO;

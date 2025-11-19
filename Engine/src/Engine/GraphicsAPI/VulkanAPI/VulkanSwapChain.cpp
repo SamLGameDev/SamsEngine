@@ -4,6 +4,8 @@
 #define GLFW_INCLUDE_VULKAN
 #include <GLFW/glfw3.h>
 
+#include "DataBuffers.h"
+#include "DataBuffersVulkan.h"
 #include "Vector2D.h"
 #include "VulkanImageView.h"
 #include "VulkanInstance.h"
@@ -31,11 +33,6 @@ namespace Vulkan
 		}
 
 		if (CreateImageViews() == ERROR) return ERROR;
-
-		VkFormat depthFormat = OwningDevice->GetOwningCard()->FindDepthFormat();
-
-
-
 
 		return SUCCEEDED;
 	}
@@ -179,15 +176,20 @@ namespace Vulkan
 	{
 		FrameBuffers.Reallocate(SwapChainImageViews.GetSize());
 
+		::DataBuffers::GenTexture(DepthBufferID);
+		::DataBuffers::GenerateDepthBuffer(DepthBufferID, { SwapChainExtent.width, SwapChainExtent.height });
+
+		TextureBuffer* buffer = dynamic_cast<TextureBuffer*>(::DataBuffers::GetTexture(DepthBufferID));
+
 		for (size_t i = 0; i < SwapChainImageViews.GetSize(); i++)
 		{
-			VkImageView attachments[] = { SwapChainImageViews[i].GetVulkanImageView() };
+			Array<VkImageView> attachments = { SwapChainImageViews[i].GetVulkanImageView(), buffer->ImageViews[0] };
 
 			VkFramebufferCreateInfo framebufferCreateInfo{};
 			framebufferCreateInfo.sType = VK_STRUCTURE_TYPE_FRAMEBUFFER_CREATE_INFO;
 			framebufferCreateInfo.renderPass = SInstance::GetInstance()->RenderPass->GetVulkanRenderPass();
-			framebufferCreateInfo.attachmentCount = 1;
-			framebufferCreateInfo.pAttachments = attachments;
+			framebufferCreateInfo.attachmentCount = attachments.GetSize();
+			framebufferCreateInfo.pAttachments = attachments.GetFirstRef();
 			framebufferCreateInfo.width = SwapChainExtent.width;
 			framebufferCreateInfo.height = SwapChainExtent.height;
 			framebufferCreateInfo.layers = 1;
