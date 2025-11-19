@@ -4,6 +4,7 @@
 
 #include "InputManager.h"
 #include "Shader.h"
+#include "Voronoi.h"
 #include "WireShapes.h"
 #include "Voronoi2D.h"
 
@@ -12,6 +13,7 @@ LinkedList<WireObject*> Renderer::WiresToDraw;
 LinkedList<Model*> Renderer::ItemsToRender;
 
 
+Array<FracturePiece3D*> Renderer::FracturesToDraw3D;
 Array<FracturePiece*> Renderer::FracturesToDraw;
 
 Renderer::Renderer(InputManager* InInputManager) : WorldObject()
@@ -138,6 +140,7 @@ void Renderer::Start()
 
 
 	FractureShader = Shader("Voronoi2D", "Shaders/");
+	FractureShader3D = Shader("Voronoi", "Shaders/");
 }
 
 void Renderer::Tick(const double& DeltaTime)
@@ -178,6 +181,18 @@ void Renderer::DrawFractures() const
 			//TODO get fracturing working, eventually
 
 			FracturesToDraw[i]->Draw(&FractureShader);
+
+			//FracturesToDraw[i]->Draw();
+		}
+	}
+
+	if (!FracturesToDraw3D.IsEmpty())
+	{
+		for (unsigned int i = 0; i < FracturesToDraw3D.GetSize(); i++)
+		{
+			//TODO get fracturing working, eventually
+
+			FracturesToDraw3D[i]->Draw(&FractureShader3D);
 
 			//FracturesToDraw[i]->Draw();
 		}
@@ -227,7 +242,7 @@ void Renderer::RenderWorldObjets() const
 
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);
 
-	//glEnable(GL_DEPTH_TEST);
+	glEnable(GL_DEPTH_TEST);
 
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
 
@@ -235,9 +250,9 @@ void Renderer::RenderWorldObjets() const
 	//glEnable(GL_PROGRAM_POINT_SIZE);
 	////glEnable(GL_CULL_FACE);
 
-	//glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
-	//DrawWireObjects();
+	DrawWireObjects();
 
 	DrawFractures();
 

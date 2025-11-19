@@ -37,9 +37,9 @@ void Transform::CalculateBounds()
 
 Vector3D Transform::GetRandomPointInBounds() const
 {
-	const Vector3D min = TransCenter - TransHalfBounds;
+	const Vector3D min = Vector3D::Zero - TransHalfBounds;
 
-	const Vector3D max = TransCenter + TransHalfBounds;
+	const Vector3D max = Vector3D::Zero + TransHalfBounds;
 
 	return Vector3D::RandomRange(min, max);
 }

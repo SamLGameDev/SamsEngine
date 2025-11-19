@@ -38,7 +38,7 @@ Model::Model(const std::string& Path, const Shader& InShader)
 	std::cout << "NumVertices: " << NumVertices << std::endl;
 #endif
 
-	BoundingBox = DrawWireCube(ModelTransform.TransCenter, ModelTransform.TransHalfBounds, Vector3D(1, 1, 1),
+	BoundingBox = DrawWireCube({ 0, 0,0 }, ModelTransform.TransHalfBounds, Vector3D(1, 1, 1),
 		Vector3D(0.2f, 0.5f, 0.2f));
 
 	Renderer::AddItemToRender(this);
@@ -176,7 +176,7 @@ void Model::LoadModel()
 
 	ModelTransform.CalculateBounds();
 
-	ProcessNode(scene->mRootNode, scene);
+	//ProcessNode(scene->mRootNode, scene);
 }
 
 void Model::ProcessNode(const aiNode* Node, const aiScene* Scene)

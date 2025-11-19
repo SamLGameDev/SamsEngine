@@ -3,6 +3,7 @@
 #include "Camera.h"
 #include "FrameBufferFactory.h"
 #include "Model.h"
+#include "Voronoi.h"
 #include "WorldObject.h"
 
 class InputManager;
@@ -15,6 +16,7 @@ class FracturePiece;
 class Renderer final : public WorldObject
 {
 public:
+	static Array<FracturePiece3D*> FracturesToDraw3D;
 	explicit Renderer(InputManager* InInputManager);
 	~Renderer() override;
 
@@ -72,4 +74,5 @@ private:
 	Shader PostProcessingShader;
 
 	Shader FractureShader;
+	Shader FractureShader3D;
 };

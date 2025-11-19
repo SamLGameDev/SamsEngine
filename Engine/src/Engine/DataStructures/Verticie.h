@@ -46,7 +46,7 @@ struct Face
 {
 public:
 
-	Array<Vertex> Vertices;
+	Array<Vector3D> Vertices;
 
 	bool operator==(const Face& other) const {
 		if (other.Vertices.GetSize() == Vertices.GetSize())

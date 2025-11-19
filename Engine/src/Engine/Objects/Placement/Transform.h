@@ -47,19 +47,19 @@ public:
 	/**
 	 * Location of the object
 	 */
-	Vector3D Position;
+	Vector3D Position = { 0, 0, 0 };
 
 
 	/**
 	 * Scale of the object
 	 */
-	Vector3D Scale;
+	Vector3D Scale {1, 1, 1};
 
 
 	/**
 	 * Rotation of the object
 	 */
-	Vector3D Rotation;
+	Vector3D Rotation {0, 0, 0};
 
 
 	/**
