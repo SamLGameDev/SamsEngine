@@ -19,20 +19,20 @@ void Voronoi::FracturePlaneRandom(Model& InModel)
 
 	//FracturePiece3D::PointShader = Shader("Point3D", "Shaders/");
 
-	for (size_t i = 0; i < 10; i++)
-	{
-		Vector3D point1 = InModel.ModelTransform.GetRandomPointInBounds();
+	//for (size_t i = 0; i < 10; i++)
+	//{
+	//	Vector3D point1 = InModel.ModelTransform.GetRandomPointInBounds();
 
-		while (points.Contains(point1))
-		{
-			point1 = InModel.ModelTransform.GetRandomPointInBounds();
-		}
-		TestSquare.push_back(DrawWireCube(point1, { 0.5, 0.5, 0.5 }, { 0.1f, 0.1f, 0.1f }, { 0.5, 0.5, 0.5 }));
+	//	while (points.Contains(point1))
+	//	{
+	//		point1 = InModel.ModelTransform.GetRandomPointInBounds();
+	//	}
+	//	TestSquare.push_back(DrawWireCube(point1, { 0.5, 0.5, 0.5 }, { 0.1f, 0.1f, 0.1f }, { 0.5, 0.5, 0.5 }));
 
-		points.Add(point1);
-	}
+	//	points.Add(point1);
+	//}
 
-	//points = { {0.1, 0.1, 0.1}, {0.8, 0.4, 0.2}, {0.4, 0.8, 0.6}, {0.6, 0.2, 0.1} };
+	points = { {0.1, 0.1, 0.1}, {0.8, 0.4, 0.2}, {0.4, 0.8, 0.6}, {0.6, 0.2, 0.1} };
 	//points = { {0.1, 0.1, 0.1}, {0.8, 0.4, 0.2} };
 	for (Vector3D& point : points)
 	{
@@ -383,7 +383,7 @@ void FracturePiece3D::Draw(Shader* InShader)
 	g.Projection = Camera::GetActiveCamera()->GetProjection();
 
 
-	//.Projection[1][1] *= -1;
+	//Projection[1][1] *= -1;
 	shader.SetUniformBuffer(0, &g, sizeof(GlobalTransforms));
 
 	shader.SetUniformBuffer(1, &ubo, sizeof(PerInstanceTransforms));
