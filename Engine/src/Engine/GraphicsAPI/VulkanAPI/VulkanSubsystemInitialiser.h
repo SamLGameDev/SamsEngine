@@ -42,7 +42,7 @@ namespace Vulkan
 
 		Camera* camera;
 
-		Renderer* renderer;
+		//Renderer* renderer;
 
 		LightManager* lightManager;
 

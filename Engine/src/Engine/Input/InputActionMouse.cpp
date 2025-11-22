@@ -1,6 +1,6 @@
 #include "InputActionMouse.h"
 
-InputActionMouse::InputActionMouse(FirstWindow* InWindow)
+InputActionMouse::InputActionMouse(Window* InWindow)
 {
-	Window = InWindow;
+	ActiveWindow = InWindow;
 }

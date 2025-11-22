@@ -8,12 +8,12 @@ void World::Tick(const double& InDeltaTime)
 
 	DeltaTime = InDeltaTime;
 
-	*TimeBufferPtr = glfwGetTime();
+	//*TimeBufferPtr = glfwGetTime();
 }
 
 void World::Start()
 {
 	Object::Start();
 
-	TimeBufferPtr = UniformBufferFactory::CreatePersistentUniformBuffer<double>(1);
+	//TimeBufferPtr = UniformBufferFactory::CreatePersistentUniformBuffer<double>(1);
 }

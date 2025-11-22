@@ -41,6 +41,7 @@ public:
 			ID = Other.ID;
 			Textures = Other.Textures;
 			Map = Other.Map;
+			RealShader = Other.RealShader;
 		}
 		return *this;
 	}

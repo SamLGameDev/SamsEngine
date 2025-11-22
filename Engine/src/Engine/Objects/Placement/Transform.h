@@ -15,6 +15,7 @@ struct GlobalTransforms
 struct PerInstanceTransforms
 {
 	glm::mat4 Model;
+	Vector3D Color;
 };
 
 /**

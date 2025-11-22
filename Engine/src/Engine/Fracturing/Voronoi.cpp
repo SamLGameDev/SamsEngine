@@ -3,9 +3,11 @@
 #include "transform.h"
 #include <iostream>
 
+#include "Camera.h"
+#include "DataBuffers.h"
 #include "MathCore.h"
 #include "ObjectFactory.h"
-#include "Renderer.h"
+#include "InterfaceRenderer.h"
 #include "glm/gtc/type_ptr.hpp"
 
 void Voronoi::FracturePlaneRandom(Model& InModel)
@@ -17,25 +19,25 @@ void Voronoi::FracturePlaneRandom(Model& InModel)
 
 	//FracturePiece3D::PointShader = Shader("Point3D", "Shaders/");
 
-	//for (size_t i = 0; i < 500; i++)
-	//{
-	//	Vector3D point1 = InModel.ModelTransform.GetRandomPointInBounds();
+	for (size_t i = 0; i < 10; i++)
+	{
+		Vector3D point1 = InModel.ModelTransform.GetRandomPointInBounds();
 
-	//	while (points.Contains(point1))
-	//	{
-	//		point1 = InModel.ModelTransform.GetRandomPointInBounds();
-	//	}
-	//	TestSquare.push_back(DrawWireCube(point1, { 0.5, 0.5, 0.5 }, { 0.1f, 0.1f, 0.1f }, { 0.5, 0.5, 0.5 }));
+		while (points.Contains(point1))
+		{
+			point1 = InModel.ModelTransform.GetRandomPointInBounds();
+		}
+		TestSquare.push_back(DrawWireCube(point1, { 0.5, 0.5, 0.5 }, { 0.1f, 0.1f, 0.1f }, { 0.5, 0.5, 0.5 }));
 
-	//	points.Add(point1);
-	//}
+		points.Add(point1);
+	}
 
-	points = { {0.1, 0.1, 0.1}, {0.8, 0.4, 0.2}, {0.4, 0.8, 0.6}, {0.6, 0.2, 0.1} };
+	//points = { {0.1, 0.1, 0.1}, {0.8, 0.4, 0.2}, {0.4, 0.8, 0.6}, {0.6, 0.2, 0.1} };
 	//points = { {0.1, 0.1, 0.1}, {0.8, 0.4, 0.2} };
 	for (Vector3D& point : points)
 	{
-		auto color = Vector3D::RandomRange(Vector3D(30, 30, 30), Vector3D(255, 255, 255));
-		TestSquare.push_back(DrawWireCube(point, { 0.5, 0.5, 0.5 }, { 0.1f, 0.1f, 0.1f }, color / 255));
+		//auto color = Vector3D::RandomRange(Vector3D(30, 30, 30), Vector3D(255, 255, 255));
+		//TestSquare.push_back(DrawWireCube(point, { 0.5, 0.5, 0.5 }, { 0.1f, 0.1f, 0.1f }, color / 255));
 	}
 
 
@@ -55,7 +57,7 @@ void Voronoi::FracturePlaneRandom(Model& InModel)
 
 			float dot = Vector3D::Dot(normal, (comparedPoint - center).Normalised());
 
-			if (dot < 0 && !MathCore::IsNearlyZero(dot) && normal != Vector3D::Zero) continue;
+			//if (dot < 0 && !MathCore::IsNearlyZero(dot) && normal != Vector3D::Zero) continue;
 
 			Array<Face> newFaces;
 
@@ -256,6 +258,8 @@ bool Voronoi::IsPointInPolygon(Vector3D Point, Array<Vector3D> Polygon, Vector3D
 FracturePiece3D::FracturePiece3D(Array<Vector3D> cell, Vector3D Point)
 {
 
+	shader = Shader("triangle", "/Shaders/");
+
 	//	cell = { {0, 1},  { 1,1 }, {1, -1}, {0, -1}, {0, -1}, {-1, -1}, {-1, 1}, {0, 1} };
 		//cell = {{0.5, 0.5}, {1, 1}, {-1 , -1}};
 
@@ -313,24 +317,35 @@ FracturePiece3D::FracturePiece3D(Array<Vector3D> cell, Vector3D Point)
 	//	vert.Print();
 	//}
 
-	glGenVertexArrays(1, &VAO);
-	glGenBuffers(1, &VBO);
-	glGenBuffers(1, &EBO);
+	::DataBuffers::GenBuffer(VAO);
 
-	glBindVertexArray(VAO);
 
-	glBindBuffer(GL_ARRAY_BUFFER, VBO);
+	DataBuffers::BindVertexInfo(VAO, 0, 0, sizeof(Vector3D), 0, Vector3);
 
-	glBufferData(GL_ARRAY_BUFFER, Verts.GetSize() * sizeof(float), Verts.GetFirstRef(), GL_STATIC_DRAW);
+	//::DataBuffers::BindBuffer(VAO);
 
-	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
 
-	glBufferData(GL_ELEMENT_ARRAY_BUFFER, Inds.GetSize() * sizeof(int), Inds.GetFirstRef(), GL_STATIC_DRAW);
+	::DataBuffers::BufferData(VAO, Verts.GetSize() * sizeof(float), Verts.GetFirstRef(), BufferTargets::Vertex);
+	DataBuffers::BufferDataIndex(VAO, Inds.GetSize() * sizeof(uint16_t), Inds.GetFirstRef());
 
-	glEnableVertexAttribArray(0);
-	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0);
+	//glGenVertexArrays(1, &VAO);
+	//glGenBuffers(1, &VBO);
+	//glGenBuffers(1, &EBO);
 
-	glBindVertexArray(0);
+	//glBindVertexArray(VAO);
+
+	//glBindBuffer(GL_ARRAY_BUFFER, VBO);
+
+	//glBufferData(GL_ARRAY_BUFFER, Verts.GetSize() * sizeof(float), Verts.GetFirstRef(), GL_STATIC_DRAW);
+
+	//glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
+
+	//glBufferData(GL_ELEMENT_ARRAY_BUFFER, Inds.GetSize() * sizeof(int), Inds.GetFirstRef(), GL_STATIC_DRAW);
+
+	//glEnableVertexAttribArray(0);
+	//glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0);
+
+	//glBindVertexArray(0);
 
 	//glGenVertexArrays(1, &PVAO);
 	//glGenBuffers(1, &PVBO);
@@ -347,27 +362,46 @@ FracturePiece3D::FracturePiece3D(Array<Vector3D> cell, Vector3D Point)
 	//glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0);
 
 
-	Renderer::FracturesToDraw3D.Add(this);
+	::Renderer::AddFracture(this);
 }
 
-void FracturePiece3D::Draw(const Shader* InShader)
+void FracturePiece3D::Draw(Shader* InShader)
 {
-	InShader->Use();
-	InShader->SetVec3("Color", color);
-	InShader->SetMatrix4fv("Model", glm::value_ptr(transform.GetModelMatrix()));
+	shader.Use();
+
+	DataBuffers::BindBuffer(VAO);
+
+	DataBuffers::DrawVertexData(VAO);
+
+	PerInstanceTransforms ubo;
+	ubo.Model = transform.GetModelMatrix();
+	ubo.Color = color;
+
+	GlobalTransforms g;
+	g.View = Camera::GetActiveCamera()->GetLook();
+
+	g.Projection = Camera::GetActiveCamera()->GetProjection();
+
+
+	//.Projection[1][1] *= -1;
+	shader.SetUniformBuffer(0, &g, sizeof(GlobalTransforms));
+
+	shader.SetUniformBuffer(1, &ubo, sizeof(PerInstanceTransforms));
+
+	::Renderer::Draw(Inds.GetSize());
 
 	//std::cout << "DrawCalled";
 	//glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
 	//TODO find a way to separate this from model
 	//used for reflection InShade
-	glPointSize(5);
-	glBindVertexArray(VAO);
+	//glPointSize(5);
+	//glBindVertexArray(VAO);
 	//glBindBuffer(GL_ARRAY_BUFFER, VBO);
 	//glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
-	glDrawElements(GL_TRIANGLES, static_cast<GLsizei>(Inds.GetSize()), GL_UNSIGNED_INT, nullptr);
-	glBindVertexArray(0);
-	glUseProgram(0);
-	glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+	//glDrawElements(GL_TRIANGLES, static_cast<GLsizei>(Inds.GetSize()), GL_UNSIGNED_INT, nullptr);
+	//glBindVertexArray(0);
+	//glUseProgram(0);
+	//glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
 	/*PointShader.Use();
 	glBindVertexArray(PVAO);*/
 	//glBindBuffer(GL_ARRAY_BUFFER, VBO);

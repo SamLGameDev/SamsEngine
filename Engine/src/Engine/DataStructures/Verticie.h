@@ -29,19 +29,6 @@ public:
 	Vertex() = default;
 };
 
-namespace std {
-	template <>
-	struct hash<Vertex> {
-		std::size_t operator()(const Vertex& v) const noexcept
-		{
-			const std::size_t hx = std::hash<float>{}(v.Position.X);
-			const std::size_t hy = std::hash<float>{}(v.Position.Y);
-			const std::size_t hz = std::hash<float>{}(v.Position.Z);
-			return hx ^ (hy << 1) ^ (hz << 2);
-		}
-	};
-}
-
 struct Face
 {
 public:

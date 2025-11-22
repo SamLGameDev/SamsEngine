@@ -28,7 +28,7 @@ public:
 
 	FracturePiece3D(Array<Vector3D> cell, Vector3D Point);
 
-	void Draw(const Shader* InShader);
+	void Draw(Shader* InShader);
 
 	void Start() override;
 
@@ -50,7 +50,9 @@ private:
 
 	Array<float> Verts;
 
-	Array<unsigned int> Inds;
+	Array<uint16_t> Inds;
 
 	GLuint VAO, VBO, EBO;
+
+	Shader shader;
 };

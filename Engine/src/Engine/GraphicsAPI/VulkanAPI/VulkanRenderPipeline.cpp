@@ -2,6 +2,7 @@
 #include "VulkanLogicalDevice.h"
 #include "VulkanGraphicsCard.h"
 #define GLFW_INCLUDE_VULKAN
+#include <iostream>
 #include <GLFW/glfw3.h>
 
 #include "Vector2D.h"
@@ -59,9 +60,12 @@ namespace Vulkan
 		dAllocInfo.descriptorSetCount = 1;
 		dAllocInfo.pSetLayouts = &DescriptorLayout;
 		dAllocInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_ALLOCATE_INFO;
-
-		vkAllocateDescriptorSets(*SInstance::GetInstance()->GraphicsCard->GetLogicalDevice()->GetVulkanLogicalDevice(),
+		VkResult rs = vkAllocateDescriptorSets(*SInstance::GetInstance()->GraphicsCard->GetLogicalDevice()->GetVulkanLogicalDevice(),
 			&dAllocInfo, &DescriptorSet);
+		if ( rs != VK_SUCCESS)
+		{
+			std::cout << rs << " ERROR::VULKAN::RENDERPIPELINE::FAILED TO ALLOCATE DESCRIPTOR SETS" << std::endl;
+		}
 
 		Array<VkDynamicState> dynamicStates = { VK_DYNAMIC_STATE_VIEWPORT, VK_DYNAMIC_STATE_SCISSOR, VK_DYNAMIC_STATE_VERTEX_INPUT_BINDING_STRIDE_EXT, VK_DYNAMIC_STATE_VERTEX_INPUT_EXT };
 

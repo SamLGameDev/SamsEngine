@@ -14,7 +14,7 @@ Shader::Shader()
 
 Shader::~Shader()
 {
-	delete RealShader;
+	//delete RealShader;
 }
 
 Shader::Shader(const std::string_view& InName, const std::string_view& InStorageLocation)

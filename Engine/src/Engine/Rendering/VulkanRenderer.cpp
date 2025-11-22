@@ -16,6 +16,8 @@
 #include "VulkanImageView.h"
 #include "glm/ext/matrix_clip_space.hpp"
 #include "glm/ext/matrix_transform.hpp"
+#include "Voronoi.h"
+#include "InterfaceRenderer.h"
 
 
 namespace Vulkan
@@ -32,6 +34,8 @@ namespace Vulkan
 
 	ErrorCodes URenderer::Init()
 	{
+		::Renderer::RealRenderer = this;
+
 		CreateRenderPass();
 
 		SInstance::GetInstance()->RenderPass = RenderPass;
@@ -57,7 +61,7 @@ namespace Vulkan
 		dPoolCreateInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_POOL_CREATE_INFO;
 		dPoolCreateInfo.pPoolSizes = poolSizes.GetFirstRef();
 		dPoolCreateInfo.poolSizeCount = poolSizes.GetSize();
-		dPoolCreateInfo.maxSets = 2;
+		dPoolCreateInfo.maxSets = 200;
 
 		vkCreateDescriptorPool(*OwningCard->GetLogicalDevice()->GetVulkanLogicalDevice(), &dPoolCreateInfo, nullptr, &DescriptorPool);
 
@@ -92,27 +96,29 @@ namespace Vulkan
 
 		Test->AddTexture(*testtex);
 
+		CurrentBuffer = CommandBuffers[0];
+
 		DataBuffers::GenBuffer(vao);
 
-		DataBuffers::BindVertexInfo(vao, 0, testPositions.GetSize(), sizeof(Vector3D), 0, Vector3);
+		//DataBuffers::BindVertexInfo(vao, 0, testPositions.GetSize(), sizeof(Vector3D), 0, Vector3);
 
-		DataBuffers::BindVertexInfo(vao, 1, 0, sizeof(Vector3D), 0, Vector3);
-		DataBuffers::BindVertexInfo(vao, 2, 0, sizeof(Vector2D), 0, Vector2);
+		////DataBuffers::BindVertexInfo(vao, 1, 0, sizeof(Vector3D), 0, Vector3);
+		//DataBuffers::BindVertexInfo(vao, 2, 0, sizeof(Vector2D), 0, Vector2);
 
-		DataBuffers::BufferData(vao, testPositions.GetSize() * sizeof(Vector3D), testPositions.GetFirstRef(), BufferTargets::Vertex);
-		DataBuffers::BufferDataIndex(vao, indices.GetSize() * sizeof(uint16_t), indices.GetFirstRef());
-		DataBuffers::BufferData(vao, testColors.GetSize() * sizeof(Vector3D), testColors.GetFirstRef(), BufferTargets::Vertex);
-		DataBuffers::BufferData(vao, testTexCoor.GetSize() * sizeof(Vector2D), testTexCoor.GetFirstRef(), BufferTargets::Vertex);
+		//DataBuffers::BufferData(vao, testPositions.GetSize() * sizeof(Vector3D), testPositions.GetFirstRef(), BufferTargets::Vertex);
+		//DataBuffers::BufferDataIndex(vao, indices.GetSize() * sizeof(uint16_t), indices.GetFirstRef());
+		////DataBuffers::BufferData(vao, testColors.GetSize() * sizeof(Vector3D), testColors.GetFirstRef(), BufferTargets::Vertex);
+		//DataBuffers::BufferData(vao, testTexCoor.GetSize() * sizeof(Vector2D), testTexCoor.GetFirstRef(), BufferTargets::Vertex);
 
-		DataBuffers::GenBuffer(vao2);
+		//DataBuffers::GenBuffer(vao2);
 
-		DataBuffers::BindVertexInfo(vao2, 0, testPositions2.GetSize(), sizeof(Vector3D), 0, Vector3);
+		//DataBuffers::BindVertexInfo(vao2, 0, testPositions2.GetSize(), sizeof(Vector3D), 0, Vector3);
 
-		DataBuffers::BindVertexInfo(vao2, 1, 0, sizeof(Vector3D), 0, Vector3);
+		////DataBuffers::BindVertexInfo(vao2, 1, 0, sizeof(Vector3D), 0, Vector3);
 
-		DataBuffers::BufferData(vao2, testPositions2.GetSize() * sizeof(Vector3D), testPositions2.GetFirstRef(), BufferTargets::Vertex);
-		DataBuffers::BufferDataIndex(vao2, indices.GetSize() * sizeof(uint16_t), indices.GetFirstRef());
-		DataBuffers::BufferData(vao2,testColors.GetSize() * sizeof(Vector3D), testColors.GetFirstRef(), BufferTargets::Vertex);
+		//DataBuffers::BufferData(vao2, testPositions2.GetSize() * sizeof(Vector3D), testPositions2.GetFirstRef(), BufferTargets::Vertex);
+		//DataBuffers::BufferDataIndex(vao2, indices.GetSize() * sizeof(uint16_t), indices.GetFirstRef());
+		////DataBuffers::BufferData(vao2,testColors.GetSize() * sizeof(Vector3D), testColors.GetFirstRef(), BufferTargets::Vertex);
 
 		return SUCCEEDED;
 	}
@@ -276,30 +282,6 @@ namespace Vulkan
 
 		vkCmdBeginRenderPass(Buffer, &renderBeginInfo, VK_SUBPASS_CONTENTS_INLINE);
 
-		Test->Use();
-
-		DataBuffers::BindBuffer(vao);
-
-		DataBuffers::DrawVertexData(vao);
-
-		static auto startTime = std::chrono::high_resolution_clock::now();
-
-		auto currentTime = std::chrono::high_resolution_clock::now();
-		float time = std::chrono::duration<float, std::chrono::seconds::period>(currentTime - startTime).count();
-
-		PerInstanceTransforms ubo;
-		ubo.Model = glm::rotate(glm::mat4(1.0f), time * glm::radians(90.0f), glm::vec3(0.0f, 0.0f, 1.0f));
-
-		GlobalTransforms g;
-		g.View = glm::lookAt(glm::vec3(2.0f, 2.0f, 2.0f), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 0.0f, 1.0f));
-
-		g.Projection = glm::perspective(glm::radians(45.0f), OwningCard->GetLogicalDevice()->GetSwapChain()->GetSwapChainExtent().width / (float)OwningCard->GetLogicalDevice()->GetSwapChain()->GetSwapChainExtent().height, 0.1f, 10.0f);
-
-
-		g.Projection[1][1] *= -1;
-		Test->SetUniformBuffer(0, &g, sizeof(GlobalTransforms));
-
-		Test->SetUniformBuffer(1, &ubo, sizeof(PerInstanceTransforms));
 
 		VkViewport viewport{};
 		viewport.x = 0;
@@ -316,12 +298,10 @@ namespace Vulkan
 		scissor.offset = { 0, 0 };
 		vkCmdSetScissor(Buffer, 0, 1, &scissor);
 
-		vkCmdDrawIndexed(Buffer, static_cast<uint32_t>(indices.GetSize()), 1, 0, 0, 0);
-		DataBuffers::BindBuffer(vao2);
-
-		DataBuffers::DrawVertexData(vao2);
-
-		vkCmdDrawIndexed(Buffer, static_cast<uint32_t>(indices.GetSize()), 1, 0, 0, 0);
+		for (FracturePiece3D* piece : FracturesToRender)
+		{
+			piece->Draw(Test);
+		}
 
 		vkCmdEndRenderPass(Buffer);
 
@@ -363,5 +343,10 @@ namespace Vulkan
 	void URenderer::CreateRenderPass()
 	{
 		RenderPass = new URenderPass(this);
+	}
+
+	void URenderer::Draw(const size_t& Size)
+	{
+		vkCmdDrawIndexed(CurrentBuffer, static_cast<uint32_t>(Size), 1, 0, 0, 0);
 	}
 }

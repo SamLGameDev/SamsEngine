@@ -13,6 +13,7 @@
 #include "VulkanShader.h"
 #include "VulkanTexture.h"
 #include "Texture.h"
+#include "InterfaceRenderer.h"
 
 namespace Vulkan
 {
@@ -69,9 +70,9 @@ namespace Vulkan
 			return ERROR;
 		}
 
-	/*	try
+		try
 		{
-			inputManager = new InputManager();
+			inputManager = new InputManager(Window->GetWindow());
 		}
 		catch (const std::exception& error)
 		{
@@ -105,7 +106,7 @@ namespace Vulkan
 			return ERROR;
 		}
 
-		try
+		/*try
 		{
 			renderer = CreateObjectPtr<Renderer>(inputManager);
 

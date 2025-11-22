@@ -25,7 +25,10 @@ namespace Vulkan
 
 	ErrorCodes RuntimeEngine::Loop()
 	{
-
+		const double time = glfwGetTime();
+		const double deltaTime = time - TimeLastFrame;
+		TimeLastFrame = time;
+		Object::TickDel.Broadcast(deltaTime);
 		SInstance::GetInstance()->GraphicsCard->GetRenderer()->Render();
 
 		return SUCCEEDED;

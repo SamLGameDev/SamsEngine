@@ -58,6 +58,8 @@ add_library(EngineCore STATIC
     "src/Engine/Objects/World/WorldObject.cpp"
     "src/Engine/Camera/Camera.cpp"
     "src/Engine/Rendering/Renderer.cpp"
+    "src/Engine/Rendering/BaseRenderer.cpp"
+    "src/Engine/Rendering/InterfaceRenderer.cpp"
     "src/Engine/Rendering/VulkanRenderer.cpp"
     "src/Engine/Objects/Placement/Transform.cpp"
     "src/Engine/Rendering/Buffers/FrameBufferFactory.cpp"
@@ -173,6 +175,8 @@ install(FILES
     src/Engine/Camera/Camera.h
     src/Engine/Rendering/VulkanRenderer.h
     src/Engine/Rendering/Renderer.h
+    src/Engine/Rendering/BaseRenderer.h
+    src/Engine/Rendering/InterfaceRenderer.h
     src/Engine/Objects/Placement/Transform.h
     src/Engine/Rendering/Buffers/FrameBufferFactory.h
     src/Engine/Rendering/Buffers/UniformBufferFactory.h

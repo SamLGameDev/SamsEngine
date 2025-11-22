@@ -1,6 +1,7 @@
 
 #pragma once
 
+#include "BaseRenderer.h"
 #include "ErrorCodes.h"
 #include "GraphicsAPIConstructor.h"
 #include "Shader.h"
@@ -24,12 +25,12 @@ namespace Vulkan
 namespace Vulkan
 {
 
-	class URenderer
+	class URenderer : BaseRenderer
 	{
 	public:
 
 		URenderer(UGraphicsCard* InOwningCard);
-		~URenderer();
+		~URenderer() override;
 
 		URenderer(const URenderer& Other)
 		{
@@ -121,6 +122,8 @@ namespace Vulkan
 		{
 			return OwningCard;
 		}
+
+		void Draw(const size_t& Size) override;
 
 	private:
 

@@ -6,73 +6,76 @@
 #include "Voronoi.h"
 #include "WorldObject.h"
 
-class InputManager;
-class Shape;
-class WireObject;
-class Shader;
+namespace OpenGL {
 
-class FracturePiece;
+	class InputManager;
+	class Shape;
+	class WireObject;
+	class Shader;
 
-class Renderer final : public WorldObject
-{
-public:
-	static Array<FracturePiece3D*> FracturesToDraw3D;
-	explicit Renderer(InputManager* InInputManager);
-	~Renderer() override;
+	class FracturePiece;
 
-
-	/**
-	 * Takes a model, and adds it to be rendered, we use instancing, so we only need to add a model once
-	 * @param Item RenderableItem
-	 */
-	static void AddItemToRender(Model* Item);
-
-	void Start() override;
-
-	static LinkedList<Model*> ItemsToRender;
-
-	static LinkedList<WireObject*> WiresToDraw;
-	static Array<FracturePiece*> FracturesToDraw;
+	class Renderer final : public WorldObject
+	{
+	public:
+		static Array<::FracturePiece3D*> FracturesToDraw3D;
+		explicit Renderer(::InputManager* InInputManager);
+		~Renderer() override;
 
 
-	void Tick(const double& DeltaTime) override;
+		/**
+		 * Takes a model, and adds it to be rendered, we use instancing, so we only need to add a model once
+		 * @param Item RenderableItem
+		 */
+		static void AddItemToRender(Model* Item);
 
-private:
+		void Start() override;
 
+		static LinkedList<Model*> ItemsToRender;
 
-	/**
-	 * The main render loop, Draws all registered objects and renders them to the screen
-	 */
-	void RenderingLoop() const;
-
-	void DrawWireObjects() const;
-	void DrawModels() const;
-	void DrawFractures() const;
-	void RenderWorldObjets() const;
-	void DrawSceneTexture() const;
-	void RenderPostProcessing() const;
-
-	/**
-	 * Creates the post-processing quad that covers the screen.
-	 * Draw using the quadVAO
-	 */
-	void CreatePostProcessingScreen();
+		static LinkedList<::WireObject*> WiresToDraw;
+		static Array<FracturePiece*> FracturesToDraw;
 
 
-	/**
-	 * Sets up the post-processing, creating both the quad and shader.
-	 */
-	void SetUpPostProcessing();
+		void Tick(const double& DeltaTime) override;
+
+	private:
 
 
-	InputManager* WindowInputManager;
+		/**
+		 * The main render loop, Draws all registered objects and renders them to the screen
+		 */
+		void RenderingLoop();
 
-	unsigned int  quadVAO;
+		void DrawWireObjects() const;
+		void DrawModels() const;
+		void DrawFractures();
+		void RenderWorldObjets();
+		void DrawSceneTexture() const;
+		void RenderPostProcessing() const;
 
-	Buffers PostProcessing, AntiAliasing;
+		/**
+		 * Creates the post-processing quad that covers the screen.
+		 * Draw using the quadVAO
+		 */
+		void CreatePostProcessingScreen();
 
-	Shader PostProcessingShader;
 
-	Shader FractureShader;
-	Shader FractureShader3D;
-};
+		/**
+		 * Sets up the post-processing, creating both the quad and shader.
+		 */
+		void SetUpPostProcessing();
+
+
+		::InputManager* WindowInputManager;
+
+		unsigned int  quadVAO;
+
+		Buffers PostProcessing, AntiAliasing;
+
+		::Shader PostProcessingShader;
+
+		::Shader FractureShader;
+		::Shader FractureShader3D;
+	};
+}

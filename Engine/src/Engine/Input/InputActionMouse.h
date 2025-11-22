@@ -9,7 +9,7 @@ public:
 
 	InputActionMouse() = default;
 
-	explicit InputActionMouse(FirstWindow* Window);
+	explicit InputActionMouse(Window* Window);
 
 
 	/**
@@ -23,7 +23,7 @@ public:
 
 protected:
 
-	FirstWindow* Window;
+	Window* ActiveWindow;
 };
 
 template<typename T>

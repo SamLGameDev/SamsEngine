@@ -41,7 +41,7 @@ Model::Model(const std::string& Path, const Shader& InShader)
 	BoundingBox = DrawWireCube({ 0, 0,0 }, ModelTransform.TransHalfBounds, Vector3D(1, 1, 1),
 		Vector3D(0.2f, 0.5f, 0.2f));
 
-	Renderer::AddItemToRender(this);
+	//Renderer::AddItemToRender(this);
 }
 
 

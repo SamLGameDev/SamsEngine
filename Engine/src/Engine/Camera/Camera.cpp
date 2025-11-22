@@ -1,15 +1,16 @@
 #include "Camera.h"
 #include <glm/gtc/matrix_transform.hpp>
 
+#include "DataBuffers.h"
 #include "Object.h"
 #include "UniformBufferFactory.h"
 
 
 Camera* Camera::ActiveCamera;
 
-FirstWindow* Camera::ActiveWindow;
+Window* Camera::ActiveWindow;
 
-void Camera::SetUpInputs(FirstWindow* Window, InputManager* Manager)
+void Camera::SetUpInputs(Window* Window, InputManager* Manager)
 {
 	WKey = std::make_unique<InputAction>(GLFW_KEY_W, Manager, Window);
 	AKey = std::make_unique<InputAction>(GLFW_KEY_A, Manager, Window);
@@ -24,23 +25,29 @@ void Camera::SetUpInputs(FirstWindow* Window, InputManager* Manager)
 	DKey->Actions.BindMember(this, &Camera::MoveRight);
 
 	Mouse->BindCallback(this, &Camera::MouseCallback);
+
+	InputMange = Manager;
+
+
 }
 
-Camera::Camera(FirstWindow* Window, InputManager* Manager)
+Camera::Camera(Window* Window, InputManager* Manager)
 {
 	SetUpInputs(Window, Manager);
 
 	glfwSetInputMode(Window->GetWindow(), GLFW_CURSOR, GLFW_CURSOR_DISABLED);
 
-	LastX = FirstWindow::GetWindowWidth() / 2;
-	LastY = FirstWindow::GetWindowHeight() / 2;
+	LastX = Window->GetWindowWidth() / 2;
+	LastY = Window->GetWindowHeight() / 2;
 }
 
 void Camera::Start()
 {
 	Object::Start();
 
-	ptr = UniformBufferFactory::CreatePersistentUniformBuffer<Transforms>(0);
+	::DataBuffers::GenBuffer(GlobalTransformsID);
+
+	ptr = static_cast<GlobalTransforms*>(::DataBuffers::GenerateUniformDataBuffer(GlobalTransformsID, sizeof(GlobalTransforms))); //UniformBufferFactory::CreatePersistentUniformBuffer<Transforms>(0);
 }
 
 void Camera::Tick(const double& DeltaTime)
@@ -49,6 +56,8 @@ void Camera::Tick(const double& DeltaTime)
 
 	ptr->Projection = GetProjection();
 	ptr->View = GetLook();
+
+	InputMange->ProcessInput(Camera::GetActiveWindow()->GetWindow());
 }
 
 void Camera::MoveForward()
@@ -140,12 +149,14 @@ glm::mat4 Camera::GetLook() const
 
 glm::mat4 Camera::GetProjection()
 {
-	const glm::mat4 projection = glm::perspective<float>
+	glm::mat4 projection = glm::perspective<float>
 	(
 		glm::radians(FOV),
 		static_cast<float>(FirstWindow::GetWindowWidth()) / static_cast<float>(FirstWindow::GetWindowHeight()),
 		NearView,
 		FarView
 	);
+
+	projection[1][1] *= -1;
 	return projection;
 }

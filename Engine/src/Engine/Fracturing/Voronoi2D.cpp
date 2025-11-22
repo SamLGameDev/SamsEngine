@@ -315,7 +315,7 @@ FracturePiece::FracturePiece(Array<Vector2D> cell, Vector2D Point)
 	color = Vector3D::RandomRange(Vector3D(30, 30, 30), Vector3D(255, 255, 255));
 
 
-	Renderer::FracturesToDraw.Add(this);
+//	Renderer::FracturesToDraw.Add(this);
 }
 
 void FracturePiece::Draw(const Shader* InShader)

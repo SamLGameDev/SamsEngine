@@ -3,7 +3,7 @@
 #include "Shader.h"
 #include "Camera.h"
 #include <glm/gtc/type_ptr.hpp>
-#include "Renderer.h"
+#include "InterfaceRenderer.h"
 #include "Verticie.h"
 #include "Transform.h"
 
@@ -13,7 +13,7 @@ WireObject::WireObject(const Transform* InTransform, const Shader* InShader)
 
 	WireShader = std::make_shared<Shader>(*InShader);
 
-	Renderer::WiresToDraw.Add(this);
+	//::Renderer::AddWireShape(this);
 }
 
 void WireObject::Copy(const WireObject& copy)
@@ -33,50 +33,50 @@ WireObject::WireObject(const WireObject& copy)
 WireObject::~WireObject()
 {
 
-	glDeleteBuffers(1, &EBO);
-	glDeleteBuffers(1, &VBO);
-	glDeleteVertexArrays(1, &VAO);
+	//glDeleteBuffers(1, &EBO);
+	//glDeleteBuffers(1, &VBO);
+	//glDeleteVertexArrays(1, &VAO);
 }
 
 void WireObject::Draw() const
 {
-	glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+	//glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
 
-	WireShader->Use();
+	//WireShader->Use();
 
-	SetShaderVariables();
+	//SetShaderVariables();
 
-	glBindVertexArray(VAO);
-	glDrawElements(GL_TRIANGLES, static_cast<GLsizei>(Indices.GetSize()), GL_UNSIGNED_INT, 0);
-	glBindVertexArray(0);
+	//glBindVertexArray(VAO);
+	//glDrawElements(GL_TRIANGLES, static_cast<GLsizei>(Indices.GetSize()), GL_UNSIGNED_INT, 0);
+	//glBindVertexArray(0);
 
-	glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+	//glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
 
-	glUseProgram(0);
+	//glUseProgram(0);
 }
 
 void WireObject::Initialise()
 {
 
-	glGenVertexArrays(1, &VAO);
-	glGenBuffers(1, &VBO);
-	glGenBuffers(1, &EBO);
+	//glGenVertexArrays(1, &VAO);
+	//glGenBuffers(1, &VBO);
+	//glGenBuffers(1, &EBO);
 
-	glBindVertexArray(VAO);
-	glBindBuffer(GL_ARRAY_BUFFER, VBO);
+	//glBindVertexArray(VAO);
+	//glBindBuffer(GL_ARRAY_BUFFER, VBO);
 
-	glBufferData(GL_ARRAY_BUFFER, sizeof(Vertex) * Vertices.GetSize(), Vertices.GetFirstRef(), GL_STATIC_DRAW);
+	//glBufferData(GL_ARRAY_BUFFER, sizeof(Vertex) * Vertices.GetSize(), Vertices.GetFirstRef(), GL_STATIC_DRAW);
 
-	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
-	glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(unsigned int) * Indices.GetSize(), Indices.GetFirstRef(), GL_STATIC_DRAW);
+	//glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
+	//glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(unsigned int) * Indices.GetSize(), Indices.GetFirstRef(), GL_STATIC_DRAW);
 
-	glEnableVertexAttribArray(0);
-	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), static_cast<void*>(0));
+	//glEnableVertexAttribArray(0);
+	//glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), static_cast<void*>(0));
 
-	glEnableVertexAttribArray(1);
-	glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), reinterpret_cast<void*>((offsetof(Vertex, Color))));
+	//glEnableVertexAttribArray(1);
+	//glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), reinterpret_cast<void*>((offsetof(Vertex, Color))));
 
-	glBindVertexArray(0);
+	//glBindVertexArray(0);
 }
 
 void WireObject::SetShaderVariables() const
@@ -96,7 +96,7 @@ std::unique_ptr<WireObject> DrawWireCube(const Vector3D& Center, const Vector3D&
 {
 	auto wireTransform = Transform(Center, Size, Vector3D(0, 0, 0));
 
-	auto wireShader = Shader("WireShader", "Shaders/WireShader/");
+	auto wireShader = Shader("triangle", "/Shaders/");
 
 	auto object = std::make_unique<WireObject>(&wireTransform, &wireShader);
 

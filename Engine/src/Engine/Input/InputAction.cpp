@@ -1,5 +1,6 @@
 #include "InputAction.h"
 #include "InputManager.h"
+#include "Window.h"
 
 void InputAction::ProcessInput(GLFWwindow* Window)
 {
@@ -9,7 +10,7 @@ void InputAction::ProcessInput(GLFWwindow* Window)
 	}
 }
 
-InputAction::InputAction(const int InKey, InputManager* Manager, FirstWindow* InWindow)
+InputAction::InputAction(const int InKey, InputManager* Manager, Window* InWindow)
 {
 	Key = InKey;
 	Manager->InputActions.BindMember(this, &InputAction::ProcessInput);

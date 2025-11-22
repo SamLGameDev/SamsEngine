@@ -78,7 +78,7 @@ ErrorCodes SubsystemInitialiser::Init()
 
 	try
 	{
-		renderer = CreateObjectPtr<Renderer>(inputManager);
+		//renderer = CreateObjectPtr<Renderer>(inputManager);
 
 	}
 	catch (const std::exception& error)

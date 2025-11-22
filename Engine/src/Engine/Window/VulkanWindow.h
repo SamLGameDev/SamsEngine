@@ -7,7 +7,7 @@
 namespace Vulkan
 {
 
-	class FirstWindow final : Window
+	class FirstWindow final : public Window
 	{
 	public:
 
