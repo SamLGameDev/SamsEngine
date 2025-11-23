@@ -66,6 +66,7 @@ for (size_t i = 0; i < points.GetSize(); i++)
 ```
 Figure 1
 
+This algorithm works by cutting a cube by a perpendicular bi-sector plane of every other point to generate a fracture piece. It repeats this for all points to geneerate a full Voronoi diagram of the mesh. 
 
 ## Optimisation 
 
@@ -100,6 +101,19 @@ Figure 5
 Figure 6
 
 Figure 5 shows that the algorithm is allocating 1.217 mb more memory than before the call. This is not a significant amount of memory, but it could be reduced. As figure 6 shows, the main bottleneck is creating FracturePieces, the reson being they are allocated on the heap. Significant memory could be saved by allocating them on the stack instead. This will be one of the aims for the next interation. 
+
+### GPU
+
+<img width="811" alt="image" src="https://github.falmouth.ac.uk/user-attachments/assets/45eab56e-3131-41f4-8610-4f2aecc2178c" />
+Firgure 7
+
+As shown in figure 7, the bulk of our GPU activity happens at the start. This is not as much as a problem, as by doing it in bulk here, we save on processing power later, but if we wanted to reduce this, we could draw the voronoi diagram when it is first interacted with, instead of at the start.
+
+## Documentation
+
+Find the docygen generated documentation below
+
+https://samlgamedev.github.io/samsenginedocs.github.io/
 
 ## References
 
