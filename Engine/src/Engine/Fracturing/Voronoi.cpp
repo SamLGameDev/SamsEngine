@@ -197,28 +197,28 @@ void Voronoi::FracturePlaneRandom(Model& InModel)
 			Faces = newFaces;
 		}
 		auto color = Vector3D::RandomRange(Vector3D(30, 30, 30), Vector3D(255, 255, 255));
-		//for (auto& face : Faces)
-		//{
-		////Face face = Faces[5];
-		//	if (fractureFaces.Contains(face))
-		//	{
-		//		continue;
-		//	}
-
-		//	FracturePiece3D* frac = CreateObjectPtr<FracturePiece3D>(face.Vertices, currentPoint);
-		//	frac->color = color;
-		//	fractureFaces.Add(face);
-		//}
-
-		Array<Vector3D> test;
 		for (auto& face : Faces)
 		{
-			test.Add(face.Vertices);
+		//Face face = Faces[5];
+			if (fractureFaces.Contains(face))
+			{
+				continue;
+			}
 
+			FracturePiece3D* frac = CreateObjectPtr<FracturePiece3D>(face.Vertices, currentPoint);
+			frac->color = color;
+			fractureFaces.Add(face);
 		}
-
-		FracturePiece3D* frac = CreateObjectPtr<FracturePiece3D>(test, currentPoint);
-		frac->color = color;
+//
+//		Array<Vector3D> test;
+//		for (auto& face : Faces)
+//		{
+//	
+//		Fractu		test.Add(face.Vertices);
+//
+//		}
+//rePiece3D* frac = CreateObjectPtr<FracturePiece3D>(test, currentPoint);
+//		frac->color = color;
 
 		//TestSquare.push_back(DrawWireCube(currentPoint, { 0.5, 0.5, 0.5 }, { 0.1f, 0.1f, 0.1f }, color/255));
 
