@@ -1,7 +1,7 @@
 
 ## Description
 
-This project aims to implement a 3D voronoi fracturing algorithm [1] using vulkan[2]. Vulkan has been chosen over alternatives like OpenGL[3] due to its ability to take advantage of the parallelism of modern GPU's [4], which will be cruicial in this project as there will be many points to calculate which can be calculated independently of one another. A triangulation algorithm will also be needed to generate a mesh from the fractured points, and as such delaunay triangulation [8] will be used. This should result in significant performance gains. For future work, this project would aim at implimenting a clipped voronoi diagram[7], allowing the fracturing of a complex 3D mesh.
+This project aims to implement a 3D voronoi fracturing algorithm [1] using vulkan[2]. Vulkan has been chosen over alternatives like OpenGL[3] due to its ability to take advantage of the parallelism of modern GPU's [4], which will be cruicial in this project as there will be many points to calculate which can be calculated independently of one another. A triangulation algorithm will also be needed to generate a mesh from the fractured points, and as such delaunay triangulation [8] will be used. This should result in significant performance gains. For future work, this project would aim at implimenting a clipped voronoi diagram[7], allowing the fracturing of a complex 3D mesh. The project has currently generated a voronoi diagram in 3D, though it still needs a triangulation algorithm added to function properly. This is what will be added in worksheet 4.
 
 ## Methodology
 This project is going to be implimented by adapting the current half plane clipping algorithm for 3D [5][6]. The pesudocode for that can be found in fig 1.
@@ -66,44 +66,54 @@ for (size_t i = 0; i < points.GetSize(); i++)
 ```
 Figure 1
 
+This algorithm works by cutting a cube by a perpendicular bi-sector plane of every other point to generate a fracture piece. It repeats this for all points to geneerate a full Voronoi diagram of the mesh. 
 
 ## Optimisation 
 
 ### CPU
 
-Currently, there are no major bottlenecks for the program, but here are some issues that will help the next 3D iteration run faster.
+Currenty, the major bottleneck to the program is creating new fracture objects for rendering, taking 83.36% of the processing time. This is shown in figure 2
 
-![image](https://github.falmouth.ac.uk/user-attachments/assets/347632b3-4130-4008-ba24-58fd7d0afbf3)
+<img width="722" alt="image" src="https://github.falmouth.ac.uk/user-attachments/assets/4b6eb04a-a471-4423-aaf7-186378811aa3" />
+
+Figure 2
+
+After investigating why, it has been discovered that it is because of two major points, shader creation and buffering data, as shown in figures 3 and 4.
+
+<img width="433" alt="image" src="https://github.falmouth.ac.uk/user-attachments/assets/db70cdfe-4b7a-446a-bf33-7101303d1046" />
+
+Figure 3
+
+<img width="782" alt="image" src="https://github.falmouth.ac.uk/user-attachments/assets/e143085c-5463-4752-b6cd-b114e6ceb3cd" />
+
 Figure 4
 
-Firgure 4 shows that creating the point shader is very inefficient, so for the next iteraction, this will be moved out of fracture piece creation, so its only ever created once.
-
-![image](https://github.falmouth.ac.uk/user-attachments/assets/3f76fc17-909c-440b-929f-0a0f5b9fce8f)
-Figure 5
-
-Fig 5 shows assinging to the heap for each fracrue peice is very inefficent, so the code will be rewritten so it can be stack based
-
-![image](https://github.falmouth.ac.uk/user-attachments/assets/e75faf0a-7292-465f-a9bd-3c1b207ce0ac)
-Figure 6
-
-Fig 6 shows copying the newcell to cell is inefficient, so the program will be rewritten to use newcell instead, avoiding the copying.
-
-![image](https://github.falmouth.ac.uk/user-attachments/assets/f1104a81-8001-4c11-8860-a3f5e65248ea)
-Figure 7
-
-Fig7 shows adding to the array is expensive, so the add method will be rewritten to allocate space to double the current size when running out, avoiding so many new allocations
-
-Currently, the program could be imporved by taking advantage of parrallel programming, allocating different threads for each point. This will help improve the performance of the 3D application.
+To solve this, The shader could be created once for the class, but the problem is that currently the shader class allocates uniform buffers on a per shader basis, so the shader class would need to be re-written to allocate one large buffer that is used per class, saving on multiple shader creation. We could do something similar with vulkan memeory allocation, and allocate once in bulk beforehand
 
 ### Memory
 
-<img width="308" alt="image" src="https://github.falmouth.ac.uk/user-attachments/assets/c3b5db15-025f-401a-8b0b-ca7507daca16" />
-Figure 2
+<img width="311" alt="image" src="https://github.falmouth.ac.uk/user-attachments/assets/62745c86-1aeb-4601-93c9-e22964aeab18" />
 
-<img width="683" alt="image" src="https://github.falmouth.ac.uk/user-attachments/assets/4841c69b-659c-486a-8323-4d6dbb68056f" />
-Figure 3
+Figure 5
 
-Fig 2 shows that the current 2D algorithm is using more memory than it should be. Figure 3 shows that this is because of the fracture pieces Being created. For the next iteration, the aim will be to reduce the size of this class, and change it to a stack allocation instead of a heap one.
+<img width="946" alt="image" src="https://github.falmouth.ac.uk/user-attachments/assets/98e1beb9-7faf-4364-82d7-a0e0f6d1d371" />
+
+Figure 6
+
+Figure 5 shows that the algorithm is allocating 1.217 mb more memory than before the call. This is not a significant amount of memory, but it could be reduced. As figure 6 shows, the main bottleneck is creating FracturePieces, the reson being they are allocated on the heap. Significant memory could be saved by allocating them on the stack instead. This will be one of the aims for the next interation. 
+
+### GPU
+
+<img width="811" alt="image" src="https://github.falmouth.ac.uk/user-attachments/assets/45eab56e-3131-41f4-8610-4f2aecc2178c" />
+Firgure 7
+
+As shown in figure 7, the bulk of our GPU activity happens at the start. This is not as much as a problem, as by doing it in bulk here, we save on processing power later, but if we wanted to reduce this, we could draw the voronoi diagram when it is first interacted with, instead of at the start.
+
+## Documentation
+
+Find the docygen generated documentation below
+
+https://samlgamedev.github.io/samsenginedocs.github.io/
 
 ## References
 
