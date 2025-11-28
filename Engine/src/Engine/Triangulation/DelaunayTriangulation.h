@@ -18,9 +18,9 @@ struct Circle
 
 	Vector3D GetCircleCenter(const Vector3D& AToB, const Vector3D& AToC);
 
-	bool ArePointsInsideCircle(const Array<Vector3D>& Points);
+	bool ArePointsInsideCircle(const Array<Vector3D>& Points)const;
 
-	bool IsPointInsideCircle(const Vector3D& Point);
+	bool IsPointInsideCircle(const Vector3D& Point) const;
 
 };
 
@@ -32,7 +32,7 @@ struct Triangle
 
 	Circle GetMinCircleTrivial(Array<Vector3D>& EdgeRPoints);
 
-	Circle GetSmallestCircle(Array<Vector3D>& Points, Array<Vector3D>& EdgeRPoints);
+	Circle GetSmallestCircle(Array<Vector3D>& Points, Array<Vector3D>& EdgeRPoints, const size_t& Size);
 
 	bool IsPointInCircumference(const Vector3D& Point);
 };

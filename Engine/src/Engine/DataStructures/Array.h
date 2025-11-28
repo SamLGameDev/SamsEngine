@@ -234,6 +234,13 @@ public:
 		return NumItems == 0;
 	}
 
+	void Swap(const size_t& From, const size_t& To)
+	{
+		T temp = std::move(DynamicArray[From]);
+		DynamicArray[From] = std::move(DynamicArray[To]);
+		DynamicArray[To] = std::move(temp);
+	}
+
 	T* begin() { return DynamicArray; }
 	T* end() { return DynamicArray + NumItems; }
 	const T* begin() const { return DynamicArray; }

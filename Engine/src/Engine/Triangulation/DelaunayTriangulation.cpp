@@ -1,5 +1,8 @@
 #include "DelaunayTriangulation.h"
+
+#include <algorithm>
 #include "Camera.h"
+#include "MathCore.h"
 
 void DelaunayTriangulation::Triangulate(Array<Vector3D>& Vertices, Array<size_t>& Indicies)
 {
@@ -33,30 +36,12 @@ Triangle DelaunayTriangulation::GetSuperTriangle(const Array<Vector3D>& Vertices
 
 	for(const auto& vertex : Vertices)
 	{
-		if (vertex.X < XRange.X)
-		{
-			XRange.X = vertex.X;
-		}
-		if (vertex.X > XRange.Y)
-		{
-			XRange.Y = vertex.X;
-		}
-		if (vertex.Y < YRange.X)
-		{
-			YRange.X = vertex.Y;
-		}
-		if (vertex.Y > YRange.Y)
-		{
-			YRange.Y = vertex.Y;
-		}
-		if (vertex.Z < ZRange.X)
-		{
-			ZRange.X = vertex.Z;
-		}
-		if (vertex.Z > ZRange.Y)
-		{
-			ZRange.Y = vertex.Z;
-		}
+		XRange.X = std::min(vertex.X, XRange.X);
+		XRange.Y = std::max(vertex.X, XRange.Y);
+		YRange.X = std::min(vertex.Y, YRange.X);
+		YRange.Y = std::max(vertex.Y, YRange.Y);
+		ZRange.X = std::min(vertex.Z, ZRange.X);
+		ZRange.Y = std::max(vertex.Z, ZRange.Y);
 	}
 
 	const float diffX = XRange.Y - XRange.X;
@@ -87,10 +72,24 @@ Circle Triangle::GetMinCircleTrivial(Array<Vector3D>& EdgeRPoints)
 	return { EdgeRPoints[0], EdgeRPoints[1], EdgeRPoints[2] };
 }
 
-Circle Triangle::GetSmallestCircle(Array<Vector3D>& Points, Array<Vector3D>& EdgeRPoints, )
+Circle Triangle::GetSmallestCircle(Array<Vector3D>& Points, Array<Vector3D>& EdgeRPoints, const size_t& Size)
 {
-	if (Points.IsEmpty() || EdgeRPoints.GetSize() == 3) return GetMinCircleTrivial(EdgeRPoints);
+	if (Size == 0 || EdgeRPoints.GetSize() == 3) return GetMinCircleTrivial(EdgeRPoints);
 
+	size_t index = MathCore::RandomRange<int>(0, Size - 1);
+	Vector3D point = Points[index];
+
+	Points.Swap(index, Size - 1);
+
+	Circle c = GetSmallestCircle(Points, EdgeRPoints, Size - 1);
+
+	if (c.IsPointInsideCircle(point)) return c;
+
+	EdgeRPoints.Add(point);
+
+	c = GetSmallestCircle(Points, EdgeRPoints, Size - 1);
+
+	return c;
 
 }
 
@@ -99,10 +98,9 @@ bool Triangle::IsPointInCircumference(const Vector3D& Point)
 	Array<Vector3D> Points = { point1, point2, point3 };
 	Array<Vector3D> EdgeRPoints;
 
+	const Circle c = GetSmallestCircle(Points, EdgeRPoints, Points.GetSize());
 
-
-
-		float circumference =
+	if (c.IsPointInsideCircle(Point)) return true;
 
 	return false;
 }
@@ -117,7 +115,7 @@ Circle::Circle(const Vector3D& P1, const Vector3D& P2)
 
 Circle::Circle(const Vector3D& P1, const Vector3D& P2, const Vector3D& P3)
 {
-	Pos = GetCircleCenter(P2 - P1, P3 - P1);
+	Pos = P1 + GetCircleCenter(P2 - P1, P3 - P1);
 
 	Radius = (Pos - P1).GetLength();
 }
@@ -132,18 +130,15 @@ Vector3D Circle::GetCircleCenter(const Vector3D& AToB, const Vector3D& AToC)
 	return (Vector3D::Dot(AToB, AToB) * Vector3D::Cross(AToC, d) + Vector3D::Dot(AToC, AToC) * Vector3D::Cross(d, AToB)) / (2 * Vector3D::Dot(d, d));
 }
 
-bool Circle::ArePointsInsideCircle(const Array<Vector3D>& Points)
+bool Circle::ArePointsInsideCircle(const Array<Vector3D>& Points) const
 {
-	for (const auto& p : Points)
+	return std::ranges::all_of(Points, [this](const Vector3D& p)
 	{
-		if (IsPointInsideCircle(p)) continue;
-		return false;
-	}
-
-	return true;
+		return IsPointInsideCircle(p);
+	});
 }
 
-bool Circle::IsPointInsideCircle(const Vector3D& Point)
+bool Circle::IsPointInsideCircle(const Vector3D& Point) const
 {
 	if ((Point - Pos).GetSquaredLength() <= (Radius * Radius)) return true;
 
