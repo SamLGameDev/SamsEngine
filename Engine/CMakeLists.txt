@@ -68,6 +68,7 @@ add_library(EngineCore STATIC
     "src/Engine/Objects/Placement/Meshes/Mesh.cpp"
     "src/Engine/Objects/Placement/Debug/WireFrame/WireShapes.cpp"
     "src/Engine/Math/MathCore.cpp"
+    "src/Engine/Triangulation/DelaunayTriangulation.cpp"
     "src/Engine/Physics/Collision/Casters/CollisionCast.cpp"
     "src/Engine/Lighting/BaseLight.cpp"
     "src/Engine/Lighting/LightManager.cpp"
@@ -130,6 +131,8 @@ target_include_directories(EngineCore
                            "$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/src/Engine/Window>"
                            "$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/src/Engine/FileSystem>"
                            "$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/src/Engine/Fracturing>"
+                           "$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/src/Engine/Triangulation>"
+                 
                            "$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/src/Engine/GraphicsAPI>"
                            "$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/src/Engine/GraphicsAPI/VulkanAPI>"
                            "$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/src/Engine/GraphicsAPI/DataBuffers>"
@@ -184,6 +187,7 @@ install(FILES
     src/Engine/Objects/Placement/Meshes/Mesh.h
     src/Engine/Objects/Placement/Debug/WireFrame/WireShapes.h
     src/Engine/Math/MathCore.h
+    src/Engine/Triangulation/DelaunayTriangulation.h
     src/Engine/Physics/Collision/Casters/CollisionCast.h
     src/Engine/Lighting/BaseLight.h
     src/Engine/Lighting/LightManager.h
