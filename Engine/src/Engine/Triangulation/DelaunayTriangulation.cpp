@@ -12,8 +12,22 @@ void DelaunayTriangulation::Triangulate(Array<Vector3D>& Vertices, Array<size_t>
 
 	for (const auto& point : Vertices)
 	{
+		Array<Triangle> NewTriangles;
+
 		for (const auto& triangle : Triangles)
 		{
+
+			if (!triangle.IsPointInCircumference(point)) continue;
+
+			Array<Vector3D> triPoints = { triangle.point1, triangle.point2, triangle.point3 };
+
+			for (size_t i= 0; i < triPoints.GetSize(); i++)
+			{
+				NewTriangles.Add({ point, triPoints[i], triPoints[(i+1) % triPoints.GetSize()] });
+			}
+
+
+
 			//Is Point inside triangle?
 			//Connect to triangle
 			//Remove Super triangle rsulting triangles?? Hwow
@@ -23,8 +37,49 @@ void DelaunayTriangulation::Triangulate(Array<Vector3D>& Vertices, Array<size_t>
 			/// Use the old method? Maps? Better method?}
 			/// //Each triangle point has an associated index? tah twe assign
 		}
+
+		Array<Edge> Edges;
+
+		for (const auto& triangle : NewTriangles)
+		{
+			Array<Edge> triEdges = {{triangle.point1, triangle.point2},
+				{triangle.point2, triangle.point3}, {triangle.point3, triangle.point1}};
+
+			for (const auto& edge : triEdges)
+			{
+				if (Edges.Contains(edge))
+				{
+					continue;
+				}
+				Edges.Add(edge);
+				
+			}
+		}
+
+		for (const auto& edge : Edges)
+		{
+			Triangles.Add({ edge.P1, edge.P2, point });
+		}
 	}
 
+	for (const auto& triangle : Triangles)
+	{
+		if (triangle.point1 == superTriangle.point1 || triangle.point1 == superTriangle.point2 || triangle.point1 == superTriangle.point3) continue;
+		if (triangle.point2 == superTriangle.point1 || triangle.point2 == superTriangle.point2 || triangle.point2 == superTriangle.point3) continue;
+		if (triangle.point3 == superTriangle.point1 || triangle.point3 == superTriangle.point2 || triangle.point3 == superTriangle.point3) continue;
+		size_t index1 = 0;
+		size_t index2 = 0;
+		size_t index3 = 0;
+		for (size_t i = 0; i < Vertices.GetSize(); i++)
+		{
+			if (Vertices[i] == triangle.point1) index1 = i;
+			if (Vertices[i] == triangle.point2) index2 = i;
+			if (Vertices[i] == triangle.point3) index3 = i;
+		}
+		Indicies.Add(index1);
+		Indicies.Add(index2);
+		Indicies.Add(index3);
+	}
 
 }
 
@@ -51,7 +106,7 @@ Triangle DelaunayTriangulation::GetSuperTriangle(const Array<Vector3D>& Vertices
 	return { {XRange.X, YRange.X, ZRange.X}, {XRange.X + (diffX / 2), YRange.Y, ZRange.X + (diffZ /2)}, {XRange.Y, YRange.X, ZRange.Y}};
 }
 
-Circle Triangle::GetMinCircleTrivial(Array<Vector3D>& EdgeRPoints)
+Circle Triangle::GetMinCircleTrivial(Array<Vector3D>& EdgeRPoints) const
 {
 	assert(EdgeRPoints.GetSize() <= 3);
 
@@ -72,7 +127,7 @@ Circle Triangle::GetMinCircleTrivial(Array<Vector3D>& EdgeRPoints)
 	return { EdgeRPoints[0], EdgeRPoints[1], EdgeRPoints[2] };
 }
 
-Circle Triangle::GetSmallestCircle(Array<Vector3D>& Points, Array<Vector3D>& EdgeRPoints, const size_t& Size)
+Circle Triangle::GetSmallestCircle(Array<Vector3D>& Points, Array<Vector3D>& EdgeRPoints, const size_t& Size) const
 {
 	if (Size == 0 || EdgeRPoints.GetSize() == 3) return GetMinCircleTrivial(EdgeRPoints);
 
@@ -93,7 +148,7 @@ Circle Triangle::GetSmallestCircle(Array<Vector3D>& Points, Array<Vector3D>& Edg
 
 }
 
-bool Triangle::IsPointInCircumference(const Vector3D& Point)
+bool Triangle::IsPointInCircumference(const Vector3D& Point) const
 {
 	Array<Vector3D> Points = { point1, point2, point3 };
 	Array<Vector3D> EdgeRPoints;
