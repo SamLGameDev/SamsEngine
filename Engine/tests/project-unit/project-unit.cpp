@@ -481,7 +481,13 @@ TEST(Tringulation, Delauney)
 
 	DelaunayTriangulation triangulator;
 
-	Array<Vector3D> verts = {{0.3, 0.2, 0.3}, {0.7, 0.8, 0.3}, {0.5, 0.1, 0.3}, {0.3, 0.5, 0.3} };
+	Array<Vector2D> verts = {
+		{0.2, 0.3},
+		{0.5, 0.8},
+		{0.9, 0.5},
+		{0.7, 0.1},
+		{0.3, 0.1}
+	};
 	Array<size_t> inds;
 
 	triangulator.Triangulate(verts, inds);

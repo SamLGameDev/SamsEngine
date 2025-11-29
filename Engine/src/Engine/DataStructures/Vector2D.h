@@ -11,6 +11,8 @@ public:
 	constexpr Vector2D()noexcept : X(0), Y(0) {};
 
 	constexpr Vector2D(const float InX, const float InY)noexcept : X(InX), Y(InY) {};
+	constexpr Vector2D(const double InX, const double InY)noexcept : X(InX), Y(InY) {};
+
 
 	constexpr Vector2D(const std::uint32_t InX, const std::uint32_t InY)noexcept : X(InX), Y(InY) {};
 
@@ -55,6 +57,8 @@ public:
 	float GetSquaredLength() const;
 	void Print() const;
 	static float Cross(const Vector2D& a, const Vector2D& b);
+
+	static Vector2D Lerp(const Vector2D& A, const Vector2D& B, const float& t);
 
 	const static Vector2D Zero;
 };

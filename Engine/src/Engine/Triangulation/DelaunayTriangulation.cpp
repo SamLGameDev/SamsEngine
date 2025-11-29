@@ -4,7 +4,7 @@
 #include "Camera.h"
 #include "MathCore.h"
 
-void DelaunayTriangulation::Triangulate(Array<Vector3D>& Vertices, Array<size_t>& Indicies)
+void DelaunayTriangulation::Triangulate(Array<Vector2D>& Vertices, Array<size_t>& Indicies)
 {
 	Triangle superTriangle = GetSuperTriangle(Vertices);
 
@@ -14,52 +14,58 @@ void DelaunayTriangulation::Triangulate(Array<Vector3D>& Vertices, Array<size_t>
 	{
 		Array<Triangle> NewTriangles;
 
+		Array<Edge> Edges;
+
 		for (const auto& triangle : Triangles)
 		{
 
-			if (!triangle.IsPointInCircumference(point)) continue;
-
-			Array<Vector3D> triPoints = { triangle.point1, triangle.point2, triangle.point3 };
-
-			for (size_t i= 0; i < triPoints.GetSize(); i++)
-			{
-				NewTriangles.Add({ point, triPoints[i], triPoints[(i+1) % triPoints.GetSize()] });
+			if (!triangle.IsPointInCircumference(point)) {
+				NewTriangles.Add(triangle);
+				continue;
 			}
-
-
-
-			//Is Point inside triangle?
-			//Connect to triangle
-			//Remove Super triangle rsulting triangles?? Hwow
-			//if triangle contains super triangle point?
-			/// too inefficnet?
-			///Seperate triangulation from Indexing? 
-			/// Use the old method? Maps? Better method?}
-			/// //Each triangle point has an associated index? tah twe assign
+			Edges.Add({ triangle.point1, triangle.point2 });
+			Edges.Add({ triangle.point2, triangle.point3 });
+			Edges.Add({ triangle.point3, triangle.point1});
 		}
 
-		Array<Edge> Edges;
 
-		for (const auto& triangle : NewTriangles)
+		Array<Edge> uniqueEdges;
+
+		for (size_t i = 0; i < Edges.GetSize(); i++)
 		{
-			Array<Edge> triEdges = {{triangle.point1, triangle.point2},
-				{triangle.point2, triangle.point3}, {triangle.point3, triangle.point1}};
+			bool unique = true;
 
-			for (const auto& edge : triEdges)
+			for (size_t j = 0; j < Edges.GetSize(); j++)
 			{
-				if (Edges.Contains(edge))
+				if (i == j) continue;
+
+				if (Edges[i] == Edges[j])
 				{
-					continue;
+					unique = false;
+					break;
 				}
-				Edges.Add(edge);
-				
+			}
+
+			if (unique)
+			{
+				uniqueEdges.Add(Edges[i]);
 			}
 		}
 
-		for (const auto& edge : Edges)
+	/*	for (const auto& edge : Edges)
 		{
-			Triangles.Add({ edge.P1, edge.P2, point });
+			if (uniqueEdges.Contains(edge)) continue;
+			uniqueEdges.Add(edge);
+		}*/
+
+		for (const auto& edge : uniqueEdges)
+		{
+			NewTriangles.Add({ edge.P1, edge.P2, point });
 		}
+
+
+		Triangles = NewTriangles;
+
 	}
 
 	for (const auto& triangle : Triangles)
@@ -83,11 +89,10 @@ void DelaunayTriangulation::Triangulate(Array<Vector3D>& Vertices, Array<size_t>
 
 }
 
-Triangle DelaunayTriangulation::GetSuperTriangle(const Array<Vector3D>& Vertices)
+Triangle DelaunayTriangulation::GetSuperTriangle(const Array<Vector2D>& Vertices)
 {
 	Vector2D XRange = { std::numeric_limits<float>::max(), std::numeric_limits<float>::min() };
 	Vector2D YRange = { std::numeric_limits<float>::max(), std::numeric_limits<float>::min() };
-	Vector2D ZRange = { std::numeric_limits<float>::max(), std::numeric_limits<float>::min() };
 
 	for(const auto& vertex : Vertices)
 	{
@@ -95,22 +100,22 @@ Triangle DelaunayTriangulation::GetSuperTriangle(const Array<Vector3D>& Vertices
 		XRange.Y = std::max(vertex.X, XRange.Y);
 		YRange.X = std::min(vertex.Y, YRange.X);
 		YRange.Y = std::max(vertex.Y, YRange.Y);
-		ZRange.X = std::min(vertex.Z, ZRange.X);
-		ZRange.Y = std::max(vertex.Z, ZRange.Y);
+
 	}
 
-	const float diffX = XRange.Y - XRange.X;
-	const float diffZ = ZRange.Y - ZRange.X;
+	const float diffX = (XRange.Y - XRange.X)* 10;
+	const float diffY = (YRange.Y - YRange.X) * 10;
 
+	
 
-	return { {XRange.X, YRange.X, ZRange.X}, {XRange.X + (diffX / 2), YRange.Y, ZRange.X + (diffZ /2)}, {XRange.Y, YRange.X, ZRange.Y}};
+	return { {XRange.X - diffX, YRange.X - diffY * 3} , {XRange.X - diffX, YRange.Y + diffY}, {XRange.Y + diffX * 3, YRange.Y + diffY} };
 }
 
-Circle Triangle::GetMinCircleTrivial(Array<Vector3D>& EdgeRPoints) const
+Circle Triangle::GetMinCircleTrivial(Array<Vector2D>& EdgeRPoints) const
 {
 	assert(EdgeRPoints.GetSize() <= 3);
 
-	if (EdgeRPoints.IsEmpty()) return { Vector3D::Zero, 0 };
+	if (EdgeRPoints.IsEmpty()) return { Vector2D::Zero, 0 };
 
 	if (EdgeRPoints.GetSize() == 1) return { EdgeRPoints[0], 0 };
 
@@ -127,12 +132,12 @@ Circle Triangle::GetMinCircleTrivial(Array<Vector3D>& EdgeRPoints) const
 	return { EdgeRPoints[0], EdgeRPoints[1], EdgeRPoints[2] };
 }
 
-Circle Triangle::GetSmallestCircle(Array<Vector3D>& Points, Array<Vector3D>& EdgeRPoints, const size_t& Size) const
+Circle Triangle::GetSmallestCircle(Array<Vector2D>& Points, Array<Vector2D> EdgeRPoints, const size_t& Size) const
 {
 	if (Size == 0 || EdgeRPoints.GetSize() == 3) return GetMinCircleTrivial(EdgeRPoints);
 
 	size_t index = MathCore::RandomRange<int>(0, Size - 1);
-	Vector3D point = Points[index];
+	Vector2D point = Points[index];
 
 	Points.Swap(index, Size - 1);
 
@@ -148,19 +153,55 @@ Circle Triangle::GetSmallestCircle(Array<Vector3D>& Points, Array<Vector3D>& Edg
 
 }
 
-bool Triangle::IsPointInCircumference(const Vector3D& Point) const
+bool Triangle::IsPointInCircumference(const Vector2D& Point) const
 {
-	Array<Vector3D> Points = { point1, point2, point3 };
-	Array<Vector3D> EdgeRPoints;
+	//Array<Vector2D> Points = { point1, point2, point3 };
+	//Array<Vector2D> EdgeRPoints;
 
-	const Circle c = GetSmallestCircle(Points, EdgeRPoints, Points.GetSize());
+	//const Circle c = GetSmallestCircle(Points, EdgeRPoints, Points.GetSize());
 
-	if (c.IsPointInsideCircle(Point)) return true;
+	//if (c.IsPointInsideCircle(Point)) return true;
 
-	return false;
+	EquationLine LineAB = EquationLine(point1, point2);
+	EquationLine LineBC = EquationLine(point2, point3);
+
+	Vector2D midpointAB = Vector2D::Lerp(point1, point2, 0.5f);
+	Vector2D midpointBC = Vector2D::Lerp(point2, point3, 0.5f);
+
+	EquationLine perpendicularAB = LineAB.PerpendicularLineAt(midpointAB);
+	EquationLine perpendicularBC = LineBC.PerpendicularLineAt(midpointBC);
+
+	float determinant = perpendicularAB.A * perpendicularBC.B - perpendicularBC.A * perpendicularAB.B;
+	float determinantX = perpendicularAB.C * perpendicularBC.B - perpendicularBC.C * perpendicularAB.B;
+	float determinantY = perpendicularAB.A * perpendicularBC.C - perpendicularBC.A * perpendicularAB.C;
+
+	Vector2D circle = {determinantX / determinant, determinantY / determinant};
+
+	float radius = (point1 - circle).GetLength();
+
+	Circle c = { circle, radius };
+
+	return c.IsPointInsideCircle(Point);
 }
 
-Circle::Circle(const Vector3D& P1, const Vector3D& P2)
+EquationLine::EquationLine(const Vector2D& InA, const Vector2D& InB)
+{
+	Vector2D delta = InB - InA;
+	A = delta.Y;
+	B = -delta.X;
+	C = A * InA.X + B * InA.Y;
+}
+
+EquationLine EquationLine::PerpendicularLineAt(const Vector2D& Pos)
+{
+	EquationLine line;
+	line.A = -B;
+	line.B = A;
+	line.C = line.A * Pos.X + line.B * Pos.Y;
+	return line;
+}
+
+Circle::Circle(const Vector2D& P1, const Vector2D& P2)
 {
 	Pos = (P1 + P2) / 2;
 
@@ -168,34 +209,39 @@ Circle::Circle(const Vector3D& P1, const Vector3D& P2)
 
 }
 
-Circle::Circle(const Vector3D& P1, const Vector3D& P2, const Vector3D& P3)
+Circle::Circle(const Vector2D& P1, const Vector2D& P2, const Vector2D& P3)
 {
 	Pos = P1 + GetCircleCenter(P2 - P1, P3 - P1);
 
 	Radius = (Pos - P1).GetLength();
 }
 
-Vector3D Circle::GetCircleCenter(const Vector3D& AToB, const Vector3D& AToC)
+Vector2D Circle::GetCircleCenter(const Vector2D& AToB, const Vector2D& AToC)
 {
+
+
 	const double b = AToB.GetSquaredLength();
 	const double c = AToC.GetSquaredLength();
 
-	const Vector3D d = Vector3D::Cross(AToB, AToC);
+	const float d = 2 * Vector2D::Cross(AToB, AToC);
 
-	return (Vector3D::Dot(AToB, AToB) * Vector3D::Cross(AToC, d) + Vector3D::Dot(AToC, AToC) * Vector3D::Cross(d, AToB)) / (2 * Vector3D::Dot(d, d));
+	return { (AToC.Y * b - AToB.Y * c) / d, (AToB.X * c - AToC.X * b) / d };
 }
 
-bool Circle::ArePointsInsideCircle(const Array<Vector3D>& Points) const
+bool Circle::ArePointsInsideCircle(const Array<Vector2D>& Points) const
 {
-	return std::ranges::all_of(Points, [this](const Vector3D& p)
+	return std::ranges::all_of(Points, [this](const Vector2D& p)
 	{
 		return IsPointInsideCircle(p);
 	});
 }
 
-bool Circle::IsPointInsideCircle(const Vector3D& Point) const
+bool Circle::IsPointInsideCircle(const Vector2D& Point) const
 {
-	if ((Point - Pos).GetSquaredLength() <= (Radius * Radius)) return true;
+	float length = (Point - Pos).GetSquaredLength();
+	float slength = (Radius * Radius);
+
+	if (length <= slength) return true;
 
 	return false;
 }

@@ -101,3 +101,8 @@ float Vector2D::Cross(const Vector2D& a, const Vector2D& b)
 
 	return cross;
 }
+
+Vector2D Vector2D::Lerp(const Vector2D& A, const Vector2D& B, const float& t)
+{
+	return A + (B - A) * t;
+}
