@@ -479,76 +479,47 @@ TEST(Tringulation, Delauney)
 {
 	CorePaths pathManager = CorePaths();
 
-	DelaunayTriangulation triangulator;
+	//DelaunayTriangulation triangulator;
 
-	Array<Vector2D> verts = {
-		{0.2, 0.3},
-		{0.5, 0.8},
-		{0.9, 0.5},
-		{0.7, 0.1},
-		{0.3, 0.1}
-	};
-	Array<size_t> inds;
+	//Array<Vector2D> verts = {
+	//	{0.2, 0.3},
+	//	{0.5, 0.8},
+	//	{0.9, 0.5},
+	//	{0.7, 0.1},
+	//	{0.3, 0.1}
+	//};
+	//Array<size_t> inds;
 
-	triangulator.Triangulate(verts, inds);
+	//triangulator.Triangulate(verts, inds);
 
-	for (size_t i = 0; i < inds.GetSize(); i++)
-	{
-		std::cout << inds[i] <<", "  << std::endl;
-		verts[inds[i]].Print();
-	}
+	//for (size_t i = 0; i < inds.GetSize(); i++)
+	//{
+	//	std::cout << inds[i] <<", "  << std::endl;
+	//	verts[inds[i]].Print();
+	//}
 
 	ASSERT_EQ(pathManager.Contents.Path, CONTENTS_DIR);
 }
 
-//TEST(Vector2D, PerpendicularBisector)
-//{
-//	RuntimeEngine engine;
-//	engine.Init();
-//
-//	/*Voronoi2D v;
-//	v.FracturePlaneRandom(Vector2D(-1, 1), Vector2D(-1, -1), Vector2D(1, 1), Vector2D(1, -1));*/
-//	const PointLight pointLight = PointLight(
-//	Vector3D(0, 0, 0),
-//	Vector3D(0.0f, 0.0f, 0.0f),
-//	Vector3D(0.0f, 0.0f, 0.0f),
-//	Vector3D(0, 0, 0),
-//	16,
-//	1,
-//	0.09,
-//	0.032);
-//
-//
-//const DirectionalLight dirLight = DirectionalLight(
-//	Vector3D(0.5f, 0.5f, 0.5f),
-//	Vector3D(0.2f, 0.2f, 0.2f),
-//	Vector3D(1, 1, 1),
-//	16);
-//
-//const auto spotLight = SpotLight(
-//	Vector3D(0.5f, 0.5f, 0.5f),
-//	Vector3D(1, 1, 1),
-//	Vector3D(0.5, 0.5, 0.5),
-//	64,
-//	glm::cos(glm::radians(12.5f)),
-//	glm::cos(glm::radians(17.5f)));
-//
-//	Shader shader = Shader("LightShader", "Shaders/");
-//
-//	Model model = Model("Models/Backpack/backpack.obj", shader);
-//
-//	Transform transform = { {0 , 0 , 0}, {1, 1, 1}, {0, 0 ,0} };
-//
-//	model.AddInstance(&transform);
-//
-//	Voronoi vor;
-//	vor.FracturePlaneRandom(model);
-//
-//
-//	while (!RuntimeEngine::ShouldClose())
-//	{
-//		engine.Loop();
-//	}
-//
-//	engine.ShutDown();
-//}
+TEST(Vector2D, PerpendicularBisector)
+{
+
+	Vulkan::RuntimeEngine engine;
+	engine.Init();
+
+
+	Voronoi vorn;
+
+	Model model = Model("/Models/BackPack/backpack.obj", Shader("triangle", "/Shaders/"));
+
+
+	vorn.FracturePlaneRandom(model);
+
+	while (!RuntimeEngine::ShouldClose())
+	{
+		engine.Loop();
+
+	}
+
+	engine.ShutDown();
+}

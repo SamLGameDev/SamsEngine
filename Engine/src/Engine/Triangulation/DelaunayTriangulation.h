@@ -65,11 +65,21 @@ struct Triangle
 	bool IsPointInCircumference(const Vector2D& Point) const;
 };
 
+struct Tetrahedron
+{
+	Vector3D point1;
+	Vector3D point2;
+	Vector3D point3;
+	Vector3D point4;
+
+	bool IsPointInCircumSphere(const Vector3D& Point) const;
+};
+
 class DelaunayTriangulation
 {
 public:
 
-	void Triangulate(Array<Vector2D>& Vertices, Array<size_t>& Indicies);
+	void Triangulate(Array<Vector2D>& Vertices, Array<uint16_t>& Indicies);
 
 private:
 

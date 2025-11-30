@@ -4,7 +4,18 @@
 #include "Camera.h"
 #include "MathCore.h"
 
-void DelaunayTriangulation::Triangulate(Array<Vector2D>& Vertices, Array<size_t>& Indicies)
+bool Tetrahedron::IsPointInCircumSphere(const Vector3D& Point) const
+{
+	Vector3D p1S = point1 * point1;
+	Vector3D p2S = point2 * point2;
+	Vector3D p3S = point3 * point3;
+	Vector3D p4S = point4 * point4;
+	Vector3D PointS = Point * Point;
+
+	//glm::mat4
+}
+
+void DelaunayTriangulation::Triangulate(Array<Vector2D>& Vertices, Array<uint16_t>& Indicies)
 {
 	Triangle superTriangle = GetSuperTriangle(Vertices);
 
@@ -51,12 +62,6 @@ void DelaunayTriangulation::Triangulate(Array<Vector2D>& Vertices, Array<size_t>
 				uniqueEdges.Add(Edges[i]);
 			}
 		}
-
-	/*	for (const auto& edge : Edges)
-		{
-			if (uniqueEdges.Contains(edge)) continue;
-			uniqueEdges.Add(edge);
-		}*/
 
 		for (const auto& edge : uniqueEdges)
 		{

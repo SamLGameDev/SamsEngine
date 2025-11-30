@@ -61,7 +61,7 @@ namespace Vulkan
 		dPoolCreateInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_POOL_CREATE_INFO;
 		dPoolCreateInfo.pPoolSizes = poolSizes.GetFirstRef();
 		dPoolCreateInfo.poolSizeCount = poolSizes.GetSize();
-		dPoolCreateInfo.maxSets = 200;
+		dPoolCreateInfo.maxSets = 2000;
 
 		vkCreateDescriptorPool(*OwningCard->GetLogicalDevice()->GetVulkanLogicalDevice(), &dPoolCreateInfo, nullptr, &DescriptorPool);
 

@@ -5,6 +5,7 @@
 
 #include "Camera.h"
 #include "DataBuffers.h"
+#include "DelaunayTriangulation.h"
 #include "MathCore.h"
 #include "ObjectFactory.h"
 #include "InterfaceRenderer.h"
@@ -19,20 +20,20 @@ void Voronoi::FracturePlaneRandom(Model& InModel)
 
 	//FracturePiece3D::PointShader = Shader("Point3D", "Shaders/");
 
-	//for (size_t i = 0; i < 10; i++)
-	//{
-	//	Vector3D point1 = InModel.ModelTransform.GetRandomPointInBounds();
+	for (size_t i = 0; i < 100; i++)
+	{
+		Vector3D point1 = InModel.ModelTransform.GetRandomPointInBounds();
 
-	//	while (points.Contains(point1))
-	//	{
-	//		point1 = InModel.ModelTransform.GetRandomPointInBounds();
-	//	}
-	//	TestSquare.push_back(DrawWireCube(point1, { 0.5, 0.5, 0.5 }, { 0.1f, 0.1f, 0.1f }, { 0.5, 0.5, 0.5 }));
+		while (points.Contains(point1))
+		{
+			point1 = InModel.ModelTransform.GetRandomPointInBounds();
+		}
+		//TestSquare.push_back(DrawWireCube(point1, { 0.5, 0.5, 0.5 }, { 0.1f, 0.1f, 0.1f }, { 0.5, 0.5, 0.5 }));
 
-	//	points.Add(point1);
-	//}
+		points.Add(point1);
+	}
 
-	points = { {0.1, 0.1, 0.1}, {0.8, 0.4, 0.2}, {0.4, 0.8, 0.6}, {0.6, 0.2, 0.1} };
+	//points = { {0.1, 0.1, 0.1}, {0.8, 0.4, 0.2}, {0.4, 0.8, 0.6}, {0.6, 0.2, 0.1} };
 	//points = { {0.1, 0.1, 0.1}, {0.8, 0.4, 0.2} };
 	for (Vector3D& point : points)
 	{
@@ -294,13 +295,56 @@ FracturePiece3D::FracturePiece3D(Array<Vector3D> cell, Vector3D Point)
 	//	Inds.Add(i % cell.GetSize());
 	//	std::cout << i % cell.GetSize();
 	//}
-	for (size_t i = 1; i + 1 < cell.GetSize(); i++)
+	bool XSame = true;
+	bool YSame = true;
+	bool ZSame = true;
+
+	for (const auto& vert : cell)
 	{
-		Inds.Add(0);
-		Inds.Add(i);
-		Inds.Add(i + 1);
+		if (!MathCore::IsNearlyEqual(vert.X, cell[0].X))
+		{
+			XSame = false;
+		}
+		if (!MathCore::IsNearlyEqual(vert.Y, cell[0].Y))
+		{
+			YSame = false;
+		}
+		if (!MathCore::IsNearlyEqual(vert.Z, cell[0].Z))
+		{
+			ZSame = false;
+		}
 	}
 
+	Array<Vector2D> projected;
+	for (const auto& vert : cell)
+	{
+		if (XSame)
+		{
+			projected.Add({ {vert.Z, vert.Y} });
+		}
+		if (YSame)
+		{
+			projected.Add({ {vert.X, vert.Z} });
+		}
+		if (ZSame)
+		{
+			projected.Add({ {vert.X, vert.Y} });
+		}
+	}
+	
+	if (projected.IsEmpty())
+	{
+		return;
+	}
+
+	DelaunayTriangulation triangulation;
+
+	triangulation.Triangulate(projected, Inds);
+
+	if (Inds.IsEmpty())
+	{
+		return;
+	}
 	//Inds = { 0, 1, 3,  // first Triangle
 	//	1, 2, 3 };
 
