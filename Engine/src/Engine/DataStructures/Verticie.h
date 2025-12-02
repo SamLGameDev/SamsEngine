@@ -38,16 +38,25 @@ public:
 	bool operator==(const Face& other) const {
 		if (other.Vertices.GetSize() == Vertices.GetSize())
 		{
+			Array<Vector3D> set = other.Vertices;
+
 			for (unsigned int i = 0; i < Vertices.GetSize(); i++)
 			{
-				if (Vertices[i] != other.Vertices[i])
+				if (set.Contains(Vertices[i]))
 				{
-					return false;
+					set.Remove(Vertices[i]);
 				}
 			}
-			return true;
+
+			if (set.IsEmpty()) return true;
+
+			return false;
 		}
 
 		return false;
+	}
+
+	bool operator<(const Face& other) const {
+		return Vertices.GetSize() < other.Vertices.GetSize();
 	}
 };

@@ -295,51 +295,10 @@ FracturePiece3D::FracturePiece3D(Array<Vector3D> cell, Vector3D Point)
 	//	Inds.Add(i % cell.GetSize());
 	//	std::cout << i % cell.GetSize();
 	//}
-	bool XSame = true;
-	bool YSame = true;
-	bool ZSame = true;
-
-	for (const auto& vert : cell)
-	{
-		if (!MathCore::IsNearlyEqual(vert.X, cell[0].X))
-		{
-			XSame = false;
-		}
-		if (!MathCore::IsNearlyEqual(vert.Y, cell[0].Y))
-		{
-			YSame = false;
-		}
-		if (!MathCore::IsNearlyEqual(vert.Z, cell[0].Z))
-		{
-			ZSame = false;
-		}
-	}
-
-	Array<Vector2D> projected;
-	for (const auto& vert : cell)
-	{
-		if (XSame)
-		{
-			projected.Add({ {vert.Z, vert.Y} });
-		}
-		if (YSame)
-		{
-			projected.Add({ {vert.X, vert.Z} });
-		}
-		if (ZSame)
-		{
-			projected.Add({ {vert.X, vert.Y} });
-		}
-	}
-	
-	if (projected.IsEmpty())
-	{
-		return;
-	}
 
 	DelaunayTriangulation triangulation;
 
-	triangulation.Triangulate(projected, Inds);
+	triangulation.Triangulate(cell, Inds);
 
 	if (Inds.IsEmpty())
 	{

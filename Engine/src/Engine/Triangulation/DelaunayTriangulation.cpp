@@ -3,16 +3,36 @@
 #include <algorithm>
 #include "Camera.h"
 #include "MathCore.h"
+#include "Matrix.h"
 
 bool Tetrahedron::IsPointInCircumSphere(const Vector3D& Point) const
 {
-	Vector3D p1S = point1 * point1;
-	Vector3D p2S = point2 * point2;
-	Vector3D p3S = point3 * point3;
-	Vector3D p4S = point4 * point4;
-	Vector3D PointS = Point * Point;
 
-	//glm::mat4
+	Matrix<4, 4> sign = {
+		point1.X, point1.Y, point1.Z, 1,
+		point2.X, point2.Y, point2.Z, 1,
+		point3.X, point3.Y, point3.Z,1,
+		point4.X, point4.Y, point4.Z, 1
+	};
+
+	const float signDet = sign.CalculateDeterminant();
+
+	if (signDet == 0) return false;
+
+
+	Matrix<5, 5> mat = 
+	{
+		point1.X, point1.Y, point1.Z, (point1.X * point1.X) + (point1.Y * point1.Y) + (point1.Z * point1.Z),1.0f,
+		point2.X, point2.Y, point2.Z, (point2.X * point2.X) + (point2.Y * point2.Y) + (point2.Z * point2.Z),1.0f,
+		point3.X, point3.Y, point3.Z, (point3.X * point3.X) + (point3.Y * point3.Y) + (point3.Z * point3.Z),1.0f,
+		point4.X, point4.Y, point4.Z, (point4.X * point4.X) + (point4.Y * point4.Y) + (point4.Z * point4.Z),1.0f,
+		Point.X,  Point.Y,   Point.Z,   (Point.X * Point.X) + (Point.Y * Point.Y) + (Point.Z * Point.Z),  1.0f
+		
+	};
+
+	const float deternminate = mat.CalculateDeterminant();
+
+	return signDet > 0 ? deternminate > 0 : deternminate < 0;
 }
 
 void DelaunayTriangulation::Triangulate(Array<Vector2D>& Vertices, Array<uint16_t>& Indicies)
@@ -94,6 +114,84 @@ void DelaunayTriangulation::Triangulate(Array<Vector2D>& Vertices, Array<uint16_
 
 }
 
+void DelaunayTriangulation::Triangulate(Array<Vector3D>& Vertices, Array<uint16_t>& Indicies)
+{
+	Tetrahedron superTetrahedron = GetSuperTetrahedron(Vertices);
+
+	Array<Tetrahedron> tetrahedra = { superTetrahedron };
+
+	for (const auto& point : Vertices)
+	{
+		Array<Tetrahedron> newTetrahedron;
+
+		Array<Face> faces;
+
+		for (const auto& tetrahedron : tetrahedra)
+		{
+
+			if (!tetrahedron.IsPointInCircumSphere(point)) {
+				newTetrahedron.Add(tetrahedron);
+				continue;
+			}
+			for (const auto& face : tetrahedron.faces)
+			{
+				faces.Add(face);
+			}
+		}
+
+		std::map<Face, int> boundaryFaces;
+		for (int i = 0; i < faces.GetSize(); ++i)
+		{
+			if (boundaryFaces.contains(faces[i]))
+			{
+				boundaryFaces.at(faces[i]) += 1;
+			}
+			else
+			{
+				boundaryFaces.emplace(faces[i], 1);
+			}
+		}
+
+		if (boundaryFaces.empty()) {
+			tetrahedra = newTetrahedron; continue;
+		}
+
+		for (const auto& [face, count] : boundaryFaces)
+		{
+			if (count > 1)
+			{
+				boundaryFaces.erase(face);
+				if (boundaryFaces.empty()) break;
+			}
+		}
+
+		for (const auto& [f, count] : boundaryFaces)
+		{
+			newTetrahedron.Add(Tetrahedron(f.Vertices[0], f.Vertices[1], f.Vertices[2], point));
+		}
+		tetrahedra = newTetrahedron;
+	}
+
+	Vertices.Empty();
+
+	for (const auto& tet : tetrahedra)
+	{
+		if (tet.point1 == superTetrahedron.point1 || tet.point1 == superTetrahedron.point2 || tet.point1 == superTetrahedron.point3 || tet.point1 == superTetrahedron.point4) continue;
+		if (tet.point2 == superTetrahedron.point1 || tet.point2 == superTetrahedron.point2 || tet.point2 == superTetrahedron.point3 || tet.point2 == superTetrahedron.point4) continue;
+		if (tet.point3 == superTetrahedron.point1 || tet.point3 == superTetrahedron.point2 || tet.point3 == superTetrahedron.point3 || tet.point3 == superTetrahedron.point4) continue;
+		if (tet.point4 == superTetrahedron.point1 || tet.point4 == superTetrahedron.point2 || tet.point4 == superTetrahedron.point3 || tet.point4 == superTetrahedron.point4) continue;
+
+		for (const auto& face : tet.faces)
+		{
+			for (size_t t= 0; t <face.Vertices.GetSize(); t++)
+			{
+				Vertices.Add(face.Vertices[t]);
+				Indicies.Add(Vertices.GetSize() - 1);
+			}
+		}
+	}
+}
+
 Triangle DelaunayTriangulation::GetSuperTriangle(const Array<Vector2D>& Vertices)
 {
 	Vector2D XRange = { std::numeric_limits<float>::max(), std::numeric_limits<float>::min() };
@@ -114,6 +212,39 @@ Triangle DelaunayTriangulation::GetSuperTriangle(const Array<Vector2D>& Vertices
 	
 
 	return { {XRange.X - diffX, YRange.X - diffY * 3} , {XRange.X - diffX, YRange.Y + diffY}, {XRange.Y + diffX * 3, YRange.Y + diffY} };
+}
+
+Tetrahedron DelaunayTriangulation::GetSuperTetrahedron(const Array<Vector3D>& Vertices)
+{
+	Vector3D min = { std::numeric_limits<float>::max(), std::numeric_limits<float>::max(), std::numeric_limits<float>::max() };
+	Vector3D max = { std::numeric_limits<float>::min(), std::numeric_limits<float>::min(), std::numeric_limits<float>::min() };
+
+	for (const auto& vertex : Vertices)
+	{
+		min.X = std::min(vertex.X,  min.X);
+		max.X = std::max(vertex.X, max.X);
+		min.Y = std::min(vertex.Y, min.Y);
+		max.Y = std::max(vertex.Y, max.Y);
+		min.Z = std::min(vertex.Z, min.Z);
+		max.Z = std::max(vertex.Z, max.Z);
+
+	}
+
+	const Vector3D center = (min + max) / 2.0f;
+
+	Vector3D BoundingBoxLength = max - min;
+
+	const float radius = BoundingBoxLength.GetLength();
+
+	const float safeRadius = radius * 10.0f;
+
+	Vector3D a = center + Vector3D(safeRadius, safeRadius, safeRadius);
+	Vector3D b = center + Vector3D(-safeRadius, -safeRadius, safeRadius);
+	Vector3D c = center + Vector3D(-safeRadius, safeRadius, -safeRadius);
+	Vector3D d = center + Vector3D(safeRadius, -safeRadius, -safeRadius);
+
+
+	return { a, b, c, d};
 }
 
 Circle Triangle::GetMinCircleTrivial(Array<Vector2D>& EdgeRPoints) const

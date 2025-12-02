@@ -72,7 +72,20 @@ struct Tetrahedron
 	Vector3D point3;
 	Vector3D point4;
 
+	Face faces[4];
+
 	bool IsPointInCircumSphere(const Vector3D& Point) const;
+
+	Tetrahedron(const Vector3D& InP1, const Vector3D& InP2, const Vector3D& InP3, const Vector3D& InP4) :
+		point1(InP1), point2(InP2), point3(InP3), point4(InP4)
+	{
+		faces[0] = { {InP1, InP2, InP3} };
+		faces[1] = { {InP1, InP2, InP4} };
+		faces[2] = { {InP1, InP3, InP4} };
+		faces[3] = { {InP2, InP3, InP4} };
+	};
+
+	Tetrahedron() = default;
 };
 
 class DelaunayTriangulation
@@ -80,9 +93,11 @@ class DelaunayTriangulation
 public:
 
 	void Triangulate(Array<Vector2D>& Vertices, Array<uint16_t>& Indicies);
+	void Triangulate(Array<Vector3D>& Vertices, Array<uint16_t>& Indicies);
 
 private:
 
 	Triangle GetSuperTriangle(const Array<Vector2D>& Vertices);
+	Tetrahedron GetSuperTetrahedron(const Array<Vector3D>& Vertices);
 
 };

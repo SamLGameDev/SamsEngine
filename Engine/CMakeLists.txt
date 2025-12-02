@@ -43,6 +43,7 @@ add_library(EngineCore STATIC
     "src/Engine/DataStructures/Vector3D.cpp"
     "src/Engine/DataStructures/BaseDelegate.cpp"
     "src/Engine/DataStructures/Verticie.cpp"
+    "src/Engine/DataStructures/Matrix.cpp"
     "src/Engine/Window/FirstWindow.cpp"
     "src/Engine/Window/Window.cpp"
     "src/Engine/Window/VulkanWindow.cpp"
@@ -161,6 +162,7 @@ install(FILES
     src/Engine/DataStructures/Vector2D.h
     src/Engine/DataStructures/Vector3D.h
     src/Engine/DataStructures/BaseDelegate.h
+    src/Engine/DataStructures/Matrix.h
     src/Engine/DataStructures/Verticie.h
     src/Engine/Window/FirstWindow.h
     src/Engine/Window/Window.h

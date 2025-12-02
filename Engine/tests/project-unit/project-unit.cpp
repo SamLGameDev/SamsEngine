@@ -498,7 +498,15 @@ TEST(Tringulation, Delauney)
 	//	verts[inds[i]].Print();
 	//}
 
-	ASSERT_EQ(pathManager.Contents.Path, CONTENTS_DIR);
+	Tetrahedron tet = { {1, 1, 1}, {-1, -1, 1}, {-1, 1, -1}, {1, -1, -1} };
+	
+
+
+	ASSERT_EQ(tet.IsPointInCircumSphere({ 0.1, 0, 0 }), true);
+
+	ASSERT_EQ(tet.IsPointInCircumSphere({ 5, 0, 0 }), false);
+
+	ASSERT_EQ(tet.IsPointInCircumSphere({ 0.9, 1, 1 }), true);
 }
 
 TEST(Vector2D, PerpendicularBisector)

@@ -1,0 +1,70 @@
+#pragma once
+#include <cmath>
+
+template <size_t N>
+struct Row
+{
+public:
+	float RowValues[N];
+};
+
+template <size_t RowNum, size_t Collum>
+struct Matrix
+{
+public:
+
+	Row<Collum> Rows[RowNum];
+
+	float CalculateDeterminant();
+};
+
+template <size_t Row, size_t Collum>
+float Matrix<Row, Collum>::CalculateDeterminant()
+{
+	float determinate = 1.f;
+	std::int8_t sign = 1;
+
+	for (size_t i = 0; i < Row; i++)
+	{
+		float maxVal = std::fabs(Rows[i].RowValues[i]);
+		size_t pivot = i;
+
+		for (size_t j = i + 1; j < Row; j++)
+		{
+			if (std::fabs(Rows[j].RowValues[i]) > maxVal)
+			{
+				maxVal = std::fabs(Rows[j].RowValues[i]);
+				pivot = j;
+			}
+		}
+		
+		if (pivot != i)
+		{
+			std::swap(Rows[i], Rows[pivot]);
+			sign = -sign;
+		}
+
+		if (std::fabs(Rows[i].RowValues[i]) < 1e-6)
+		{
+			return 0.0f;
+		}
+
+		for (size_t j = i + 1; j < Row; j++)
+		{
+			const float factor = Rows[j].RowValues[i] / Rows[i].RowValues[i];
+			for (size_t k = i + 1; k < Collum; k++)
+			{
+				Rows[j].RowValues[k] -= factor * Rows[i].RowValues[k];
+			}
+		}
+
+	}
+
+	for (size_t i = 0; i < Row; i++)
+	{
+		determinate *= Rows[i].RowValues[i];
+	}
+
+	return determinate * sign;
+
+}
