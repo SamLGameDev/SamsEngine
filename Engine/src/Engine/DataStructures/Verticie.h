@@ -57,6 +57,23 @@ public:
 	}
 
 	bool operator<(const Face& other) const {
-		return Vertices.GetSize() < other.Vertices.GetSize();
+		if (other.Vertices.GetSize() == Vertices.GetSize())
+		{
+			Array<Vector3D> set = other.Vertices;
+
+			for (unsigned int i = 0; i < Vertices.GetSize(); i++)
+			{
+				if (set.Contains(Vertices[i]))
+				{
+					set.Remove(Vertices[i]);
+				}
+			}
+
+			if (set.IsEmpty()) return false;
+
+			return true;
+		}
+
+		return true; 
 	}
 };

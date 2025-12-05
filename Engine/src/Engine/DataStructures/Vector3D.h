@@ -4,30 +4,32 @@ struct Vector3D
 {
 public:
 
-	Vector3D() : X(0), Y(0), Z(0){};
+	constexpr Vector3D() noexcept : X(0), Y(0), Z(0){};
 
-	Vector3D(float InX, float InY, float InZ);
+	//constexpr Vector3D(const float InX, const float InY, const float InZ) noexcept : X(InX), Y(InY), Z(InZ) {};
 
-	Vector3D(const Vector3D& CopyVec)
-	{
-		Copy(CopyVec);
-	}
+	constexpr Vector3D(const double InX, const double InY, const double InZ) noexcept : X(InX), Y(InY), Z(InZ){};
 
-	Vector3D& operator=(const Vector3D& CopyVec)
-	{
-		if (this != &CopyVec)
-		{
-			Copy(CopyVec);
-		}
-		return *this;
-	}
+	////Vector3D(const Vector3D& CopyVec)
+	////{
+	////	Copy(CopyVec);
+	////}
 
-	void Copy(const Vector3D& CopyVec)
-	{
-		X = CopyVec.X;
-		Y = CopyVec.Y;
-		Z = CopyVec.Z;
-	}
+	////Vector3D& operator=(const Vector3D& CopyVec)
+	////{
+	////	if (this != &CopyVec)
+	////	{
+	////		Copy(CopyVec);
+	////	}
+	////	return *this;
+	////}
+
+	////void Copy(const Vector3D& CopyVec)
+	////{
+	////	X = CopyVec.X;
+	////	Y = CopyVec.Y;
+	////	Z = CopyVec.Z;
+	////}
 
 	[[nodiscard]] bool operator==(const Vector3D& other) const {
 		return	X == other.X && Y == other.Y && Z == other.Z;

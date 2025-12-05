@@ -129,7 +129,7 @@ void DelaunayTriangulation::Triangulate(Array<Vector3D>& Vertices, Array<uint16_
 		for (const auto& tetrahedron : tetrahedra)
 		{
 
-			if (!tetrahedron.IsPointInCircumSphere(point)) {
+ 			if (!tetrahedron.IsPointInCircumSphere(point)) {
 				newTetrahedron.Add(tetrahedron);
 				continue;
 			}
@@ -139,33 +139,30 @@ void DelaunayTriangulation::Triangulate(Array<Vector3D>& Vertices, Array<uint16_
 			}
 		}
 
-		std::map<Face, int> boundaryFaces;
+		Array<Face> boundaryFaces;
+		Array<Face> appearedFaces;
 		for (int i = 0; i < faces.GetSize(); ++i)
 		{
-			if (boundaryFaces.contains(faces[i]))
+			if (!appearedFaces.Contains(faces[i]))
 			{
-				boundaryFaces.at(faces[i]) += 1;
-			}
-			else
-			{
-				boundaryFaces.emplace(faces[i], 1);
+				if (boundaryFaces.Contains(faces[i]))
+				{
+					boundaryFaces.Remove(faces[i]);
+					appearedFaces.Add(faces[i]);
+				}
+				else
+				{
+					boundaryFaces.Add(faces[i]);
+				}
 			}
 		}
 
-		if (boundaryFaces.empty()) {
+		if (boundaryFaces.IsEmpty()) {
 			tetrahedra = newTetrahedron; continue;
 		}
 
-		for (const auto& [face, count] : boundaryFaces)
-		{
-			if (count > 1)
-			{
-				boundaryFaces.erase(face);
-				if (boundaryFaces.empty()) break;
-			}
-		}
 
-		for (const auto& [f, count] : boundaryFaces)
+		for (const auto& f: boundaryFaces)
 		{
 			newTetrahedron.Add(Tetrahedron(f.Vertices[0], f.Vertices[1], f.Vertices[2], point));
 		}
@@ -176,17 +173,60 @@ void DelaunayTriangulation::Triangulate(Array<Vector3D>& Vertices, Array<uint16_
 
 	for (const auto& tet : tetrahedra)
 	{
-		if (tet.point1 == superTetrahedron.point1 || tet.point1 == superTetrahedron.point2 || tet.point1 == superTetrahedron.point3 || tet.point1 == superTetrahedron.point4) continue;
-		if (tet.point2 == superTetrahedron.point1 || tet.point2 == superTetrahedron.point2 || tet.point2 == superTetrahedron.point3 || tet.point2 == superTetrahedron.point4) continue;
-		if (tet.point3 == superTetrahedron.point1 || tet.point3 == superTetrahedron.point2 || tet.point3 == superTetrahedron.point3 || tet.point3 == superTetrahedron.point4) continue;
-		if (tet.point4 == superTetrahedron.point1 || tet.point4 == superTetrahedron.point2 || tet.point4 == superTetrahedron.point3 || tet.point4 == superTetrahedron.point4) continue;
+		//if (tet.point1 == superTetrahedron.point1 || tet.point1 == superTetrahedron.point2 || tet.point1 == superTetrahedron.point3 || tet.point1 == superTetrahedron.point4) continue;
+		//if (tet.point2 == superTetrahedron.point1 || tet.point2 == superTetrahedron.point2 || tet.point2 == superTetrahedron.point3 || tet.point2 == superTetrahedron.point4) continue;
+		//if (tet.point3 == superTetrahedron.point1 || tet.point3 == superTetrahedron.point2 || tet.point3 == superTetrahedron.point3 || tet.point3 == superTetrahedron.point4) continue;
+		//if (tet.point4 == superTetrahedron.point1 || tet.point4 == superTetrahedron.point2 || tet.point4 == superTetrahedron.point3 || tet.point4 == superTetrahedron.point4) continue;
 
 		for (const auto& face : tet.faces)
 		{
-			for (size_t t= 0; t <face.Vertices.GetSize(); t++)
+			bool skipFace = false;
+
+			for (const auto& verts : face.Vertices)
 			{
-				Vertices.Add(face.Vertices[t]);
-				Indicies.Add(Vertices.GetSize() - 1);
+				if (verts == superTetrahedron.point1 || verts == superTetrahedron.point2 || verts == superTetrahedron.point3 || verts == superTetrahedron.point4)
+				{
+					skipFace = true;
+					break;
+				}
+			}
+			
+			if (skipFace) continue;
+
+			for (size_t t= 1; t < 3; t++)
+			{
+
+				unsigned int index = 0;
+
+				if (Vertices.Contains(face.Vertices[0], index))
+				{
+					Indicies.Add(index);
+				}
+				else
+				{
+
+					Vertices.Add(face.Vertices[t]);
+					Indicies.Add(Vertices.GetSize() - 1);
+				}
+
+				if (Vertices.Contains(face.Vertices[t], index))
+				{
+					Indicies.Add(index);
+				}
+				else
+				{
+					Vertices.Add(face.Vertices[t]);
+					Indicies.Add(Vertices.GetSize() - 1);
+				}
+				if (Vertices.Contains(face.Vertices[(t + 1) % 3], index))
+				{
+					Indicies.Add(index);
+				}
+				else
+				{
+					Vertices.Add(face.Vertices[(t + 1) % 3]);
+					Indicies.Add(Vertices.GetSize() - 1);
+				}
 			}
 		}
 	}
@@ -217,7 +257,7 @@ Triangle DelaunayTriangulation::GetSuperTriangle(const Array<Vector2D>& Vertices
 Tetrahedron DelaunayTriangulation::GetSuperTetrahedron(const Array<Vector3D>& Vertices)
 {
 	Vector3D min = { std::numeric_limits<float>::max(), std::numeric_limits<float>::max(), std::numeric_limits<float>::max() };
-	Vector3D max = { std::numeric_limits<float>::min(), std::numeric_limits<float>::min(), std::numeric_limits<float>::min() };
+	Vector3D max = { std::numeric_limits<float>::lowest(), std::numeric_limits<float>::lowest(), std::numeric_limits<float>::lowest() };
 
 	for (const auto& vertex : Vertices)
 	{
@@ -236,12 +276,14 @@ Tetrahedron DelaunayTriangulation::GetSuperTetrahedron(const Array<Vector3D>& Ve
 
 	const float radius = BoundingBoxLength.GetLength();
 
-	const float safeRadius = radius * 10.0f;
+	float pad = std::max({ BoundingBoxLength.X, BoundingBoxLength.Y, BoundingBoxLength.Z });
 
-	Vector3D a = center + Vector3D(safeRadius, safeRadius, safeRadius);
-	Vector3D b = center + Vector3D(-safeRadius, -safeRadius, safeRadius);
-	Vector3D c = center + Vector3D(-safeRadius, safeRadius, -safeRadius);
-	Vector3D d = center + Vector3D(safeRadius, -safeRadius, -safeRadius);
+	const float safeRadius = pad * 10.0f;
+
+	Vector3D a = center + Vector3D(safeRadius * 2, safeRadius, safeRadius);
+	Vector3D b = center + Vector3D(-(safeRadius * 2), -safeRadius, safeRadius);
+	Vector3D c = center + Vector3D(-(2 *safeRadius), safeRadius, -safeRadius);
+	Vector3D d = center + Vector3D(2 *safeRadius, -safeRadius, -safeRadius);
 
 
 	return { a, b, c, d};

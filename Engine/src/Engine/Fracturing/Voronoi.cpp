@@ -10,7 +10,18 @@
 #include "ObjectFactory.h"
 #include "InterfaceRenderer.h"
 #include "glm/gtc/type_ptr.hpp"
+#include <CGAL/Exact_predicates_inexact_constructions_kernel.h>
+#include <CGAL/Delaunay_triangulation_3.h>
+#include <CGAL/Triangulation_vertex_base_with_info_3.h>
 
+typedef CGAL::Exact_predicates_inexact_constructions_kernel K;
+
+// Define a vertex base with an "info" field
+typedef CGAL::Triangulation_vertex_base_with_info_3<size_t, K> Vb;
+typedef CGAL::Triangulation_cell_base_3<K> Cb;
+typedef CGAL::Triangulation_data_structure_3<Vb, Cb> Tds;
+typedef CGAL::Delaunay_triangulation_3<K, Tds> Delaunay3;
+typedef K::Point_3 Point3;
 void Voronoi::FracturePlaneRandom(Model& InModel)
 {
 

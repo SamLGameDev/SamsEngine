@@ -12,12 +12,6 @@ Vector3D const Vector3D::Zero = Vector3D(0, 0, 0);
 Vector3D const Vector3D::One = Vector3D(1, 1, 1);
 
 
-Vector3D::Vector3D(const float InX, const float InY, const float InZ)
-{
-	X = InX;
-	Y = InY;
-	Z = InZ;
-}
 
 Vector3D Vector3D::Normalised() const
 {

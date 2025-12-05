@@ -500,6 +500,24 @@ TEST(Tringulation, Delauney)
 
 	Tetrahedron tet = { {1, 1, 1}, {-1, -1, 1}, {-1, 1, -1}, {1, -1, -1} };
 	
+	DelaunayTriangulation tri;
+
+	Array<Vector3D> verts= {
+	{0,0,0}, // 0
+	{1,0,0}, // 1
+	{0,1,0}, // 2
+	{0,0,1}, // 3
+	{1,1,1}  // 4
+	};
+
+	Array<uint16_t> inds;
+
+	tri.Triangulate(verts, inds);
+	
+	for (const auto& index : inds)
+	{
+		std::cout << index << ", ";
+	}
 
 
 	ASSERT_EQ(tet.IsPointInCircumSphere({ 0.1, 0, 0 }), true);
