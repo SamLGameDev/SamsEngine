@@ -29,13 +29,6 @@ public:
 
 	Transform(const Vector3D& InPosition, const Vector3D& InScale, const Vector3D& InRotation);
 
-	Transform(const Transform& Copy)
-	{
-		Position = Copy.Position;
-		Scale = Copy.Scale;
-		Rotation = Copy.Rotation;
-	}
-
 	/**
 	 * Calculates the bounds of the object based on its position, rotation and scale
 	 * Bounds are the center, and 4 corners of the object to make a cube

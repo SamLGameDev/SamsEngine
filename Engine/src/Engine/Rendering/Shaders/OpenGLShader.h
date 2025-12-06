@@ -119,7 +119,7 @@ namespace OpenGL
 			return ID;
 		}
 
-		[[nodiscard]] LinkedList<Texture> GetTextures() const
+		[[nodiscard]] Array<Texture> GetTextures() const
 		{
 			return Textures;
 		}
@@ -208,7 +208,7 @@ namespace OpenGL
 
 		unsigned int ID;
 
-		LinkedList<Texture> Textures;
+		Array<Texture> Textures;
 
 		CubeMap Map;
 	};

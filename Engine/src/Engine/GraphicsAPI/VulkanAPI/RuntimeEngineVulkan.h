@@ -29,7 +29,5 @@ namespace Vulkan
 
 		double TimeLastFrame;
 
-		GLsync Gsync;
-
 	};
 }

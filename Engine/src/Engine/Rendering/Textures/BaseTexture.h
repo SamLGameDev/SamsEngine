@@ -25,6 +25,13 @@ public:
 	BaseTexture() = default;
 	virtual ~BaseTexture(){};
 
+	BaseTexture(const BaseTexture& Other) = default;
+
+	BaseTexture(BaseTexture&& Other) noexcept = default;
+
+	BaseTexture& operator=(const BaseTexture& Other) = default;
+	BaseTexture& operator=(BaseTexture&& Other) noexcept = default;
+
 	/**
 	 * loads the texture at that location. Srgb for diffuse, rgb for everything else
 	 * @param InTextureLocation starts from where the main file is located. i.e. Contents/Textures/texture

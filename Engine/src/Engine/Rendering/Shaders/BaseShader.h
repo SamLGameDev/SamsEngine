@@ -23,25 +23,9 @@ public:
 	 */
 	BaseShader(const std::string_view& InName, const std::string_view& InStorageLocation){};
 
-	BaseShader(const BaseShader& Other)
-	{
-		StorageLocation = Other.GetRawStorageLocation();
-		Name = Other.GetName();
-		ID = Other.GetID();
-		Textures = Other.Textures;
-		Map = Other.Map;
-	}
+	BaseShader(const BaseShader& Other) = default;
 
-	BaseShader& operator=(const BaseShader& Other) {
-		if (this != &Other) { // prevent self-assignment
-			StorageLocation = Other.StorageLocation;
-			Name = Other.Name;
-			ID = Other.ID;
-			Textures = Other.Textures;
-			Map = Other.Map;
-		}
-		return *this;
-	}
+	BaseShader& operator=(const BaseShader& Other) = default;
 
 
 	/**
@@ -98,28 +82,15 @@ public:
 	/**
 	 * @return The folder containing the shaders
 	 */
-	virtual [[nodiscard]] std::string GetRawStorageLocation() const
-	{
-		return StorageLocation;
-	}
+	virtual [[nodiscard]] std::string GetRawStorageLocation() const = 0;
 
-	virtual [[nodiscard]] std::string GetName() const
-	{
-		return Name;
-	}
-
+	virtual [[nodiscard]] std::string GetName() const = 0;
 	/**
 	 * @return The assigned buffer of the shader program
 	 */
-	virtual [[nodiscard]] unsigned int GetID() const
-	{
-		return ID;
-	}
+	virtual [[nodiscard]] unsigned int GetID() const = 0;
 
-	virtual [[nodiscard]] LinkedList<Texture> GetTextures() const
-	{
-		return Textures;
-	}
+	virtual [[nodiscard]] LinkedList<Texture> GetTextures() const = 0;
 
 	virtual void AddCubeMap(const CubeMap& InMap) = 0;
 
@@ -183,13 +154,4 @@ private:
 
 	virtual [[nodiscard]] std::string ReadFileContents(const std::string_view& Location) const = 0;
 
-	std::string StorageLocation;
-
-	std::string Name;
-
-	unsigned int ID;
-
-	LinkedList<Texture> Textures;
-
-	CubeMap Map;
 };

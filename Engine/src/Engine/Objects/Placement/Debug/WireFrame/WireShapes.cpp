@@ -1,3 +1,8 @@
+// DO NOT MARK except lines 139 - 190 as marked by the DO MARK comments.
+//This is because it has been submitted for my dissertation. Link to Original: https://github.falmouth.ac.uk/GA-Undergrad-Student-Work-25-26/Dissertation-SL295211.git
+
+
+
 #include "WireShapes.h"
 #include "Array.h"
 #include "Shader.h"
@@ -131,7 +136,7 @@ std::unique_ptr<WireObject> DrawWireCube(const Vector3D& Center, const Vector3D&
 		3, 7, 6,
 	};
 
-	//Faces aren't used currently, maybe something fracturing will use, when i next work on it
+	//DO MARK
 
 	//Top right, bottom right, bottom left, top left
 	Face face;
@@ -181,6 +186,8 @@ std::unique_ptr<WireObject> DrawWireCube(const Vector3D& Center, const Vector3D&
 	face.Vertices.Add(object->Vertices[2].Position);
 	face.Vertices.Add(object->Vertices[6].Position);
 	object->Faces.Add(face);
+
+	//END OF DO MARK
 
 	object->Initialise();
 

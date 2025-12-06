@@ -106,27 +106,7 @@ namespace Vulkan
 			return ERROR;
 		}
 
-		/*try
-		{
-			renderer = CreateObjectPtr<Renderer>(inputManager);
-
-		}
-		catch (const std::exception& error)
-		{
-			std::cout << error.what() << "\n";
-			return ERROR;
-		}
-
-		try
-		{
-			lightManager = new LightManager();
-
-		}
-		catch (const std::exception& error)
-		{
-			std::cout << error.what() << "\n";
-			return ERROR;
-		}*/
+	
 
 		return SUCCEEDED;
 	}
@@ -134,56 +114,6 @@ namespace Vulkan
 	ErrorCodes SubsystemInitialiser::ShutDown()
 	{
 
-	///*	try
-	//	{
-	//		delete lightManager;
-
-	//	}
-	//	catch (const std::exception& error)
-	//	{
-	//		std::cout << error.what() << "\n";
-	//		return ERROR;
-	//	}
-
-	//	try
-	//	{
-	//		delete renderer;
-	//	}
-	//	catch (const std::exception& error)
-	//	{
-	//		std::cout << error.what() << "\n";
-	//		return ERROR;
-	//	}
-
-	//	try
-	//	{
-	//		delete camera;
-	//	}
-	//	catch (const std::exception& error)
-	//	{
-	//		std::cout << error.what() << "\n";
-	//		return ERROR;
-	//	}
-
-	//	try
-	//	{
-	//		delete world;
-	//	}
-	//	catch (const std::exception& error)
-	//	{
-	//		std::cout << error.what() << "\n";
-	//		return ERROR;
-	//	}
-
-	//	try
-	//	{
-	//		delete inputManager;
-	//	}
-	//	catch (const std::exception& error)
-	//	{
-	//		std::cout << error.what() << "\n";
-	//		return ERROR;
-	//	}*/
 
 		 delete ::DataBuffers::APIBufferInstance;
 

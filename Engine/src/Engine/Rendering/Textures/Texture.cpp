@@ -4,7 +4,7 @@
 #include <iostream>
 #include "CorePaths.h"
 
-std::function<BaseTexture* (const std::string_view& InTextureLocation, const TextureType& InType)> Texture::TextureCreationFunc;
+std::function<std::shared_ptr<BaseTexture> (const std::string_view& InTextureLocation, const TextureType& InType)> Texture::TextureCreationFunc;
 
 const std::map<TextureType, GLint> Texture::ColorChannel =
 {
@@ -36,8 +36,6 @@ Texture::~Texture()
 	{
 		return;
 	}
-
-	delete RealTexture;
 }
 
 void Texture::GenerateByChannel(const std::uint8_t& nrChannels, const unsigned int& width, const unsigned int& height, const unsigned char* data) const

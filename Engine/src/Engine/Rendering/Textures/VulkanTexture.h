@@ -2,6 +2,7 @@
 #include <string>
 #include <map>
 #include <cstdint>
+#include <memory>
 #include <vulkan/vulkan_core.h>
 
 #include "glad/glad.h"
@@ -10,7 +11,7 @@
 namespace Vulkan {
 
 
-	class Texture : BaseTexture
+	class Texture : public BaseTexture
 	{
 	public:
 
@@ -28,17 +29,53 @@ namespace Vulkan {
 		 */
 		void GenerateByChannel(const std::uint8_t& nrChannels, const unsigned int& width, const unsigned int& height, const unsigned char* data) const;
 
+		void Copy(const Texture& Other)
+		{
+			TextureLocation = Other.GetTextureLocation();
+			ID = Other.GetID();
+			Type = Other.Type;
+		}
+
 		inline Texture(const Texture& Other) : BaseTexture(Other)
 		{
 			//only need to copy the location, ID, and type, as its already beem generated and bound at creation
 
-			TextureLocation = Other.GetTextureLocation();
-			ID = Other.GetID();
-			Type = Other.Type;
+			Copy(Other);
 			
 		}
 
-		static BaseTexture* CreateVulkanTexture(const std::string_view& InTextureLocation, const TextureType& InType);
+		void Move(Texture& Other)
+		{
+			TextureLocation = std::move(Other.TextureLocation);
+			Type = Other.Type;
+			ID = Other.ID;
+			Other.ID = 0;
+		}
+
+		Texture(Texture&& Other) noexcept
+		{
+			Move(Other);
+		}
+
+		Texture& operator=(const Texture& Other)
+		{
+			if (this != &Other)
+			{
+				Copy(Other);
+			}
+			return *this;
+		}
+
+		Texture& operator=(Texture&& Other) noexcept
+		{
+			if (this != &Other) 
+			{
+				Move(Other);
+			}
+			return *this;
+		}
+
+		static std::shared_ptr<BaseTexture> CreateVulkanTexture(const std::string_view& InTextureLocation, const TextureType& InType);
 
 		/**
 		 * @return The buffer ID assigned to this texture

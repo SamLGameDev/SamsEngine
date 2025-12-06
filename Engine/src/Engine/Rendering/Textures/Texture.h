@@ -4,6 +4,7 @@
 #include <cstdint>
 #include "BaseTexture.h"
 #include <functional>
+#include <memory>
 
 #include "glad/glad.h"
 
@@ -27,14 +28,51 @@ public:
 	 */
 	void GenerateByChannel(const std::uint8_t& nrChannels, const unsigned int& width, const unsigned int& height, const unsigned char* data) const;
 
-	inline Texture(const Texture& Other)
+	void Copy(const Texture& Other)
 	{
-		//only need to copy the location, ID, and type, as its already beem generated and bound at creation
-
 		TextureLocation = Other.GetTextureLocation();
 		ID = Other.GetID();
 		RealTexture = Other.RealTexture;
 		Type = Other.Type;
+	}
+
+	Texture(const Texture& Other)
+	{
+		//only need to copy the location, ID, and type, as its already beem generated and bound at creation
+
+		Copy(Other);
+	}
+
+	void Move(Texture& Other)
+	{
+		TextureLocation = std::move(Other.TextureLocation);
+		ID = Other.ID;
+		RealTexture = Other.RealTexture;
+		Type = Other.Type;
+		Other.ID = 0;
+		Other.RealTexture = nullptr;
+	}
+
+	Texture(Texture&& Other) noexcept
+	{
+		Move(Other);
+	}
+
+	Texture& operator=(Texture&& Other) noexcept
+	{
+		if (this != &Other)
+		{
+			Move(Other);
+		}
+		return *this;
+	}
+
+	Texture& operator=(const Texture& Other) {
+		if (this != &Other) 
+		{
+			Copy(Other);
+		}
+		return *this;
 	}
 
 	/**
@@ -65,8 +103,8 @@ public:
 	{
 		return Type;
 	}
-	static std::function<BaseTexture* (const std::string_view& InTextureLocation, const TextureType& InType)> TextureCreationFunc;
-	BaseTexture* RealTexture;
+	static std::function<std::shared_ptr<BaseTexture> (const std::string_view& InTextureLocation, const TextureType& InType)> TextureCreationFunc;
+	std::shared_ptr<BaseTexture> RealTexture;
 
 private:
 

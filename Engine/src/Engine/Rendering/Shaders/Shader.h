@@ -48,6 +48,30 @@ public:
 		return *this;
 	}
 
+	void Move(Shader& Other)
+	{
+		StorageLocation = std::move(Other.StorageLocation);
+		Name = std::move(Other.Name);
+		ID = Other.ID;
+		Textures = Other.Textures;
+		Map = std::move(Other.Map);
+		RealShader = std::move(Other.RealShader);
+		Other.ID = 0;
+	}
+
+	Shader(Shader&& Other) noexcept
+	{
+		Move(Other);
+	}
+
+	Shader& operator=(Shader&& Other) noexcept
+	{
+		if (this != &Other) {
+			Move(Other);
+		}
+		return *this;
+	}
+
 	/**
 	 * Activates the shader to be applied to draw calls
 	 */
@@ -121,7 +145,7 @@ public:
 		return ID;
 	}
 
-	[[nodiscard]] LinkedList<Texture> GetTextures() const
+	[[nodiscard]] Array<Texture> GetTextures() const
 	{
 		return Textures;
 	}
@@ -212,8 +236,7 @@ private:
 	std::string Name;
 
 	unsigned int ID;
-
-	LinkedList<Texture> Textures;
+	Array<Texture> Textures;
 
 	CubeMap Map;
 

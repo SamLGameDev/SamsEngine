@@ -86,9 +86,9 @@ namespace Vulkan {
 		}
 	}
 
-	BaseTexture* Texture::CreateVulkanTexture(const std::string_view& InTextureLocation, const TextureType& InType)
+	std::shared_ptr<BaseTexture> Texture::CreateVulkanTexture(const std::string_view& InTextureLocation, const TextureType& InType)
 	{
-		return new Texture(InTextureLocation, InType);
+		return std::make_shared<Vulkan::Texture>(InTextureLocation, InType);
 	}
 
 	std::string Texture::GetFullTexturePath() const

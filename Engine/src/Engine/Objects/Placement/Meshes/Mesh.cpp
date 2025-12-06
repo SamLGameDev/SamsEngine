@@ -13,11 +13,6 @@ Mesh::Mesh()
 {
 }
 
-Mesh::Mesh(const Array<Vertex>& InVertices, const Array<uint16_t>& InIndices, Shader& InShader)
-{
-
-}
-
 
 Mesh::~Mesh()
 {	
@@ -73,20 +68,6 @@ void Mesh::Draw(const Transform* ModelTransform, ::Shader* InShader) const
 	SetShaderVariables(ModelTransform, InShader);
 
 	::Renderer::Draw(Indices.GetSize());
-
-	//InShader->ApplyTextures();
-	//glActiveTexture(GL_TEXTURE0);
-
-
-	//TODO find a way to separate this from model
-	//used for reflection shader
-	//const glm::vec3 camPos = Camera::GetActiveCamera()->GetPos();
-	//InShader->SetVec3("cameraPos", Vector3D(camPos.x, camPos.y, camPos.z));
-
-	//glBindVertexArray(VAO);
-	//glDrawElementsInstanced(GL_TRIANGLES, static_cast<GLsizei>(Indices.GetSize()), GL_UNSIGNED_INT, nullptr, *Instances);
-	//glBindVertexArray(0);
-	//glUseProgram(0);
 }
 
 void Mesh::SetShaderVariables(const Transform* ModelTransform, Shader* InShader)
@@ -105,17 +86,6 @@ void Mesh::SetShaderVariables(const Transform* ModelTransform, Shader* InShader)
 	InShader->SetUniformBuffer(1, &ubo, sizeof(PerInstanceTransforms));
 }
 
-void Mesh::SetLightVariables(const glm::mat4& view, const Shader* InShader)
-{
-	LightManager::GetLightManager()->ImplementLights(InShader);
-}
-
-void Mesh::SetTransformationVariables(const glm::mat4& model, const glm::mat3& normalModel, const Shader* InShader)
-{
-	InShader->SetMatrix4fv("Model", glm::value_ptr(model));
-
-	InShader->SetMatrix3fv("NormalModel", glm::value_ptr(normalModel));
-}
 
 void Mesh::RegenerateMesh()
 {

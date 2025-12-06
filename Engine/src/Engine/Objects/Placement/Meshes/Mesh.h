@@ -6,13 +6,12 @@
 #include "Verticie.h"
 #include "Shader.h"
 #include "Transform.h"
+#include <utility>
 
 class Mesh
 {
 public:
 	Mesh();
-
-	Mesh(const Array<Vertex>& InVertices, const Array<uint16_t>& InIndices, Shader& InShader);
 
 	~Mesh();
 	void Copy(const Mesh& Copy);
@@ -25,6 +24,31 @@ public:
 		if (this != &other)
 		{
 			Copy(other);
+		}
+		return *this;
+	}
+
+	void Move(Mesh& other)
+	{
+		Vertices = std::move(other.Vertices);
+		Indices = std::move(other.Indices);
+		FVerts = std::move(other.FVerts);
+		FTexCoords = std::move(other.FTexCoords);
+		MeshShader = std::move(other.MeshShader);
+		VAO = other.VAO;
+		other.VAO = 0;
+	}
+
+	Mesh(Mesh&& other) noexcept
+	{
+		Move(other);
+	}
+
+	Mesh& operator=(Mesh&& other) noexcept
+	{
+		if (this != &other)
+		{
+			Move(other);
 		}
 		return *this;
 	}
@@ -47,17 +71,11 @@ public:
 
 	std::optional<Shader> MeshShader;
 
-	GLuint VAO, VBO, EBO;
-
-	unsigned int* Instances;
-
+	uint32_t VAO;
 private:
 
 	void SetUpMesh();
 
 	static void SetShaderVariables(const Transform* ModelTransform, Shader* InShader);
 
-	static void SetLightVariables(const glm::mat4& view, const Shader* InShader);
-
-	static void SetTransformationVariables(const glm::mat4& model, const glm::mat3& normalModel, const Shader* InShader);
 };

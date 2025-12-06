@@ -21,6 +21,11 @@ public:
 		Copy(CopyArray);
 	}
 
+	Array(Array&& Other)
+	{
+		Move(Other);
+	}
+
 	Array(std::initializer_list<T> Init)
 	{
 		NumItems = Init.size();
@@ -65,6 +70,28 @@ public:
 		}
 		return *this;
 	}
+
+	void Move(Array& other)
+	{
+		delete[] DynamicArray;
+		DynamicArray = other.DynamicArray;
+		NumItems = other.NumItems;
+		ArraySize = other.ArraySize;
+		other.DynamicArray = nullptr;
+		other.NumItems = 0;
+		other.ArraySize = 0;
+	}
+
+	Array& operator=(Array&& other) noexcept
+	{
+		if (this != &other)
+		{
+			Move(other);
+		}
+		return *this;
+	}
+
+
 
 	bool operator==(const Array& other) const
 	{
