@@ -534,18 +534,24 @@ TEST(Vector2D, PerpendicularBisector)
 	engine.Init();
 
 
-	Voronoi vorn;
+	//Voronoi vorn;
 
-	Model model = Model("/Models/BackPack/backpack.obj", Shader("triangle", "/Shaders/"));
+	Model* model = new Model("/Models/Asteroid/rock.obj", Shader("BasicTexture", "/Shaders/"));
 
 
-	vorn.FracturePlaneRandom(model);
+	Model* model2 = new Model("/Models/BackPack/backpack.obj", Shader("BasicTexture", "/Shaders/"));
+
+	model2->ModelTransform.Position = { 5,0, 0 };
+	/*vorn.FracturePlaneRandom(model);*/
 
 	while (!RuntimeEngine::ShouldClose())
 	{
 		engine.Loop();
-
 	}
+	Vulkan::RuntimeEngine::WaitForFrameToFinish();
+
+	delete model;
+	delete model2;
 
 	engine.ShutDown();
 }

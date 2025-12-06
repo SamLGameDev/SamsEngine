@@ -21,6 +21,8 @@ namespace Vulkan
 
 		static bool ShouldClose();
 
+		static void WaitForFrameToFinish();
+
 	private:
 
 		SubsystemInitialiser* SubsystemManager;

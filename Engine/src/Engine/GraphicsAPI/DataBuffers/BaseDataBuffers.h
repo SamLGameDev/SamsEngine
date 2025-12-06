@@ -6,7 +6,7 @@
 
 enum BufferTargets : uint8_t
 {
-	Vertex,
+	VERTEX,
 	Indices,
 	Transfer
 };

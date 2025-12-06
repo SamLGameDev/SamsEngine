@@ -1,5 +1,7 @@
 #pragma once
 
+#include <optional>
+
 #include "Array.h"
 #include "Verticie.h"
 #include "Shader.h"
@@ -10,7 +12,7 @@ class Mesh
 public:
 	Mesh();
 
-	Mesh(const Array<Vertex>& InVertices, const Array<unsigned int>& InIndices, const Shader& InShader);
+	Mesh(const Array<Vertex>& InVertices, const Array<uint16_t>& InIndices, Shader& InShader);
 
 	~Mesh();
 	void Copy(const Mesh& Copy);
@@ -27,19 +29,23 @@ public:
 		return *this;
 	}
 
+	void Initialise();
 
-	void Draw(const Transform* ModelTransform) const;
+	void Draw(const Transform* ModelTransform);
 
-	void Draw(const Transform* ModelTransform, const Shader* InShader) const;
+	void Draw(const Transform* ModelTransform, Shader* InShader) const;
 
 	void RegenerateMesh();
 
 
 	Array<Vertex> Vertices;
 
-	Array<unsigned int> Indices;
+	Array<uint16_t> Indices;
 
-	Shader MeshShader;
+	Array<Vector3D> FVerts;
+	Array<Vector2D> FTexCoords;
+
+	std::optional<Shader> MeshShader;
 
 	GLuint VAO, VBO, EBO;
 
@@ -49,7 +55,7 @@ private:
 
 	void SetUpMesh();
 
-	static void SetShaderVariables(const Transform* ModelTransform, const Shader* InShader);
+	static void SetShaderVariables(const Transform* ModelTransform, Shader* InShader);
 
 	static void SetLightVariables(const glm::mat4& view, const Shader* InShader);
 

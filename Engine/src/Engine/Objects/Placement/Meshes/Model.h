@@ -30,7 +30,7 @@ public:
 	/**
 	 * Draws the model with the set shader
 	 */
-	void Draw() const;
+	void Draw();
 
 
 	/**
@@ -42,7 +42,7 @@ public:
 	/**
 	 * Draws the model with the input shader
 	 */
-	void Draw(const Shader* InShader) const;
+	void Draw(Shader* InShader);
 
 
 
@@ -95,7 +95,7 @@ private:
 
 	void LoadModel();
 
-	void ProcessNode(const aiNode* Node, const aiScene* Scene);
+	void ProcessNode(const aiNode* Node, const aiScene* Scene, size_t& CurrentMesh);
 
 	//TODO do something about this, even if it means creating our own file loader
 	/**

@@ -51,4 +51,10 @@ namespace Vulkan
 	{
 		return glfwWindowShouldClose(Camera::GetActiveWindow()->GetWindow());
 	}
+
+	void RuntimeEngine::WaitForFrameToFinish()
+	{
+		SInstance::GetInstance()->GraphicsCard->GetRenderer()->WaitForDrawToFinish();
+	}
+
 }

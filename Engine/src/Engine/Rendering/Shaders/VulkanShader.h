@@ -1,5 +1,6 @@
 #pragma once
 
+#include <memory>
 #include <string>
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
@@ -21,7 +22,7 @@ namespace Vulkan
 {
 
 
-	class Shader : BaseShader
+	class Shader : public BaseShader
 	{
 	public:
 
@@ -51,12 +52,13 @@ namespace Vulkan
 				ID = Other.ID;
 				Textures = Other.Textures;
 				Map = Other.Map;
+				Pipeline = Other.Pipeline;
 			}
 			return *this;
 		}
 
 
-		static BaseShader* CreateVulkanShader(const std::string_view& InName, const std::string_view& InStorageLocation);
+		static std::shared_ptr<BaseShader> CreateVulkanShader(const std::string_view& InName, const std::string_view& InStorageLocation);
 
 		/**
 		 * Activates the shader to be applied to draw calls

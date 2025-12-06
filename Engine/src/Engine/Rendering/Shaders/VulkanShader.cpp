@@ -94,9 +94,11 @@ namespace Vulkan
 
 	}
 
-	BaseShader* Shader::CreateVulkanShader(const std::string_view& InName, const std::string_view& InStorageLocation)
+	std::shared_ptr<BaseShader> Shader::CreateVulkanShader(const std::string_view& InName, const std::string_view& InStorageLocation)
 	{
-		return new Shader(InName, InStorageLocation);
+		std::shared_ptr<Shader> shader = std::make_shared<Shader>(InName, InStorageLocation);
+
+		return shader;
 	}
 
 	void Shader::Use()

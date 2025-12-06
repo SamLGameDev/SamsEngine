@@ -2,6 +2,7 @@
 #include "Voronoi.h"
 #include "BaseRenderer.h"
 #include "WireShapes.h"
+#include "Model.h"
 
 BaseRenderer* Renderer::RealRenderer = nullptr;
 
@@ -13,6 +14,11 @@ void Renderer::AddFracture(FracturePiece3D* Piece)
 void Renderer::AddWireShape(WireObject* Shape)
 {
 	RealRenderer->AddWireShape(Shape);
+}
+
+void Renderer::AddModel(Model* InModel)
+{
+	RealRenderer->AddModel(InModel);
 }
 
 void Renderer::Draw(const size_t& Size)

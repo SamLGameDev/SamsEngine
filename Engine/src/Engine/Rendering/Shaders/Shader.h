@@ -10,6 +10,7 @@
 #include "CubeMap.h"
 #include "BaseShader.h"
 #include <functional>
+#include <memory>
 
 class Shader
 {
@@ -32,6 +33,7 @@ public:
 		ID = Other.GetID();
 		Textures = Other.Textures;
 		Map = Other.Map;
+		RealShader = Other.RealShader;
 	}
 
 	Shader& operator=(const Shader& Other) {
@@ -127,7 +129,7 @@ public:
 	void AddCubeMap(const CubeMap& InMap);
 
 
-	static std::function<BaseShader* (const std::string_view& InName, const std::string_view& InStorageLocation)> ShaderCreationFunc;
+	static std::function<std::shared_ptr<BaseShader> (const std::string_view& InName, const std::string_view& InStorageLocation)> ShaderCreationFunc;
 
 private:
 
@@ -215,5 +217,5 @@ private:
 
 	CubeMap Map;
 
-	BaseShader* RealShader;
+	std::shared_ptr<BaseShader> RealShader;
 };

@@ -6,7 +6,7 @@
 #include "CorePaths.h"
 
 
-std::function<BaseShader*(const std::string_view& InName, const std::string_view& InStorageLocation)> Shader::ShaderCreationFunc;
+std::function<std::shared_ptr<BaseShader>(const std::string_view& InName, const std::string_view& InStorageLocation)> Shader::ShaderCreationFunc;
 
 Shader::Shader()
 {
@@ -14,7 +14,6 @@ Shader::Shader()
 
 Shader::~Shader()
 {
-	//delete RealShader;
 }
 
 Shader::Shader(const std::string_view& InName, const std::string_view& InStorageLocation)

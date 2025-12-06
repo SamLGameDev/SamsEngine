@@ -4,26 +4,23 @@
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
 #include "Camera.h"
+#include "DataBuffers.h"
+#include "InterfaceRenderer.h"
 #include "LightManager.h"
+#include "Verticie.h"
 
 Mesh::Mesh()
 {
 }
 
-Mesh::Mesh(const Array<Vertex>& InVertices, const Array<unsigned int>& InIndices, const Shader& InShader)
+Mesh::Mesh(const Array<Vertex>& InVertices, const Array<uint16_t>& InIndices, Shader& InShader)
 {
-	Vertices = InVertices;
-	Indices = InIndices;
-	MeshShader = InShader;
 
-	SetUpMesh();
 }
+
 
 Mesh::~Mesh()
 {	
-	////glDeleteBuffers(1, &EBO);
-	////glDeleteBuffers(1, &VBO);
-	////glDeleteVertexArrays(1, &VAO);
 }
 
 
@@ -37,44 +34,75 @@ void Mesh::Copy(const Mesh& Copy)
 	Vertices = Copy.Vertices;
 	Indices = Copy.Indices;
 	MeshShader = Copy.MeshShader;
+	FVerts = Copy.FVerts;
+	FTexCoords = Copy.FTexCoords;
+	VAO = Copy.VAO;
 	RegenerateMesh();
 }
-void Mesh::Draw(const Transform* ModelTransform) const
+
+void Mesh::Initialise()
 {
-	Draw(ModelTransform, &MeshShader);
+	FVerts.Reallocate(Vertices.GetSize());
+	FTexCoords.Reallocate(Vertices.GetSize());
+
+	for (size_t i = 0; i < Vertices.GetSize(); i++)
+	{
+		FVerts[i] = Vertices[i].Position;
+		FTexCoords[i] = Vertices[i].TexCoords;
+	}
+
+	SetUpMesh();
 }
 
-void Mesh::Draw(const Transform* ModelTransform, const Shader* InShader) const
+void Mesh::Draw(const Transform* ModelTransform)
 {
+	Draw(ModelTransform, &MeshShader.value());
+}
+
+void Mesh::Draw(const Transform* ModelTransform, ::Shader* InShader) const
+{
+
+
 	InShader->Use();
 
-	InShader->ApplyTextures();
-	glActiveTexture(GL_TEXTURE0);
+	DataBuffers::BindBuffer(VAO);
+
+	DataBuffers::DrawVertexData(VAO);
+
 
 	SetShaderVariables(ModelTransform, InShader);
 
+	::Renderer::Draw(Indices.GetSize());
+
+	//InShader->ApplyTextures();
+	//glActiveTexture(GL_TEXTURE0);
+
+
 	//TODO find a way to separate this from model
 	//used for reflection shader
-	const glm::vec3 camPos = Camera::GetActiveCamera()->GetPos();
-	InShader->SetVec3("cameraPos", Vector3D(camPos.x, camPos.y, camPos.z));
+	//const glm::vec3 camPos = Camera::GetActiveCamera()->GetPos();
+	//InShader->SetVec3("cameraPos", Vector3D(camPos.x, camPos.y, camPos.z));
 
-	glBindVertexArray(VAO);
-	glDrawElementsInstanced(GL_TRIANGLES, static_cast<GLsizei>(Indices.GetSize()), GL_UNSIGNED_INT, nullptr, *Instances);
-	glBindVertexArray(0);
-	glUseProgram(0);
+	//glBindVertexArray(VAO);
+	//glDrawElementsInstanced(GL_TRIANGLES, static_cast<GLsizei>(Indices.GetSize()), GL_UNSIGNED_INT, nullptr, *Instances);
+	//glBindVertexArray(0);
+	//glUseProgram(0);
 }
 
-void Mesh::SetShaderVariables(const Transform* ModelTransform, const Shader* InShader)
+void Mesh::SetShaderVariables(const Transform* ModelTransform, Shader* InShader)
 {
-	const glm::mat4 model = ModelTransform->GetModelMatrix();
 
-	const glm::mat4 view = Camera::GetActiveCamera()->GetLook();
+	PerInstanceTransforms ubo;
+	ubo.Model = ModelTransform->GetModelMatrix();
 
-	const glm::mat3 normalModel = glm::transpose(glm::inverse(view * model));
+	GlobalTransforms g;
+	g.View = Camera::GetActiveCamera()->GetLook();
 
-	SetTransformationVariables(model, normalModel, InShader);
+	g.Projection = Camera::GetActiveCamera()->GetProjection();
 
-	SetLightVariables(view, InShader);
+	InShader->SetUniformBuffer(0, &g, sizeof(GlobalTransforms));
+
+	InShader->SetUniformBuffer(1, &ubo, sizeof(PerInstanceTransforms));
 }
 
 void Mesh::SetLightVariables(const glm::mat4& view, const Shader* InShader)
@@ -91,34 +119,21 @@ void Mesh::SetTransformationVariables(const glm::mat4& model, const glm::mat3& n
 
 void Mesh::RegenerateMesh()
 {
-	SetUpMesh();
+
+//	SetUpMesh();
 }
 
 void Mesh::SetUpMesh()
 {
 
-	glGenVertexArrays(1, &VAO);
-	glGenBuffers(1, &VBO);
-	glGenBuffers(1, &EBO);
+	::DataBuffers::GenBuffer(VAO);
 
-	glBindVertexArray(VAO);
 
-	glBindBuffer(GL_ARRAY_BUFFER, VBO);
+	DataBuffers::BindVertexInfo(VAO, 0, 0, sizeof(Vector3D), 0, Vector3);
+	DataBuffers::BindVertexInfo(VAO, 1, 0, sizeof(Vector2D), 0, Vector2);
 
-	glBufferData(GL_ARRAY_BUFFER, Vertices.GetSize() * sizeof(Vertex), Vertices.GetFirstRef(), GL_STATIC_DRAW);
-
-	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
-	glBufferData(GL_ELEMENT_ARRAY_BUFFER, Indices.GetSize() * sizeof(unsigned int), Indices.GetFirstRef(), GL_STATIC_DRAW);
-
-	glEnableVertexAttribArray(0);
-	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), static_cast<void*>(0));
-
-	glEnableVertexAttribArray(1);
-	glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), reinterpret_cast<void*>(offsetof(Vertex, Normal)));
-
-	glEnableVertexAttribArray(2);
-	glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, sizeof(Vertex), reinterpret_cast<void*>(offsetof(Vertex, TexCoords)));
-
-	glBindVertexArray(0);
+	::DataBuffers::BufferData(VAO, FVerts.GetSize() * sizeof(Vector3D), FVerts.GetFirstRef(), BufferTargets::VERTEX);
+	DataBuffers::BufferDataIndex(VAO, Indices.GetSize() * sizeof(uint16_t), Indices.GetFirstRef());
+	DataBuffers::BufferData(VAO, FTexCoords.GetSize() * sizeof(Vector2D), FTexCoords.GetFirstRef(), BufferTargets::VERTEX);
 
 }

@@ -125,6 +125,8 @@ namespace Vulkan
 
 		void Draw(const size_t& Size) override;
 
+		void WaitForDrawToFinish();
+
 	private:
 
 		VkCommandPool CommandPool;

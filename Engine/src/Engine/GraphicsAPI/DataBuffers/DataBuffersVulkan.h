@@ -114,7 +114,7 @@ namespace Vulkan
 
 		std::map<uint32_t, TextureBuffer> RegisteredTextures;
 
-		std::map<BufferTargets, VkBufferUsageFlags> TargetToVulkan{ {BufferTargets::Vertex, VK_BUFFER_USAGE_VERTEX_BUFFER_BIT}, {Indices, VK_BUFFER_USAGE_INDEX_BUFFER_BIT}, {Transfer, VK_BUFFER_USAGE_TRANSFER_DST_BIT} };
+		std::map<BufferTargets, VkBufferUsageFlags> TargetToVulkan{ {BufferTargets::VERTEX, VK_BUFFER_USAGE_VERTEX_BUFFER_BIT}, {Indices, VK_BUFFER_USAGE_INDEX_BUFFER_BIT}, {Transfer, VK_BUFFER_USAGE_TRANSFER_DST_BIT} };
 		std::map<BufferFormat, VkFormat> FormatToVulkan{ {BufferFormat::Vector2, VK_FORMAT_R32G32_SFLOAT}, {Vector3, VK_FORMAT_R32G32B32_SFLOAT}};
 	};
 

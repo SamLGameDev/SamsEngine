@@ -105,10 +105,10 @@ namespace Vulkan
 		////DataBuffers::BindVertexInfo(vao, 1, 0, sizeof(Vector3D), 0, Vector3);
 		//DataBuffers::BindVertexInfo(vao, 2, 0, sizeof(Vector2D), 0, Vector2);
 
-		//DataBuffers::BufferData(vao, testPositions.GetSize() * sizeof(Vector3D), testPositions.GetFirstRef(), BufferTargets::Vertex);
+		//DataBuffers::BufferData(vao, testPositions.GetSize() * sizeof(Vector3D), testPositions.GetFirstRef(), BufferTargets::VERTEX);
 		//DataBuffers::BufferDataIndex(vao, indices.GetSize() * sizeof(uint16_t), indices.GetFirstRef());
-		////DataBuffers::BufferData(vao, testColors.GetSize() * sizeof(Vector3D), testColors.GetFirstRef(), BufferTargets::Vertex);
-		//DataBuffers::BufferData(vao, testTexCoor.GetSize() * sizeof(Vector2D), testTexCoor.GetFirstRef(), BufferTargets::Vertex);
+		////DataBuffers::BufferData(vao, testColors.GetSize() * sizeof(Vector3D), testColors.GetFirstRef(), BufferTargets::VERTEX);
+		//DataBuffers::BufferData(vao, testTexCoor.GetSize() * sizeof(Vector2D), testTexCoor.GetFirstRef(), BufferTargets::VERTEX);
 
 		//DataBuffers::GenBuffer(vao2);
 
@@ -116,9 +116,9 @@ namespace Vulkan
 
 		////DataBuffers::BindVertexInfo(vao2, 1, 0, sizeof(Vector3D), 0, Vector3);
 
-		//DataBuffers::BufferData(vao2, testPositions2.GetSize() * sizeof(Vector3D), testPositions2.GetFirstRef(), BufferTargets::Vertex);
+		//DataBuffers::BufferData(vao2, testPositions2.GetSize() * sizeof(Vector3D), testPositions2.GetFirstRef(), BufferTargets::VERTEX);
 		//DataBuffers::BufferDataIndex(vao2, indices.GetSize() * sizeof(uint16_t), indices.GetFirstRef());
-		////DataBuffers::BufferData(vao2,testColors.GetSize() * sizeof(Vector3D), testColors.GetFirstRef(), BufferTargets::Vertex);
+		////DataBuffers::BufferData(vao2,testColors.GetSize() * sizeof(Vector3D), testColors.GetFirstRef(), BufferTargets::VERTEX);
 
 		return SUCCEEDED;
 	}
@@ -303,6 +303,11 @@ namespace Vulkan
 			piece->Draw(Test);
 		}
 
+		for (Model* model : ModelsToRender)
+		{
+			model->Draw();
+		}
+
 		vkCmdEndRenderPass(Buffer);
 
 		if (vkEndCommandBuffer(Buffer) != VK_SUCCESS) return ERROR;
@@ -348,5 +353,10 @@ namespace Vulkan
 	void URenderer::Draw(const size_t& Size)
 	{
 		vkCmdDrawIndexed(CurrentBuffer, static_cast<uint32_t>(Size), 1, 0, 0, 0);
+	}
+
+	void URenderer::WaitForDrawToFinish()
+	{
+		vkDeviceWaitIdle(*GetOwningCard()->GetLogicalDevice()->GetVulkanLogicalDevice());
 	}
 }

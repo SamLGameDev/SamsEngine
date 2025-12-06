@@ -270,7 +270,7 @@ bool Voronoi::IsPointInPolygon(Vector3D Point, Array<Vector3D> Polygon, Vector3D
 FracturePiece3D::FracturePiece3D(Array<Vector3D> cell, Vector3D Point)
 {
 
-	shader = Shader("triangle", "/Shaders/");
+	shader = Shader("ColorShape", "/Shaders/");
 
 	//	cell = { {0, 1},  { 1,1 }, {1, -1}, {0, -1}, {0, -1}, {-1, -1}, {-1, 1}, {0, 1} };
 		//cell = {{0.5, 0.5}, {1, 1}, {-1 , -1}};
@@ -339,7 +339,7 @@ FracturePiece3D::FracturePiece3D(Array<Vector3D> cell, Vector3D Point)
 	//::DataBuffers::BindBuffer(VAO);
 
 
-	::DataBuffers::BufferData(VAO, Verts.GetSize() * sizeof(float), Verts.GetFirstRef(), BufferTargets::Vertex);
+	::DataBuffers::BufferData(VAO, Verts.GetSize() * sizeof(float), Verts.GetFirstRef(), BufferTargets::VERTEX);
 	DataBuffers::BufferDataIndex(VAO, Inds.GetSize() * sizeof(uint16_t), Inds.GetFirstRef());
 
 	//glGenVertexArrays(1, &VAO);

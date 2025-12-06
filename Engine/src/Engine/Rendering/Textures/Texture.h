@@ -50,7 +50,7 @@ public:
 	 */
 	[[nodiscard]] inline std::string GetTextureLocation() const
 	{
-		return TextureLocation;
+		return RealTexture->GetTextureLocation();
 	}
 
 	/**

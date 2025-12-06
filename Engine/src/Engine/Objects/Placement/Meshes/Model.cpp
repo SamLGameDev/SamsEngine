@@ -7,8 +7,7 @@
 #include <assimp/Importer.hpp>
 #include <assimp/postprocess.h>
 #include "CorePaths.h"
-
-#include "Renderer.h"
+#include "InterfaceRenderer.h"
 
 Array<Texture> Model::LoadedTextures;
 
@@ -41,7 +40,7 @@ Model::Model(const std::string& Path, const Shader& InShader)
 	BoundingBox = DrawWireCube({ 0, 0,0 }, ModelTransform.TransHalfBounds, Vector3D(1, 1, 1),
 		Vector3D(0.2f, 0.5f, 0.2f));
 
-	//Renderer::AddItemToRender(this);
+	::Renderer::AddModel(this);
 }
 
 
@@ -49,13 +48,13 @@ Model::~Model()
 {
 }
 
-void Model::Draw() const
+void Model::Draw()
 {
 
-	glDepthFunc(DrawGroup);
-	UpdateModelLocations();
+	//glDepthFunc(DrawGroup);
+	//UpdateModelLocations();
 
-	for (const Mesh& Mesh : Meshes)
+	for (Mesh& Mesh : Meshes)
 	{
 		Mesh.Draw(&ModelTransform);
 	}
@@ -75,12 +74,12 @@ void Model::DrawOutline()
 	ModelTransform.Scale -= OutlineSize;
 }
 
-void Model::Draw(const Shader* InShader) const
+void Model::Draw(Shader* InShader)
 {
-	glDepthFunc(DrawGroup);
+	//glDepthFunc(DrawGroup);
 	UpdateModelLocations();
 
-	for (const Mesh& Mesh : Meshes)
+	for (Mesh& Mesh : Meshes)
 	{
 		Mesh.Draw(&ModelTransform, InShader);
 	}
@@ -97,57 +96,7 @@ void Model::UpdateModelLocations() const
 
 void Model::AddInstance(const Transform* transform)
 {
-	//auto updates instances as all meshes have a reference to this
-	Instances++;
-
-	InstanceTransforms.Add(transform);
-
-	constexpr GLenum flags = GL_MAP_WRITE_BIT | GL_MAP_PERSISTENT_BIT | GL_MAP_COHERENT_BIT;
-
-	const GLsizeiptr size = sizeof(glm::mat4) * Instances;
-
-	//delete the old buffer, as the new one will need to be bigger
-
-	glDeleteBuffers(1, &ModelVBO);
-
-	glGenBuffers(1, &ModelVBO);
-
-	glBindBuffer(GL_ARRAY_BUFFER, ModelVBO);
-
-	glBufferStorage(GL_ARRAY_BUFFER, size, nullptr, flags);
-
-	modelTransforms = static_cast<glm::mat4*>(glMapBufferRange(GL_ARRAY_BUFFER, 0, size, flags));
-
-	glBindBuffer(GL_ARRAY_BUFFER, 0);
-
-	for (Mesh& Mesh : Meshes)
-	{
-
-		glBindVertexArray(Mesh.VAO);
-
-		//set the shaders vertex location. we have to do 4 here as it's a mat4, so essentially 4 vec4
-
-		glBindBuffer(GL_ARRAY_BUFFER, ModelVBO);
-
-		glEnableVertexAttribArray(3);
-		glVertexAttribPointer(3, 4, GL_FLOAT, GL_FALSE, sizeof(glm::mat4), static_cast<void*>(nullptr));
-
-		glEnableVertexAttribArray(4);
-		glVertexAttribPointer(4, 4, GL_FLOAT, GL_FALSE, sizeof(glm::mat4), reinterpret_cast<void*>(sizeof(glm::vec4)));
-
-		glEnableVertexAttribArray(5);
-		glVertexAttribPointer(5, 4, GL_FLOAT, GL_FALSE, sizeof(glm::mat4), reinterpret_cast<void*>(2 * sizeof(glm::vec4)));
-
-		glEnableVertexAttribArray(6);
-		glVertexAttribPointer(6, 4, GL_FLOAT, GL_FALSE, sizeof(glm::mat4), reinterpret_cast<void*>(3 * sizeof(glm::vec4)));
-
-		glVertexAttribDivisor(3, 1);
-		glVertexAttribDivisor(4, 1);
-		glVertexAttribDivisor(5, 1);
-		glVertexAttribDivisor(6, 1);
-
-		Mesh.Instances = &Instances;
-	}
+	
 }
 
 void Model::LoadModel()
@@ -176,10 +125,15 @@ void Model::LoadModel()
 
 	ModelTransform.CalculateBounds();
 
-	//ProcessNode(scene->mRootNode, scene);
+	size_t numMeshes = scene->mNumMeshes;
+	Meshes.Reallocate(numMeshes);
+	std::cout << "NumMeshes: " << numMeshes << std::endl;
+	size_t currentMesh = 0;
+
+	ProcessNode(scene->mRootNode, scene, currentMesh);
 }
 
-void Model::ProcessNode(const aiNode* Node, const aiScene* Scene)
+void Model::ProcessNode(const aiNode* Node, const aiScene* Scene, size_t& CurrentMesh)
 {
 #if DEBUG
 	std::cout << glfwGetTime() - Time << std::endl;
@@ -188,7 +142,9 @@ void Model::ProcessNode(const aiNode* Node, const aiScene* Scene)
 	for (unsigned int i = 0; i < Node->mNumMeshes; i++)
 	{
 		aiMesh* mesh = Scene->mMeshes[Node->mMeshes[i]];
-		Meshes.Add(ProcessMesh(mesh, Scene));
+		Meshes[CurrentMesh] = ProcessMesh(mesh, Scene);
+		CurrentMesh++;
+		std::cout << "Processed Mesh " << CurrentMesh << std::endl;
 	}
 
 #if DEBUG
@@ -197,7 +153,7 @@ void Model::ProcessNode(const aiNode* Node, const aiScene* Scene)
 
 	for (unsigned int i = 0; i < Node->mNumChildren; i++)
 	{
-		ProcessNode(Node->mChildren[i], Scene);
+		ProcessNode(Node->mChildren[i], Scene, CurrentMesh);
 	}
 #if DEBUG
 	std::cout << glfwGetTime() - Time << std::endl;
@@ -232,7 +188,7 @@ Mesh Model::ProcessMesh(aiMesh* InMesh, const aiScene* Scene)
 			vert.TexCoords = Vector2D(InMesh->mTextureCoords[0][i].x, InMesh->mTextureCoords[0][i].y);
 		}
 
-		mesh.Vertices.Add(vert);
+		mesh.Vertices[i]=vert;
 	}
 
 #if DEBUG
@@ -262,18 +218,20 @@ Mesh Model::ProcessMesh(aiMesh* InMesh, const aiScene* Scene)
 	{
 		const aiMaterial* mat = Scene->mMaterials[InMesh->mMaterialIndex];
 
-		LoadMaterialTextures(mat, aiTextureType_DIFFUSE, diffuse, mesh.MeshShader);
+		LoadMaterialTextures(mat, aiTextureType_HEIGHT, height, mesh.MeshShader.value());
 
-		LoadMaterialTextures(mat, aiTextureType_SPECULAR, specular, mesh.MeshShader);
+		LoadMaterialTextures(mat, aiTextureType_DIFFUSE, diffuse, mesh.MeshShader.value());
 
-		LoadMaterialTextures(mat, aiTextureType_HEIGHT, height, mesh.MeshShader);
 
-		LoadMaterialTextures(mat, aiTextureType_AMBIENT, normal, mesh.MeshShader);
 
-		LoadMaterialTextures(mat, aiTextureType_BASE_COLOR, diffuse, mesh.MeshShader);
+		//LoadMaterialTextures(mat, aiTextureType_SPECULAR, specular, mesh.MeshShader);
 
-		LoadMaterialTextures(mat, aiTextureType_GLTF_METALLIC_ROUGHNESS, specular, mesh.MeshShader);
-		LoadMaterialTextures(mat, aiTextureType_NORMALS, normal, mesh.MeshShader);
+		//LoadMaterialTextures(mat, aiTextureType_AMBIENT, normal, mesh.MeshShader);
+
+		//LoadMaterialTextures(mat, aiTextureType_BASE_COLOR, diffuse, mesh.MeshShader);
+
+		//LoadMaterialTextures(mat, aiTextureType_GLTF_METALLIC_ROUGHNESS, specular, mesh.MeshShader);
+		//LoadMaterialTextures(mat, aiTextureType_NORMALS, normal, mesh.MeshShader);
 
 
 		//TODO: Extend this to cover more types, like base color
@@ -295,7 +253,7 @@ Mesh Model::ProcessMesh(aiMesh* InMesh, const aiScene* Scene)
 
 #endif
 
-	mesh.RegenerateMesh();
+	mesh.Initialise();
 
 #if DEBUG
 
