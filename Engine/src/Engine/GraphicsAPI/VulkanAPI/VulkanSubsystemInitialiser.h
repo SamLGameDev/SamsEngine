@@ -42,10 +42,6 @@ namespace Vulkan
 
 		Camera* camera;
 
-		//Renderer* renderer;
-
-		LightManager* lightManager;
-
 		CorePaths* PathManager;
 
 		UGraphicsCard* GraphicsCard;

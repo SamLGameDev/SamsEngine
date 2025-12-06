@@ -113,7 +113,11 @@ namespace Vulkan
 
 	ErrorCodes SubsystemInitialiser::ShutDown()
 	{
+		delete camera;
 
+		delete world;
+
+		delete inputManager;
 
 		 delete ::DataBuffers::APIBufferInstance;
 
@@ -158,6 +162,8 @@ namespace Vulkan
 			std::cout << error.what() << "\n";
 			return ERROR;
 		}
+
+
 
 		return SUCCEEDED;
 	}

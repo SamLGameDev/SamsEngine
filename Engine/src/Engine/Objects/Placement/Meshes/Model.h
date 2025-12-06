@@ -63,15 +63,15 @@ public:
 	/**
 	 * Draws the model with the input shader
 	 */
-	void Draw(Shader* InShader);
+	void Draw(Shader InShader);
 
 
 
 
-	////[[nodiscard]] Shader* GetShader()
-	////{
-	////	return &ModelShader;
-	////}
+	[[nodiscard]] Shader* GetShader()
+	{
+		return &ModelShader;
+	}
 
 
 	/**
@@ -128,7 +128,7 @@ private:
 	/**
 	 * All the textures that have currently been loaded, so we don't have to load them again when we have duplicates
 	 */
-//	static Array<Texture> LoadedTextures;
+	//static Array<Texture> LoadedTextures;
 #if DEBUG
 	double Time;
 

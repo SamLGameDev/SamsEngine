@@ -22,7 +22,7 @@ Model::Model(const std::string& Path, const Shader& InShader)
 
 	StorageLocation =  CorePaths::Contents.Path + "/" + Path;
 
-	//ModelShader = InShader;
+	ModelShader = InShader;
 
 	Directory = Path.substr(0, Path.find_last_of('/'));
 
@@ -32,7 +32,7 @@ Model::Model(const std::string& Path, const Shader& InShader)
 
 	ModelTransform = Transform(Vector3D(0, 0, 0), Vector3D(1, 1, 1), Vector3D(0, 0, 0));
 
-	LoadModel();
+	//LoadModel();
 
 #if DEBUG
 	std::cout << "NumVertices: " << NumVertices << std::endl;
@@ -54,7 +54,7 @@ void Model::Copy(const Model& Other)
 	StorageLocation = Other.StorageLocation;
 	Directory = Other.Directory;
 	ModelTransform = Other.ModelTransform;
-//	ModelShader = Other.ModelShader;
+	ModelShader = Other.ModelShader;
 	if (Other.BoundingBox)
 	{
 		BoundingBox = std::make_unique<WireObject>(*Other.BoundingBox);
@@ -76,7 +76,7 @@ void Model::Move(Model& Other)
 	StorageLocation = std::move(Other.StorageLocation);
 	Directory = std::move(Other.Directory);
 	ModelTransform = Other.ModelTransform;
-//	ModelShader = std::move(Other.ModelShader);
+	ModelShader = std::move(Other.ModelShader);
 	if (Other.BoundingBox)
 	{
 		BoundingBox = std::move(Other.BoundingBox);
@@ -97,7 +97,7 @@ void Model::Draw()
 	}
 }
 
-void Model::Draw(Shader* InShader)
+void Model::Draw(Shader InShader)
 {
 
 	for (Mesh& Mesh : Meshes)
@@ -216,19 +216,19 @@ Mesh Model::ProcessMesh(aiMesh* InMesh, const aiScene* Scene)
 	time = glfwGetTime();
 #endif
 
-	//mesh.MeshShader = ModelShader;
+	mesh.MeshShader = ModelShader;
 
-	////if (InMesh->mMaterialIndex != 0)
-	////{
-	////	const aiMaterial* mat = Scene->mMaterials[InMesh->mMaterialIndex];
+	if (InMesh->mMaterialIndex != 0)
+	{
+		const aiMaterial* mat = Scene->mMaterials[InMesh->mMaterialIndex];
 
-	////	LoadMaterialTextures(mat, aiTextureType_HEIGHT, height, mesh.MeshShader.value());
+		LoadMaterialTextures(mat, aiTextureType_HEIGHT, height, mesh.MeshShader);
 
-	////	LoadMaterialTextures(mat, aiTextureType_DIFFUSE, diffuse, mesh.MeshShader.value());
+		LoadMaterialTextures(mat, aiTextureType_DIFFUSE, diffuse, mesh.MeshShader);
 
-	////	//TODO: Extend this to cover more types, like base color
+		//TODO: Extend this to cover more types, like base color
 
-	////}
+	}
 
 #if DEBUG
 
@@ -258,35 +258,35 @@ Mesh Model::ProcessMesh(aiMesh* InMesh, const aiScene* Scene)
 
 void Model::LoadMaterialTextures(const aiMaterial* Mat, const aiTextureType& Type, const TextureType& TypeName, Shader& MeshShader)
 {
-	////for (unsigned int i = 0; i < Mat->GetTextureCount(Type); i++)
-	////{
-	////	aiString str;
-	////	Mat->GetTexture(Type, i, &str);
+	for (unsigned int i = 0; i < Mat->GetTextureCount(Type); i++)
+	{
+		//aiString str;
+		//Mat->GetTexture(Type, i, &str);
 
-	////	const std::string Path = Directory + "\\" + str.C_Str();
+		//const std::string Path = Directory + "\\" + str.C_Str();
 
-	////	bool bSkip = false;
+		//bool bSkip = false;
 
-	////	for (unsigned int index = 0; index < LoadedTextures.GetSize(); index++)
-	////	{
-	////		const std::string texPath = LoadedTextures[index].GetTextureLocation();
-	////		if (texPath == Path)
-	////		{
-	////			bSkip = true;
-	////			break;
-	////		}
-	////	}
+		//for (unsigned int index = 0; index < LoadedTextures.GetSize(); index++)
+		//{
+		//	const std::string texPath = LoadedTextures[index].GetTextureLocation();
+		//	if (texPath == Path)
+		//	{
+		//		bSkip = true;
+		//		break;
+		//	}
+		//}
 
-	////	if (bSkip)
-	////	{
-	////		continue;
-	////	}
+		//if (bSkip)
+		//{
+		//	continue;
+		//}
 
-	////	const auto texture = Texture(Path, TypeName);
+		//const auto texture = Texture(Path, TypeName);
 
-	////	LoadedTextures.Add(texture);
-	////	MeshShader.AddTexture(texture);
-	////}
+		//LoadedTextures.Add(texture);
+		//MeshShader.AddTexture(texture);
+	}
 }
 
 void Model::CalculateBoundPoints(const aiNode* Node, const aiScene* Scene)

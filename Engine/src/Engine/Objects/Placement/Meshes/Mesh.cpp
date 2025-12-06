@@ -51,14 +51,14 @@ void Mesh::Initialise()
 
 void Mesh::Draw(const Transform* ModelTransform)
 {
-	Draw(ModelTransform, &MeshShader.value());
+	Draw(ModelTransform, MeshShader);
 }
 
-void Mesh::Draw(const Transform* ModelTransform, ::Shader* InShader) const
+void Mesh::Draw(const Transform* ModelTransform, ::Shader& InShader) const
 {
 
 
-	InShader->Use();
+	InShader.Use();
 
 	DataBuffers::BindBuffer(VAO);
 
@@ -70,7 +70,7 @@ void Mesh::Draw(const Transform* ModelTransform, ::Shader* InShader) const
 	::Renderer::Draw(Indices.GetSize());
 }
 
-void Mesh::SetShaderVariables(const Transform* ModelTransform, Shader* InShader)
+void Mesh::SetShaderVariables(const Transform* ModelTransform, Shader InShader)
 {
 
 	PerInstanceTransforms ubo;
@@ -81,9 +81,9 @@ void Mesh::SetShaderVariables(const Transform* ModelTransform, Shader* InShader)
 
 	g.Projection = Camera::GetActiveCamera()->GetProjection();
 
-	InShader->SetUniformBuffer(0, &g, sizeof(GlobalTransforms));
+	InShader.SetUniformBuffer(0, &g, sizeof(GlobalTransforms));
 
-	InShader->SetUniformBuffer(1, &ubo, sizeof(PerInstanceTransforms));
+	InShader.SetUniformBuffer(1, &ubo, sizeof(PerInstanceTransforms));
 }
 
 

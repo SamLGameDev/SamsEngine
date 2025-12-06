@@ -542,6 +542,9 @@ TEST(Vector2D, PerpendicularBisector)
 	Model* model2 = new Model("/Models/BackPack/backpack.obj", Shader("BasicTexture", "/Shaders/"));
 
 	model2->ModelTransform.Position = { 5,0, 0 };
+
+
+
 	/*vorn.FracturePlaneRandom(model);*/
 
 	while (!RuntimeEngine::ShouldClose())
@@ -549,7 +552,6 @@ TEST(Vector2D, PerpendicularBisector)
 		engine.Loop();
 	}
 	Vulkan::RuntimeEngine::WaitForFrameToFinish();
-
 	delete model;
 	delete model2;
 

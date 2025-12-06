@@ -57,7 +57,7 @@ public:
 
 	void Draw(const Transform* ModelTransform);
 
-	void Draw(const Transform* ModelTransform, Shader* InShader) const;
+	void Draw(const Transform* ModelTransform, Shader& InShader) const;
 
 	void RegenerateMesh();
 
@@ -69,13 +69,13 @@ public:
 	Array<Vector3D> FVerts;
 	Array<Vector2D> FTexCoords;
 
-	std::optional<Shader> MeshShader;
+	Shader MeshShader;
 
 	uint32_t VAO;
 private:
 
 	void SetUpMesh();
 
-	static void SetShaderVariables(const Transform* ModelTransform, Shader* InShader);
+	static void SetShaderVariables(const Transform* ModelTransform, Shader InShader);
 
 };
