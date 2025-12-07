@@ -6,6 +6,18 @@
 class WorldObject;
 
 
+struct GlobalTransforms
+{
+	glm::mat4 View;
+	glm::mat4 Projection;
+};
+
+struct PerInstanceTransforms
+{
+	glm::mat4 Model;
+	Vector3D Color;
+};
+
 /**
  * Main class that dictates an objects position
  */
@@ -16,13 +28,6 @@ public:
 	Transform() = default;
 
 	Transform(const Vector3D& InPosition, const Vector3D& InScale, const Vector3D& InRotation);
-
-	Transform(const Transform& Copy)
-	{
-		Position = Copy.Position;
-		Scale = Copy.Scale;
-		Rotation = Copy.Rotation;
-	}
 
 	/**
 	 * Calculates the bounds of the object based on its position, rotation and scale
@@ -36,19 +41,19 @@ public:
 	/**
 	 * Location of the object
 	 */
-	Vector3D Position;
+	Vector3D Position = { 0, 0, 0 };
 
 
 	/**
 	 * Scale of the object
 	 */
-	Vector3D Scale;
+	Vector3D Scale {1, 1, 1};
 
 
 	/**
 	 * Rotation of the object
 	 */
-	Vector3D Rotation;
+	Vector3D Rotation {0, 0, 0};
 
 
 	/**

@@ -1,6 +1,10 @@
 #pragma once
 #include <initializer_list>
 #include <utility>
+#include <stdexcept>
+
+#include "vulkan/vulkan_core.h"
+
 template<typename T>
 class Array
 {
@@ -19,6 +23,11 @@ public:
 	Array(const Array<T>& CopyArray)
 	{
 		Copy(CopyArray);
+	}
+
+	Array(Array&& Other)
+	{
+		Move(Other);
 	}
 
 	Array(std::initializer_list<T> Init)
@@ -65,6 +74,28 @@ public:
 		}
 		return *this;
 	}
+
+	void Move(Array& other)
+	{
+		delete[] DynamicArray;
+		DynamicArray = other.DynamicArray;
+		NumItems = other.NumItems;
+		ArraySize = other.ArraySize;
+		other.DynamicArray = nullptr;
+		other.NumItems = 0;
+		other.ArraySize = 0;
+	}
+
+	Array& operator=(Array&& other) noexcept
+	{
+		if (this != &other)
+		{
+			Move(other);
+		}
+		return *this;
+	}
+
+
 
 	bool operator==(const Array& other) const
 	{
@@ -298,6 +329,13 @@ public:
 		return NumItems == 0;
 	}
 
+	void Swap(const size_t& From, const size_t& To)
+	{
+		T temp = std::move(DynamicArray[From]);
+		DynamicArray[From] = std::move(DynamicArray[To]);
+		DynamicArray[To] = std::move(temp);
+	}
+
 	T* begin() { return DynamicArray; }
 	T* end() { return DynamicArray + NumItems; }
 	const T* begin() const { return DynamicArray; }
@@ -307,6 +345,15 @@ private:
 
 	void Copy(const Array& other)
 	{
+		if (other.GetSize() == 0)
+		{
+			delete[] DynamicArray;
+			DynamicArray = new T[1];
+			NumItems = 0;
+			ArraySize = 0;
+			return;
+		}
+
 		delete[] DynamicArray;
 		DynamicArray = new T[other.GetSize()];
 		for (unsigned int i = 0; i < other.GetSize(); i++)

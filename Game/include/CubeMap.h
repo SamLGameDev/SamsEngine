@@ -23,15 +23,48 @@ public:
 	 */
 	void GenerateByChannel(const std::uint8_t& nrChannels, const unsigned int& width, const unsigned int& height, const unsigned char* data, const GLenum& target) const;
 
-	CubeMap(const CubeMap& Other)
+	void Copy(const CubeMap& Other)
 	{
-		//only need to copy the location, ID, and type, as its already beem generated and bound at creation
-
 		TextureLocation = Other.GetTextureLocation();
 		ID = Other.GetID();
 		Type = Other.Type;
 	}
 
+	CubeMap(const CubeMap& Other)
+	{
+		//only need to copy the location, ID, and type, as its already beem generated and bound at creation
+
+		Copy(Other);
+	}
+
+	CubeMap& operator=(const CubeMap& Other) {
+		if (this != &Other) 
+		{
+			Copy(Other);
+		}
+		return *this;
+	}
+	void Move(CubeMap& Other)
+	{
+		TextureLocation = std::move(Other.TextureLocation);
+		ID = Other.ID;
+		Type = std::move(Other.Type);
+		Other.ID = 0;
+	}
+
+	CubeMap(CubeMap&& Other) noexcept
+	{
+		Move(Other);
+	}
+
+	CubeMap& operator=(CubeMap&& Other) noexcept
+	{
+		if (this != &Other)
+		{
+			Move(Other);
+		}
+		return *this;
+	}
 
 	/**
 	 * @return The buffer ID assigned to this cubemap

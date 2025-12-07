@@ -22,6 +22,9 @@ target_link_libraries(SamsEngine PRIVATE glm::glm)
 find_package(assimp REQUIRED)
 target_link_libraries(SamsEngine PRIVATE assimp::assimp)
 
+find_package(Vulkan REQUIRED)
+target_link_libraries(SamsEngine PRIVATE Vulkan::Vulkan)
+
 set(CMAKE_FIND_DEBUG_MODE 1)
 find_package(EngineCore REQUIRED)
 target_link_libraries(SamsEngine PRIVATE EngineCore::EngineCore)

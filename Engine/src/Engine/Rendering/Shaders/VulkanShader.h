@@ -135,7 +135,7 @@ namespace Vulkan
 			return ID;
 		}
 
-		[[nodiscard]] LinkedList<Texture> GetTextures() const override
+		[[nodiscard]] Array<Texture> GetTextures() const override
 		{
 			return Textures;
 		}
@@ -229,7 +229,7 @@ namespace Vulkan
 
 		unsigned int ID;
 
-		LinkedList<Texture> Textures;
+		Array<::Texture> Textures;
 
 		Array<VkPipelineShaderStageCreateInfo> ShaderStages;
 

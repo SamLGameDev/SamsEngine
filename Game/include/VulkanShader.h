@@ -1,5 +1,6 @@
 #pragma once
 
+#include <memory>
 #include <string>
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
@@ -21,7 +22,7 @@ namespace Vulkan
 {
 
 
-	class Shader : BaseShader
+	class Shader : public BaseShader
 	{
 	public:
 
@@ -51,12 +52,13 @@ namespace Vulkan
 				ID = Other.ID;
 				Textures = Other.Textures;
 				Map = Other.Map;
+				Pipeline = Other.Pipeline;
 			}
 			return *this;
 		}
 
 
-		static BaseShader* CreateVulkanShader(const std::string_view& InName, const std::string_view& InStorageLocation);
+		static std::shared_ptr<BaseShader> CreateVulkanShader(const std::string_view& InName, const std::string_view& InStorageLocation);
 
 		/**
 		 * Activates the shader to be applied to draw calls
@@ -68,6 +70,9 @@ namespace Vulkan
 		 * Sets the shaders uniform float value
 		 */
 		void SetFloat(const std::string_view& InName, const float& Value) override;
+
+		void SetUniformBuffer(const size_t& Location, const void* Data, const size_t& Size) override;
+
 
 		/**
 		 * Sets the shaders uniform int value
@@ -130,7 +135,7 @@ namespace Vulkan
 			return ID;
 		}
 
-		[[nodiscard]] LinkedList<Texture> GetTextures() const override
+		[[nodiscard]] Array<Texture> GetTextures() const override
 		{
 			return Textures;
 		}
@@ -224,12 +229,17 @@ namespace Vulkan
 
 		unsigned int ID;
 
-		LinkedList<Texture> Textures;
+		Array<::Texture> Textures;
 
 		Array<VkPipelineShaderStageCreateInfo> ShaderStages;
 
 		CubeMap Map;
 
 		URenderPipeline* Pipeline;
+
+		Array<uint32_t> UnifromBufferID;
+		Array<void*> UniformMappedData;
 	};
+
+
 }

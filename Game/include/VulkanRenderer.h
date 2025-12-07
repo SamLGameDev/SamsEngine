@@ -1,6 +1,7 @@
 
 #pragma once
 
+#include "BaseRenderer.h"
 #include "ErrorCodes.h"
 #include "GraphicsAPIConstructor.h"
 #include "Shader.h"
@@ -24,12 +25,12 @@ namespace Vulkan
 namespace Vulkan
 {
 
-	class URenderer
+	class URenderer : BaseRenderer
 	{
 	public:
 
 		URenderer(UGraphicsCard* InOwningCard);
-		~URenderer();
+		~URenderer() override;
 
 		URenderer(const URenderer& Other)
 		{
@@ -52,17 +53,22 @@ namespace Vulkan
 			InFlightFences = InOther.InFlightFences;
 		}
 
-		URenderer(URenderer&& Other)
+		URenderer(URenderer&& Other) noexcept
 		{
-			Move(std::move(Other));
+			Move(Other);
 		}
 
-		URenderer& operator=(URenderer&& Other)
+		URenderer& operator=(URenderer&& Other) noexcept
 		{
-			Move(std::move(Other));
+			if (this != &Other)
+			{
+				Move(Other);
+
+			}
+			return *this;
 		}
 
-		void Move(URenderer&& InOther)
+		void Move(URenderer& InOther)
 		{
 			if (CommandPool != VK_NULL_HANDLE)ShutDown();
 
@@ -97,10 +103,43 @@ namespace Vulkan
 
 		void CreateRenderPass();
 
+		VkCommandPool* GetTransferPool()
+		{
+			return &TransferPool;
+		}
+
+		VkFence& GetCopyFence()
+		{
+			return CopyFence;
+		}
+
+		VkDescriptorPool* GetDescriptorPool()
+		{
+			return &DescriptorPool;
+		}
+
+		VkSampler GetSampler() const
+		{
+			return Sampler;
+		}
+
+		UGraphicsCard* GetOwningCard() const
+		{
+			return OwningCard;
+		}
+
+		void Draw(const size_t& Size) override;
+
+		void WaitForDrawToFinish();
+
 	private:
 
 		VkCommandPool CommandPool;
 		Array<VkCommandBuffer> CommandBuffers;
+
+		VkCommandPool TransferPool;
+
+		VkDescriptorPool DescriptorPool;
 
 		UGraphicsCard* OwningCard;
 
@@ -108,25 +147,16 @@ namespace Vulkan
 		Array<VkSemaphore> RenderFinishedSemaphores;
 		Array<VkFence> InFlightFences;
 
-		URenderPass* RenderPass;
+		VkSampler Sampler;
 
-		Shader* Test;
+		VkFence CopyFence;
+
+		URenderPass* RenderPass;
 
 		size_t CurrentFrame = 0;
 
 		VkCommandBuffer CurrentBuffer;
 
-		Array<Vector2D> testPositions = {
-	{0.0f, -0.5f},
-	{0.5f, 0.5f},
-	{-0.5f, 0.5f}
-		};
-		Array<Vector3D> testColors = {
-		{1.0f, 0.0f, 0.0f},
-		{0.0f, 1.0f, 0.0f},
-		{0.0f, 0.0f, 1.0f}
-		};
 
-		uint32_t vao;
 	};
 }

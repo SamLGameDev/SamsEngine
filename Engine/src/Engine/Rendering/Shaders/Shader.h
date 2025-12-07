@@ -28,21 +28,12 @@ public:
 
 	Shader(const Shader& Other)
 	{
-		StorageLocation = Other.GetRawStorageLocation();
-		Name = Other.GetName();
-		ID = Other.GetID();
-		Textures = Other.Textures;
-		Map = Other.Map;
 		RealShader = Other.RealShader;
 	}
 
 	Shader& operator=(const Shader& Other) {
 		if (this != &Other) { // prevent self-assignment
-			StorageLocation = Other.StorageLocation;
-			Name = Other.Name;
-			ID = Other.ID;
-			Textures = Other.Textures;
-			Map = Other.Map;
+
 			RealShader = Other.RealShader;
 		}
 		return *this;
@@ -50,13 +41,7 @@ public:
 
 	void Move(Shader& Other)
 	{
-		StorageLocation = std::move(Other.StorageLocation);
-		Name = std::move(Other.Name);
-		ID = Other.ID;
-		Textures = Other.Textures;
-		Map = std::move(Other.Map);
 		RealShader = std::move(Other.RealShader);
-		Other.ID = 0;
 	}
 
 	Shader(Shader&& Other) noexcept
@@ -129,12 +114,12 @@ public:
 	 */
 	[[nodiscard]] std::string GetRawStorageLocation() const
 	{
-		return StorageLocation;
+		return RealShader->GetRawStorageLocation();
 	}
 
 	[[nodiscard]] std::string GetName() const
 	{
-		return Name;
+		return RealShader->GetName();
 	}
 
 	/**
@@ -142,12 +127,12 @@ public:
 	 */
 	[[nodiscard]] unsigned int GetID() const
 	{
-		return ID;
+		return RealShader->GetID();
 	}
 
 	[[nodiscard]] Array<Texture> GetTextures() const
 	{
-		return Textures;
+		return RealShader->GetTextures();
 	}
 
 	void AddCubeMap(const CubeMap& InMap);
@@ -231,14 +216,7 @@ private:
 
 	[[nodiscard]] std::string ReadFileContents(const std::string_view& Location) const;
 
-	std::string StorageLocation;
-
-	std::string Name;
-
-	unsigned int ID;
-	Array<Texture> Textures;
-
-	CubeMap Map;
 
 	std::shared_ptr<BaseShader> RealShader;
+
 };

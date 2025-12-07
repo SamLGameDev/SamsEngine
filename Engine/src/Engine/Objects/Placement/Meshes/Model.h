@@ -122,13 +122,13 @@ private:
 	 */
 	void CalculatePointsForMesh(const aiMesh* InMesh);
 
-	//Shader ModelShader;
+	Shader ModelShader;
 
 
 	/**
 	 * All the textures that have currently been loaded, so we don't have to load them again when we have duplicates
 	 */
-	//static Array<Texture> LoadedTextures;
+	static Array<Texture> LoadedTextures;
 #if DEBUG
 	double Time;
 

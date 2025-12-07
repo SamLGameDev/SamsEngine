@@ -4,6 +4,7 @@
 #include <GLFW/glfw3.h>
 #include "BaseDelegate.h"
 
+class Window;
 class FirstWindow;
 class InputManager;
 
@@ -13,7 +14,7 @@ public:
 
 	InputAction() = default;
 
-	InputAction(int InKey, InputManager* Manager, FirstWindow* InWindow);
+	InputAction(int InKey, InputManager* Manager, Window* InWindow);
 
 
 	void ProcessInput(GLFWwindow* Window);

@@ -33,92 +33,42 @@ void Shader::SetUniformBuffer(const size_t& Location, const void* Data, const si
 
 void Shader::SetFloat(const std::string_view& InName, const float& Value) const
 {
-	glUniform1f(glGetUniformLocation(ID, InName.data()), Value);
+	RealShader->SetFloat(InName, Value);
 }
 
 void Shader::SetInt(const std::string_view& InName, const int& Value) const
 {
-	glUniform1i(glGetUniformLocation(ID, InName.data()), Value);
+	RealShader->SetInt(InName, Value);
 }
 
 void Shader::SetMatrix4fv(const std::string_view& InName, const GLfloat* Value) const
 {
-	glUniformMatrix4fv(glGetUniformLocation(ID, InName.data()), 1, GL_FALSE, Value);
+	RealShader->SetMatrix4fv(InName, Value);
 }
 
 void Shader::SetMatrix3fv(const std::string_view& InName, const GLfloat* Value) const
 {
-	glUniformMatrix3fv(glGetUniformLocation(ID, InName.data()), 1, GL_FALSE, Value);
+	RealShader->SetMatrix3fv(InName, Value);
 }
 
 void Shader::SetVec4(const std::string_view& InName, const Array<float>& Value) const
 {
-	glUniform4f(glGetUniformLocation(ID, InName.data()), Value[0], Value[1], Value[2], Value[3]);
+	RealShader->SetVec4(InName, Value);
 }
 
 void Shader::SetVec3(const std::string_view& InName, const Array<float>& Value) const
 {
-	glUniform3f(glGetUniformLocation(ID, InName.data()), Value[0], Value[1], Value[2]);
+	RealShader->SetVec3(InName, Value);
 }
 
 void Shader::SetVec3(const std::string_view& InName, const Vector3D& Value) const
 {
-	glUniform3f(glGetUniformLocation(ID, InName.data()), Value.X, Value.Y, Value.Z);
+	RealShader->SetVec3(InName, Value);
 }
 
 void Shader::ApplyTextures() const
 {
-	unsigned int SpecularNum = 1;
-	unsigned int DiffuseNum = 1;
-	unsigned int HeightNum = 1;
-	unsigned int NormalNum = 1;
-
-	//assign the texture based on its type
-
-	for (unsigned int i = 0; i < Textures.GetSize(); i++)
-	{
-		glActiveTexture(GL_TEXTURE0 + i);
-
-		std::string number;
-		std::string Type;
-
-		if (Textures[i].GetType() == diffuse)
-		{
-			Type = "texture_diffuse";
-			number = std::to_string(DiffuseNum++);
-		}
-		else if (Textures[i].GetType() == specular)
-		{
-			Type = "texture_specular";
-			number = std::to_string(SpecularNum++);
-		}
-		else if (Textures[i].GetType() == height)
-		{
-			Type = "texture_height";
-			number = std::to_string(HeightNum++);
-		}
-		else if (Textures[i].GetType() == normal)
-		{
-			Type = "texture_normal";
-			number = std::to_string(NormalNum++);
-		}
-
-		//TODO Fix This by converting the enum to string, and update the shader file to reflect this. Also figure out why this works?
-		std::string TextureSlot = "material." + Type + number;
-		SetInt(TextureSlot, i);
-
-		glBindTexture(GL_TEXTURE_2D, Textures[i].GetID());
-	}
-
-	//if there is a cube-map, apply it
-	if (Map.GetTextureLocation() != "")
-	{
-		glActiveTexture(GL_TEXTURE0 + Textures.GetSize());
-
-		SetInt("Map", Textures.GetSize());
-
-		glBindTexture(GL_TEXTURE_CUBE_MAP, Map.GetID());
-	}
+	RealShader->ApplyTextures();
 }
 
 void Shader::AddTexture(const Texture InTexture)
@@ -128,7 +78,7 @@ void Shader::AddTexture(const Texture InTexture)
 
 void Shader::AddTexture(const Array<Texture>& InTexture)
 {
-	Textures.Add(InTexture);
+	RealShader->AddTexture(InTexture);
 }
 
 bool Shader::CreateDefaultFragmentFile() const
@@ -166,7 +116,7 @@ bool Shader::CreateDefaultFragmentFile() const
 
 void Shader::AddCubeMap(const CubeMap& InMap)
 {
-	Map = InMap;
+	RealShader->AddCubeMap(InMap);
 }
 
 bool Shader::CreateDefaultShaderFile() const
@@ -274,7 +224,7 @@ bool Shader::DoesFragmentShaderExist() const
 
 std::string Shader::GetPathUntyped() const
 {
-	return CorePaths::Contents.Path + "/" + StorageLocation + Name;
+	return RealShader->GetRawStorageLocation();
 }
 
 std::string Shader::GetShaderLocation() const
@@ -294,108 +244,26 @@ std::string Shader::GetFragmentLocation() const
 
 unsigned int Shader::CompileVertex() const
 {
-	int  success;
-
-	const std::string vertexCodeString = ReadFileContents(GetShaderLocation());
-
-	const char* vertexCode = vertexCodeString.c_str();
-
-	const unsigned int vertex = glCreateShader(GL_VERTEX_SHADER);
-	glShaderSource(vertex, 1, &vertexCode, NULL);
-	glCompileShader(vertex);
-
-	glGetShaderiv(vertex, GL_COMPILE_STATUS, &success);
-
-	if (!success)
-	{
-#if DEBUG
-		char infoLog[512];
-		glGetShaderInfoLog(vertex, 512, NULL, infoLog);
-		std::cout << "ERROR::SHADER::VERTEX::" << Name << "::COMPILATION_FAILED\n" << infoLog << std::endl;
-#endif
-		return -1;
-	}
-
-	return vertex;
+	return -1;
 }
 
 unsigned int Shader::CompileGeometry() const
 {
-	int  success;
 
-	const std::string geometryCodeString = ReadFileContents(GetGeometryLocation());
 
-	const char* geometryCode = geometryCodeString.c_str();
-
-	const unsigned int geometry = glCreateShader(GL_GEOMETRY_SHADER);
-	glShaderSource(geometry, 1, &geometryCode, NULL);
-	glCompileShader(geometry);
-
-	glGetShaderiv(geometry, GL_COMPILE_STATUS, &success);
-
-	if (!success)
-	{
-#if DEBUG
-		char infoLog[512];
-		glGetShaderInfoLog(geometry, 512, NULL, infoLog);
-		std::cout << "ERROR::SHADER::GEOMETRY::" << Name << "::COMPILATION_FAILED\n" << infoLog << std::endl;
-#endif
-		return -1;
-	}
-
-	return geometry;
+	return -1;
 }
 
 unsigned int Shader::CompileFragment() const
 {
-	int  success;
 
-	const std::string fragmentCodeString = ReadFileContents(GetFragmentLocation());
 
-	const char* fragmentCode = fragmentCodeString.data();
-
-	const unsigned int fragment = glCreateShader(GL_FRAGMENT_SHADER);
-
-	glShaderSource(fragment, 1, &fragmentCode, NULL);
-	glCompileShader(fragment);
-	glGetShaderiv(fragment, GL_COMPILE_STATUS, &success);
-
-	if (!success)
-	{
-#if DEBUG
-		char infoLog[512];
-		glGetShaderInfoLog(fragment, 512, NULL, infoLog);
-		std::cout << "ERROR::SHADER::FRAGMENT::" << Name << "::COMPILATION_FAILED\n" << infoLog << std::endl;
-#endif
-		return -1;
-	}
-
-	return fragment;
+	return -1;
 }
 
 void Shader::CreateProgram(const unsigned int& vertex, const unsigned int& fragment, const unsigned int& geometry)
 {
-	int  success;
 
-	ID = glCreateProgram();
-	glAttachShader(ID, vertex);
-	glAttachShader(ID, geometry);
-	glAttachShader(ID, fragment);
-	glLinkProgram(ID);
-	glGetProgramiv(ID, GL_LINK_STATUS, &success);
-
-#if DEBUG
-
-	if (!success) {
-
-		char infoLog[512];
-		glGetProgramInfoLog(ID, 512, NULL, infoLog);
-		std::cout << "ERROR::SHADER::PROGRAM::COMPILATION_FAILED\n" << infoLog << std::endl;
-	}
-#endif
-	glDeleteShader(vertex);
-	glDeleteShader(geometry);
-	glDeleteShader(fragment);
 }
 
 std::string Shader::ReadFileContents(const std::string_view& Location) const

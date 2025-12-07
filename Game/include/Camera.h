@@ -11,8 +11,8 @@
 class Camera final : public WorldObject
 {
 public:
-	void SetUpInputs(FirstWindow* Window, InputManager* Manager);
-	Camera(FirstWindow* Window, InputManager* Manager);
+	void SetUpInputs(Window* Window, InputManager* Manager);
+	Camera(Window* Window, InputManager* Manager);
 
 	void Start() override;
 
@@ -52,12 +52,12 @@ public:
 		ActiveCamera = NewCamera;
 	}
 
-	[[nodiscard]] static FirstWindow* GetActiveWindow()
+	[[nodiscard]] static Window* GetActiveWindow()
 	{
 		return ActiveWindow;
 	};
 
-	static void SetActiveWindow(FirstWindow* NewWindow)
+	static void SetActiveWindow(Window* NewWindow)
 	{
 		ActiveWindow = NewWindow;
 	}
@@ -116,7 +116,11 @@ private:
 
 	static Camera* ActiveCamera;
 
-	static FirstWindow* ActiveWindow;
+	static Window* ActiveWindow;
 
-	Transforms* ptr;
+	GlobalTransforms* ptr;
+
+	uint32_t GlobalTransformsID;
+
+	InputManager* InputMange;
 };

@@ -106,7 +106,7 @@ namespace Vulkan
 		void BufferTexture(const uint32_t& ID, const unsigned char* Pixels, const uint32_t& Width, const uint32_t& Height)override;
 
 		BaseDataBuffer* GetBuffer(const uint32_t& ID) override;
-		BaseDataBuffer* GetTexture(const uint32_t& ID);
+		BaseDataBuffer* GetTexture(const uint32_t& ID) override;
 
 		void DrawVertexData(const uint32_t& ID) override;
 

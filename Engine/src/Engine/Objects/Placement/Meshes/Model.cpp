@@ -10,7 +10,7 @@
 #include "CorePaths.h"
 #include "InterfaceRenderer.h"
 
-//Array<Texture> Model::LoadedTextures;
+Array<Texture> Model::LoadedTextures;
 
 Model::Model(const std::string& Path, const Shader& InShader)
 {
@@ -32,7 +32,7 @@ Model::Model(const std::string& Path, const Shader& InShader)
 
 	ModelTransform = Transform(Vector3D(0, 0, 0), Vector3D(1, 1, 1), Vector3D(0, 0, 0));
 
-	//LoadModel();
+	LoadModel();
 
 #if DEBUG
 	std::cout << "NumVertices: " << NumVertices << std::endl;
@@ -260,32 +260,32 @@ void Model::LoadMaterialTextures(const aiMaterial* Mat, const aiTextureType& Typ
 {
 	for (unsigned int i = 0; i < Mat->GetTextureCount(Type); i++)
 	{
-		//aiString str;
-		//Mat->GetTexture(Type, i, &str);
+		aiString str;
+		Mat->GetTexture(Type, i, &str);
 
-		//const std::string Path = Directory + "\\" + str.C_Str();
+		const std::string Path = Directory + "\\" + str.C_Str();
 
-		//bool bSkip = false;
+		bool bSkip = false;
 
-		//for (unsigned int index = 0; index < LoadedTextures.GetSize(); index++)
-		//{
-		//	const std::string texPath = LoadedTextures[index].GetTextureLocation();
-		//	if (texPath == Path)
-		//	{
-		//		bSkip = true;
-		//		break;
-		//	}
-		//}
+		for (unsigned int index = 0; index < LoadedTextures.GetSize(); index++)
+		{
+			const std::string texPath = LoadedTextures[index].GetTextureLocation();
+			if (texPath == Path)
+			{
+				bSkip = true;
+				break;
+			}
+		}
 
-		//if (bSkip)
-		//{
-		//	continue;
-		//}
+		if (bSkip)
+		{
+			continue;
+		}
 
-		//const auto texture = Texture(Path, TypeName);
+		const auto texture = Texture(Path, TypeName);
 
-		//LoadedTextures.Add(texture);
-		//MeshShader.AddTexture(texture);
+		LoadedTextures.Add(texture);
+		MeshShader.AddTexture(texture);
 	}
 }
 

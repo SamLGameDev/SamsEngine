@@ -1,6 +1,10 @@
 #pragma once
 #include <initializer_list>
 #include <utility>
+#include <stdexcept>
+
+#include "vulkan/vulkan_core.h"
+
 template<typename T>
 class Array
 {
@@ -341,6 +345,15 @@ private:
 
 	void Copy(const Array& other)
 	{
+		if (other.GetSize() == 0)
+		{
+			delete[] DynamicArray;
+			DynamicArray = new T[1];
+			NumItems = 0;
+			ArraySize = 0;
+			return;
+		}
+
 		delete[] DynamicArray;
 		DynamicArray = new T[other.GetSize()];
 		for (unsigned int i = 0; i < other.GetSize(); i++)

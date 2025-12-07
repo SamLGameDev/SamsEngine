@@ -470,29 +470,6 @@ namespace Vulkan
 	void Shader::CreateProgram(const unsigned int& vertex, const unsigned int& fragment, const unsigned int& geometry)
 	{
 
-
-
-		int  success;
-
-		ID = glCreateProgram();
-		glAttachShader(ID, vertex);
-		glAttachShader(ID, geometry);
-		glAttachShader(ID, fragment);
-		glLinkProgram(ID);
-		glGetProgramiv(ID, GL_LINK_STATUS, &success);
-
-#if DEBUG
-
-		if (!success) {
-
-			char infoLog[512];
-			glGetProgramInfoLog(ID, 512, NULL, infoLog);
-			std::cout << "ERROR::SHADER::PROGRAM::COMPILATION_FAILED\n" << infoLog << std::endl;
-		}
-#endif
-		glDeleteShader(vertex);
-		glDeleteShader(geometry);
-		glDeleteShader(fragment);
 	}
 
 	std::string Shader::ReadFileContents(const std::string_view& Location) const

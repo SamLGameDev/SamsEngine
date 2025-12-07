@@ -10,6 +10,7 @@
 #include "CubeMap.h"
 #include "BaseShader.h"
 #include <functional>
+#include <memory>
 
 class Shader
 {
@@ -27,20 +28,31 @@ public:
 
 	Shader(const Shader& Other)
 	{
-		StorageLocation = Other.GetRawStorageLocation();
-		Name = Other.GetName();
-		ID = Other.GetID();
-		Textures = Other.Textures;
-		Map = Other.Map;
+		RealShader = Other.RealShader;
 	}
 
 	Shader& operator=(const Shader& Other) {
 		if (this != &Other) { // prevent self-assignment
-			StorageLocation = Other.StorageLocation;
-			Name = Other.Name;
-			ID = Other.ID;
-			Textures = Other.Textures;
-			Map = Other.Map;
+
+			RealShader = Other.RealShader;
+		}
+		return *this;
+	}
+
+	void Move(Shader& Other)
+	{
+		RealShader = std::move(Other.RealShader);
+	}
+
+	Shader(Shader&& Other) noexcept
+	{
+		Move(Other);
+	}
+
+	Shader& operator=(Shader&& Other) noexcept
+	{
+		if (this != &Other) {
+			Move(Other);
 		}
 		return *this;
 	}
@@ -50,6 +62,7 @@ public:
 	 */
 	void Use() const;
 
+	void SetUniformBuffer(const size_t& Location, const void* Data, const size_t& Size);
 
 	/**
 	 * Sets the shaders uniform float value
@@ -101,12 +114,12 @@ public:
 	 */
 	[[nodiscard]] std::string GetRawStorageLocation() const
 	{
-		return StorageLocation;
+		return RealShader->GetRawStorageLocation();
 	}
 
 	[[nodiscard]] std::string GetName() const
 	{
-		return Name;
+		return RealShader->GetName();
 	}
 
 	/**
@@ -114,18 +127,18 @@ public:
 	 */
 	[[nodiscard]] unsigned int GetID() const
 	{
-		return ID;
+		return RealShader->GetID();
 	}
 
-	[[nodiscard]] LinkedList<Texture> GetTextures() const
+	[[nodiscard]] Array<Texture> GetTextures() const
 	{
-		return Textures;
+		return RealShader->GetTextures();
 	}
 
 	void AddCubeMap(const CubeMap& InMap);
 
 
-	static std::function<BaseShader* (const std::string_view& InName, const std::string_view& InStorageLocation)> ShaderCreationFunc;
+	static std::function<std::shared_ptr<BaseShader> (const std::string_view& InName, const std::string_view& InStorageLocation)> ShaderCreationFunc;
 
 private:
 
@@ -203,15 +216,7 @@ private:
 
 	[[nodiscard]] std::string ReadFileContents(const std::string_view& Location) const;
 
-	std::string StorageLocation;
 
-	std::string Name;
+	std::shared_ptr<BaseShader> RealShader;
 
-	unsigned int ID;
-
-	LinkedList<Texture> Textures;
-
-	CubeMap Map;
-
-	BaseShader* RealShader;
 };

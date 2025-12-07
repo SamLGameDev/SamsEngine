@@ -53,17 +53,22 @@ namespace Vulkan
 			InFlightFences = InOther.InFlightFences;
 		}
 
-		URenderer(URenderer&& Other)
+		URenderer(URenderer&& Other) noexcept
 		{
-			Move(std::move(Other));
+			Move(Other);
 		}
 
-		URenderer& operator=(URenderer&& Other)
+		URenderer& operator=(URenderer&& Other) noexcept
 		{
-			Move(std::move(Other));
+			if (this != &Other)
+			{
+				Move(Other);
+
+			}
+			return *this;
 		}
 
-		void Move(URenderer&& InOther)
+		void Move(URenderer& InOther)
 		{
 			if (CommandPool != VK_NULL_HANDLE)ShutDown();
 
@@ -148,37 +153,10 @@ namespace Vulkan
 
 		URenderPass* RenderPass;
 
-		Shader* Test;
-
 		size_t CurrentFrame = 0;
 
 		VkCommandBuffer CurrentBuffer;
 
-		Array<Vector3D> testPositions = {
-	{-0.5f, -0.5f, 0.0f}, 
-	{0.5f, -0.5f, 0.0f}, 
-	{0.5f, 0.5f, 0.0f}, 
-	{-0.5f, 0.5f, 0.0f}
-		};
-		Array<Vector3D> testColors = {
-		{1.0f, 0.0f, 0.0f},
-		{0.0f, 1.0f, 0.0f},
-		{0.0f, 0.0f, 1.0f},
-			{ 1, 1, 1, }
-		};
 
-		Array<Vector2D> testTexCoor = { {1, 0 }, { 0, 0 }, {0, 1}, {1, 1} };
-	
-		const Array<uint16_t> indices = {
-	0, 1, 2, 2, 3, 0
-		};
-		uint32_t vao, vao2;
-
-		Array<Vector3D> testPositions2 = {
-{-0.5f, -0.5f, -0.5f},
-{0.5f, -0.5f, -0.5f},
-{0.5f, 0.5f, -0.5f},
-{-0.5f, 0.5f, -0.5f}
-		};
 	};
 }

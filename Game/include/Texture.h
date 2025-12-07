@@ -2,21 +2,11 @@
 #include <string>
 #include <map>
 #include <cstdint>
+#include "BaseTexture.h"
+#include <functional>
+#include <memory>
 
 #include "glad/glad.h"
-
-
-/**
- * Type of the texture, used to decided how its loaded, and what the shader does with it
- */
-enum TextureType : std::int8_t
-{
-	diffuse,
-	specular,
-	normal,
-	height,
-};
-
 
 class Texture
 {
@@ -31,18 +21,58 @@ public:
 	 */
 	Texture(const std::string_view& InTextureLocation, const TextureType& InType);
 
+	~Texture();
+
 	/**
 	 * Generate a texture according to how many channels it has, i.e. 3 for rgb, 4 for rgba
 	 */
 	void GenerateByChannel(const std::uint8_t& nrChannels, const unsigned int& width, const unsigned int& height, const unsigned char* data) const;
 
-	inline Texture(const Texture& Other)
+	void Copy(const Texture& Other)
+	{
+		TextureLocation = Other.GetTextureLocation();
+		ID = Other.GetID();
+		RealTexture = Other.RealTexture;
+		Type = Other.Type;
+	}
+
+	Texture(const Texture& Other)
 	{
 		//only need to copy the location, ID, and type, as its already beem generated and bound at creation
 
-		TextureLocation = Other.GetTextureLocation();
-		ID = Other.GetID();
+		Copy(Other);
+	}
+
+	void Move(Texture& Other)
+	{
+		TextureLocation = std::move(Other.TextureLocation);
+		ID = Other.ID;
+		RealTexture = Other.RealTexture;
 		Type = Other.Type;
+		Other.ID = 0;
+		Other.RealTexture = nullptr;
+	}
+
+	Texture(Texture&& Other) noexcept
+	{
+		Move(Other);
+	}
+
+	Texture& operator=(Texture&& Other) noexcept
+	{
+		if (this != &Other)
+		{
+			Move(Other);
+		}
+		return *this;
+	}
+
+	Texture& operator=(const Texture& Other) {
+		if (this != &Other) 
+		{
+			Copy(Other);
+		}
+		return *this;
 	}
 
 	/**
@@ -50,7 +80,7 @@ public:
 	 */
 	[[nodiscard]] inline unsigned int GetID() const
 	{
-		return ID;
+		return RealTexture->GetID();
 	}
 
 	/**
@@ -58,7 +88,7 @@ public:
 	 */
 	[[nodiscard]] inline std::string GetTextureLocation() const
 	{
-		return TextureLocation;
+		return RealTexture->GetTextureLocation();
 	}
 
 	/**
@@ -73,6 +103,8 @@ public:
 	{
 		return Type;
 	}
+	static std::function<std::shared_ptr<BaseTexture> (const std::string_view& InTextureLocation, const TextureType& InType)> TextureCreationFunc;
+	std::shared_ptr<BaseTexture> RealTexture;
 
 private:
 

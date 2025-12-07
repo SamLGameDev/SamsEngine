@@ -6,6 +6,7 @@
 #include <assimp/Importer.hpp>
 #include <assimp/scene.h>
 #include <memory>
+#include "WireShapes.h"
 
 
 
@@ -25,24 +26,44 @@ public:
 	Model(const std::string& Path, const Shader& InShader);
 
 	~Model();
+	void Copy(const Model& Other);
 
+	Model(const Model& Other);
+	void Move(Model& Other);
+
+	Model(Model&& Other) noexcept
+	{
+		Move(Other);
+	}
+
+	Model& operator=(const Model& Other)
+	{
+		if (this != &Other)
+		{
+			Copy(Other);
+		}
+		return *this;
+	}
+	Model& operator=(Model&& Other) noexcept
+	{
+		if (this != &Other)
+		{
+			Move(Other);
+		}
+		return *this;
+	}
 
 	/**
 	 * Draws the model with the set shader
 	 */
-	void Draw() const;
+	void Draw();
 
-
-	/**
-	 * Draws an outline of the model
-	 */
-	void DrawOutline();
 
 
 	/**
 	 * Draws the model with the input shader
 	 */
-	void Draw(const Shader* InShader) const;
+	void Draw(Shader InShader);
 
 
 
@@ -62,22 +83,6 @@ public:
 
 	std::unique_ptr<WireObject> BoundingBox;
 
-	void SetOutlineShader(const Shader& Outline)
-	{
-		OutlineShader = Outline;
-	}
-
-
-	/**
-	 * Adds a new instance to of the model, and updates the buffer
-	 */
-	void AddInstance(const Transform* transform);
-
-	//TODO rework this to work per object, instead of mesh
-	/**
-	 * The Depth buffer draw group, should normally be GL_LESS.
-	 */
-	GLenum DrawGroup;
 
 	//TODO get rid of this, need to rework bounds recalculation
 	Transform ModelTransform;
@@ -95,7 +100,7 @@ private:
 
 	void LoadModel();
 
-	void ProcessNode(const aiNode* Node, const aiScene* Scene);
+	void ProcessNode(const aiNode* Node, const aiScene* Scene, size_t& CurrentMesh);
 
 	//TODO do something about this, even if it means creating our own file loader
 	/**
@@ -119,8 +124,6 @@ private:
 
 	Shader ModelShader;
 
-	Shader OutlineShader;
-
 
 	/**
 	 * All the textures that have currently been loaded, so we don't have to load them again when we have duplicates
@@ -131,25 +134,6 @@ private:
 
 	unsigned int NumVertices = 0;
 #endif
-
-	constexpr static float OutlineSize = 0.1f;
-
-	unsigned int Instances = 0;
-
-	Array<const Transform*> InstanceTransforms;
-
-	GLuint ModelVBO;
-
-
-	/**
-	 * The persistent uniform buffer ptr model transforms
-	 */
-	glm::mat4* modelTransforms;
-
-	/**
- * Updates the stored model transformed to reflect the current positions of all instances of this model
- */
-	void UpdateModelLocations() const;
 
 
 };

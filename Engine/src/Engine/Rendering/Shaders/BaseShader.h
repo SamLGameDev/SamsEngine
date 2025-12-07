@@ -90,7 +90,7 @@ public:
 	 */
 	virtual [[nodiscard]] unsigned int GetID() const = 0;
 
-	virtual [[nodiscard]] LinkedList<Texture> GetTextures() const = 0;
+	virtual [[nodiscard]] Array<Texture> GetTextures() const = 0;
 
 	virtual void AddCubeMap(const CubeMap& InMap) = 0;
 

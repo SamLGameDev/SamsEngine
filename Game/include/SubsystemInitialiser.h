@@ -34,7 +34,7 @@ private:
 
 	Camera* camera;
 
-	Renderer* renderer;
+	OpenGL::Renderer* renderer;
 
 	LightManager* lightManager;
 

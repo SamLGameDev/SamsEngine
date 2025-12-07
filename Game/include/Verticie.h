@@ -1,3 +1,7 @@
+// DO NOT MARK.
+//This is because it has been submitted for my dissertation. Link to Original: https://github.falmouth.ac.uk/GA-Undergrad-Student-Work-25-26/Dissertation-SL295211.git
+
+
 #pragma once
 #include "Vector3D.h"
 #include "Vector2D.h"
@@ -29,38 +33,51 @@ public:
 	Vertex() = default;
 };
 
-namespace std {
-	template <>
-	struct hash<Vertex> {
-		std::size_t operator()(const Vertex& v) const noexcept
-		{
-			const std::size_t hx = std::hash<float>{}(v.Position.X);
-			const std::size_t hy = std::hash<float>{}(v.Position.Y);
-			const std::size_t hz = std::hash<float>{}(v.Position.Z);
-			return hx ^ (hy << 1) ^ (hz << 2);
-		}
-	};
-}
-
 struct Face
 {
 public:
 
-	Array<Vertex> Vertices;
+	Array<Vector3D> Vertices;
 
 	bool operator==(const Face& other) const {
 		if (other.Vertices.GetSize() == Vertices.GetSize())
 		{
+			Array<Vector3D> set = other.Vertices;
+
 			for (unsigned int i = 0; i < Vertices.GetSize(); i++)
 			{
-				if (Vertices[i] != other.Vertices[i])
+				if (set.Contains(Vertices[i]))
 				{
-					return false;
+					set.Remove(Vertices[i]);
 				}
 			}
-			return true;
+
+			if (set.IsEmpty()) return true;
+
+			return false;
 		}
 
 		return false;
+	}
+
+	bool operator<(const Face& other) const {
+		if (other.Vertices.GetSize() == Vertices.GetSize())
+		{
+			Array<Vector3D> set = other.Vertices;
+
+			for (unsigned int i = 0; i < Vertices.GetSize(); i++)
+			{
+				if (set.Contains(Vertices[i]))
+				{
+					set.Remove(Vertices[i]);
+				}
+			}
+
+			if (set.IsEmpty()) return false;
+
+			return true;
+		}
+
+		return true; 
 	}
 };

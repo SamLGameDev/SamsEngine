@@ -22,6 +22,28 @@ namespace Vulkan
 		URenderPipeline(Shader& InShader);
 		~URenderPipeline();
 
+		URenderPipeline(const URenderPipeline& Other)
+		{
+			Copy(Other);
+		}
+
+		void Copy(const URenderPipeline& Other)
+		{
+			Layout = Other.Layout;
+			Pipeline = Other.Pipeline;
+			DescriptorLayout = Other.DescriptorLayout;
+			DescriptorSet = Other.DescriptorSet;
+		}
+
+		URenderPipeline& operator=(const URenderPipeline& Other)
+		{
+			if (this != &Other)
+			{
+				Copy(Other);
+			}
+			return *this;
+		}
+
 		ErrorCodes Init(Shader& InShader);
 
 		ErrorCodes ShutDown();
@@ -31,11 +53,25 @@ namespace Vulkan
 			return Pipeline;
 		}
 
+		const VkDescriptorSet& GetDescriptorSet() const
+		{
+			return DescriptorSet;
+		}
+
+		const VkPipelineLayout& GetPipelineLayout()const
+		{
+			return Layout;
+		}
+
 	private:
 
 		VkPipelineLayout Layout;
 
 		VkPipeline Pipeline;
+
+		VkDescriptorSetLayout DescriptorLayout;
+
+		VkDescriptorSet DescriptorSet;
 
 	};
 }

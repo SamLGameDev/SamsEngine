@@ -89,36 +89,7 @@ namespace Vulkan
 			throw std::runtime_error("Failed to create texture sampler");
 		}
 
-
-		Test = new Shader("triangle", "/Shaders/");
-
-		Texture* testtex = new Texture("/Models/Statue/texture.jpg", TextureType::diffuse);
-
-		Test->AddTexture(*testtex);
-
 		CurrentBuffer = CommandBuffers[0];
-
-		DataBuffers::GenBuffer(vao);
-
-		//DataBuffers::BindVertexInfo(vao, 0, testPositions.GetSize(), sizeof(Vector3D), 0, Vector3);
-
-		////DataBuffers::BindVertexInfo(vao, 1, 0, sizeof(Vector3D), 0, Vector3);
-		//DataBuffers::BindVertexInfo(vao, 2, 0, sizeof(Vector2D), 0, Vector2);
-
-		//DataBuffers::BufferData(vao, testPositions.GetSize() * sizeof(Vector3D), testPositions.GetFirstRef(), BufferTargets::VERTEX);
-		//DataBuffers::BufferDataIndex(vao, indices.GetSize() * sizeof(uint16_t), indices.GetFirstRef());
-		////DataBuffers::BufferData(vao, testColors.GetSize() * sizeof(Vector3D), testColors.GetFirstRef(), BufferTargets::VERTEX);
-		//DataBuffers::BufferData(vao, testTexCoor.GetSize() * sizeof(Vector2D), testTexCoor.GetFirstRef(), BufferTargets::VERTEX);
-
-		//DataBuffers::GenBuffer(vao2);
-
-		//DataBuffers::BindVertexInfo(vao2, 0, testPositions2.GetSize(), sizeof(Vector3D), 0, Vector3);
-
-		////DataBuffers::BindVertexInfo(vao2, 1, 0, sizeof(Vector3D), 0, Vector3);
-
-		//DataBuffers::BufferData(vao2, testPositions2.GetSize() * sizeof(Vector3D), testPositions2.GetFirstRef(), BufferTargets::VERTEX);
-		//DataBuffers::BufferDataIndex(vao2, indices.GetSize() * sizeof(uint16_t), indices.GetFirstRef());
-		////DataBuffers::BufferData(vao2,testColors.GetSize() * sizeof(Vector3D), testColors.GetFirstRef(), BufferTargets::VERTEX);
 
 		return SUCCEEDED;
 	}
@@ -300,7 +271,7 @@ namespace Vulkan
 
 		for (FracturePiece3D* piece : FracturesToRender)
 		{
-			piece->Draw(Test);
+			//piece->Draw();
 		}
 
 		for (Model* model : ModelsToRender)
@@ -320,8 +291,6 @@ namespace Vulkan
 
 	ErrorCodes URenderer::ShutDown()
 	{
-
-		delete Test;
 
 		vkDestroySampler(*SInstance::GetInstance()->GraphicsCard->GetLogicalDevice()->GetVulkanLogicalDevice(), Sampler, nullptr);
 

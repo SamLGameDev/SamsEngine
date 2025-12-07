@@ -1,16 +1,17 @@
 #pragma once
 
+#include <optional>
+
 #include "Array.h"
 #include "Verticie.h"
 #include "Shader.h"
 #include "Transform.h"
+#include <utility>
 
 class Mesh
 {
 public:
 	Mesh();
-
-	Mesh(const Array<Vertex>& InVertices, const Array<unsigned int>& InIndices, const Shader& InShader);
 
 	~Mesh();
 	void Copy(const Mesh& Copy);
@@ -27,31 +28,54 @@ public:
 		return *this;
 	}
 
+	void Move(Mesh& other)
+	{
+		Vertices = std::move(other.Vertices);
+		Indices = std::move(other.Indices);
+		FVerts = std::move(other.FVerts);
+		FTexCoords = std::move(other.FTexCoords);
+		MeshShader = std::move(other.MeshShader);
+		VAO = other.VAO;
+		other.VAO = 0;
+	}
 
-	void Draw(const Transform* ModelTransform) const;
+	Mesh(Mesh&& other) noexcept
+	{
+		Move(other);
+	}
 
-	void Draw(const Transform* ModelTransform, const Shader* InShader) const;
+	Mesh& operator=(Mesh&& other) noexcept
+	{
+		if (this != &other)
+		{
+			Move(other);
+		}
+		return *this;
+	}
+
+	void Initialise();
+
+	void Draw(const Transform* ModelTransform);
+
+	void Draw(const Transform* ModelTransform, Shader& InShader) const;
 
 	void RegenerateMesh();
 
 
 	Array<Vertex> Vertices;
 
-	Array<unsigned int> Indices;
+	Array<uint16_t> Indices;
+
+	Array<Vector3D> FVerts;
+	Array<Vector2D> FTexCoords;
 
 	Shader MeshShader;
 
-	GLuint VAO, VBO, EBO;
-
-	unsigned int* Instances;
-
+	uint32_t VAO;
 private:
 
 	void SetUpMesh();
 
-	static void SetShaderVariables(const Transform* ModelTransform, const Shader* InShader);
+	static void SetShaderVariables(const Transform* ModelTransform, Shader InShader);
 
-	static void SetLightVariables(const glm::mat4& view, const Shader* InShader);
-
-	static void SetTransformationVariables(const glm::mat4& model, const glm::mat3& normalModel, const Shader* InShader);
 };
