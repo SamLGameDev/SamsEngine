@@ -1,3 +1,42 @@
+## DO NOT MARK
+StaticMeshComponent.cpp and h
+Item.cpp and h
+LinkedList.cpp and h
+Verticie.cpp and h
+BaseLight.cpp and h
+DirectionalLight.cpp and h
+LightManager.cpp and h
+PointLight.cpp and h
+SpotLight.cpp and h
+
+All of wire shapes.cpp except lines 139 -190. This is marked by the DO mark comments.
+All of wireshapes.h
+
+ObjectFactory.cpp and h
+
+CollisionCast.cpp and h
+
+FrameBufferFactory.cpp and h
+UnifromBufferFactory.cpp and h
+
+OpenGLShader.cpp and h
+
+CreateDefaultShaderFile, CreateDefaultGeometryFile, CreateDefaultFragmentFile from VulkanShader.cpp
+CreateDefaultShaderFile, CreateDefaultGeometryFile, CreateDefaultFragmentFile from VulkanShader.h
+
+Renderer.cpp
+Renderer.h
+
+CubeMap.cpp and h
+OpenGLTexture.cpp and h
+
+FirstWindow.cpp and h
+
+RuntimeEngine.cpp and h
+
+SubsystemInitialiser.cpp and h
+
+MeshObject.cpp and h
 
 ## Description
 
