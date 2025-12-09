@@ -11,6 +11,8 @@ public:
 
 	static void AddFracture(FracturePiece3D* Piece);
 
+	static void ReplaceFracture(const FracturePiece3D* Old, const FracturePiece3D* New);
+
 	static void AddWireShape(WireObject* Shape);
 
 	static void AddModel(Model* InModel);

@@ -25,18 +25,18 @@ void SpotLight::Implement(const Shader* InShader)
 {
 	const glm::vec4 lightModel = Camera::GetActiveCamera()->transform.GetModelMatrix() * glm::vec4(0, 0, 0, 1);
 
-	InShader->SetVec3("spotLight.position", Vector3D(lightModel.x, lightModel.y, lightModel.z));
+	//InShader->SetVec3("spotLight.position", Vector3D(lightModel.x, lightModel.y, lightModel.z));
 
 	const glm::vec3 front = Camera::GetActiveCamera()->GetFront();
 
-	InShader->SetVec3("spotLight.direction", Vector3D(front.x, front.y, front.z));
+//	InShader->SetVec3("spotLight.direction", Vector3D(front.x, front.y, front.z));
 
-	InShader->SetFloat("material.shininess", Shininess);
+	//InShader->SetFloat("material.shininess", Shininess);
 
-	InShader->SetVec3("spotLight.ambient", ambient);
-	InShader->SetVec3("spotLight.diffuse", diffuse);
-	InShader->SetVec3("spotLight.specular", specular);
+	//InShader->SetVec3("spotLight.ambient", ambient);
+	//->SetVec3("spotLight.diffuse", diffuse);
+	//InShader->SetVec3("spotLight.specular", specular);
 
-	InShader->SetFloat("spotLight.innerCutOff", innerCutOff);
-	InShader->SetFloat("spotLight.outerCutOff", outerCutOff);
+//	InShader->SetFloat("spotLight.innerCutOff", innerCutOff);
+//	InShader->SetFloat("spotLight.outerCutOff", outerCutOff);
 }

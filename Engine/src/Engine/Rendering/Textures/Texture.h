@@ -23,11 +23,6 @@ public:
 
 	~Texture();
 
-	/**
-	 * Generate a texture according to how many channels it has, i.e. 3 for rgb, 4 for rgba
-	 */
-	void GenerateByChannel(const std::uint8_t& nrChannels, const unsigned int& width, const unsigned int& height, const unsigned char* data) const;
-
 	void Copy(const Texture& Other)
 	{
 		TextureLocation = Other.GetTextureLocation();

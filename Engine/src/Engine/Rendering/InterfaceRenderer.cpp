@@ -11,6 +11,11 @@ void Renderer::AddFracture(FracturePiece3D* Piece)
 	RealRenderer->AddFracture(Piece);
 }
 
+void Renderer::ReplaceFracture(const FracturePiece3D* Old, const FracturePiece3D* New)
+{
+	RealRenderer->ReplaceFracture(Old, New);
+}
+
 void Renderer::AddWireShape(WireObject* Shape)
 {
 	RealRenderer->AddWireShape(Shape);

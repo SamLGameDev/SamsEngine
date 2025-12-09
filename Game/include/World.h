@@ -26,14 +26,6 @@ public:
 
 private:
 
-
-	/**
-	 * A pointer the the global time buffer for shaders, stores the time elapsed since program start \n
-	 * Buffer location = 1
-	 */
-	double* TimeBufferPtr;
-
-
 	/**
 	 * The time since the last frame, will be updated in tick
 	 */

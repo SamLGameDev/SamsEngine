@@ -14,6 +14,7 @@ public:
 	virtual ~BaseRenderer() = default;
 
 	void AddFracture(FracturePiece3D* Piece);
+	void ReplaceFracture(const FracturePiece3D* Old, const FracturePiece3D* New);
 	void AddWireShape(WireObject* Shape);
 	void AddModel(Model* InModel);
 

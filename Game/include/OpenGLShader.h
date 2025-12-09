@@ -1,3 +1,7 @@
+// DO NOT MARK.
+//This is because it has been submitted for my dissertation. Link to Original: https://github.falmouth.ac.uk/GA-Undergrad-Student-Work-25-26/Dissertation-SL295211.git
+
+
 #pragma once
 
 #include <string>
@@ -53,42 +57,7 @@ namespace OpenGL
 		void Use() const;
 
 
-		/**
-		 * Sets the shaders uniform float value
-		 */
-		void SetFloat(const std::string_view& InName, const float& Value) const;
-
-		/**
-		 * Sets the shaders uniform int value
-		 */
-		void SetInt(const std::string_view& InName, const int& Value) const;
-
-		/**
-		 * Sets the shaders uniform mat4 value
-		 */
-		void SetMatrix4fv(const std::string_view& InName, const GLfloat* Value) const;
-
-		/**
-		 * Sets the shaders uniform mat3 value
-		 */
-		void SetMatrix3fv(const std::string_view& InName, const GLfloat* Value) const;
-
-		/**
-		 * Sets the shaders uniform vec4 value
-		 */
-		void SetVec4(const std::string_view& InName, const Array<float>& Value) const;
-
-		/**
-		 * Sets the shaders uniform vec3 value
-		 */
-		void SetVec3(const std::string_view& InName, const Array<float>& Value) const;
-
-		/**
-		 * Sets the shaders uniform vec3 value
-		 */
-		void SetVec3(const std::string_view& InName, const Vector3D& Value) const;
-
-
+	
 		/**
 		 * Apply all the textures for the next set of rendered objects
 		 */

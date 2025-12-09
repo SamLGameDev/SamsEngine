@@ -21,11 +21,11 @@ void DirectionalLight::Implement(const Shader* InShader)
 {
 	const auto front = Vector3D(Camera::GetActiveCamera()->GetFront().x, Camera::GetActiveCamera()->GetFront().y, Camera::GetActiveCamera()->GetFront().z);
 
-	InShader->SetVec3("directional.direction", front);
+	//InShader->SetVec3("directional.direction", front);
 
-	InShader->SetFloat("material.shininess", Shininess);
+//	InShader->SetFloat("material.shininess", Shininess);
 
-	InShader->SetVec3("directional.ambient", ambient);
-	InShader->SetVec3("directional.diffuse", diffuse);
-	InShader->SetVec3("directional.specular", specular);
+	//->SetVec3("directional.ambient", ambient);
+	//InShader->SetVec3("directional.diffuse", diffuse);
+	//InShader->SetVec3("directional.specular", specular);
 }

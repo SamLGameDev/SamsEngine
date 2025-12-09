@@ -34,46 +34,7 @@ public:
 	virtual void Use() = 0;
 
 	virtual void SetUniformBuffer(const size_t& Location, const void* Data, const size_t& Size) = 0;
-	/**
-	 * Sets the shaders uniform float value
-	 */
-	virtual void SetFloat(const std::string_view& InName, const float& Value) = 0;
 
-	/**
-	 * Sets the shaders uniform int value
-	 */
-	virtual void SetInt(const std::string_view& InName, const int& Value) const = 0;
-
-	/**
-	 * Sets the shaders uniform mat4 value
-	 */
-	virtual void SetMatrix4fv(const std::string_view& InName, const GLfloat* Value) const = 0;
-
-	/**
-	 * Sets the shaders uniform mat3 value
-	 */
-	virtual void SetMatrix3fv(const std::string_view& InName, const GLfloat* Value) const = 0;
-
-	/**
-	 * Sets the shaders uniform vec4 value
-	 */
-	virtual void SetVec4(const std::string_view& InName, const Array<float>& Value) const = 0;
-
-	/**
-	 * Sets the shaders uniform vec3 value
-	 */
-	virtual void SetVec3(const std::string_view& InName, const Array<float>& Value) const = 0;
-
-	/**
-	 * Sets the shaders uniform vec3 value
-	 */
-	virtual void SetVec3(const std::string_view& InName, const Vector3D& Value) const = 0;
-
-
-	/**
-	 * Apply all the textures for the next set of rendered objects
-	 */
-	virtual void ApplyTextures() const = 0;
 
 	virtual void AddTexture(const Texture InTexture) = 0;
 	virtual void AddTexture(const Array<Texture>& InTexture) = 0;
@@ -148,9 +109,6 @@ private:
 	 * @return The full path to the fragment shader
 	 */
 	virtual [[nodiscard]] std::string GetFragmentLocation() const = 0;
-
-
-	virtual void CreateProgram(const unsigned int& vertex, const unsigned int& fragment, const unsigned int& geometry) = 0;
 
 	virtual [[nodiscard]] std::string ReadFileContents(const std::string_view& Location) const = 0;
 

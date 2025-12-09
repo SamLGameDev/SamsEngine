@@ -93,7 +93,7 @@ void WireObject::SetShaderVariables() const
 
 void WireObject::SetTransformationVariables(const glm::mat4& model) const
 {
-	WireShader->SetMatrix4fv("Model", glm::value_ptr(model));
+	//WireShader->SetMatrix4fv("Model", glm::value_ptr(model));
 }
 
 std::unique_ptr<WireObject> DrawWireCube(const Vector3D& Center, const Vector3D& HalfBounds, const Vector3D& Size,

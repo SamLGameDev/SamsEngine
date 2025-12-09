@@ -321,7 +321,7 @@ FracturePiece::FracturePiece(Array<Vector2D> cell, Vector2D Point)
 void FracturePiece::Draw(const Shader* InShader)
 {
 	InShader->Use();
-	InShader->SetVec3("Color", color);
+	//InShader->SetVec3("Color", color);
 
 	//std::cout << "DrawCalled";
 

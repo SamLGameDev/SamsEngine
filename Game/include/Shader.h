@@ -65,42 +65,6 @@ public:
 	void SetUniformBuffer(const size_t& Location, const void* Data, const size_t& Size);
 
 	/**
-	 * Sets the shaders uniform float value
-	 */
-	void SetFloat(const std::string_view& InName, const float& Value) const;
-
-	/**
-	 * Sets the shaders uniform int value
-	 */
-	void SetInt(const std::string_view& InName, const int& Value) const;
-
-	/**
-	 * Sets the shaders uniform mat4 value
-	 */
-	void SetMatrix4fv(const std::string_view& InName, const GLfloat* Value) const;
-
-	/**
-	 * Sets the shaders uniform mat3 value
-	 */
-	void SetMatrix3fv(const std::string_view& InName, const GLfloat* Value) const;
-
-	/**
-	 * Sets the shaders uniform vec4 value
-	 */
-	void SetVec4(const std::string_view& InName, const Array<float>& Value) const;
-
-	/**
-	 * Sets the shaders uniform vec3 value
-	 */
-	void SetVec3(const std::string_view& InName, const Array<float>& Value) const;
-
-	/**
-	 * Sets the shaders uniform vec3 value
-	 */
-	void SetVec3(const std::string_view& InName, const Vector3D& Value) const;
-
-
-	/**
 	 * Apply all the textures for the next set of rendered objects
 	 */
 	void ApplyTextures() const;
@@ -142,40 +106,6 @@ public:
 
 private:
 
-	//TODO update all the default files to reflect new system
-	/**
-	 * Creates a default vertex file for rendering an object
-	 * @return true if file successfully created
-	 */
-	bool CreateDefaultShaderFile() const;
-
-	/**
-	 * Creates a default geometry file for rendering an object
-	 * @return true if file successfully created
-	 */
-	bool CreateDefaultGeometryFile() const;
-
-	/**
-	 * Creates a default fragment file for rendering an object
-	 * @return true if file successfully created
-	 */
-	bool CreateDefaultFragmentFile() const;
-
-
-	/**
-	 * @return true if the vertex file exists
-	 */
-	[[nodiscard]] bool DoesVertexShaderExist() const;
-
-	/**
-	 * @return true if the geometry file exists
-	 */
-	[[nodiscard]] bool DoesGeometryShaderExist() const;
-
-	/**
-	 * @return true if the fragment file exists
-	 */
-	[[nodiscard]] bool DoesFragmentShaderExist() const;
 
 	std::string GetPathUntyped() const;
 
@@ -194,27 +124,6 @@ private:
 	 * @return The full path to the fragment shader
 	 */
 	[[nodiscard]] std::string GetFragmentLocation() const;
-
-
-
-	/**
-	 * @return The buffer of the vertex shader, if -1 means it failed
-	 */
-	[[nodiscard]] unsigned int CompileVertex() const;
-
-	/**
-	 * @return The buffer of the Geometry shader, if -1 means it failed
-	 */
-	[[nodiscard]] unsigned int CompileGeometry() const;
-
-	/**
-	 * @return The buffer of the Fragment shader, if -1 means it failed
-	 */
-	[[nodiscard]] unsigned int CompileFragment() const;
-
-	void CreateProgram(const unsigned int& vertex, const unsigned int& fragment, const unsigned int& geometry);
-
-	[[nodiscard]] std::string ReadFileContents(const std::string_view& Location) const;
 
 
 	std::shared_ptr<BaseShader> RealShader;

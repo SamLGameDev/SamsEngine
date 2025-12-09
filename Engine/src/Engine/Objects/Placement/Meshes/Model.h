@@ -129,11 +129,10 @@ private:
 	 * All the textures that have currently been loaded, so we don't have to load them again when we have duplicates
 	 */
 	static Array<Texture> LoadedTextures;
-#if DEBUG
+
 	double Time;
 
 	unsigned int NumVertices = 0;
-#endif
 
 
 };

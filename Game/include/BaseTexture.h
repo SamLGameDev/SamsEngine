@@ -1,3 +1,5 @@
+
+
 #pragma once
 #include <string>
 #include <map>
@@ -38,10 +40,6 @@ public:
 	 */
 	BaseTexture(const std::string_view& InTextureLocation, const TextureType& InType) {};
 
-	/**
-	 * Generate a texture according to how many channels it has, i.e. 3 for rgb, 4 for rgba
-	 */
-	virtual void GenerateByChannel(const std::uint8_t& nrChannels, const unsigned int& width, const unsigned int& height, const unsigned char* data) const = 0;
 
 	/**
 	 * @return The buffer ID assigned to this texture

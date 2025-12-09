@@ -10,19 +10,8 @@
 #include "ObjectFactory.h"
 #include "InterfaceRenderer.h"
 #include "glm/gtc/type_ptr.hpp"
-#include <CGAL/Exact_predicates_inexact_constructions_kernel.h>
-#include <CGAL/Delaunay_triangulation_3.h>
-#include <CGAL/Triangulation_vertex_base_with_info_3.h>
 
-typedef CGAL::Exact_predicates_inexact_constructions_kernel K;
-
-// Define a vertex base with an "info" field
-typedef CGAL::Triangulation_vertex_base_with_info_3<size_t, K> Vb;
-typedef CGAL::Triangulation_cell_base_3<K> Cb;
-typedef CGAL::Triangulation_data_structure_3<Vb, Cb> Tds;
-typedef CGAL::Delaunay_triangulation_3<K, Tds> Delaunay3;
-typedef K::Point_3 Point3;
-void Voronoi::FracturePlaneRandom(Model& InModel)
+void Voronoi::FracturePlaneRandom(Model& InModel, Array<FracturePiece3D>& OutFractures)
 {
 
 	Array<Vector3D> points;
@@ -31,7 +20,7 @@ void Voronoi::FracturePlaneRandom(Model& InModel)
 
 	//FracturePiece3D::PointShader = Shader("Point3D", "Shaders/");
 
-	for (size_t i = 0; i < 100; i++)
+	for (size_t i = 0; i < 10; i++)
 	{
 		Vector3D point1 = InModel.ModelTransform.GetRandomPointInBounds();
 
@@ -202,41 +191,38 @@ void Voronoi::FracturePlaneRandom(Model& InModel)
 						if (bAddSecond) intersectFace.Vertices.Add(secondIntersection);
 					}
 				}
+
 				newFaces.Add(newFace);
 			}
-			newFaces.Add(intersectFace);
+			if (intersectFace.Vertices.GetSize() > 2) newFaces.Add(intersectFace);
 
 			Faces = newFaces;
 		}
 		auto color = Vector3D::RandomRange(Vector3D(30, 30, 30), Vector3D(255, 255, 255));
+		////for (auto& face : Faces)
+		////{
+
+		////	FracturePiece3D* frac = CreateObjectPtr<FracturePiece3D>(face.Vertices, currentPoint);
+		////	frac->color = color;
+		////	fractureFaces.Add(face);
+		////}
+//
+		Array<Vector3D> test;
 		for (auto& face : Faces)
 		{
-		//Face face = Faces[5];
-			if (fractureFaces.Contains(face))
-			{
-				continue;
-			}
+	
+			test.Add(face.Vertices);
 
-			FracturePiece3D* frac = CreateObjectPtr<FracturePiece3D>(face.Vertices, currentPoint);
-			frac->color = color;
-			fractureFaces.Add(face);
 		}
-//
-//		Array<Vector3D> test;
-//		for (auto& face : Faces)
-//		{
-//	
-//		Fractu		test.Add(face.Vertices);
-//
-//		}
-//rePiece3D* frac = CreateObjectPtr<FracturePiece3D>(test, currentPoint);
-//		frac->color = color;
+        FracturePiece3D frac = CreateObjectRaw<FracturePiece3D>(test, currentPoint);
+		frac.color = color;
+		OutFractures.Add(frac);
+
 
 		//TestSquare.push_back(DrawWireCube(currentPoint, { 0.5, 0.5, 0.5 }, { 0.1f, 0.1f, 0.1f }, color/255));
 
 	}
 
-	
 }
 void Voronoi::DefinePlane(Vector3D& normal, Vector3D& CurrentPoint, Vector3D& closestPoint, Vector3D& Right, Vector3D& Up, Vector3D& PlaneCenter)
 {
@@ -265,6 +251,11 @@ bool Voronoi::IsPointInPolygon(Vector3D Point, Array<Vector3D> Polygon, Vector3D
 
 	}
 	return true;
+}
+
+FracturePiece3D::~FracturePiece3D()
+{
+	
 }
 
 FracturePiece3D::FracturePiece3D(Array<Vector3D> cell, Vector3D Point)
@@ -301,15 +292,17 @@ FracturePiece3D::FracturePiece3D(Array<Vector3D> cell, Vector3D Point)
 	dir = dir.Normalised();
 
 	//std::cout << "Inds: ";
-	//for (size_t i = 0; i < cell.GetSize() || i % 3 != 0; i++)
-	//{
-	//	Inds.Add(i % cell.GetSize());
-	//	std::cout << i % cell.GetSize();
-	//}
+	for (size_t i = 1; i + 1 < cell.GetSize(); i++)
+	{
+		Inds.Add(0);
+		Inds.Add(i);
+		Inds.Add(i + 1);
+	}
 
-	DelaunayTriangulation triangulation;
 
-	triangulation.Triangulate(cell, Inds);
+	//DelaunayTriangulation triangulation;
+
+	//triangulation.Triangulate(cell, Inds);
 
 	if (Inds.IsEmpty())
 	{
@@ -379,7 +372,7 @@ FracturePiece3D::FracturePiece3D(Array<Vector3D> cell, Vector3D Point)
 	::Renderer::AddFracture(this);
 }
 
-void FracturePiece3D::Draw(Shader* InShader)
+void FracturePiece3D::Draw()
 {
 	shader.Use();
 

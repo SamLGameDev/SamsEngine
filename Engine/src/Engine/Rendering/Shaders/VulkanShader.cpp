@@ -1,3 +1,7 @@
+// DO NOT MARK CreateDefaultShaderFile, CreateDefaultFragmentFile, CreateDefaultGeometryFile.
+//This is because it has been submitted for my dissertation. Link to Original: https://github.falmouth.ac.uk/GA-Undergrad-Student-Work-25-26/Dissertation-SL295211.git
+
+
 #pragma once
 #include "VulkanShader.h"
 #include <fstream>
@@ -109,102 +113,13 @@ namespace Vulkan
 			0, 1, &Pipeline->GetDescriptorSet(), 0, nullptr);
 	}
 
-	void Shader::SetFloat(const std::string_view& InName, const float& Value)
-	{
-		glUniform1f(glGetUniformLocation(ID, InName.data()), Value);
-	}
-
 	void Shader::SetUniformBuffer(const size_t& Location, const void* Data, const size_t& Size)
 	{
 		void* data = UniformMappedData[Location];
 		memcpy(data, Data, Size);
 	}
 
-	void Shader::SetInt(const std::string_view& InName, const int& Value) const
-	{
-		glUniform1i(glGetUniformLocation(ID, InName.data()), Value);
-	}
-
-	void Shader::SetMatrix4fv(const std::string_view& InName, const GLfloat* Value) const
-	{
-		glUniformMatrix4fv(glGetUniformLocation(ID, InName.data()), 1, GL_FALSE, Value);
-	}
-
-	void Shader::SetMatrix3fv(const std::string_view& InName, const GLfloat* Value) const
-	{
-		glUniformMatrix3fv(glGetUniformLocation(ID, InName.data()), 1, GL_FALSE, Value);
-	}
-
-	void Shader::SetVec4(const std::string_view& InName, const Array<float>& Value) const
-	{
-		glUniform4f(glGetUniformLocation(ID, InName.data()), Value[0], Value[1], Value[2], Value[3]);
-	}
-
-	void Shader::SetVec3(const std::string_view& InName, const Array<float>& Value) const
-	{
-		glUniform3f(glGetUniformLocation(ID, InName.data()), Value[0], Value[1], Value[2]);
-	}
-
-	void Shader::SetVec3(const std::string_view& InName, const Vector3D& Value) const
-	{
-		glUniform3f(glGetUniformLocation(ID, InName.data()), Value.X, Value.Y, Value.Z);
-	}
-
-	void Shader::ApplyTextures() const
-	{
-		unsigned int SpecularNum = 1;
-		unsigned int DiffuseNum = 1;
-		unsigned int HeightNum = 1;
-		unsigned int NormalNum = 1;
-
-		//assign the texture based on its type
-
-		for (unsigned int i = 0; i < Textures.GetSize(); i++)
-		{
-			glActiveTexture(GL_TEXTURE0 + i);
-
-			std::string number;
-			std::string Type;
-
-			if (Textures[i].GetType() == diffuse)
-			{
-				Type = "texture_diffuse";
-				number = std::to_string(DiffuseNum++);
-			}
-			else if (Textures[i].GetType() == specular)
-			{
-				Type = "texture_specular";
-				number = std::to_string(SpecularNum++);
-			}
-			else if (Textures[i].GetType() == height)
-			{
-				Type = "texture_height";
-				number = std::to_string(HeightNum++);
-			}
-			else if (Textures[i].GetType() == normal)
-			{
-				Type = "texture_normal";
-				number = std::to_string(NormalNum++);
-			}
-
-			//TODO Fix This by converting the enum to string, and update the shader file to reflect this. Also figure out why this works?
-			std::string TextureSlot = "material." + Type + number;
-			SetInt(TextureSlot, i);
-
-			glBindTexture(GL_TEXTURE_2D, Textures[i].GetID());
-		}
-
-		//if there is a cube-map, apply it
-		if (Map.GetTextureLocation() != "")
-		{
-			glActiveTexture(GL_TEXTURE0 + Textures.GetSize());
-
-			SetInt("Map", Textures.GetSize());
-
-			glBindTexture(GL_TEXTURE_CUBE_MAP, Map.GetID());
-		}
-	}
-
+	
 	void Shader::AddTexture(const Texture InTexture)
 	{
 
@@ -465,11 +380,6 @@ namespace Vulkan
 		fragPipelineCreateInfo.pName = "main";
 
 		return fragPipelineCreateInfo;
-	}
-
-	void Shader::CreateProgram(const unsigned int& vertex, const unsigned int& fragment, const unsigned int& geometry)
-	{
-
 	}
 
 	std::string Shader::ReadFileContents(const std::string_view& Location) const

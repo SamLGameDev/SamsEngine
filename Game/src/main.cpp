@@ -33,7 +33,7 @@ int main(int argc, char* argv[]) {
 
 
 
-	/*vorn.FracturePlaneRandom(model);*/
+	//vorn.FracturePlaneRandom(*model2);
 
 	while (!Vulkan::RuntimeEngine::ShouldClose())
 	{

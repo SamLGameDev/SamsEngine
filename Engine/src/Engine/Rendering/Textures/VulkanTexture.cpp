@@ -54,38 +54,6 @@ namespace Vulkan {
 		stbi_image_free(data);
 	}
 
-	void Texture::GenerateByChannel(const std::uint8_t& nrChannels, const unsigned int& width, const unsigned int& height, const unsigned char* data) const
-	{
-		if (nrChannels == 3)
-		{
-			const GLint colorChannel = ColorChannel.at(Type);
-			glTexImage2D(
-				GL_TEXTURE_2D,
-				0,
-				colorChannel,
-				width,
-				height,
-				0,
-				GL_RGB,
-				GL_UNSIGNED_BYTE,
-				data);
-		}
-		else if (nrChannels == 4)
-		{
-			const GLint colorChannel = ColorChannelWithAlpha.at(Type);
-			glTexImage2D(
-				GL_TEXTURE_2D,
-				0,
-				colorChannel,
-				width,
-				height,
-				0,
-				GL_RGBA,
-				GL_UNSIGNED_BYTE,
-				data);
-		}
-	}
-
 	std::shared_ptr<BaseTexture> Texture::CreateVulkanTexture(const std::string_view& InTextureLocation, const TextureType& InType)
 	{
 		return std::make_shared<Vulkan::Texture>(InTextureLocation, InType);

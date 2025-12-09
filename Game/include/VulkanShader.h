@@ -1,3 +1,9 @@
+
+// DO NOT MARK CreateDefaultShaderFile, CreateDefaultFragmentFile, CreateDefaultGeometryFile.
+//This is because it has been submitted for my dissertation. Link to Original: https://github.falmouth.ac.uk/GA-Undergrad-Student-Work-25-26/Dissertation-SL295211.git
+
+
+
 #pragma once
 
 #include <memory>
@@ -66,49 +72,7 @@ namespace Vulkan
 		void Use() override;
 
 
-		/**
-		 * Sets the shaders uniform float value
-		 */
-		void SetFloat(const std::string_view& InName, const float& Value) override;
-
 		void SetUniformBuffer(const size_t& Location, const void* Data, const size_t& Size) override;
-
-
-		/**
-		 * Sets the shaders uniform int value
-		 */
-		void SetInt(const std::string_view& InName, const int& Value) const override;
-
-		/**
-		 * Sets the shaders uniform mat4 value
-		 */
-		void SetMatrix4fv(const std::string_view& InName, const GLfloat* Value) const override;
-
-		/**
-		 * Sets the shaders uniform mat3 value
-		 */
-		void SetMatrix3fv(const std::string_view& InName, const GLfloat* Value) const override;
-
-		/**
-		 * Sets the shaders uniform vec4 value
-		 */
-		void SetVec4(const std::string_view& InName, const Array<float>& Value) const override;
-
-		/**
-		 * Sets the shaders uniform vec3 value
-		 */
-		void SetVec3(const std::string_view& InName, const Array<float>& Value) const override;
-
-		/**
-		 * Sets the shaders uniform vec3 value
-		 */
-		void SetVec3(const std::string_view& InName, const Vector3D& Value) const override;
-
-
-		/**
-		 * Apply all the textures for the next set of rendered objects
-		 */
-		void ApplyTextures() const override;
 
 		void AddTexture(const Texture InTexture) override;
 		void AddTexture(const Array<Texture>& InTexture) override;
@@ -218,8 +182,6 @@ namespace Vulkan
 		 * @return The buffer of the Fragment shader, if -1 means it failed
 		 */
 		[[nodiscard]] VkPipelineShaderStageCreateInfo CompileFragment() const;
-
-		void CreateProgram(const unsigned int& vertex, const unsigned int& fragment, const unsigned int& geometry) override;
 
 		[[nodiscard]] std::string ReadFileContents(const std::string_view& Location) const override;
 

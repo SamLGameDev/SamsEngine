@@ -32,16 +32,16 @@ void PointLight::Implement(const Shader* InShader)
 
 	const std::string id = "pointLights[" + std::to_string(ID) + "]";
 
-	InShader->SetVec3(id + ".position", Vector3D(lightModel.x, lightModel.y, lightModel.z));
+	//InShader->SetVec3(id + ".position", Vector3D(lightModel.x, lightModel.y, lightModel.z));
 
-	InShader->SetFloat(id + ".constant", constant);
+////	InShader->SetFloat(id + ".constant", constant);
 
-	InShader->SetFloat(id + ".linear", linear);
+//	InShader->SetFloat(id + ".linear", linear);
 
-	InShader->SetFloat(id + ".quadratic", quadratic);
-	InShader->SetFloat("material.shininess", Shininess);
+//InShader->SetFloat(id + ".quadratic", quadratic);
+	//InShader->SetFloat("material.shininess", Shininess);
 
-	InShader->SetVec3(id + ".ambient", ambient);
-	InShader->SetVec3(id + ".diffuse", diffuse);
-	InShader->SetVec3(id + ".specular", specular);
+//InShader->SetVec3(id + ".ambient", ambient);
+	//InShader->SetVec3(id + ".diffuse", diffuse);
+	//InShader->SetVec3(id + ".specular", specular);
 }

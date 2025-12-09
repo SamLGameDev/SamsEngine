@@ -1,3 +1,7 @@
+// DO NOT MARK.
+//This is because it has been submitted for my dissertation. Link to Original: https://github.falmouth.ac.uk/GA-Undergrad-Student-Work-25-26/Dissertation-SL295211.git
+
+
 #pragma once
 #include "OpenGLShader.h"
 #include <fstream>
@@ -82,40 +86,7 @@ namespace OpenGL {
 		glUseProgram(ID);
 	}
 
-	void Shader::SetFloat(const std::string_view& InName, const float& Value) const
-	{
-		glUniform1f(glGetUniformLocation(ID, InName.data()), Value);
-	}
-
-	void Shader::SetInt(const std::string_view& InName, const int& Value) const
-	{
-		glUniform1i(glGetUniformLocation(ID, InName.data()), Value);
-	}
-
-	void Shader::SetMatrix4fv(const std::string_view& InName, const GLfloat* Value) const
-	{
-		glUniformMatrix4fv(glGetUniformLocation(ID, InName.data()), 1, GL_FALSE, Value);
-	}
-
-	void Shader::SetMatrix3fv(const std::string_view& InName, const GLfloat* Value) const
-	{
-		glUniformMatrix3fv(glGetUniformLocation(ID, InName.data()), 1, GL_FALSE, Value);
-	}
-
-	void Shader::SetVec4(const std::string_view& InName, const Array<float>& Value) const
-	{
-		glUniform4f(glGetUniformLocation(ID, InName.data()), Value[0], Value[1], Value[2], Value[3]);
-	}
-
-	void Shader::SetVec3(const std::string_view& InName, const Array<float>& Value) const
-	{
-		glUniform3f(glGetUniformLocation(ID, InName.data()), Value[0], Value[1], Value[2]);
-	}
-
-	void Shader::SetVec3(const std::string_view& InName, const Vector3D& Value) const
-	{
-		glUniform3f(glGetUniformLocation(ID, InName.data()), Value.X, Value.Y, Value.Z);
-	}
+	
 
 	void Shader::ApplyTextures() const
 	{
@@ -156,7 +127,7 @@ namespace OpenGL {
 
 			//TODO Fix This by converting the enum to string, and update the shader file to reflect this. Also figure out why this works?
 			std::string TextureSlot = "material." + Type + number;
-			SetInt(TextureSlot, i);
+		//	SetInt(TextureSlot, i);
 
 			glBindTexture(GL_TEXTURE_2D, Textures[i].GetID());
 		}
@@ -166,7 +137,7 @@ namespace OpenGL {
 		{
 			glActiveTexture(GL_TEXTURE0 + Textures.GetSize());
 
-			SetInt("Map", Textures.GetSize());
+		//	SetInt("Map", Textures.GetSize());
 
 			glBindTexture(GL_TEXTURE_CUBE_MAP, Map.GetID());
 		}

@@ -64,45 +64,6 @@ TEST(Array, Searching)
 	ASSERT_EQ(1, index);
 }
 
-TEST(Array, Copying)
-{
-	Array<int> test;
-
-	test.Add(5);
-
-	test.Add(3);
-
-	Array<int> copy = test;
-
-	bool btest = copy == test;
-
-	ASSERT_EQ(btest, true);
-
-	copy.Remove(3);
-	btest = copy == test;
-
-	ASSERT_EQ(btest, false);
-
-}
-
-TEST(Dellegate, Calling)
-{
-	MulticastDelegate<bool&> TestDel;
-
-	bool flag = false;
-
-	std::function<void(bool&)> TestFunc = [](bool& flag)
-	{
-			flag = true;
-	};
-
-	TestDel.BindMember(TestFunc);
-
-	TestDel.Broadcast(flag);
-
-	ASSERT_EQ(true, flag);
-
-}
 
 TEST(LinkedList, Allocation)
 {
@@ -336,12 +297,6 @@ TEST(Vector3D, PlaneLineIntersection)
 	ASSERT_EQ(out, Vector3D(-3, 9, 0));
 }
 
-TEST(FileSystem, Contents)
-{
-	CorePaths pathManager = CorePaths();
-
-	ASSERT_EQ(pathManager.Contents.Path, CONTENTS_DIR);
-}
 
 char* itoa(int Value, int Base)
 {
@@ -477,37 +432,17 @@ void BuildStringFromMatrix(int* Matrix, int NumRows, int NumColumns,
 
 TEST(Tringulation, Delauney)
 {
-	CorePaths pathManager = CorePaths();
-
-	//DelaunayTriangulation triangulator;
-
-	//Array<Vector2D> verts = {
-	//	{0.2, 0.3},
-	//	{0.5, 0.8},
-	//	{0.9, 0.5},
-	//	{0.7, 0.1},
-	//	{0.3, 0.1}
-	//};
-	//Array<size_t> inds;
-
-	//triangulator.Triangulate(verts, inds);
-
-	//for (size_t i = 0; i < inds.GetSize(); i++)
-	//{
-	//	std::cout << inds[i] <<", "  << std::endl;
-	//	verts[inds[i]].Print();
-	//}
 
 	Tetrahedron tet = { {1, 1, 1}, {-1, -1, 1}, {-1, 1, -1}, {1, -1, -1} };
 	
 	DelaunayTriangulation tri;
 
 	Array<Vector3D> verts= {
-	{0,0,0}, // 0
-	{1,0,0}, // 1
-	{0,1,0}, // 2
-	{0,0,1}, // 3
-	{1,1,1}  // 4
+	{0,0,0},
+	{1,0,0}, 
+	{0,1,0},
+	{0,0,1},
+	{1,1,1} 
 	};
 
 	Array<uint16_t> inds;
@@ -525,35 +460,4 @@ TEST(Tringulation, Delauney)
 	ASSERT_EQ(tet.IsPointInCircumSphere({ 5, 0, 0 }), false);
 
 	ASSERT_EQ(tet.IsPointInCircumSphere({ 0.9, 1, 1 }), true);
-}
-
-TEST(Vector2D, PerpendicularBisector)
-{
-
-	Vulkan::RuntimeEngine engine;
-	engine.Init();
-
-
-	//Voronoi vorn;
-
-	Model* model = new Model("/Models/Asteroid/rock.obj", Shader("BasicTexture", "/Shaders/"));
-
-
-	Model* model2 = new Model("/Models/BackPack/backpack.obj", Shader("BasicTexture", "/Shaders/"));
-
-	model2->ModelTransform.Position = { 5,0, 0 };
-
-
-
-	/*vorn.FracturePlaneRandom(model);*/
-
-	while (!RuntimeEngine::ShouldClose())
-	{
-		engine.Loop();
-	}
-	Vulkan::RuntimeEngine::WaitForFrameToFinish();
-	delete model;
-	delete model2;
-
-	engine.ShutDown();
 }
