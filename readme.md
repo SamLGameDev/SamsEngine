@@ -36,6 +36,8 @@ RuntimeEngine.cpp and h
 
 SubsystemInitialiser.cpp and h
 
+MeshObject.cpp and h
+
 ## Description
 
 This project aims to implement a 3D voronoi fracturing algorithm [1] using vulkan[2]. Vulkan has been chosen over alternatives like OpenGL[3] due to its ability to take advantage of the parallelism of modern GPU's [4], which will be cruicial in this project as there will be many points to calculate which can be calculated independently of one another. A triangulation algorithm will also be needed to generate a mesh from the fractured points, and as such delaunay triangulation [8] will be used. This should result in significant performance gains. For future work, this project would aim at implimenting a clipped voronoi diagram[7], allowing the fracturing of a complex 3D mesh. The project has currently generated a voronoi diagram in 3D, though it still needs a triangulation algorithm added to function properly. This is what will be added in worksheet 4.
