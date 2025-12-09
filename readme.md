@@ -191,3 +191,7 @@ cmake --build build
 ```
 
 Another option is to use CLion, you can get free Educational licences while you are a student. If you've used pycharm, it's pycharm for C++.
+
+##What to open
+You should open the Game folder with cmake. This wll contain the worksheets runable code, as all engine contains are unit tests. To run unit tests open engine and run project-unit.exe
+
