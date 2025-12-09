@@ -37,6 +37,7 @@ Camera::Camera(Window* Window, InputManager* Manager)
 
 	glfwSetInputMode(Window->GetWindow(), GLFW_CURSOR, GLFW_CURSOR_DISABLED);
 
+	//center of the screen
 	LastX = Window->GetWindowWidth() / 2;
 	LastY = Window->GetWindowHeight() / 2;
 }
@@ -47,7 +48,7 @@ void Camera::Start()
 
 	::DataBuffers::GenBuffer(GlobalTransformsID);
 
-	ptr = static_cast<GlobalTransforms*>(::DataBuffers::GenerateUniformDataBuffer(GlobalTransformsID, sizeof(GlobalTransforms))); //UniformBufferFactory::CreatePersistentUniformBuffer<Transforms>(0);
+	ptr = static_cast<GlobalTransforms*>(::DataBuffers::GenerateUniformDataBuffer(GlobalTransformsID, sizeof(GlobalTransforms)));
 }
 
 void Camera::Tick(const double& DeltaTime)
@@ -127,20 +128,19 @@ glm::mat4 Camera::GetLook() const
 
 	const glm::vec3 yAxis = glm::cross(zAxis, xAxis);
 
-	// Create translation and rotation matrix
-	auto translation = glm::mat4(1.0f); // Identity matrix by default
-	translation[3][0] = -pos.x; // Fourth column, first row
+	auto translation = glm::mat4(1.0f);
+	translation[3][0] = -pos.x; 
 	translation[3][1] = -pos.y;
 	translation[3][2] = -pos.z;
 
 	auto rotation = glm::mat4(1.0f);
-	rotation[0][0] = xAxis.x; // First column, first row
+	rotation[0][0] = xAxis.x; 
 	rotation[1][0] = xAxis.y;
 	rotation[2][0] = xAxis.z;
-	rotation[0][1] = yAxis.x; // First column, second row
+	rotation[0][1] = yAxis.x; 
 	rotation[1][1] = yAxis.y;
 	rotation[2][1] = yAxis.z;
-	rotation[0][2] = zAxis.x; // First column, third row
+	rotation[0][2] = zAxis.x;
 	rotation[1][2] = zAxis.y;
 	rotation[2][2] = zAxis.z;
 
@@ -157,6 +157,8 @@ glm::mat4 Camera::GetProjection()
 		FarView
 	);
 
+	//Reverse for vulkan
+	//TODO make this more part of vulkan, so it doesnt interfere with OpenGL
 	projection[1][1] *= -1;
 	return projection;
 }
