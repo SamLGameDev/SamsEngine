@@ -31,7 +31,7 @@ namespace Vulkan
 		}
 
 		Array<VkPhysicalDevice> physicalDevices(NumDevices);
-		vkEnumeratePhysicalDevices(SInstance::GetInstance()->VulkanInstance, &NumDevices, physicalDevices.GetFirstRef());
+		vkEnumeratePhysicalDevices(SInstance::GetInstance()->VulkanInstance, &NumDevices, physicalDevices.GetFirstPtr());
 
 		for (const VkPhysicalDevice& device : physicalDevices)
 		{
@@ -82,7 +82,7 @@ namespace Vulkan
 		vkEnumerateDeviceExtensionProperties(Device, nullptr, &extensionCount, nullptr);
 
 		Array<VkExtensionProperties> extensions(extensionCount);
-		vkEnumerateDeviceExtensionProperties(Device, nullptr, &extensionCount, extensions.GetFirstRef());
+		vkEnumerateDeviceExtensionProperties(Device, nullptr, &extensionCount, extensions.GetFirstPtr());
 
 		for (const char* requiredExtension : DeviceExtensions)
 		{
@@ -114,7 +114,7 @@ namespace Vulkan
 		if (formatCount != 0)
 		{
 			SwapChainSupport.Formats.Reallocate(formatCount);
-			vkGetPhysicalDeviceSurfaceFormatsKHR(Device, Surface, &formatCount, SwapChainSupport.Formats.GetFirstRef());
+			vkGetPhysicalDeviceSurfaceFormatsKHR(Device, Surface, &formatCount, SwapChainSupport.Formats.GetFirstPtr());
 		}
 
 		std::uint32_t presentsModeCount;
@@ -123,13 +123,13 @@ namespace Vulkan
 		if (presentsModeCount != 0)
 		{
 			SwapChainSupport.Presents.Reallocate(presentsModeCount);
-			vkGetPhysicalDeviceSurfacePresentModesKHR(Device, Surface, &presentsModeCount, SwapChainSupport.Presents.GetFirstRef());
+			vkGetPhysicalDeviceSurfacePresentModesKHR(Device, Surface, &presentsModeCount, SwapChainSupport.Presents.GetFirstPtr());
 		}
 
 		return !SwapChainSupport.Presents.IsEmpty() && !SwapChainSupport.Formats.IsEmpty();
 	}
 
-	uint32_t UGraphicsCard::FindMemoryType(uint32_t TypeFilter, VkMemoryPropertyFlags Properties)
+	uint32_t UGraphicsCard::FindMemoryType(uint32_t TypeFilter, VkMemoryPropertyFlags Properties) const
 	{
 		VkPhysicalDeviceMemoryProperties properties;
 		vkGetPhysicalDeviceMemoryProperties(GraphicsCard, &properties);
@@ -152,7 +152,7 @@ namespace Vulkan
 		vkGetPhysicalDeviceQueueFamilyProperties(Device, &queueFamilyCount, nullptr);
 
 		Array<VkQueueFamilyProperties> queueFamily(queueFamilyCount);
-		vkGetPhysicalDeviceQueueFamilyProperties(Device, &queueFamilyCount, queueFamily.GetFirstRef());
+		vkGetPhysicalDeviceQueueFamilyProperties(Device, &queueFamilyCount, queueFamily.GetFirstPtr());
 
 		for (size_t i = 0; i < queueFamily.GetSize(); i++)
 		{
@@ -202,7 +202,7 @@ namespace Vulkan
 			VK_IMAGE_TILING_OPTIMAL, VK_FORMAT_FEATURE_DEPTH_STENCIL_ATTACHMENT_BIT);
 	}
 
-	bool UGraphicsCard::HadStencilAttachment(const VkFormat& Format) const
+	bool UGraphicsCard::HadStencilAttachment(const VkFormat& Format)
 	{
 		return Format == VK_FORMAT_D32_SFLOAT_S8_UINT || Format == VK_FORMAT_D24_UNORM_S8_UINT || Format == VK_FORMAT_D16_UNORM_S8_UINT;
 	}
@@ -215,7 +215,7 @@ namespace Vulkan
 		Renderer->Init();
 	}
 
-	ErrorCodes UGraphicsCard::ShutDown()
+	ErrorCodes UGraphicsCard::ShutDown() const
 	{
 		delete Renderer;
 

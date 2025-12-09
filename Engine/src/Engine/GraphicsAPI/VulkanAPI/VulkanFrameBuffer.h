@@ -66,7 +66,7 @@ namespace Vulkan
 
 		ErrorCodes ShutDown();
 
-		const VkFramebuffer GetFrameBuffer()const
+		VkFramebuffer GetFrameBuffer()const
 		{
 			return FrameBuffer;
 		}

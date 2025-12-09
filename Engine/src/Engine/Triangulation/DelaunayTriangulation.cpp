@@ -196,7 +196,7 @@ void DelaunayTriangulation::Triangulate(Array<Vector3D>& Vertices, Array<uint16_
 			for (size_t t= 1; t < 3; t++)
 			{
 
-				unsigned int index = 0;
+				size_t index = 0;
 
 				if (Vertices.Contains(face.Vertices[0], index))
 				{

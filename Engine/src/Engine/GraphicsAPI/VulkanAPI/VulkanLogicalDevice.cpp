@@ -67,12 +67,12 @@ namespace Vulkan
 
 		VkDeviceCreateInfo deviceCreateInfo{};
 		deviceCreateInfo.sType = VK_STRUCTURE_TYPE_DEVICE_CREATE_INFO;
-		deviceCreateInfo.pQueueCreateInfos = uniqueQueues.GetFirstRef();
+		deviceCreateInfo.pQueueCreateInfos = uniqueQueues.GetFirstPtr();
 		deviceCreateInfo.queueCreateInfoCount = uniqueQueues.GetSize();
 		deviceCreateInfo.pNext = &vertexInputDynamicStateFeatures;
 		deviceCreateInfo.pEnabledFeatures = &deviceFeatures;
 		deviceCreateInfo.enabledExtensionCount = deviceExtensions.GetSize();
-		deviceCreateInfo.ppEnabledExtensionNames = deviceExtensions.GetFirstRef();
+		deviceCreateInfo.ppEnabledExtensionNames = deviceExtensions.GetFirstPtr();
 
 		deviceCreateInfo.enabledLayerCount = 0;
 
@@ -82,7 +82,7 @@ namespace Vulkan
 
 
 		deviceCreateInfo.enabledLayerCount = validationLayers.GetSize();
-		deviceCreateInfo.ppEnabledLayerNames = validationLayers.GetFirstRef();
+		deviceCreateInfo.ppEnabledLayerNames = validationLayers.GetFirstPtr();
 #endif
 
 

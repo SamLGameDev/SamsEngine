@@ -7,16 +7,16 @@
 
 const Vector2D Vector2D::Zero{0, 0};
 
-Vector2D Vector2D::RandomRange(const Vector2D& min, const Vector2D& max)
+Vector2D Vector2D::RandomRange(const Vector2D& Min, const Vector2D& Max)
 {
 	std::random_device rd;
 	std::mt19937 gen(rd());
 
-	const float minX = std::min(min.X, max.X);
-	const float maxX = std::max(min.X, max.X);
+	const float minX = std::min(Min.X, Max.X);
+	const float maxX = std::max(Min.X, Max.X);
 
-	const float minY = std::min(min.Y, max.Y);
-	const float maxY = std::max(min.Y, max.Y);
+	const float minY = std::min(Min.Y, Max.Y);
+	const float maxY = std::max(Min.Y, Max.Y);
 
 	std::uniform_real_distribution<float> distrX(minX, maxX);
 	std::uniform_real_distribution<float> distrY(minY, maxY);
@@ -49,25 +49,29 @@ void Vector2D::Clamp(Vector2D& Value, const Vector2D& MinRange, const Vector2D& 
 	}
 }
 
-Vector2D Vector2D::PerpendicularBisector(const Vector2D& P1, const Vector2D& P2, float& a, float& b,float& c)
+Vector2D Vector2D::PerpendicularBisector(const Vector2D& P1, const Vector2D& P2, float& A, float& B,float& C)
 {
 	Vector2D HalfWay = (P1 + P2) / 2;
 
-	a = P2.X - P1.X;
-	b = P2.Y - P1.Y;
+	A = P2.X - P1.X;
+	B = P2.Y - P1.Y;
 
-	c = -HalfWay.X * a - b * HalfWay.Y;
+	C = -HalfWay.X * A - B * HalfWay.Y;
 
 	return HalfWay;
 
 
 }
 
-float Vector2D::Dot(const Vector2D& a, const Vector2D& b)
+float Vector2D::Dot(const Vector2D& A, const Vector2D& B)
 {
-	return a.X * b.X + a.Y * b.Y;
+	return A.X * B.X + A.Y * B.Y;
 }
 
+/// <summary>
+/// Normalises the vector, however if the length is near 0 by 1e-6, will return a zero vector.
+/// </summary>
+/// <returns></returns>
 Vector2D Vector2D::Normalised() const
 {
 	const float length = GetLength();
@@ -102,7 +106,7 @@ float Vector2D::Cross(const Vector2D& a, const Vector2D& b)
 	return cross;
 }
 
-Vector2D Vector2D::Lerp(const Vector2D& A, const Vector2D& B, const float& t)
+Vector2D Vector2D::Lerp(const Vector2D& A, const Vector2D& B, const float& T)
 {
-	return A + (B - A) * t;
+	return A + (B - A) * T;
 }

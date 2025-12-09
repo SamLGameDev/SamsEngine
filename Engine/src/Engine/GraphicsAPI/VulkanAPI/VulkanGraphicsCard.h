@@ -15,9 +15,11 @@ namespace Vulkan
 
 	struct SwapChainSupportDetails
 	{
-		VkSurfaceCapabilitiesKHR Capabilities;
 		Array<VkSurfaceFormatKHR> Formats;
 		Array<VkPresentModeKHR> Presents;
+		VkSurfaceCapabilitiesKHR Capabilities;
+	private:
+		uint32_t padding = 0;
 	};
 
 	struct QueueFamilyIndices
@@ -45,16 +47,16 @@ namespace Vulkan
 		bool DoesDeviceHaveRequiredExtensions(const VkPhysicalDevice& Device);
 		bool IsSwapChainSupported(const VkPhysicalDevice& Device, const VkSurfaceKHR& Surface);
 
-		uint32_t FindMemoryType(uint32_t TypeFilter, VkMemoryPropertyFlags Properties);
+		uint32_t FindMemoryType(uint32_t TypeFilter, VkMemoryPropertyFlags Properties) const;
 
 
-		QueueFamilyIndices FindQueueFamilies(const VkPhysicalDevice& Device, const VkSurfaceKHR& Surface);
+		static QueueFamilyIndices FindQueueFamilies(const VkPhysicalDevice& Device, const VkSurfaceKHR& Surface);
 
 		VkFormat FindSupportedFormat(const Array<VkFormat>& Candidates, const VkImageTiling& Tilling, const VkFormatFeatureFlags& Features) const;
 
 		VkFormat FindDepthFormat() const;
 
-		bool HadStencilAttachment(const VkFormat& Format) const;
+		static bool HadStencilAttachment(const VkFormat& Format);
 
 		const QueueFamilyIndices& GetFoundQueueFamilies() const
 		{
@@ -86,7 +88,7 @@ namespace Vulkan
 			return LogicalDevice;
 		}
 
-		URenderer* GetRenderer()
+		URenderer* GetRenderer() const
 		{
 			return Renderer;
 		};
@@ -98,7 +100,7 @@ namespace Vulkan
 
 		void CreateRenderer();
 
-		ErrorCodes ShutDown();
+		ErrorCodes ShutDown() const;
 
 	private:
 

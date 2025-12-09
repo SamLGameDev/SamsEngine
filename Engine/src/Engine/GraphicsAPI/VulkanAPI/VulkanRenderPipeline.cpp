@@ -51,7 +51,7 @@ namespace Vulkan
 		VkDescriptorSetLayoutCreateInfo descriptorLayoutCreateInfo{};
 		descriptorLayoutCreateInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_LAYOUT_CREATE_INFO;
 		descriptorLayoutCreateInfo.bindingCount = descriptors.GetSize();
-		descriptorLayoutCreateInfo.pBindings = descriptors.GetFirstRef();
+		descriptorLayoutCreateInfo.pBindings = descriptors.GetFirstPtr();
 
 		vkCreateDescriptorSetLayout(*SInstance::GetInstance()->GraphicsCard->GetLogicalDevice()->GetVulkanLogicalDevice(), &descriptorLayoutCreateInfo, nullptr, &DescriptorLayout);
 
@@ -72,7 +72,7 @@ namespace Vulkan
 		VkPipelineDynamicStateCreateInfo dynamicStatesCreateInfo{};
 		dynamicStatesCreateInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_DYNAMIC_STATE_CREATE_INFO;
 		dynamicStatesCreateInfo.dynamicStateCount = dynamicStates.GetSize();
-		dynamicStatesCreateInfo.pDynamicStates = dynamicStates.GetFirstRef();
+		dynamicStatesCreateInfo.pDynamicStates = dynamicStates.GetFirstPtr();
 
 		VkPipelineVertexInputStateCreateInfo vertexInputStateCreateInfo{};
 		vertexInputStateCreateInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_VERTEX_INPUT_STATE_CREATE_INFO;
@@ -176,7 +176,7 @@ namespace Vulkan
 		VkGraphicsPipelineCreateInfo pipelineCreateInfo{};
 		pipelineCreateInfo.sType = VK_STRUCTURE_TYPE_GRAPHICS_PIPELINE_CREATE_INFO;
 		pipelineCreateInfo.stageCount = InShader.GetShaderStages().GetSize();
-		pipelineCreateInfo.pStages = InShader.GetShaderStages().GetFirstRef();
+		pipelineCreateInfo.pStages = InShader.GetShaderStages().GetFirstPtr();
 		pipelineCreateInfo.pInputAssemblyState = &inputAssemblyCreateInfo;
 		pipelineCreateInfo.pVertexInputState = &vertexInputStateCreateInfo;
 		pipelineCreateInfo.pViewportState = &viewportStateCreateInfo;

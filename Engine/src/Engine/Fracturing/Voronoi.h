@@ -99,11 +99,29 @@ private:
 class Voronoi
 {
 public:
-	void FracturePlaneRandom(Model& InModel, Array<FracturePiece3D>& OutFractures);
-	static void DefinePlane(Vector3D& normal, Vector3D& CurrentPoint, Vector3D& closestPoint, Vector3D& Right, Vector3D& Up, Vector3D& PlaneCenter);
-	bool IsPointInPolygon(Vector3D Point, Array<Vector3D> Polygon, Vector3D center);
+
+	//Fracture the model into a voronoi diagram based on random points
+	void FracturePlaneRandom(Model& InModel, Array<FracturePiece3D>& OutFractures, const size_t& NumPoints);
 
 private:
+
+	void GetFirstIntersection(Vector3D normal, Vector3D center, const Face& currentFace, Face newFace,
+		size_t& firstIntersectionIndex, Vector3D& firstIntersection);
+
+	size_t GetAllVertsUntilSecondIntersection(Vector3D normal, Vector3D center, const Face& currentFace, Face newFace,
+		size_t firstIntersectionIndex, Vector3D& secondIntersection);
+
+	void GetFaceReveresed(Face intersectFace, const Face& currentFace, Face newFace, size_t firstIntersectionIndex,
+		Vector3D firstIntersection, Vector3D secondIntersection, size_t secondIntersectionIndex);
+
+	void SliceFaceByPlane(Array<Face>& Faces, Vector3D& Normal, Vector3D& Center, Array<Face>& newFaces,
+		Face& intersectFace, const size_t& FaceIndex);
+
+	void SliceShapeByPlane(const Array<Vector3D>& Points, const size_t& Index, Vector3D& CurrentPoint, Array<Face>& Faces, Vector3D& Normal,
+		Vector3D& Right, Vector3D& Up, Vector3D& Center, const size_t& J);
+
+	static void DefinePlane(Vector3D& normal, Vector3D& CurrentPoint, Vector3D& closestPoint, Vector3D& Right, Vector3D& Up, Vector3D& PlaneCenter);
+	static bool IsPointInPolygon(Vector3D Point, Array<Vector3D> Polygon, Vector3D center);
 
 	std::vector<std::unique_ptr<WireObject>> TestSquare;
 

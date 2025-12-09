@@ -15,12 +15,12 @@ float MathCore::Determinant(const Vector3D& C0, const Vector3D& C1, const Vector
 	return d00 - d01 + d02;
 }
 
-bool MathCore::IsNearlyEqual(const float a, const float b, const float range)
+bool MathCore::IsNearlyEqual(const float& A, const float& B, const float& Range)
 {
-	return std::abs(a - b) < range;
+	return std::abs(A - B) < Range;
 }
 
-bool MathCore::IsEven(const int Value)
+bool MathCore::IsEven(const int& Value)
 {
 	return Value % 2 == 0;
 }

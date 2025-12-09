@@ -70,7 +70,7 @@ namespace Vulkan
 		{
 			createInfo.imageSharingMode = VK_SHARING_MODE_CONCURRENT;
 			createInfo.queueFamilyIndexCount = indices.GetSize();
-			createInfo.pQueueFamilyIndices = indices.GetFirstRef();
+			createInfo.pQueueFamilyIndices = indices.GetFirstPtr();
 		}
 		else
 		{
@@ -92,7 +92,7 @@ namespace Vulkan
 
 		SwapChainImages.Reallocate(swapChainImageCount);
 
-		vkGetSwapchainImagesKHR(*OwningDevice->GetVulkanLogicalDevice(), SwapChain, &swapChainImageCount, SwapChainImages.GetFirstRef());
+		vkGetSwapchainImagesKHR(*OwningDevice->GetVulkanLogicalDevice(), SwapChain, &swapChainImageCount, SwapChainImages.GetFirstPtr());
 
 		SwapChainExtent = extent;
 		SwapChainFormat = format;
@@ -189,7 +189,7 @@ namespace Vulkan
 			framebufferCreateInfo.sType = VK_STRUCTURE_TYPE_FRAMEBUFFER_CREATE_INFO;
 			framebufferCreateInfo.renderPass = SInstance::GetInstance()->RenderPass->GetVulkanRenderPass();
 			framebufferCreateInfo.attachmentCount = attachments.GetSize();
-			framebufferCreateInfo.pAttachments = attachments.GetFirstRef();
+			framebufferCreateInfo.pAttachments = attachments.GetFirstPtr();
 			framebufferCreateInfo.width = SwapChainExtent.width;
 			framebufferCreateInfo.height = SwapChainExtent.height;
 			framebufferCreateInfo.layers = 1;

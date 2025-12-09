@@ -49,7 +49,7 @@ TEST(Array, Searching)
 
 	test.Add(3);
 
-	unsigned int index;
+	size_t index;
 	bool btest = test.Contains(5, index);
 
 	ASSERT_EQ(btest, true);

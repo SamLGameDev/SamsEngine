@@ -12,7 +12,10 @@ Vector3D const Vector3D::Zero = Vector3D(0, 0, 0);
 Vector3D const Vector3D::One = Vector3D(1, 1, 1);
 
 
-
+/// <summary>
+/// Normalises the vector, however if the length is near zero by 1e-6, will return a zero vector
+/// </summary>
+/// <returns></returns>
 Vector3D Vector3D::Normalised() const
 {
 	const float length = GetLength();
@@ -35,19 +38,19 @@ float Vector3D::GetSquaredLength() const
 	return X * X + Y * Y + Z * Z;
 }
 
-Vector3D Vector3D::RandomRange(const Vector3D& min, const Vector3D& max)
+Vector3D Vector3D::RandomRange(const Vector3D& Min, const Vector3D& Max)
 {
 	std::random_device rd;
 	std::mt19937 gen(rd());
 
-	const float minX = std::min(min.X, max.X);
-	const float maxX = std::max(min.X, max.X);
+	const float minX = std::min(Min.X, Max.X);
+	const float maxX = std::max(Min.X, Max.X);
 
-	const float minY = std::min(min.Y, max.Y);
-	const float maxY = std::max(min.Y, max.Y);
+	const float minY = std::min(Min.Y, Max.Y);
+	const float maxY = std::max(Min.Y, Max.Y);
 
-	const float minZ = std::min(min.Z, max.Z);
-	const float maxZ = std::max(min.Z, max.Z);
+	const float minZ = std::min(Min.Z, Max.Z);
+	const float maxZ = std::max(Min.Z, Max.Z);
 
 	std::uniform_real_distribution<float> distrX(minX, maxX);
 	std::uniform_real_distribution<float> distrY(minY, maxY);
@@ -60,9 +63,9 @@ Vector3D Vector3D::RandomRange(const Vector3D& min, const Vector3D& max)
 	return point;
 }
 
-bool Vector3D::WithinRange(const Vector3D& Value, const Vector3D& min, const Vector3D& max)
+bool Vector3D::WithinRange(const Vector3D& Value, const Vector3D& Min, const Vector3D& Max)
 {
-	return Value > min && Value < max;
+	return Value > Min && Value < Max;
 }
 
 void Vector3D::Clamp(Vector3D& Value, const Vector3D& MinRange, const Vector3D& MaxRange)
@@ -95,27 +98,27 @@ void Vector3D::Clamp(Vector3D& Value, const Vector3D& MinRange, const Vector3D& 
 	}
 }
 
-float Vector3D::Dot(const Vector3D& a, const Vector3D& b)
+float Vector3D::Dot(const Vector3D& A, const Vector3D& B)
 {
-	return a.X * b.X + a.Y * b.Y + a.Z * b.Z;
+	return A.X * B.X + A.Y * B.Y + A.Z * B.Z;
 }
 
-Vector3D Vector3D::Cross(const Vector3D& a, const Vector3D& b)
+Vector3D Vector3D::Cross(const Vector3D& A, const Vector3D& B)
 {
-	const float X = a.Y * b.Z - a.Z * b.Y;
-	const float Y = a.Z * b.X - a.X * b.Z;
-	const float Z = a.X * b.Y - a.Y * b.X;
+	const float X = A.Y * B.Z - A.Z * B.Y;
+	const float Y = A.Z * B.X - A.X * B.Z;
+	const float Z = A.X * B.Y - A.Y * B.X;
 
 	return {X, Y, Z};
 }
 
-bool Vector3D::GetIntersectionPointWithPlane(const Vector3D& Mid, const Vector3D& Normal, const Vector3D& point,
-                                    const Vector3D& LineDir, Vector3D& out)
+bool Vector3D::GetIntersectionPointWithPlane(const Vector3D& Mid, const Vector3D& Normal, const Vector3D& Point,
+                                    const Vector3D& LineDir, Vector3D& Out)
 {
 	const float d = -Dot(Normal, Mid);
 
 	const float dot1 = Dot(Normal, LineDir);
-	const float dot2 = Dot(Normal, point);
+	const float dot2 = Dot(Normal, Point);
 
 	if (dot1 == 0)
 	{
@@ -128,14 +131,14 @@ bool Vector3D::GetIntersectionPointWithPlane(const Vector3D& Mid, const Vector3D
 		return false;
 	}
 
-	out = point + (t * LineDir);
+	Out = Point + (t * LineDir);
 
 	return true;
 }
 
-bool Vector3D::IsAlmostEqual(const Vector3D& a, const Vector3D& b, const float range)
+bool Vector3D::IsAlmostEqual(const Vector3D& A, const Vector3D& B, const float& Range)
 {
-	return a - b < range;
+	return A - B < Range;
 }
 
 void Vector3D::Print() const
@@ -143,9 +146,9 @@ void Vector3D::Print() const
 	std::cout << "Vector3D: " << X << ", " << Y << ", " << Z << std::endl;
 }
 
-Vector3D Vector3D::Abs(const Vector3D& v)
+Vector3D Vector3D::Abs(const Vector3D& V)
 {
-	return {std::abs(v.X), std::abs(v.Y), std::abs(v.Z)};
+	return {std::abs(V.X), std::abs(V.Y), std::abs(V.Z)};
 }
 
 Vector3D Vector3D::Abs() const

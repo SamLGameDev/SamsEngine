@@ -26,7 +26,7 @@ void Camera::SetUpInputs(Window* Window, InputManager* Manager)
 
 	Mouse->BindCallback(this, &Camera::MouseCallback);
 
-	InputMange = Manager;
+	AInputManger = Manager;
 
 
 }
@@ -58,7 +58,7 @@ void Camera::Tick(const double& DeltaTime)
 	ptr->Projection = GetProjection();
 	ptr->View = GetLook();
 
-	InputMange->ProcessInput(Camera::GetActiveWindow()->GetWindow());
+	AInputManger->ProcessInput(Camera::GetActiveWindow()->GetWindow());
 }
 
 void Camera::MoveForward()

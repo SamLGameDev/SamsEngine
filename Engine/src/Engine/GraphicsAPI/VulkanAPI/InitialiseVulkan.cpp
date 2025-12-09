@@ -15,10 +15,6 @@
 namespace Vulkan
 {
 
-//TODO
-// rewrite All this, different engines for different APIs. Or ratherm loops, when initisalising the enigine, you pass in different RuntimeEngine.
-// i.e. RuntimeEngineVulakn. This will load the whole thing using vulkan, so we dont have to try mesh vulakn and openGL together
-// have shader class, but have it just be a wrapper for called class i.e. vulkan shader
 #if DEBUG
 const Array<const char*> InitialiseVulkan::ValidationLayers = { "VK_LAYER_KHRONOS_validation" };
 #endif
@@ -55,9 +51,9 @@ ErrorCodes InitialiseVulkan::CreateVulkan()
 	Array<const char*> extensions = GetRequiredExtensions();
 
 	createInfo.enabledExtensionCount = extensions.GetSize();
-	createInfo.ppEnabledExtensionNames = extensions.GetFirstRef();
+	createInfo.ppEnabledExtensionNames = extensions.GetFirstPtr();
 	createInfo.enabledLayerCount = static_cast<std::uint32_t>(ValidationLayers.GetSize());
-	createInfo.ppEnabledLayerNames = ValidationLayers.GetFirstRef();
+	createInfo.ppEnabledLayerNames = ValidationLayers.GetFirstPtr();
 	createInfo.flags = 0;
 
 	std::uint32_t optionalExtensionsCount;
@@ -66,15 +62,7 @@ ErrorCodes InitialiseVulkan::CreateVulkan()
 
 	Array<VkExtensionProperties> OptionalExtensions(optionalExtensionsCount);
 
-	vkEnumerateInstanceExtensionProperties(nullptr, &optionalExtensionsCount, OptionalExtensions.GetFirstRef());
-
-
-	//std::cout << "Number of extensions: " << optionalExtensionsCount << " available extensions:\n";
-
-	//for (auto extension : OptionalExtensions)
-	//{
-	//	std::cout << extension.extensionName << "\n";
-	//}
+	vkEnumerateInstanceExtensionProperties(nullptr, &optionalExtensionsCount, OptionalExtensions.GetFirstPtr());
 
 	for (size_t i = 0; i < extensions.GetSize(); i++) {
 
@@ -182,7 +170,7 @@ bool InitialiseVulkan::CheckValidationLayerSupport()
 
 	Array<VkLayerProperties> availableLayers(layerCount);
 
-	vkEnumerateInstanceLayerProperties(&layerCount, availableLayers.GetFirstRef());
+	vkEnumerateInstanceLayerProperties(&layerCount, availableLayers.GetFirstPtr());
 
 	for (const char* layer : ValidationLayers)
 	{

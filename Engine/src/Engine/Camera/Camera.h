@@ -28,6 +28,10 @@ public:
 
 	void MouseCallback(double Xpos, double Ypos);
 
+	/// <summary>
+	/// Get Camera Position
+	/// </summary>
+	/// <returns></returns>
 	[[nodiscard]] glm::vec3 GetPos() const
 	{
 		return {transform.Position.X, transform.Position.Y, transform.Position.Z};
@@ -122,5 +126,5 @@ private:
 
 	uint32_t GlobalTransformsID;
 
-	InputManager* InputMange;
+	InputManager* AInputManger;
 };

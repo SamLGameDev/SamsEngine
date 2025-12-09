@@ -22,7 +22,7 @@ namespace Vulkan
 		return SUCCEEDED;
 	}
 
-	ErrorCodes UImageView::CreateImageView(VkImageViewCreateInfo& CreateInfo)
+	ErrorCodes UImageView::CreateImageView(const VkImageViewCreateInfo& CreateInfo)
 	{
 
 		if (vkCreateImageView

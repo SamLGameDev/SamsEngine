@@ -59,7 +59,7 @@ namespace Vulkan
 
 		VkDescriptorPoolCreateInfo dPoolCreateInfo{};
 		dPoolCreateInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_POOL_CREATE_INFO;
-		dPoolCreateInfo.pPoolSizes = poolSizes.GetFirstRef();
+		dPoolCreateInfo.pPoolSizes = poolSizes.GetFirstPtr();
 		dPoolCreateInfo.poolSizeCount = poolSizes.GetSize();
 		dPoolCreateInfo.maxSets = 2000000;
 
@@ -124,7 +124,7 @@ namespace Vulkan
 		allocateInfo.commandBufferCount = CommandBuffers.GetSize();
 		allocateInfo.commandPool = CommandPool;
 		allocateInfo.level = VK_COMMAND_BUFFER_LEVEL_PRIMARY;
-		if (vkAllocateCommandBuffers(*OwningCard->GetLogicalDevice()->GetVulkanLogicalDevice(), &allocateInfo, CommandBuffers.GetFirstRef()) != VK_SUCCESS) return ERROR;
+		if (vkAllocateCommandBuffers(*OwningCard->GetLogicalDevice()->GetVulkanLogicalDevice(), &allocateInfo, CommandBuffers.GetFirstPtr()) != VK_SUCCESS) return ERROR;
 
 		return SUCCEEDED;
 	}
@@ -249,7 +249,7 @@ namespace Vulkan
 		renderBeginInfo.renderArea.offset = { 0, 0 };
 		renderBeginInfo.renderArea.extent = OwningCard->GetLogicalDevice()->GetSwapChain()->GetSwapChainExtent();
 		renderBeginInfo.clearValueCount = clearValues.GetSize();
-		renderBeginInfo.pClearValues = clearValues.GetFirstRef();
+		renderBeginInfo.pClearValues = clearValues.GetFirstPtr();
 
 		vkCmdBeginRenderPass(Buffer, &renderBeginInfo, VK_SUBPASS_CONTENTS_INLINE);
 

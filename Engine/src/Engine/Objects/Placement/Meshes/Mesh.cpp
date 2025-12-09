@@ -102,8 +102,8 @@ void Mesh::SetUpMesh()
 	DataBuffers::BindVertexInfo(VAO, 0, 0, sizeof(Vector3D), 0, Vector3);
 	DataBuffers::BindVertexInfo(VAO, 1, 0, sizeof(Vector2D), 0, Vector2);
 
-	::DataBuffers::BufferData(VAO, FVerts.GetSize() * sizeof(Vector3D), FVerts.GetFirstRef(), BufferTargets::VERTEX);
-	DataBuffers::BufferDataIndex(VAO, Indices.GetSize() * sizeof(uint16_t), Indices.GetFirstRef());
-	DataBuffers::BufferData(VAO, FTexCoords.GetSize() * sizeof(Vector2D), FTexCoords.GetFirstRef(), BufferTargets::VERTEX);
+	::DataBuffers::BufferData(VAO, FVerts.GetSize() * sizeof(Vector3D), FVerts.GetFirstPtr(), BufferTargets::VERTEX);
+	DataBuffers::BufferDataIndex(VAO, Indices.GetSize() * sizeof(uint16_t), Indices.GetFirstPtr());
+	DataBuffers::BufferData(VAO, FTexCoords.GetSize() * sizeof(Vector2D), FTexCoords.GetFirstPtr(), BufferTargets::VERTEX);
 
 }

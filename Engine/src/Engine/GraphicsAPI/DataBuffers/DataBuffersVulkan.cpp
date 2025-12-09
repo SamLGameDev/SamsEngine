@@ -11,6 +11,8 @@
 #include "VulkanLogicalDevice.h"
 #include <stdexcept>
 
+//TODO : Cleanup this file and split into multiple files, and fixing it to use better memory management practices, such as offsets
+
 namespace Vulkan
 {
 
@@ -135,9 +137,9 @@ namespace Vulkan
 		vkCmdSetVertexInputEXT(
 			SInstance::GetInstance()->GraphicsCard->GetRenderer()->GetCurrentBuffer(),
 			buffer.BindingDescriptions.GetSize(),
-			buffer.BindingDescriptions.GetFirstRef(),
+			buffer.BindingDescriptions.GetFirstPtr(),
 			buffer.AttributeDescriptions.GetSize(),
-			buffer.AttributeDescriptions.GetFirstRef()
+			buffer.AttributeDescriptions.GetFirstPtr()
 		);
 	}
 
@@ -540,7 +542,7 @@ namespace Vulkan
 
 		VkDeviceSize offsets[] = { 0, 0, 0 };
 		vkCmdBindVertexBuffers(SInstance::GetInstance()->GraphicsCard->GetRenderer()->GetCurrentBuffer(),
-			0, buffer.Buffers.GetSize(), buffer.Buffers.GetFirstRef(), offsets);
+			0, buffer.Buffers.GetSize(), buffer.Buffers.GetFirstPtr(), offsets);
 
 		vkCmdBindIndexBuffer(SInstance::GetInstance()->GraphicsCard->GetRenderer()->GetCurrentBuffer(), buffer.IndexBuffer, 0, VK_INDEX_TYPE_UINT16);
 	}
