@@ -72,6 +72,10 @@ public:
 	 */
 	[[nodiscard]] static glm::mat4 GetProjection();
 
+	InputManager* GetActiveInputManager()
+	{
+		return AInputManger;
+	}
 
 	/**
 	 * @return The Current facing direction of the camera

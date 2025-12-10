@@ -308,115 +308,88 @@ FracturePiece3D::~FracturePiece3D()
 	
 }
 
-FracturePiece3D::FracturePiece3D(Array<Vector3D> cell, Vector3D Point)
+FracturePiece3D::FracturePiece3D(Array<Face> cell, Vector3D Point)
 {
+	InputManager* inputManager = Camera::GetActiveCamera()->GetActiveInputManager();
+	auto LeftArrow = std::make_unique<InputAction>(GLFW_KEY_LEFT, inputManager, Camera::GetActiveWindow());
+
+	LeftArrow->Actions.BindMember(this, &FracturePiece3D::Seperate);
+
+	auto RightArrow = std::make_unique<InputAction>(GLFW_KEY_RIGHT, inputManager, Camera::GetActiveWindow());
+
+	RightArrow->Actions.BindMember(this, &FracturePiece3D::Converge);
+
+	dir = (Point - Vector3D::Zero).Normalise();
 
 	shader = Shader("ColorShape", "/Shaders/");
 
-	//	cell = { {0, 1},  { 1,1 }, {1, -1}, {0, -1}, {0, -1}, {-1, -1}, {-1, 1}, {0, 1} };
-		//cell = {{0.5, 0.5}, {1, 1}, {-1 , -1}};
-
-		//Array<Vector2D> solo;
-
-		//for (Vector2D vert : cell)
-		//{
-		//	unsigned int index;
-		//	if (solo.Contains(vert, index))
-		//	{
-		//		continue;
-		//	}
-		//	solo.Add(vert);
-		//}
-
-		//cell = solo;
-
-	for (Vector3D vert : cell)
+	for (Face& face : cell)
 	{
-		Verts.Add(vert.X);
-		Verts.Add(vert.Y);
-		Verts.Add(vert.Z);
+		for (Vector3D& vert : face.Verts) {
+			Verts.Add(vert.X);
+			Verts.Add(vert.Y);
+			Verts.Add(vert.Z);
+		}
 	}
 
 	dir = Vector3D::RandomRange(Vector3D::Zero, Vector3D(100, 100, 100));
 
 	dir = dir.Normalised();
 
-	//std::cout << "Inds: ";
-	for (size_t i = 1; i + 1 < cell.GetSize(); i++)
+	size_t currentInd = 0;
+
+	for (const auto& face : cell)
 	{
-		Inds.Add(0);
-		Inds.Add(i);
-		Inds.Add(i + 1);
+		for (size_t i = 1; i + 1 < face.Vertices i++)
+		{
+			size_t index = 0;
+			if (Inds.Contains(face.Verticies[0], index))
+			{
+				Inds.Add(Inds[index]);
+			}
+			else
+			{
+				Inds.Add(currentInd);
+				currentInd++;
+			}
+
+			if (Inds.Contains(face.Verticies[i], index))
+			{
+				Inds.Add(Inds[index]);
+			}
+			else
+			{
+				Inds.Add(currentInd);
+				currentInd++;
+			}
+
+			if (Inds.Contains(face.Verticies[i + 1], index))
+			{
+				Inds.Add(Inds[index]);
+			}
+			else
+			{
+				Inds.Add(currentInd);
+				currentInd++;
+			}
+
+		}
 	}
-
-
-	//DelaunayTriangulation triangulation;
-
-	//triangulation.Triangulate(cell, Inds);
 
 	if (Inds.IsEmpty())
 	{
 		return;
 	}
-	//Inds = { 0, 1, 3,  // first Triangle
-	//	1, 2, 3 };
-
-	//Verts = { 0.5f,  0.5f, 0.0f,  // top right
-	//	 0.5f, -0.5f, 0.0f,  // bottom right
-	//	-0.5f, -0.5f, 0.0f,  // bottom left
-	//	-0.5f,  0.5f, 0.0f };
-
-	//std::cout << "Vert: " << "\n";
-
-	//for (Vector2D vert : Verts)
-	//{
-
-	//	vert.Print();
-	//}
 
 	::DataBuffers::GenBuffer(VAO);
 
 
 	DataBuffers::BindVertexInfo(VAO, 0, 0, sizeof(Vector3D), 0, Vector3);
 
-	//::DataBuffers::BindBuffer(VAO);
-
 
 	::DataBuffers::BufferData(VAO, Verts.GetSize() * sizeof(float), Verts.GetFirstPtr(), BufferTargets::VERTEX);
 	DataBuffers::BufferDataIndex(VAO, Inds.GetSize() * sizeof(uint16_t), Inds.GetFirstPtr());
 
-	//glGenVertexArrays(1, &VAO);
-	//glGenBuffers(1, &VBO);
-	//glGenBuffers(1, &EBO);
-
-	//glBindVertexArray(VAO);
-
-	//glBindBuffer(GL_ARRAY_BUFFER, VBO);
-
-	//glBufferData(GL_ARRAY_BUFFER, Verts.GetSize() * sizeof(float), Verts.GetFirstPtr(), GL_STATIC_DRAW);
-
-	//glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
-
-	//glBufferData(GL_ELEMENT_ARRAY_BUFFER, Inds.GetSize() * sizeof(int), Inds.GetFirstPtr(), GL_STATIC_DRAW);
-
-	//glEnableVertexAttribArray(0);
-	//glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0);
-
-	//glBindVertexArray(0);
-
-	//glGenVertexArrays(1, &PVAO);
-	//glGenBuffers(1, &PVBO);
-
-	//glBindVertexArray(PVAO);
-
-	//glBindBuffer(GL_ARRAY_BUFFER, PVBO);
-
-	//Array<float> Points = { Point.X, Point.Y };
-
-	//glBufferData(GL_ARRAY_BUFFER, 2 * sizeof(float), Points.GetFirstPtr(), GL_STATIC_DRAW);
-
-	//glEnableVertexAttribArray(0);
-	//glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0);
 
 
 	::Renderer::AddFracture(this);
@@ -439,33 +412,12 @@ void FracturePiece3D::Draw()
 
 	g.Projection = Camera::GetActiveCamera()->GetProjection();
 
-
-	//Projection[1][1] *= -1;
 	shader.SetUniformBuffer(0, &g, sizeof(GlobalTransforms));
 
 	shader.SetUniformBuffer(1, &ubo, sizeof(PerInstanceTransforms));
 
 	::Renderer::Draw(Inds.GetSize());
 
-	//std::cout << "DrawCalled";
-	//glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
-	//TODO find a way to separate this from model
-	//used for reflection InShade
-	//glPointSize(5);
-	//glBindVertexArray(VAO);
-	//glBindBuffer(GL_ARRAY_BUFFER, VBO);
-	//glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
-	//glDrawElements(GL_TRIANGLES, static_cast<GLsizei>(Inds.GetSize()), GL_UNSIGNED_INT, nullptr);
-	//glBindVertexArray(0);
-	//glUseProgram(0);
-	//glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
-	/*PointShader.Use();
-	glBindVertexArray(PVAO);*/
-	//glBindBuffer(GL_ARRAY_BUFFER, VBO);
-	//glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
-	//glDrawArrays(GL_POINTS, 0, 1);
-	//glBindVertexArray(0);
-	//glUseProgram(0);
 }
 
 void FracturePiece3D::Start()
@@ -483,5 +435,16 @@ void FracturePiece3D::Tick(const double& DeltaTime)
 	//	transform.Position = transform.Position + (dir * 5) * DeltaTime;
 	//}
 
+}
+
+void FracturePiece3D::Serperate()
+{
+
+	transform.Position += dir;
+
+}
+void FracturePiece3D::Converge()
+{
+	transform.Position -= dir;
 }
 

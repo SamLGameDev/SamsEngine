@@ -16,7 +16,7 @@ public:
 
 	~FracturePiece3D();
 
-	FracturePiece3D(Array<Vector3D> cell, Vector3D Point);
+	FracturePiece3D(Array<Face> cell, Vector3D Point);
 
 	void Copy(const FracturePiece3D& other)
 	{
@@ -66,6 +66,10 @@ public:
 		return *this;
 	}
 
+	void Seperate();
+
+	void Converge();
+
 	void Draw();
 
 	void Start() override;
@@ -93,6 +97,9 @@ private:
 	GLuint VAO, VBO, EBO;
 
 	Shader shader;
+
+	std::unique_ptr<InputAction> LeftArrow;
+	std::unique_ptr<InputAction> RightArrow;
 };
 
 
