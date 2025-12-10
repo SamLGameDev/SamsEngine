@@ -22,9 +22,9 @@ int main(int argc, char* argv[]) {
 	engine.Init();
 
 
-	//Voronoi vorn;
+	Voronoi vorn;
 
-	Model* model = new Model("/Models/Asteroid/rock.obj", Shader("BasicTexture", "/Shaders/"));
+	//Model* model = new Model("/Models/Asteroid/rock.obj", Shader("BasicTexture", "/Shaders/"));
 
 
 	Model* model2 = new Model("/Models/BackPack/backpack.obj", Shader("BasicTexture", "/Shaders/"));
@@ -32,15 +32,15 @@ int main(int argc, char* argv[]) {
 	model2->ModelTransform.Position = { 5,0, 0 };
 
 
-
-	//vorn.FracturePlaneRandom(*model2);
+	Array<FracturePiece3D> test;
+	vorn.FracturePlaneRandom(*model2, test, 10);
 
 	while (!Vulkan::RuntimeEngine::ShouldClose())
 	{
 		engine.Loop();
 	}
 	Vulkan::RuntimeEngine::WaitForFrameToFinish();
-	delete model;
+	//delete model;
 	delete model2;
 
 	engine.ShutDown();

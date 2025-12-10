@@ -11,6 +11,8 @@ public:
 	constexpr Vector2D()noexcept : X(0), Y(0) {};
 
 	constexpr Vector2D(const float InX, const float InY)noexcept : X(InX), Y(InY) {};
+	constexpr Vector2D(const double InX, const double InY)noexcept : X(InX), Y(InY) {};
+
 
 	constexpr Vector2D(const std::uint32_t InX, const std::uint32_t InY)noexcept : X(InX), Y(InY) {};
 
@@ -45,16 +47,18 @@ public:
 	}
 
 	~Vector2D() = default;
-	static Vector2D RandomRange(const Vector2D& min, const Vector2D& max);
+	static Vector2D RandomRange(const Vector2D& Min, const Vector2D& Max);
 	static void Clamp(Vector2D& Value, const Vector2D& MinRange, const Vector2D& MaxRange);
 
-	static Vector2D PerpendicularBisector(const Vector2D& P1, const Vector2D& P2, float& a, float& b, float& c);
-	static float Dot(const Vector2D& a, const Vector2D& b);
+	static Vector2D PerpendicularBisector(const Vector2D& P1, const Vector2D& P2, float& A, float& B, float& C);
+	static float Dot(const Vector2D& A, const Vector2D& B);
 	Vector2D Normalised() const;
 	float GetLength() const;
 	float GetSquaredLength() const;
 	void Print() const;
 	static float Cross(const Vector2D& a, const Vector2D& b);
+
+	static Vector2D Lerp(const Vector2D& A, const Vector2D& B, const float& T);
 
 	const static Vector2D Zero;
 };

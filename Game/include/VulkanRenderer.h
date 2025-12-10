@@ -39,7 +39,12 @@ namespace Vulkan
 
 		URenderer& operator=(const URenderer& Other)
 		{
+			if (this == &Other)
+			{
+				return *this;
+			}
 			Copy(Other);
+			return *this;
 		}
 
 		void Copy(const URenderer& InOther)

@@ -79,7 +79,7 @@ namespace Vulkan
 		}
 
 		ErrorCodes Init(VkImageViewCreateInfo& CreateInfo);
-		ErrorCodes CreateImageView(VkImageViewCreateInfo& CreateInfo);
+		ErrorCodes CreateImageView(const VkImageViewCreateInfo& CreateInfo);
 
 		ErrorCodes ShutDown();
 

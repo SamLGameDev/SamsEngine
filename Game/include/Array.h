@@ -11,6 +11,7 @@ class Array
 public:
 	Array()
 	{
+		// TODO Need to separate numItems and ArraySize, but problem is vulkan stuff accesses the array directly, so size won't be updated
 		NumItems = 0;
 		ArraySize = 0;
 		DynamicArray = new T[1];
@@ -25,7 +26,7 @@ public:
 		Copy(CopyArray);
 	}
 
-	Array(Array&& Other)
+	Array(Array&& Other) noexcept
 	{
 		Move(Other);
 	}
@@ -48,11 +49,11 @@ public:
 	}
 
 
-	explicit Array(size_t size)
+	explicit Array(const size_t& Size)
 	{
-		NumItems = size;
-		ArraySize = size;
-		DynamicArray = new T[size];
+		NumItems = Size;
+		ArraySize = Size;
+		DynamicArray = new T[Size];
 	}
 
 	explicit Array(T* First, T* Last)
@@ -104,7 +105,7 @@ public:
 			return false;
 		}
 
-		for (unsigned int i = 0; i < other.GetSize(); i++)
+		for (size_t i = 0; i < other.GetSize(); i++)
 		{
 			if (other[i] != DynamicArray[i])
 			{
@@ -120,51 +121,53 @@ public:
 		return this == null;
 	}
 
-	[[nodiscard]] const T& operator[](const unsigned int Index) const
+	[[nodiscard]] const T& operator[](const size_t& Index) const
 	{
 		return GetItemAtRef(Index);
 	}
-	[[nodiscard]] T& operator[](const unsigned int Index)
+	[[nodiscard]] T& operator[](const size_t& Index)
 	{
 		return GetItemAtRef(Index);
 	}
 
 
-	[[nodiscard]] T& GetItemAtRef(const unsigned int Index) const
+	[[nodiscard]] T& GetItemAtRef(const size_t& Index) const
 	{
 		return DynamicArray[Index];
 	}
 
-	[[nodiscard]] T* GetItemAtPtr(const unsigned int Index) const
+	[[nodiscard]] T* GetItemAtPtr(const size_t Index) const
 	{
 		return &DynamicArray[Index];
 	}
 
-	[[nodiscard]] T* GetFirstRef()const
+	[[nodiscard]] T* GetFirstPtr()const
 	{
 		return DynamicArray;
 	}
 
-	[[nodiscard]] T* GetLastPtr() 
+	[[nodiscard]] T* GetLastPtr() const
 	{
 		return &DynamicArray[NumItems - 1];
 	}
 
-	void Add(const T item)
+	void Add(const T& Item)
 	{
+		//Depreciated for now, as arraySize needs to be seperated from NumItems properly
 		if (NumItems + 1 < ArraySize)
 		{
 			NumItems++;
-			DynamicArray[NumItems] = item;
+			DynamicArray[NumItems] = Item;
 			return;
 		}
+
 		T* NewArray = new T[NumItems + 1];
 
-		for (unsigned int i = 0; i < NumItems; i++)
+		for (size_t i = 0; i < NumItems; i++)
 		{
-			NewArray[i] = std::move(GetItemAt(i));;
+			NewArray[i] = std::move(GetItemAt(i));
 		}
-		NewArray[NumItems] = item;
+		NewArray[NumItems] = Item;
 		NumItems++;
 
 		delete[] DynamicArray;
@@ -173,31 +176,32 @@ public:
 		ArraySize = NumItems;
 	}
 
-	void Add(const Array& item)
+	void Add(const Array& Item)
 	{
-		if (ArraySize > NumItems + item.GetSize())
+		//Depreciated for now, as arraySize needs to be seperated from NumItems properly
+		if (ArraySize > NumItems + Item.GetSize())
 		{
-			for (unsigned int i = 0; i < item.GetSize(); i++)
+			for (size_t i = 0; i < Item.GetSize(); i++)
 			{
-				DynamicArray[i + NumItems] = std::move(item.GetItemAt(i));;
+				DynamicArray[i + NumItems] = std::move(Item.GetItemAt(i));;
 			}
-			NumItems += item.GetSize();
+			NumItems += Item.GetSize();
 			return;
 		}
 
-		T* NewArray = new T[NumItems + item.GetSize()];
+		T* NewArray = new T[NumItems + Item.GetSize()];
 
-		for (unsigned int i = 0; i < NumItems; i++)
+		for (size_t i = 0; i < NumItems; i++)
 		{
-			NewArray[i] = std::move(GetItemAt(i));;
+			NewArray[i] = std::move(GetItemAt(i));
 		}
 
-		for (unsigned int i = 0; i < item.GetSize(); i++)
+		for (size_t i = 0; i < Item.GetSize(); i++)
 		{
-			NewArray[i + NumItems] = std::move(item.GetItemAt(i));;
+			NewArray[i + NumItems] = std::move(Item.GetItemAt(i));
 		}
 
-		NumItems += item.GetSize();;
+		NumItems += Item.GetSize();;
 
 		delete[] DynamicArray;
 		DynamicArray = NewArray;
@@ -205,7 +209,12 @@ public:
 		ArraySize = NumItems;
 	}
 
-	[[nodiscard]] T GetItemAt(unsigned int Index) const
+	/// <summary>
+	/// Gets a copy of the item at the specified index
+	/// </summary>
+	/// <param name="Index"></param>
+	/// <returns></returns>
+	[[nodiscard]] T GetItemAt(const size_t& Index) const
 	{
 		return DynamicArray[Index];
 	}
@@ -215,12 +224,13 @@ public:
 		return NumItems;
 	}
 
-	[[nodiscard]] T GetArray()
+	//Get the first item in the underlying array
+	[[nodiscard]] T* GetArray()
 	{
 		return DynamicArray;
 	}
 
-	bool Reallocate(const unsigned int Size)
+	bool Reallocate(const size_t& Size)
 	{
 		if (Size < ArraySize)
 		{
@@ -229,7 +239,7 @@ public:
 
 		T* NewArray = new T[Size];
 
-		for (unsigned int i = 0; i < NumItems; i++)
+		for (size_t i = 0; i < NumItems; i++)
 		{
 			NewArray[i] = GetItemAt(i);
 		}
@@ -243,9 +253,15 @@ public:
 		return true;
 	}
 
-	bool Contains(const T& Item, unsigned int& Index) const
+	/// <summary>
+	/// Does the Item exist in the array, and if so, updates Index to the location
+	/// </summary>
+	/// <param name="Item"></param>
+	/// <param name="Index"></param>
+	/// <returns></returns>
+	bool Contains(const T& Item, size_t& Index) const
 	{
-		for (unsigned int i = 0; i < NumItems; i++)
+		for (size_t i = 0; i < NumItems; i++)
 		{
 			if (DynamicArray[i] == Item)
 			{
@@ -258,7 +274,7 @@ public:
 
 	bool Contains(const T& Item) const
 	{
-		for (unsigned int i = 0; i < NumItems; i++)
+		for (size_t i = 0; i < NumItems; i++)
 		{
 			if (DynamicArray[i] == Item)
 			{
@@ -270,7 +286,7 @@ public:
 
 	bool Replace(const T& ToReplace, const T& NewItem)
 	{
-		for (unsigned int i = 0; i < NumItems; i++)
+		for (size_t i = 0; i < NumItems; i++)
 		{
 			if (DynamicArray[i] == ToReplace)
 			{
@@ -281,7 +297,7 @@ public:
 		return false;
 	}
 
-	bool Replace(const size_t Index, const T& Item)
+	bool ReplaceAt(const size_t& Index, const T& Item)
 	{
 		if (NumItems > Index)
 		{
@@ -293,7 +309,7 @@ public:
 
 	void Remove(const T& Item)
 	{
-		unsigned int index;
+		size_t index;
 
 		if (Contains(Item, index))
 		{
@@ -315,6 +331,9 @@ public:
 		}
 	}
 
+	/// <summary>
+	/// Empties the array
+	/// </summary>
 	void Empty()
 	{
 		delete[] DynamicArray;
@@ -356,7 +375,7 @@ private:
 
 		delete[] DynamicArray;
 		DynamicArray = new T[other.GetSize()];
-		for (unsigned int i = 0; i < other.GetSize(); i++)
+		for (size_t i = 0; i < other.GetSize(); i++)
 		{
 			DynamicArray[i] = std::move(other.GetItemAt(i));
 		}

@@ -11,16 +11,16 @@
 #include "InterfaceRenderer.h"
 #include "glm/gtc/type_ptr.hpp"
 
-void Voronoi::GetFirstIntersection(Vector3D normal, Vector3D center, const Face& currentFace, Face newFace, size_t& firstIntersectionIndex, Vector3D& firstIntersection)
+void Voronoi::GetFirstIntersection(const Vector3D& Normal, const Vector3D& Center, const Face& CurrentFace, Face& NewFace, size_t& FirstIntersectionIndex, Vector3D& FirstIntersection)
 {
-	for (firstIntersectionIndex; firstIntersectionIndex < currentFace.Vertices.GetSize(); firstIntersectionIndex++)
+	for (FirstIntersectionIndex; FirstIntersectionIndex < CurrentFace.Vertices.GetSize(); FirstIntersectionIndex++)
 	{
-		Vector3D fromVert = currentFace.Vertices[firstIntersectionIndex];
-		Vector3D toVert = currentFace.Vertices[(firstIntersectionIndex + 1) % currentFace.Vertices.GetSize()];
+		Vector3D fromVert = CurrentFace.Vertices[FirstIntersectionIndex];
+		Vector3D toVert = CurrentFace.Vertices[(FirstIntersectionIndex + 1) % CurrentFace.Vertices.GetSize()];
 
 		Vector3D lineDir = toVert - fromVert;
 		Vector3D intersectionPoint;
-		const bool bDoesLineIntersect = Vector3D::GetIntersectionPointWithPlane(center, normal, fromVert, lineDir, intersectionPoint);
+		const bool bDoesLineIntersect = Vector3D::GetIntersectionPointWithPlane(Center, Normal, fromVert, lineDir, intersectionPoint);
 
 		if (bDoesLineIntersect)
 		{
@@ -28,19 +28,19 @@ void Voronoi::GetFirstIntersection(Vector3D normal, Vector3D center, const Face&
 
 			if (intersectionIsNextVertex)
 			{
-				newFace.Vertices.Add(toVert);
-				newFace.Vertices.Add(currentFace.Vertices[(firstIntersectionIndex + 2) % currentFace.Vertices.GetSize()]);
-				firstIntersectionIndex = (firstIntersectionIndex + 2) % currentFace.Vertices.GetSize();
+				NewFace.Vertices.Add(toVert);
+				NewFace.Vertices.Add(CurrentFace.Vertices[(FirstIntersectionIndex + 2) % CurrentFace.Vertices.GetSize()]);
+				FirstIntersectionIndex = (FirstIntersectionIndex + 2) % CurrentFace.Vertices.GetSize();
 
 			}
 			else
 			{
-				newFace.Vertices.Add(intersectionPoint);
-				newFace.Vertices.Add(toVert);
-				firstIntersectionIndex = (firstIntersectionIndex + 1) % currentFace.Vertices.GetSize();
+				NewFace.Vertices.Add(intersectionPoint);
+				NewFace.Vertices.Add(toVert);
+				FirstIntersectionIndex = (FirstIntersectionIndex + 1) % CurrentFace.Vertices.GetSize();
 			}
 
-			firstIntersection = intersectionPoint;
+			FirstIntersection = intersectionPoint;
 
 			break;
 						
@@ -49,65 +49,67 @@ void Voronoi::GetFirstIntersection(Vector3D normal, Vector3D center, const Face&
 	}
 }
 
-size_t Voronoi::GetAllVertsUntilSecondIntersection(Vector3D normal, Vector3D center, const Face& currentFace, Face newFace, size_t firstIntersectionIndex, Vector3D& secondIntersection)
+size_t Voronoi::GetAllVertsUntilSecondIntersection(const Vector3D& Normal, const Vector3D& Center, const Face& CurrentFace, Face& NewFace, const size_t&
+                                                   FirstIntersectionIndex, Vector3D& SecondIntersection)
 {
 	size_t secondIntersectionIndex = 0;
 
-	for (secondIntersectionIndex = firstIntersectionIndex; secondIntersectionIndex < currentFace.Vertices.GetSize(); secondIntersectionIndex++)
+	for (secondIntersectionIndex = FirstIntersectionIndex; secondIntersectionIndex < CurrentFace.Vertices.GetSize(); secondIntersectionIndex++)
 	{
-		Vector3D fromVert = currentFace.Vertices[secondIntersectionIndex];
-		Vector3D toVert = currentFace.Vertices[(secondIntersectionIndex + 1) % currentFace.Vertices.GetSize()];
+		Vector3D fromVert = CurrentFace.Vertices[secondIntersectionIndex];
+		Vector3D toVert = CurrentFace.Vertices[(secondIntersectionIndex + 1) % CurrentFace.Vertices.GetSize()];
 
 		Vector3D lineDir = toVert - fromVert;
 		Vector3D intersectionPoint;
-		const bool bDoesLineIntersect = Vector3D::GetIntersectionPointWithPlane(center, normal, fromVert, lineDir, intersectionPoint);
+		const bool bDoesLineIntersect = Vector3D::GetIntersectionPointWithPlane(Center, Normal, fromVert, lineDir, intersectionPoint);
 
 		if (bDoesLineIntersect)
 		{
-			newFace.Vertices.Add(intersectionPoint);
-			secondIntersection = intersectionPoint;
+			NewFace.Vertices.Add(intersectionPoint);
+			SecondIntersection = intersectionPoint;
 			secondIntersectionIndex++;
 			break;
 
 		}
-		newFace.Vertices.Add(toVert);
+		NewFace.Vertices.Add(toVert);
 	}
 	return secondIntersectionIndex;
 }
 
-void Voronoi::GetFaceReveresed(Face intersectFace, const Face& currentFace, Face newFace, size_t firstIntersectionIndex, Vector3D firstIntersection, Vector3D secondIntersection, size_t secondIntersectionIndex)
+void Voronoi::GetFaceReveresed(Face& IntersectFace, const Face& CurrentFace, Face& NewFace, const size_t& FirstIntersectionIndex, const Vector3D&
+                               FirstIntersection, const Vector3D& SecondIntersection, const size_t& SecondIntersectionIndex)
 {
-	newFace.Vertices.Empty();
+	NewFace.Vertices.Empty();
 
-	if (secondIntersection != currentFace.Vertices[secondIntersectionIndex % currentFace.Vertices.GetSize()]) newFace.Vertices.Add(secondIntersection);
+	if (SecondIntersection != CurrentFace.Vertices[SecondIntersectionIndex % CurrentFace.Vertices.GetSize()]) NewFace.Vertices.Add(SecondIntersection);
 
 	Vector3D from;
 
-	for (size_t a = secondIntersectionIndex; a % currentFace.Vertices.GetSize() != firstIntersectionIndex; a++)
+	for (size_t a = SecondIntersectionIndex; a % CurrentFace.Vertices.GetSize() != FirstIntersectionIndex; a++)
 	{
-		from = currentFace.Vertices[a % currentFace.Vertices.GetSize()];
-		Vector3D to = currentFace.Vertices[(a + 1) % currentFace.Vertices.GetSize()];
+		from = CurrentFace.Vertices[a % CurrentFace.Vertices.GetSize()];
+		Vector3D to = CurrentFace.Vertices[(a + 1) % CurrentFace.Vertices.GetSize()];
 		if (from == to) continue;
 
-		newFace.Vertices.Add(from);
+		NewFace.Vertices.Add(from);
 	}
 
-	if (from != firstIntersection) newFace.Vertices.Add(firstIntersection);
+	if (from != FirstIntersection) NewFace.Vertices.Add(FirstIntersection);
 
 	bool bAddFirst = true, bAddSecond = true;
-	for (auto vert : intersectFace.Vertices)
+	for (const auto& vert : IntersectFace.Vertices)
 	{
-		if (Vector3D::IsAlmostEqual(vert, firstIntersection)) bAddFirst = false;
+		if (Vector3D::IsAlmostEqual(vert, FirstIntersection)) bAddFirst = false;
 
-		if (Vector3D::IsAlmostEqual(vert, secondIntersection)) bAddSecond = false;
+		if (Vector3D::IsAlmostEqual(vert, SecondIntersection)) bAddSecond = false;
 	}
 
-	if (bAddSecond) intersectFace.Vertices.Add(secondIntersection);
-	if (bAddFirst) intersectFace.Vertices.Add(firstIntersection);
+	if (bAddSecond) IntersectFace.Vertices.Add(SecondIntersection);
+	if (bAddFirst) IntersectFace.Vertices.Add(FirstIntersection);
 }
 
-void Voronoi::SliceFaceByPlane(Array<Face>& Faces, Vector3D& Normal, Vector3D& Center, Array<Face>& newFaces,
-                               Face& intersectFace, const size_t& FaceIndex)
+void Voronoi::SliceFaceByPlane(const Array<Face>& Faces, const Vector3D& Normal, const Vector3D& Center, Array<Face>& NewFaces,
+                               Face& IntersectFace, const size_t& FaceIndex)
 {
 	const Face& currentFace = Faces[FaceIndex];
 	Face newFace;
@@ -124,7 +126,7 @@ void Voronoi::SliceFaceByPlane(Array<Face>& Faces, Vector3D& Normal, Vector3D& C
 	{
 		if (Vector3D::Dot(Normal, (currentFace.Vertices[0] - Center).Normalised()) > 0)
 		{
-			newFaces.Add(currentFace);
+			NewFaces.Add(currentFace);
 		}
 		return;
 	}
@@ -149,7 +151,7 @@ void Voronoi::SliceFaceByPlane(Array<Face>& Faces, Vector3D& Normal, Vector3D& C
 	{
 		GetFaceReveresed
 		(
-			intersectFace,
+			IntersectFace,
 			currentFace,
 			newFace,
 			firstIntersectionIndex,
@@ -164,21 +166,19 @@ void Voronoi::SliceFaceByPlane(Array<Face>& Faces, Vector3D& Normal, Vector3D& C
 		// if the intersections arent already in the intersect face, add them
 
 		bool bAddFirst = true, bAddSecond = true;
-		for (auto vert : intersectFace.Vertices)
+		for (const auto& vert : IntersectFace.Vertices)
 		{
 			if (Vector3D::IsAlmostEqual(vert, firstIntersection)) bAddFirst = false;
 
 			if (Vector3D::IsAlmostEqual(vert, secondIntersection)) bAddSecond = false;
 		}
 
-		if (bAddFirst) intersectFace.Vertices.Add(firstIntersection);
+		if (bAddFirst) IntersectFace.Vertices.Add(firstIntersection);
 
-		if (bAddSecond) intersectFace.Vertices.Add(secondIntersection);
+		if (bAddSecond) IntersectFace.Vertices.Add(secondIntersection);
 	}
-				
 
-	newFaces.Add(newFace);
-	return;
+	NewFaces.Add(newFace);
 }
 
 void Voronoi::SliceShapeByPlane(const Array<Vector3D>& Points, const size_t& Index, Vector3D& CurrentPoint, Array<Face>& Faces,
@@ -215,16 +215,16 @@ void Voronoi::FracturePlaneRandom(Model& InModel, Array<FracturePiece3D>& OutFra
 
 	for (size_t i = 0; i < NumPoints; i++)
 	{
-		Vector3D point1 = InModel.ModelTransform.GetRandomPointInBounds();
-
-		while (points.Contains(point1))
+		
+		Vector3D point1;
+		do 
 		{
 			point1 = InModel.ModelTransform.GetRandomPointInBounds();
-		}
+		} while (points.Contains(point1) && IsPointTooClose(point1, points));
 
 		//TestSquare.push_back(DrawWireCube(point1, { 0.5, 0.5, 0.5 }, { 0.1f, 0.1f, 0.1f }, { 0.5, 0.5, 0.5 }));
 
-		points.Add(point1);
+		points[i] = point1;
 	}
 
 	//TestPoints
@@ -248,24 +248,17 @@ void Voronoi::FracturePlaneRandom(Model& InModel, Array<FracturePiece3D>& OutFra
 		auto color = Vector3D::RandomRange(Vector3D(30, 30, 30), Vector3D(255, 255, 255));
 
 
-		////for (auto& face : Faces)
-		////{
-
-		////	FracturePiece3D* frac = CreateObjectPtr<FracturePiece3D>(face.Vertices, currentPoint);
-		////	frac->color = color;
-		////	fractureFaces.Add(face);
-		////}
+		//for (auto& face : Faces)
+		//{
+		//	FracturePiece3D* frac = CreateObjectPtr<FracturePiece3D>(face.Vertices, currentPoint);
+		//	frac->color = color;
+		//	fractureFaces.Add(face);
+		//}
 //
-		Array<Vector3D> test;
-		for (auto& face : Faces)
-		{
-	
-			test.Add(face.Vertices);
 
-		}
-        FracturePiece3D frac = CreateObjectRaw<FracturePiece3D>(test, currentPoint);
-		frac.color = color;
-		OutFractures.Add(frac);
+        FracturePiece3D* frac = CreateObjectPtr<FracturePiece3D>(Faces, currentPoint);
+		frac->color = color;
+	//	OutFractures.Add(frac);
 
 
 		//TestSquare.push_back(DrawWireCube(currentPoint, { 0.5, 0.5, 0.5 }, { 0.1f, 0.1f, 0.1f }, color/255));
@@ -290,7 +283,7 @@ void Voronoi::DefinePlane(Vector3D& normal, Vector3D& CurrentPoint, Vector3D& cl
 	PlaneCenter = (CurrentPoint + closestPoint) / 2;
 }
 
-bool Voronoi::IsPointInPolygon(Vector3D Point, Array<Vector3D> Polygon, Vector3D center)
+bool Voronoi::IsPointInPolygon(const Vector3D& Point, const Array<Vector3D>& Polygon, const Vector3D& center)
 {
 	//Check if any point is on the wrong side of the plane, i.e. on the negative side of the normal
 	for (size_t i = 0; i < Polygon.GetSize(); i++)
@@ -303,13 +296,26 @@ bool Voronoi::IsPointInPolygon(Vector3D Point, Array<Vector3D> Polygon, Vector3D
 	return true;
 }
 
+bool Voronoi::IsPointTooClose(const Vector3D& Point, const Array<Vector3D>& Points)
+{
+	for (const auto& p : Points)
+	{
+		double d = (Point - p).GetSquaredLength();
+		if (d < 0.001) return true;
+
+	}
+
+	return false;
+}
+
+
 FracturePiece3D::~FracturePiece3D()
 {
 	
 }
 
 FracturePiece3D::FracturePiece3D(Array<Face> cell, Vector3D Point)
-{
+{/*
 	InputManager* inputManager = Camera::GetActiveCamera()->GetActiveInputManager();
 	auto LeftArrow = std::make_unique<InputAction>(GLFW_KEY_LEFT, inputManager, Camera::GetActiveWindow());
 
@@ -317,64 +323,71 @@ FracturePiece3D::FracturePiece3D(Array<Face> cell, Vector3D Point)
 
 	auto RightArrow = std::make_unique<InputAction>(GLFW_KEY_RIGHT, inputManager, Camera::GetActiveWindow());
 
-	RightArrow->Actions.BindMember(this, &FracturePiece3D::Converge);
+	RightArrow->Actions.BindMember(this, &FracturePiece3D::Converge);*/
 
-	dir = (Point - Vector3D::Zero).Normalise();
+	dir = (Point - Vector3D::Zero).Normalised();
 
 	shader = Shader("ColorShape", "/Shaders/");
 
-	for (Face& face : cell)
-	{
-		for (Vector3D& vert : face.Verts) {
-			Verts.Add(vert.X);
-			Verts.Add(vert.Y);
-			Verts.Add(vert.Z);
-		}
-	}
+	Array<Vector3D> newVerts;
 
 	dir = Vector3D::RandomRange(Vector3D::Zero, Vector3D(100, 100, 100));
 
 	dir = dir.Normalised();
 
-	size_t currentInd = 0;
 
 	for (const auto& face : cell)
 	{
-		for (size_t i = 1; i + 1 < face.Vertices i++)
+		for (size_t i = 1; i + 1 < face.Vertices.GetSize(); i++)
 		{
 			size_t index = 0;
-			if (Inds.Contains(face.Verticies[0], index))
+			if (newVerts.Contains(face.Vertices[0], index))
 			{
-				Inds.Add(Inds[index]);
+				Inds.Add(index);
 			}
 			else
 			{
-				Inds.Add(currentInd);
-				currentInd++;
+				Inds.Add(newVerts.GetSize());
+				newVerts.Add(face.Vertices[0]);
 			}
 
-			if (Inds.Contains(face.Verticies[i], index))
+			if (newVerts.Contains(face.Vertices[i], index))
 			{
-				Inds.Add(Inds[index]);
+				Inds.Add(index);
 			}
 			else
 			{
-				Inds.Add(currentInd);
-				currentInd++;
+				Inds.Add(newVerts.GetSize());
+				newVerts.Add(face.Vertices[i]);
 			}
 
-			if (Inds.Contains(face.Verticies[i + 1], index))
+			if (newVerts.Contains(face.Vertices[i + 1], index))
 			{
-				Inds.Add(Inds[index]);
+				Inds.Add(index);
 			}
 			else
 			{
-				Inds.Add(currentInd);
-				currentInd++;
+				Inds.Add(newVerts.GetSize());
+				newVerts.Add(face.Vertices[i+1]);
 			}
 
 		}
 	}
+
+	
+	for (const Vector3D& vert : newVerts) {
+		Verts.Add(vert.X);
+		Verts.Add(vert.Y);
+		Verts.Add(vert.Z);
+	}
+
+	////for (size_t i = 1; i + 1< cell.GetSize(); i++)
+	////{
+	////	Inds.Add(0);
+	////	Inds.Add(i);
+	////	Inds.Add(i + 1);
+	////}
+
 
 	if (Inds.IsEmpty())
 	{
@@ -437,7 +450,7 @@ void FracturePiece3D::Tick(const double& DeltaTime)
 
 }
 
-void FracturePiece3D::Serperate()
+void FracturePiece3D::Seperate()
 {
 
 	transform.Position += dir;

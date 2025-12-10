@@ -2,6 +2,9 @@
 #include <functional>
 #include "LinkedList.h"
 
+
+//TODO this whole thing needs to be reworked to allow unbinding, and null checking.
+
 template<typename... Args>
 class MulticastDelegate
 {

@@ -461,3 +461,31 @@ TEST(Tringulation, Delauney)
 
 	ASSERT_EQ(tet.IsPointInCircumSphere({ 0.9, 1, 1 }), true);
 }
+TEST(Fracturing, Diagram) {
+	Vulkan::RuntimeEngine engine;
+	engine.Init();
+
+
+	Voronoi vorn;
+
+	//Model* model = new Model("/Models/Asteroid/rock.obj", Shader("BasicTexture", "/Shaders/"));
+
+
+	Model* model2 = new Model("/Models/BackPack/backpack.obj", Shader("BasicTexture", "/Shaders/"));
+
+	model2->ModelTransform.Position = { 5,0, 0 };
+
+
+	Array<FracturePiece3D> test;
+	vorn.FracturePlaneRandom(*model2, test, 10);
+
+	while (!Vulkan::RuntimeEngine::ShouldClose())
+	{
+		engine.Loop();
+	}
+	Vulkan::RuntimeEngine::WaitForFrameToFinish();
+	//delete model;
+	delete model2;
+
+	engine.ShutDown();
+}

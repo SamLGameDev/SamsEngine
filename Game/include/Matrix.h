@@ -1,6 +1,9 @@
 #pragma once
 #include <cmath>
 
+
+//Needs refactoring to allow different rows and columns, but for now this will do.
+
 template <size_t N>
 struct Row
 {
@@ -18,6 +21,12 @@ public:
 	float CalculateDeterminant();
 };
 
+/// <summary>
+/// Will not return correct result for singular matrices, or if row and collum are not equal.
+/// </summary>
+/// <typeparam name="Row"></typeparam>
+/// <typeparam name="Collum"></typeparam>
+/// <returns></returns>
 template <size_t Row, size_t Collum>
 float Matrix<Row, Collum>::CalculateDeterminant()
 {

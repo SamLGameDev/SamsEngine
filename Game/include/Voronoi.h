@@ -1,6 +1,7 @@
 
 #pragma once
 
+#include "InputAction.h"
 #include "InterfaceRenderer.h"
 #include "Vector3D.h"
 #include "Model.h"
@@ -16,7 +17,7 @@ public:
 
 	~FracturePiece3D();
 
-	FracturePiece3D(Array<Vector3D> cell, Vector3D Point);
+	FracturePiece3D(Array<Face> cell, Vector3D Point);
 
 	void Copy(const FracturePiece3D& other)
 	{
@@ -66,6 +67,10 @@ public:
 		return *this;
 	}
 
+	void Seperate();
+
+	void Converge();
+
 	void Draw();
 
 	void Start() override;
@@ -93,22 +98,44 @@ private:
 	GLuint VAO, VBO, EBO;
 
 	Shader shader;
+
+	std::unique_ptr<InputAction> LeftArrow;
+	std::unique_ptr<InputAction> RightArrow;
 };
 
 
 class Voronoi
 {
 public:
-	void FracturePlaneRandom(Model& InModel, Array<FracturePiece3D>& OutFractures);
-	static void DefinePlane(Vector3D& normal, Vector3D& CurrentPoint, Vector3D& closestPoint, Vector3D& Right, Vector3D& Up, Vector3D& PlaneCenter);
-	bool IsPointInPolygon(Vector3D Point, Array<Vector3D> Polygon, Vector3D center);
+
+	//Fracture the model into a voronoi diagram based on random points
+	void FracturePlaneRandom(Model& InModel, Array<FracturePiece3D>& OutFractures, const size_t& NumPoints);
 
 private:
+
+	void GetFirstIntersection(Vector3D normal, Vector3D center, const Face& currentFace, Face newFace,
+		size_t& firstIntersectionIndex, Vector3D& firstIntersection);
+
+	size_t GetAllVertsUntilSecondIntersection(Vector3D normal, Vector3D center, const Face& currentFace, Face newFace,
+		size_t firstIntersectionIndex, Vector3D& secondIntersection);
+
+	void GetFaceReveresed(Face intersectFace, const Face& currentFace, Face newFace, size_t firstIntersectionIndex,
+		Vector3D firstIntersection, Vector3D secondIntersection, size_t secondIntersectionIndex);
+
+	void SliceFaceByPlane(Array<Face>& Faces, Vector3D& Normal, Vector3D& Center, Array<Face>& newFaces,
+		Face& intersectFace, const size_t& FaceIndex);
+
+	void SliceShapeByPlane(const Array<Vector3D>& Points, const size_t& Index, Vector3D& CurrentPoint, Array<Face>& Faces, Vector3D& Normal,
+		Vector3D& Right, Vector3D& Up, Vector3D& Center, const size_t& J);
+
+	static void DefinePlane(Vector3D& normal, Vector3D& CurrentPoint, Vector3D& closestPoint, Vector3D& Right, Vector3D& Up, Vector3D& PlaneCenter);
+	static bool IsPointInPolygon(Vector3D Point, Array<Vector3D> Polygon, Vector3D center);
 
 	std::vector<std::unique_ptr<WireObject>> TestSquare;
 
 	Array<Face> fractureFaces;
 
+	Array<FracturePiece3D> Fractures;
 
 };
 

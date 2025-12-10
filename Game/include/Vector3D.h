@@ -31,97 +31,97 @@ public:
 	////	Z = CopyVec.Z;
 	////}
 
-	[[nodiscard]] bool operator==(const Vector3D& other) const {
-		return	X == other.X && Y == other.Y && Z == other.Z;
+	[[nodiscard]] bool operator==(const Vector3D& Other) const {
+		return	X == Other.X && Y == Other.Y && Z == Other.Z;
 	}
 
-	[[nodiscard]] Vector3D operator/(const float& other)const
+	[[nodiscard]] Vector3D operator/(const float& Other)const
 	{
-		return {X / other, Y / other, Z / other};
+		return {X / Other, Y / Other, Z / Other};
 	}
-	[[nodiscard]] Vector3D operator/(const Vector3D& other)const
+	[[nodiscard]] Vector3D operator/(const Vector3D& Other)const
 	{
-		return {X / other.X, Y / other.Y, Z / other.Z};
+		return {X / Other.X, Y / Other.Y, Z / Other.Z};
 	}
 	[[nodiscard]] Vector3D operator-() const {
 		return {-X, -Y, -Z};
 	}
-	[[nodiscard]] Vector3D operator-(const Vector3D& other) const {
-		return {X - other.X, Y - other.Y, Z - other.Z};
+	[[nodiscard]] Vector3D operator-(const Vector3D& Other) const {
+		return {X - Other.X, Y - Other.Y, Z - Other.Z};
 	}
 
-	[[nodiscard]] Vector3D operator*(const float& multiplier)const
+	[[nodiscard]] Vector3D operator*(const float& Multiplier)const
 	{
-		return {X * multiplier, Y * multiplier, Z * multiplier};
+		return {X * Multiplier, Y * Multiplier, Z * Multiplier};
 	}
-	[[nodiscard]] Vector3D operator*(const Vector3D& multiplier)const
+	[[nodiscard]] Vector3D operator*(const Vector3D& Multiplier)const
 	{
-		return {X * multiplier.X, Y * multiplier.Y, Z * multiplier.Z};
-	}
-
-	[[nodiscard]] Vector3D operator+(const Vector3D& other)const
-	{
-		return {X + other.X, Y + other.Y, Z + other.Z};
+		return {X * Multiplier.X, Y * Multiplier.Y, Z * Multiplier.Z};
 	}
 
-	[[nodiscard]] Vector3D operator+(const float& other)const
+	[[nodiscard]] Vector3D operator+(const Vector3D& Other)const
 	{
-		return {X + other, Y + other, Z + other};
+		return {X + Other.X, Y + Other.Y, Z + Other.Z};
 	}
 
-
-	void operator+=(const float& other)
+	[[nodiscard]] Vector3D operator+(const float& Other)const
 	{
-		X += other;
-		Y += other;
-		Z += other;
-	}
-
-	void operator+=(const Vector3D& other)
-	{
-		X += other.X;
-		Y += other.Y;
-		Z += other.Z;
-	}
-
-	void operator-=(const float& other)
-	{
-		X -= other;
-		Y -= other;
-		Z -= other;
-	}
-
-	void operator-=(const Vector3D& other)
-	{
-		X -= other.X;
-		Y -= other.Y;
-		Z -= other.Z;
-	}
-
-	[[nodiscard]] bool operator<(const float& value) const
-	{
-		return X < value && Y < value && Z < value;
+		return {X + Other, Y + Other, Z + Other};
 	}
 
 
-	[[nodiscard]] bool operator<(const Vector3D& value) const
+	void operator+=(const float& Other)
 	{
-		return X < value.X && Y < value.Y && Z < value.Z;
+		X += Other;
+		Y += Other;
+		Z += Other;
+	}
+
+	void operator+=(const Vector3D& Other)
+	{
+		X += Other.X;
+		Y += Other.Y;
+		Z += Other.Z;
+	}
+
+	void operator-=(const float& Other)
+	{
+		X -= Other;
+		Y -= Other;
+		Z -= Other;
+	}
+
+	void operator-=(const Vector3D& Other)
+	{
+		X -= Other.X;
+		Y -= Other.Y;
+		Z -= Other.Z;
+	}
+
+	[[nodiscard]] bool operator<(const float& Value) const
+	{
+		return X < Value && Y < Value && Z < Value;
 	}
 
 
-	[[nodiscard]] bool operator>(const float& value) const
+	[[nodiscard]] bool operator<(const Vector3D& Value) const
 	{
-		return X > value && Y > value && Z > value;
-	}
-	[[nodiscard]] bool operator>(const Vector3D& value) const
-	{
-		return X > value.X && Y > value.Y && Z > value.Z;
+		return X < Value.X && Y < Value.Y && Z < Value.Z;
 	}
 
-	[[nodiscard]] bool operator>=(const Vector3D& value) const
+
+	[[nodiscard]] bool operator>(const float& Value) const
 	{
-		return X >= value.X && Y >= value.Y && Z >= value.Z;
+		return X > Value && Y > Value && Z > Value;
+	}
+	[[nodiscard]] bool operator>(const Vector3D& Value) const
+	{
+		return X > Value.X && Y > Value.Y && Z > Value.Z;
+	}
+
+	[[nodiscard]] bool operator>=(const Vector3D& Value) const
+	{
+		return X >= Value.X && Y >= Value.Y && Z >= Value.Z;
 	}
 
 	[[nodiscard]] Vector3D Normalised() const;
@@ -130,16 +130,16 @@ public:
 
 	[[nodiscard]] float GetSquaredLength() const;
 
-	[[nodiscard]] static Vector3D RandomRange(const Vector3D& min, const Vector3D& max);
+	[[nodiscard]] static Vector3D RandomRange(const Vector3D& Min, const Vector3D& Max);
 
-	[[nodiscard]] static bool WithinRange(const Vector3D& Value, const Vector3D& min, const Vector3D& max);
+	[[nodiscard]] static bool WithinRange(const Vector3D& Value, const Vector3D& Min, const Vector3D& Max);
 
 
 	static void Clamp(Vector3D& Value, const Vector3D& MinRange, const Vector3D& MaxRange);
 
-	[[nodiscard]] static float Dot(const Vector3D& a, const Vector3D& b);
+	[[nodiscard]] static float Dot(const Vector3D& A, const Vector3D& B);
 
-	[[nodiscard]] static Vector3D Cross(const Vector3D& a, const Vector3D& b);
+	[[nodiscard]] static Vector3D Cross(const Vector3D& A, const Vector3D& B);
 
 	/**
 	 * Gets where a plane and line intersect
@@ -147,20 +147,18 @@ public:
 	 * @param Normal Planes normal
 	 * @param Point Origin of line
 	 * @param LineDir Direction of line travel
-	 * @param out The point of intersection
+	 * @param Out The point of intersection
 	 * @return Whether the line intersects with the plane
 	 */
 	static bool GetIntersectionPointWithPlane(const Vector3D& Mid, const Vector3D& Normal, const Vector3D& Point,
-	                                          const Vector3D& LineDir, Vector3D& out);
+	                                          const Vector3D& LineDir, Vector3D& Out);
 
-	[[nodiscard]] static bool IsAlmostEqual(const Vector3D& a, const Vector3D& b, float range = 1e-6);
+	[[nodiscard]] static bool IsAlmostEqual(const Vector3D& A, const Vector3D& B, const float& Range = 1e-6);
 
 	void Print() const;
 
-	[[nodiscard]] static Vector3D Abs(const Vector3D& v);
+	[[nodiscard]] static Vector3D Abs(const Vector3D& V);
 	[[nodiscard]] Vector3D Abs() const;
-
-	~Vector3D() = default;
 
 	float X = 0;
 	float Y = 0;
@@ -171,7 +169,7 @@ public:
 	static const Vector3D One;
 };
 
-[[nodiscard]] inline Vector3D operator*(const float& multiplier, const Vector3D& vec)
+[[nodiscard]] inline Vector3D operator*(const float& Multiplier, const Vector3D& Vec)
 {
-	return vec * multiplier;
+	return Vec * Multiplier;
 }
