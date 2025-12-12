@@ -14,37 +14,31 @@
 #include <RuntimeEngineVulkan.h>
 
 
-int main(int argc, char* argv[]) {
+void RunEngine(Vulkan::RuntimeEngine engine)
+{
+	Model backpack = Model("/Models/BackPack/backpack.obj", Shader("BasicTexture", "/Shaders/"));
 
+	Model asteroid = Model("/Models/Asteroid/rock.obj", Shader("BasicTexture", "/Shaders/"));
+	
+	backpack.ModelTransform.Position = { 5,0, 0 };
+	asteroid.ModelTransform.Position = { 0, 0, -3 };
 
-
-	Vulkan::RuntimeEngine engine;
-	engine.Init();
-
-
-	Voronoi vorn;
-
-	//Model* model = new Model("/Models/Asteroid/rock.obj", Shader("BasicTexture", "/Shaders/"));
-
-
-	Model* model2 = new Model("/Models/BackPack/backpack.obj", Shader("BasicTexture", "/Shaders/"));
-
-	model2->ModelTransform.Position = { 5,0, 0 };
-
-
-	Array<FracturePiece3D> test;
-	vorn.FracturePlaneRandom(*model2, test, 10);
-
-	while (!Vulkan::RuntimeEngine::ShouldClose())
+	while (!RuntimeEngine::ShouldClose())
 	{
 		engine.Loop();
 	}
+
 	Vulkan::RuntimeEngine::WaitForFrameToFinish();
-	//delete model;
-	delete model2;
+}
+
+int main(int argc, char* argv[])
+{
+	Vulkan::RuntimeEngine engine;
+	engine.Init();
+
+	RunEngine(engine);
 
 	engine.ShutDown();
-	
 
 	return EXIT_SUCCESS;
 }
