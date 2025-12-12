@@ -17,9 +17,13 @@
 void RunEngine(Vulkan::RuntimeEngine engine)
 {
 
-	Voronoi2D vorn;
-	vorn.FracturePlaneRandom({-1, 1}, {-1, -1}, 
-		{1, 1}, {1, -1}, 100);
+	Model model = Model("/Models/BackPack/backpack.obj", Shader("BasicTexture", "/Shaders/"));
+
+	model.ModelTransform.Position = { 5,0, 0 };
+
+
+	Voronoi vorn;
+	vorn.FracturePlaneRandom(model, 100);
 
 	while (!RuntimeEngine::ShouldClose())
 	{
