@@ -259,7 +259,7 @@ Vector3D Voronoi::ComputePolygonNormal(const Array<Vector3D>& verts)
 	return normal.Normalised();
 }
 
-void Voronoi::FracturePlaneRandom(Model& InModel, const size_t& NumPoints)
+void Voronoi::FracturePlaneRandom(const Model& InModel, const size_t& NumPoints)
 {
 
 
@@ -274,8 +274,6 @@ void Voronoi::FracturePlaneRandom(Model& InModel, const size_t& NumPoints)
 		{
 			point1 = InModel.ModelTransform.GetRandomPointInBounds();
 		} while (points.Contains(point1) && IsPointTooClose(point1, points));
-
-		TestSquare.push_back(DrawWireCube(point1, { 0.5, 0.5, 0.5 }, { 0.1f, 0.1f, 0.1f }, { 0.5, 0.5, 0.5 }));
 
 		points[i] = point1;
 	}

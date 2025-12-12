@@ -149,7 +149,7 @@ class Voronoi
 public:
 
 	//Fracture the model into a voronoi diagram based on random points
-	void FracturePlaneRandom(Model& InModel, const size_t& NumPoints);
+	void FracturePlaneRandom(const Model& InModel, const size_t& NumPoints);
 
 private:
 	static void GetFirstIntersection(const Vector3D& Normal, const Vector3D& Center, const Face& CurrentFace, Face& NewFace,
