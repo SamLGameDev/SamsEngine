@@ -99,13 +99,17 @@ void Voronoi::GetFaceReveresed(Face& IntersectFace, const Face& CurrentFace, Fac
 	bool bAddFirst = true, bAddSecond = true;
 	for (const auto& vert : IntersectFace.Vertices)
 	{
-		if (Vector3D::IsAlmostEqual(vert, FirstIntersection)) bAddFirst = false;
+		if (vert == FirstIntersection) bAddFirst = false;
 
-		if (Vector3D::IsAlmostEqual(vert, SecondIntersection)) bAddSecond = false;
+		if (vert == SecondIntersection) bAddSecond = false;
 	}
+
+
 
 	if (bAddSecond) IntersectFace.Vertices.Add(SecondIntersection);
 	if (bAddFirst) IntersectFace.Vertices.Add(FirstIntersection);
+
+
 }
 
 void Voronoi::SliceFaceByPlane(const Array<Face>& Faces, const Vector3D& Normal, const Vector3D& Center, Array<Face>& NewFaces,
@@ -124,7 +128,7 @@ void Voronoi::SliceFaceByPlane(const Array<Face>& Faces, const Vector3D& Normal,
 
 	if (newFace.Vertices.IsEmpty())
 	{
-		if (Vector3D::Dot(Normal, (currentFace.Vertices[0] - Center).Normalised()) > 0)
+		if (Vector3D::Dot(Normal, currentFace.Vertices[0] - Center) > 0)
 		{
 			NewFaces.Add(currentFace);
 		}
@@ -168,14 +172,18 @@ void Voronoi::SliceFaceByPlane(const Array<Face>& Faces, const Vector3D& Normal,
 		bool bAddFirst = true, bAddSecond = true;
 		for (const auto& vert : IntersectFace.Vertices)
 		{
-			if (Vector3D::IsAlmostEqual(vert, firstIntersection)) bAddFirst = false;
+			if (vert == firstIntersection) bAddFirst = false;
 
-			if (Vector3D::IsAlmostEqual(vert, secondIntersection)) bAddSecond = false;
+			if (vert == secondIntersection) bAddSecond = false;
 		}
 
 		if (bAddFirst) IntersectFace.Vertices.Add(firstIntersection);
 
 		if (bAddSecond) IntersectFace.Vertices.Add(secondIntersection);
+
+
+
+
 	}
 
 	NewFaces.Add(newFace);
@@ -201,12 +209,57 @@ void Voronoi::SliceShapeByPlane(const Array<Vector3D>& Points, const size_t& Ind
 	}
 
 	//if there is a valid intersect face, add it to the list of faces
-	if (intersectFace.Vertices.GetSize() > 2) newFaces.Add(intersectFace);
+	if (intersectFace.Vertices.GetSize() > 2)
+	{
+		size_t index = 0;
+		float mostdot = -1.1f;
+		Vector3D mostn;
+		for (size_t i = 0; i <  newFaces.GetSize(); i++)
+		{
+			Vector3D normal = ComputePolygonNormal(newFaces[i].Vertices);
+
+			if (float d = Vector3D::Dot(normal, -Normal) > mostdot)
+			{
+				index = i;
+				mostdot = d;
+				mostn = normal;
+			}
+		}
+
+		Vector3D cross = Vector3D::Cross(mostn, Normal).Normalised();
+
+		if (Vector3D::Dot(cross, -Right) < 0)
+		{
+			newFaces.Insert(intersectFace, index);
+		}
+		else
+		{
+			newFaces.Insert(intersectFace, index);
+		}
+	}
 
 	Faces = newFaces;
 }
 
-void Voronoi::FracturePlaneRandom(Model& InModel, Array<FracturePiece3D>& OutFractures, const size_t& NumPoints)
+Vector3D Voronoi::ComputePolygonNormal(const Array<Vector3D>& verts)
+{
+	Vector3D normal(0, 0, 0);
+
+	size_t count = verts.GetSize();
+	for (size_t i = 0; i < count; i++)
+	{
+		const Vector3D& current = verts[i];
+		const Vector3D& next = verts[(i + 1) % count];
+
+		normal.X += (current.Y - next.Y) * (current.Z - next.Z);
+		normal.Y += (current.Z - next.Z) * (current.X - next.X);
+		normal.Z += (current.X - next.X) * (current.Y - next.Y);
+	}
+
+	return normal.Normalised();
+}
+
+void Voronoi::FracturePlaneRandom(Model& InModel, const size_t& NumPoints)
 {
 
 
@@ -222,13 +275,13 @@ void Voronoi::FracturePlaneRandom(Model& InModel, Array<FracturePiece3D>& OutFra
 			point1 = InModel.ModelTransform.GetRandomPointInBounds();
 		} while (points.Contains(point1) && IsPointTooClose(point1, points));
 
-		//TestSquare.push_back(DrawWireCube(point1, { 0.5, 0.5, 0.5 }, { 0.1f, 0.1f, 0.1f }, { 0.5, 0.5, 0.5 }));
+		TestSquare.push_back(DrawWireCube(point1, { 0.5, 0.5, 0.5 }, { 0.1f, 0.1f, 0.1f }, { 0.5, 0.5, 0.5 }));
 
 		points[i] = point1;
 	}
 
 	//TestPoints
-	//points = { {0.1, 0.1, 0.1}, {0.8, 0.4, 0.2}, {0.4, 0.8, 0.6}, {0.6, 0.2, 0.1} };
+	//points = { {0.8, 0.4, 0.2}, {0.4, 0.8, 0.6}, {0.1, 0.1, 0.1} };
 	//points = { {0.1, 0.1, 0.1}, {0.8, 0.4, 0.2} };
 
 
@@ -255,9 +308,12 @@ void Voronoi::FracturePlaneRandom(Model& InModel, Array<FracturePiece3D>& OutFra
 		//	fractureFaces.Add(face);
 		//}
 //
+		Array<Face> test = {Faces};
 
-        FracturePiece3D* frac = CreateObjectPtr<FracturePiece3D>(Faces, currentPoint);
-		frac->color = color;
+		FracturePiece3D frac = CreateObjectRaw<FracturePiece3D>(test, currentPoint);
+		frac.color = color;
+		Fractures.Add({ frac });
+
 	//	OutFractures.Add(frac);
 
 
@@ -266,7 +322,7 @@ void Voronoi::FracturePlaneRandom(Model& InModel, Array<FracturePiece3D>& OutFra
 	}
 
 }
-void Voronoi::DefinePlane(Vector3D& normal, Vector3D& CurrentPoint, Vector3D& closestPoint, Vector3D& Right, Vector3D& Up, Vector3D& PlaneCenter)
+void Voronoi::DefinePlane(Vector3D& normal, const Vector3D& CurrentPoint, const Vector3D& closestPoint, Vector3D& Right, Vector3D& Up, Vector3D& PlaneCenter)
 {
 	normal = (CurrentPoint - closestPoint).Normalised();
 	
@@ -283,15 +339,18 @@ void Voronoi::DefinePlane(Vector3D& normal, Vector3D& CurrentPoint, Vector3D& cl
 	PlaneCenter = (CurrentPoint + closestPoint) / 2;
 }
 
-bool Voronoi::IsPointInPolygon(const Vector3D& Point, const Array<Vector3D>& Polygon, const Vector3D& center)
+bool Voronoi::IsPointInPolygon(const Vector3D& Normal, const Array<Vector3D>& Polygon, const Vector3D& center)
 {
+
+
 	//Check if any point is on the wrong side of the plane, i.e. on the negative side of the normal
 	for (size_t i = 0; i < Polygon.GetSize(); i++)
 	{
-		float d = Vector3D::Dot(Point, (Polygon[i] - center).Normalised());
+		const float d = Vector3D::Dot(Polygon[i] - center, Normal);
 
-		if (d < 0 && !MathCore::IsNearlyZero(d)) return false ;
-
+		if (d < 0 && !MathCore::IsNearlyZero(d)) {
+			return false;
+		}
 	}
 	return true;
 }
@@ -309,21 +368,16 @@ bool Voronoi::IsPointTooClose(const Vector3D& Point, const Array<Vector3D>& Poin
 }
 
 
-FracturePiece3D::~FracturePiece3D()
+FracturePiece3D::FracturePiece3D(Array<Face> cell, Vector3D Point) : WorldObject()
 {
-	
-}
-
-FracturePiece3D::FracturePiece3D(Array<Face> cell, Vector3D Point)
-{/*
 	InputManager* inputManager = Camera::GetActiveCamera()->GetActiveInputManager();
-	auto LeftArrow = std::make_unique<InputAction>(GLFW_KEY_LEFT, inputManager, Camera::GetActiveWindow());
+	LeftArrow = std::make_unique<InputAction>(GLFW_KEY_LEFT, inputManager, Camera::GetActiveWindow());
 
 	LeftArrow->Actions.BindMember(this, &FracturePiece3D::Seperate);
 
-	auto RightArrow = std::make_unique<InputAction>(GLFW_KEY_RIGHT, inputManager, Camera::GetActiveWindow());
+	RightArrow = std::make_unique<InputAction>(GLFW_KEY_RIGHT, inputManager, Camera::GetActiveWindow());
 
-	RightArrow->Actions.BindMember(this, &FracturePiece3D::Converge);*/
+	RightArrow->Actions.BindMember(this, &FracturePiece3D::Converge);
 
 	dir = (Point - Vector3D::Zero).Normalised();
 
@@ -331,9 +385,9 @@ FracturePiece3D::FracturePiece3D(Array<Face> cell, Vector3D Point)
 
 	Array<Vector3D> newVerts;
 
-	dir = Vector3D::RandomRange(Vector3D::Zero, Vector3D(100, 100, 100));
+	//dir = Vector3D::RandomRange(Vector3D::Zero, Vector3D(100, 100, 100));
 
-	dir = dir.Normalised();
+	//dir = dir.Normalised();
 
 
 	for (const auto& face : cell)
@@ -453,11 +507,11 @@ void FracturePiece3D::Tick(const double& DeltaTime)
 void FracturePiece3D::Seperate()
 {
 
-	transform.Position += dir;
+	transform.Position += (dir * 5) * World->GetDeltaTime();
 
 }
 void FracturePiece3D::Converge()
 {
-	transform.Position -= dir;
+	transform.Position -= (dir * 5) * World->GetDeltaTime();
 }
 

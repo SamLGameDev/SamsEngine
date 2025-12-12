@@ -138,7 +138,8 @@ bool Vector3D::GetIntersectionPointWithPlane(const Vector3D& Mid, const Vector3D
 
 bool Vector3D::IsAlmostEqual(const Vector3D& A, const Vector3D& B, const float& Range)
 {
-	return A - B < Range;
+	Vector3D diff = A - B;
+	return diff < Range && diff > -Range;
 }
 
 void Vector3D::Print() const

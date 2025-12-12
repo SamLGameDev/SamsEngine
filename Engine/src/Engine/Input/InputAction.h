@@ -14,7 +14,9 @@ public:
 
 	InputAction() = default;
 
-	InputAction(int InKey, InputManager* Manager, Window* InWindow);
+	~InputAction();
+
+	InputAction(int InKey, InputManager* InManager, Window* InWindow);
 
 
 	void ProcessInput(GLFWwindow* Window);
@@ -23,6 +25,7 @@ public:
 
 protected:
 
+	InputManager* Manager;
 
 	/**
 	 * The key pressed to activate the bound actions

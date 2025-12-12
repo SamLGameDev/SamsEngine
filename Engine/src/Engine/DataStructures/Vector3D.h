@@ -32,7 +32,7 @@ public:
 	////}
 
 	[[nodiscard]] bool operator==(const Vector3D& Other) const {
-		return	X == Other.X && Y == Other.Y && Z == Other.Z;
+		return	IsAlmostEqual(*this, Other);
 	}
 
 	[[nodiscard]] Vector3D operator/(const float& Other)const

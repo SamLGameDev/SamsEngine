@@ -137,54 +137,60 @@ std::unique_ptr<WireObject> DrawWireCube(const Vector3D& Center, const Vector3D&
 	};
 
 	//DO MARK
+	Face face;
+
+
 
 	//Top right, bottom right, bottom left, top left
-	Face face;
+
 	face.Vertices.Add(object->Vertices[0].Position);
-	face.Vertices.Add(object->Vertices[1].Position);
-	face.Vertices.Add(object->Vertices[2].Position);
 	face.Vertices.Add(object->Vertices[3].Position);
-	object->Faces.Add(face);
-
-	//back top right, back bottom right, front bottom right, front top right
-	face = Face();
-	face.Vertices.Add(object->Vertices[4].Position);
-	face.Vertices.Add(object->Vertices[5].Position);
+	face.Vertices.Add(object->Vertices[2].Position);
 	face.Vertices.Add(object->Vertices[1].Position);
-	face.Vertices.Add(object->Vertices[0].Position);
-	object->Faces.Add(face);
-
-	//back top left, back bottom left, back bottom right, back top right
-	face = Face();
-	face.Vertices.Add(object->Vertices[7].Position);
-	face.Vertices.Add(object->Vertices[6].Position);
-	face.Vertices.Add(object->Vertices[5].Position);
-	face.Vertices.Add(object->Vertices[4].Position);
 	object->Faces.Add(face);
 
 
 	//front top left, front bottom left, back bottom left, back top left
 	face = Face();
 	face.Vertices.Add(object->Vertices[3].Position);
-	face.Vertices.Add(object->Vertices[2].Position);
-	face.Vertices.Add(object->Vertices[6].Position);
 	face.Vertices.Add(object->Vertices[7].Position);
+	face.Vertices.Add(object->Vertices[6].Position);
+	face.Vertices.Add(object->Vertices[2].Position);
 	object->Faces.Add(face);
+
+	//back top left, back bottom left, back bottom right, back top right
+	face = Face();
+	face.Vertices.Add(object->Vertices[7].Position);
+	face.Vertices.Add(object->Vertices[4].Position);
+	face.Vertices.Add(object->Vertices[5].Position);
+	face.Vertices.Add(object->Vertices[6].Position);
+	object->Faces.Add(face);
+
+	//back top right, back bottom right, front bottom right, front top right
+	face = Face();
+	face.Vertices.Add(object->Vertices[4].Position);
+	face.Vertices.Add(object->Vertices[0].Position);
+	face.Vertices.Add(object->Vertices[1].Position);
+	face.Vertices.Add(object->Vertices[5].Position);
+	object->Faces.Add(face);
+
+
+
 
 	//back top right, front top right, front top left, back top left
 	face = Face();
 	face.Vertices.Add(object->Vertices[4].Position);
-	face.Vertices.Add(object->Vertices[0].Position);
-	face.Vertices.Add(object->Vertices[3].Position);
 	face.Vertices.Add(object->Vertices[7].Position);
+	face.Vertices.Add(object->Vertices[3].Position);
+	face.Vertices.Add(object->Vertices[0].Position);
 	object->Faces.Add(face);
 
 	//back bottom right, front bottom right, front bottom left, back bottom left
 	face = Face();
 	face.Vertices.Add(object->Vertices[5].Position);
-	face.Vertices.Add(object->Vertices[1].Position);
-	face.Vertices.Add(object->Vertices[2].Position);
 	face.Vertices.Add(object->Vertices[6].Position);
+	face.Vertices.Add(object->Vertices[2].Position);
+	face.Vertices.Add(object->Vertices[1].Position);
 	object->Faces.Add(face);
 
 	//END OF DO MARK

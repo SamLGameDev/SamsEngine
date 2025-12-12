@@ -7,7 +7,7 @@
 class Object
 {
 public:
-	virtual ~Object() = default;
+	virtual ~Object();
 
 
 	/**

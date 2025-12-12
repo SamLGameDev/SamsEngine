@@ -11,9 +11,9 @@ public:
 
 	[[nodiscard]] static float Determinant(const Vector3D& C0, const Vector3D& C1, const Vector3D& C2);
 
-	[[nodiscard]] static bool IsNearlyZero(const float Value, const float Range = 1e-6f)
+	[[nodiscard]] static bool IsNearlyZero(const double& Value, const double& Range = 1e-6f)
 	{
-		return std::fabs(Value) < Range;
+		return Value < Range && Value > -Range;
 	}
 
 	[[nodiscard]] static bool IsNearlyEqual(const float& A, const float& B, const float& Range = 1e-6f);

@@ -4,10 +4,17 @@
 #include <stdexcept>
 
 #include "vulkan/vulkan_core.h"
+#include <memory>
 
 template<typename T>
 class Array
 {
+	template<typename T>
+	struct is_unique_ptr : std::false_type {};
+
+	template<typename U>
+	struct is_unique_ptr<std::unique_ptr<U>> : std::true_type {};
+
 public:
 	Array()
 	{
@@ -165,9 +172,34 @@ public:
 
 		for (size_t i = 0; i < NumItems; i++)
 		{
-			NewArray[i] = std::move(GetItemAt(i));
+			NewArray[i] = std::move(DynamicArray[i]);
 		}
 		NewArray[NumItems] = Item;
+		NumItems++;
+
+		delete[] DynamicArray;
+		DynamicArray = NewArray;
+
+		ArraySize = NumItems;
+	}
+
+	void Add(T& Item) requires is_unique_ptr<T>::value
+	{
+		//Depreciated for now, as arraySize needs to be seperated from NumItems properly
+		if (NumItems + 1 < ArraySize)
+		{
+			NumItems++;
+			DynamicArray[NumItems] = std::move(Item);
+			return;
+		}
+
+		T* NewArray = new T[NumItems + 1];
+
+		for (size_t i = 0; i < NumItems; i++)
+		{
+			NewArray[i] = std::move(GetItemAt(i));
+		}
+		NewArray[NumItems] = std::move(Item);
 		NumItems++;
 
 		delete[] DynamicArray;
@@ -209,12 +241,39 @@ public:
 		ArraySize = NumItems;
 	}
 
+	void Insert(const T& Item, const size_t& Index)
+	{
+		if (Index > NumItems)
+		{
+			Add(Item);
+			return;
+		}
+		T* NewArray = new T[NumItems + 1];
+		for (size_t i = 0; i < Index; i++)
+		{
+			NewArray[i] = std::move(GetItemAt(i));
+		}
+		NewArray[Index] = Item;
+		for (size_t i = Index; i < NumItems; i++)
+		{
+			NewArray[i + 1] = std::move(GetItemAt(i));
+		}
+		NumItems++;
+		delete[] DynamicArray;
+		DynamicArray = NewArray;
+		ArraySize = NumItems;
+	}
+
 	/// <summary>
 	/// Gets a copy of the item at the specified index
 	/// </summary>
 	/// <param name="Index"></param>
 	/// <returns></returns>
 	[[nodiscard]] T GetItemAt(const size_t& Index) const
+	{
+		return DynamicArray[Index];
+	}
+	[[nodiscard]] T& GetItemAt(const size_t& Index) const requires is_unique_ptr<T>::value
 	{
 		return DynamicArray[Index];
 	}
@@ -329,6 +388,31 @@ public:
 			NumItems--;
 			ArraySize--;
 		}
+	}
+
+
+	bool RemoveAt(const size_t& Index)
+	{
+		if (NumItems > Index)
+		{
+			T* NewArray = new T[ArraySize - 1];
+			size_t skip = 0;
+			for (size_t i = 0; i < NumItems - 1; i++)
+			{
+				if (i == Index)
+				{
+					skip = 1;
+				}
+
+				NewArray[i] = std::move(DynamicArray[i + skip]);
+			}
+			delete[] DynamicArray;
+			DynamicArray = NewArray;
+			NumItems--;
+			ArraySize--;
+			
+		}
+		return false;
 	}
 
 	/// <summary>

@@ -1,6 +1,7 @@
 
 #pragma once
 
+#include "Camera.h"
 #include "InputAction.h"
 #include "InterfaceRenderer.h"
 #include "Vector3D.h"
@@ -15,54 +16,93 @@ public:
 
 	FracturePiece3D() = default;
 
-	~FracturePiece3D();
-
 	FracturePiece3D(Array<Face> cell, Vector3D Point);
 
-	void Copy(const FracturePiece3D& other)
+	void Copy(const FracturePiece3D& Other)
 	{
-		color = other.color;
+		color = Other.color;
 
-		dir = other.dir;
-		transform = other.transform;
-		PVAO = other.PVAO;
-		PVBO = other.PVBO;
-		Verts = other.Verts;
-		Inds = other.Inds;
-		VAO = other.VAO;
-		VBO = other.VBO;
-		EBO = other.EBO;
-		shader = other.shader;
+		dir = Other.dir;
+		transform = Other.transform;
+		PVAO = Other.PVAO;
+		PVBO = Other.PVBO;
+		Verts = Other.Verts;
+		Inds = Other.Inds;
+		VAO = Other.VAO;
+		VBO = Other.VBO;
+		EBO = Other.EBO;
+		shader = Other.shader;
 
-		::Renderer::ReplaceFracture(&other, this);
+		::Renderer::ReplaceFracture(&Other, this);
 
-		///.Replace(&other,*other.Tick, this,  &Tick);
+		TickDel.BindMember(this, &FracturePiece3D::Tick);
+
+		InputManager* inputManager = Camera::GetActiveCamera()->GetActiveInputManager();
+		LeftArrow = std::make_unique<InputAction>(GLFW_KEY_LEFT, inputManager, Camera::GetActiveWindow());
+
+		LeftArrow->Actions.BindMember(this, &FracturePiece3D::Seperate);
+
+		RightArrow = std::make_unique<InputAction>(GLFW_KEY_RIGHT, inputManager, Camera::GetActiveWindow());
+
+		RightArrow->Actions.BindMember(this, &FracturePiece3D::Converge);
+
 	}
 
-	FracturePiece3D(const FracturePiece3D& other)
+	FracturePiece3D(const FracturePiece3D& Other) : WorldObject()
 	{
-		Copy(other);
+		Copy(Other);
 	}
 
-	FracturePiece3D& operator=(const FracturePiece3D& other)
+
+	void Move(FracturePiece3D& Other)
 	{
-		if (this != &other)
+		color = Other.color;
+
+		dir = Other.dir;
+		transform = Other.transform;
+		PVAO = Other.PVAO;
+		PVBO = Other.PVBO;
+		Verts = Other.Verts;
+		Inds = Other.Inds;
+		VAO = Other.VAO;
+		VBO = Other.VBO;
+		EBO = Other.EBO;
+		shader = Other.shader;
+
+		::Renderer::ReplaceFracture(&Other, this);
+
+		InputManager* inputManager = Camera::GetActiveCamera()->GetActiveInputManager();
+		LeftArrow = std::make_unique<InputAction>(GLFW_KEY_LEFT, inputManager, Camera::GetActiveWindow());
+
+		LeftArrow->Actions.BindMember(this, &FracturePiece3D::Seperate);
+
+		RightArrow = std::make_unique<InputAction>(GLFW_KEY_RIGHT, inputManager, Camera::GetActiveWindow());
+
+		RightArrow->Actions.BindMember(this, &FracturePiece3D::Converge);
+
+		TickDel.Remove(&Other, &FracturePiece3D::Tick);
+		TickDel.BindMember(this, &FracturePiece3D::Tick);
+	}
+
+	FracturePiece3D& operator=(const FracturePiece3D& Other)
+	{
+		if (this != &Other)
 		{
-			Copy(other);
+			Copy(Other);
 		}
 		return *this;
 	}
 
-	FracturePiece3D(FracturePiece3D&& other) noexcept
+	FracturePiece3D(FracturePiece3D&& Other) noexcept
 	{
-		Copy(other);
+		Move(Other);
 	}
 
 	FracturePiece3D& operator=(FracturePiece3D&& other) noexcept
 	{
 		if (this != &other)
 		{
-			Copy(other);
+			Move(other);
 		}
 		return *this;
 	}
@@ -109,7 +149,7 @@ class Voronoi
 public:
 
 	//Fracture the model into a voronoi diagram based on random points
-	void FracturePlaneRandom(Model& InModel, Array<FracturePiece3D>& OutFractures, const size_t& NumPoints);
+	void FracturePlaneRandom(Model& InModel, const size_t& NumPoints);
 
 private:
 	static void GetFirstIntersection(const Vector3D& Normal, const Vector3D& Center, const Face& CurrentFace, Face& NewFace,
@@ -126,9 +166,10 @@ private:
 
 	void SliceShapeByPlane(const Array<Vector3D>& Points, const size_t& Index, Vector3D& CurrentPoint, Array<Face>& Faces, Vector3D& Normal,
 		Vector3D& Right, Vector3D& Up, Vector3D& Center, const size_t& J);
+	Vector3D ComputePolygonNormal(const Array<Vector3D>& verts);
 
-	static void DefinePlane(Vector3D& normal, Vector3D& CurrentPoint, Vector3D& closestPoint, Vector3D& Right, Vector3D& Up, Vector3D& PlaneCenter);
-	static bool IsPointInPolygon(const Vector3D& Point, const Array<Vector3D>& Polygon, const Vector3D& center);
+	static void DefinePlane(Vector3D& normal, const Vector3D& CurrentPoint, const Vector3D& closestPoint, Vector3D& Right, Vector3D& Up, Vector3D& PlaneCenter);
+	static bool IsPointInPolygon(const Vector3D& Normal, const Array<Vector3D>& Polygon, const Vector3D& center);
 	static bool IsPointTooClose(const Vector3D& Point, const Array<Vector3D>& Points);
 
 	std::vector<std::unique_ptr<WireObject>> TestSquare;

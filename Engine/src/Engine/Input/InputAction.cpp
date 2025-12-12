@@ -10,8 +10,14 @@ void InputAction::ProcessInput(GLFWwindow* Window)
 	}
 }
 
-InputAction::InputAction(const int InKey, InputManager* Manager, Window* InWindow)
+InputAction::~InputAction()
+{
+	Manager->InputActions.Remove(this, &InputAction::ProcessInput);
+}
+
+InputAction::InputAction(const int InKey, InputManager* InManager, Window* InWindow)
 {
 	Key = InKey;
+	Manager = InManager;
 	Manager->InputActions.BindMember(this, &InputAction::ProcessInput);
 }
