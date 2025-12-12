@@ -1,5 +1,6 @@
 #pragma once
 
+class FracturePiece2D;
 class Model;
 class WireObject;
 class BaseRenderer;
@@ -10,8 +11,12 @@ class Renderer
 public:
 
 	static void AddFracture(FracturePiece3D* Piece);
+	static void AddFracture(FracturePiece2D* Piece);
 
 	static void ReplaceFracture(const FracturePiece3D* Old, const FracturePiece3D* New);
+
+	static void ReplaceFracture(const FracturePiece2D* Old, const FracturePiece2D* New);
+
 
 	static void AddWireShape(WireObject* Shape);
 

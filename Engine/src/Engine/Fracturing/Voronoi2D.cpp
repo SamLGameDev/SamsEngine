@@ -3,6 +3,7 @@
 
 #include <iostream>
 
+#include "DataBuffers.h"
 #include "LinkedList.h"
 #include "MathCore.h"
 
@@ -10,211 +11,216 @@
 
 #include "WireShapes.h";
 
-Shader FracturePiece::PointShader;
+Shader FracturePiece2D::PointShader;
 
 
-//Possible floaing point error causing points to break
-
-bool Voronoi2D::GetIntersection(float a, float b, float c,  Vector2D From, Vector2D To, Vector2D& intersection)
+bool Voronoi2D::GetIntersection(const float& A, const float& B, const float& c, const Vector2D& From, const Vector2D& To, Vector2D& Intersection)
 {
-	float lineA = From.Y - To.Y;
-	float lineB = To.X - From.X;
-	float lineC = From.X * To.Y - To.X * From.Y;
+	const float lineA = From.Y - To.Y;
+	const float lineB = To.X - From.X;
+	const float lineC = From.X * To.Y - To.X * From.Y;
 
-	//if (fabs(b) < std::pow(2, -23) || fabs(lineB) < std::pow(2, -23))
-	//	return false;
-
-	//if (fabs(a * lineB - lineA * b) < std::pow(2, -23) &&
-	//	fabs(c * lineB - lineC * b) < std::pow(2, -23))
-	//	return false;
-
-	if ((a / b == lineA / lineB) && (c / b == lineC / lineB)) return false;
+	if (MathCore::IsNearlyEqual(A / B, lineA / lineB) 
+		&& MathCore::IsNearlyEqual(c / B, lineC / lineB)) return false;
 
 
-	Vector3D u = Vector3D(a, b, c);
-	Vector3D v = Vector3D(lineA, lineB, lineC);
-	Vector3D z = Vector3D::Cross(u, v);
+	const Vector3D u = Vector3D(A, B, c);
+	const Vector3D v = Vector3D(lineA, lineB, lineC);
+	const Vector3D z = Vector3D::Cross(u, v);
 
-	if (z.Z == 0.f)
-	{
-		return false;
-	}
-	intersection = Vector2D(z.X / z.Z, z.Y / z.Z);
+	if (z.Z == 0.f) return false;
+	
+	Intersection = Vector2D(z.X / z.Z, z.Y / z.Z);
 
-	bool IsVertical = MathCore::IsNearlyEqual(From.X, To.X, std::pow(2, -23));
+	const bool IsVertical = MathCore::IsNearlyEqual(From.X, To.X, std::pow(2, -23));
 
-	bool IsHorizontal = MathCore::IsNearlyEqual(From.Y, To.Y, std::pow(2, -23));
+	const bool IsHorizontal = MathCore::IsNearlyEqual(From.Y, To.Y, std::pow(2, -23));
 
-	bool IsEndpointY = MathCore::IsNearlyEqual(intersection.Y, From.Y, std::pow(2, -23)) || MathCore::IsNearlyEqual(intersection.Y, To.Y, std::pow(2, -23));
-	bool IsEndpointX = MathCore::IsNearlyEqual(intersection.X, From.X, std::pow(2, -23)) || MathCore::IsNearlyEqual(intersection.X, To.X, std::pow(2, -23));
+	const bool IsEndpointY = MathCore::IsNearlyEqual(Intersection.Y, From.Y, std::pow(2, -23))
+	|| MathCore::IsNearlyEqual(Intersection.Y, To.Y, std::pow(2, -23));
+	const bool IsEndpointX = MathCore::IsNearlyEqual(Intersection.X, From.X, std::pow(2, -23)) 
+	|| MathCore::IsNearlyEqual(Intersection.X, To.X, std::pow(2, -23));
 
-	bool IsBetweenXAxis = (intersection.X < From.X) != (intersection.X < To.X);
-	bool IsBetweenYAxis = (intersection.Y < From.Y) != (intersection.Y < To.Y);
+	const bool IsBetweenXAxis = Intersection.X < From.X != Intersection.X < To.X;
+	const bool IsBetweenYAxis = Intersection.Y < From.Y != Intersection.Y < To.Y;
 
-	bool IsBetweenAB = IsBetweenXAxis && IsBetweenYAxis;
+	const bool IsBetweenAB = IsBetweenXAxis && IsBetweenYAxis;
 
 	if (IsVertical && (IsEndpointY || IsBetweenYAxis)) return true;
 	
 	if (IsHorizontal && (IsEndpointX || IsBetweenXAxis)) return true;
 	
 	if (IsBetweenAB) return true;
+
 	return false;
 }
 
-void Voronoi2D::FracturePlaneRandom(Vector2D TopLeft, Vector2D BottomLeft, Vector2D TopRight, Vector2D BottomRight)
+void Voronoi2D::GetFirstIntersection(const Array<Vector2D>& Cell, const float& A, const float& B, const float& C, Array<Vector2D>& NewCell, size_t& FirstIntersectionIndex, Vector2D
+                                     & FirstIntersection)
 {
-
-	FracturePiece::PointShader = Shader("Point2D", "Shaders/");
-
-
-	Vector2D center = BottomLeft + (TopRight / 2);
-
-	Array<Vector2D> points;
-
-	for (size_t i = 0; i < 10; i++)
+	for (size_t i = 0; i < Cell.GetSize(); i++)
 	{
-		Vector2D point1 = Vector2D::RandomRange(BottomLeft, TopRight);
+		const Vector2D& from = Cell[i];
+		const Vector2D& to = Cell[(i + 1) % Cell.GetSize()];
 
-		while (points.Contains(point1))
+		const bool bIsIntersection = GetIntersection(A, B, C, from, to, FirstIntersection);
+
+		if (bIsIntersection)
 		{
-			point1 = Vector2D::RandomRange(BottomLeft, TopRight);
+			const bool bIntersectionIsNextVertex = FirstIntersection == to;
+
+			if (bIntersectionIsNextVertex)
+			{
+				NewCell.Add(to);
+				NewCell.Add(Cell[(i + 2) % Cell.GetSize()]);
+				FirstIntersectionIndex = (i + 2) % Cell.GetSize();
+				return;
+			}
+			
+			NewCell.Add(FirstIntersection);
+			NewCell.Add(to);
+			FirstIntersectionIndex = (i + 1) % Cell.GetSize();
+			return;
 		}
 
-		points.Add(point1);
+	}
+}
+
+void Voronoi2D::GetSecondIntersection(const Array<Vector2D>& Cell, const float& A, const float& B, const float& C, Array<Vector2D>& NewCell, const size_t&
+                                      FirstIntersectionIndex, size_t& SecondIntersectionIndex, Vector2D& SecondIntersection)
+{
+	for (size_t i = FirstIntersectionIndex; i < Cell.GetSize(); i++)
+	{
+		const Vector2D& from = Cell[i];
+		const Vector2D& to = Cell[(i + 1) % Cell.GetSize()];
+
+		Vector2D intersection;
+
+		const bool bIsIntersection = GetIntersection(A, B, C, from, to, intersection);
+
+		if (bIsIntersection)
+		{
+			NewCell.Add(intersection);
+			SecondIntersectionIndex = i + 1;
+			SecondIntersection = intersection;
+			return;
+		}
+		
+		NewCell.Add(to);
+		
+
+	}
+}
+
+void Voronoi2D::GetReversePolygon(const Array<Vector2D>& Cell, Array<Vector2D>& NewCell, const size_t& FirstIntersectionIndex, const size_t&
+                                  SecondIntersectionIndex, const Vector2D& FirstIntersection, const Vector2D& SecondIntersection)
+{
+	NewCell.Empty();
+
+	if (SecondIntersection != Cell[SecondIntersectionIndex % Cell.GetSize()]) NewCell.Add(SecondIntersection);
+
+	Vector2D from;
+
+	for (size_t i = SecondIntersectionIndex; i % Cell.GetSize() != FirstIntersectionIndex; i++)
+	{
+		from = Cell[i % Cell.GetSize()];
+		const Vector2D& to = Cell[(i + 1) % Cell.GetSize()];
+		if (from == to) continue;
+
+		NewCell.Add(from);
+	}
+
+	if (from != FirstIntersection) NewCell.Add(FirstIntersection);
+}
+
+void Voronoi2D::FracturePlaneRandom(const Vector2D& TopLeft, const Vector2D& BottomLeft, const Vector2D& TopRight, const Vector2D& BottomRight, const
+                                    size_t& NumPoints)
+{
+
+	const Vector2D center = BottomLeft + (TopRight / 2);
+
+	Array<Vector2D> points(NumPoints);
+
+	for (size_t i = 0; i < NumPoints; i++)
+	{
+		Vector2D point1;
+		do
+		{
+			point1 = Vector2D::RandomRange(BottomLeft, TopRight);
+		} while (points.Contains(point1));
+
+		points[i] = point1;
 	}
 
 	//points = { {0, 0},{0.2, -0.7}, Vector2D(-1, -1)};
 
 	//points = { {0, 0} };
 
-
+	Fractures.Reallocate(NumPoints);
 
 	for (size_t p = 0; p < points.GetSize(); p++)
 	{
-		Vector2D point = points[p];
+		const Vector2D& point = points[p];
 		Array<Vector2D> cell = {TopLeft, TopRight, BottomRight, BottomLeft};
-
+	
 		for (size_t j = 0; j < points.GetSize(); j++)
 		{
 			if (j == p) continue;
 
-			Vector2D qPoint = points[j];
+			const Vector2D& qPoint = points[j];
 
 			float a, b, c;
-			Vector2D halfWay = Vector2D::PerpendicularBisector(point, qPoint, a, b, c);
-
+			const Vector2D& halfWay = Vector2D::PerpendicularBisector(point, qPoint, a, b, c);
+			
+			//No valid bi-sector as p and q are perpendicular
 			if (a == 0.f && b == 0.f) continue;
 
 			Array<Vector2D> newCell;
-			size_t intersections = 0;
 
-			size_t FirstIntersectionIndex;
+			size_t firstIntersectionIndex;
 
-			size_t SecondIntersectionIndex = 0;
+			size_t secondIntersectionIndex = 0;
 
 			Vector2D firstIntersection;
 
-			for (size_t i = 0; i < cell.GetSize(); i++)
+			GetFirstIntersection(cell, a, b, c, newCell, firstIntersectionIndex, firstIntersection);
+
+			//If no intersection, keep original cell
+			if (newCell.IsEmpty())
 			{
-				Vector2D from = cell[i];
-				Vector2D to = cell[(i + 1) % cell.GetSize()];
-
-				bool IsIntersection = GetIntersection(a, b, c, from, to, firstIntersection);
-
-				if (IsIntersection)
-				{
-					bool intersectionIsNextVertex = firstIntersection == to;
-
-					if (intersectionIsNextVertex)
-					{
-						newCell.Add(to);
-						newCell.Add(cell[(i + 2) % cell.GetSize()]);
-						FirstIntersectionIndex = (i + 2) % cell.GetSize();
-
-					}
-					else
-					{
-						newCell.Add(firstIntersection);
-						newCell.Add(to);
-						FirstIntersectionIndex = (i + 1) % cell.GetSize();
-					}
-
-					break;
-
-				}
-
+				continue;
 			}
 
-			if (newCell.GetSize() == 0)
+			//Add all cells up to and including the second intersection
+			Vector2D secondIntersection;
+
+			GetSecondIntersection(cell, a, b, c, newCell, firstIntersectionIndex, secondIntersectionIndex, secondIntersection);
+
+			//There are 2 cases that can happen here, either the point is inside the new polygon, or its outside
+			//If outside, get the polygon from second intersection to first, as that will contain the point.
+			if (!IsPointInPolygon(point, newCell))
 			{
-				newCell = cell;
-			}
-			else
-			{
-				Vector2D secondIntersection;
-
-				for (size_t i = FirstIntersectionIndex; i < cell.GetSize(); i++)
-				{
-					//size_t idx = (FirstIntersectionIndex + i) % cell.GetSize();
-					size_t idx = i;
-
-					Vector2D from = cell[idx];
-					Vector2D to = cell[(idx + 1) % cell.GetSize()];
-
-					Vector2D intersection;
-
-					bool IsIntersection = GetIntersection(a, b, c, from, to, intersection);
-
-					if (IsIntersection)
-					{
-						newCell.Add(intersection);
-						SecondIntersectionIndex = idx + 1;
-						secondIntersection = intersection;
-						break;
-					}
-					else
-					{
-						newCell.Add(to);
-					}
-
-				}
-				if (!IsPointInPolygon(point, newCell))
-				{
-					newCell.Empty();
-
-					if (secondIntersection != cell[SecondIntersectionIndex % cell.GetSize()]) newCell.Add(secondIntersection);
-
-					Vector2D from;
-
-					for (size_t i = SecondIntersectionIndex; i % cell.GetSize() != FirstIntersectionIndex; i++)
-					{
-						from = cell[i % cell.GetSize()];
-						Vector2D to = cell[(i + 1) % cell.GetSize()];
-						if (from == to) continue;
-
-						newCell.Add(from);
-					}
-
-					if (from != firstIntersection) newCell.Add(firstIntersection);
-				}
-
+				GetReversePolygon(cell, newCell, firstIntersectionIndex, secondIntersectionIndex, firstIntersection, secondIntersection);
 			}
 
 			cell = newCell;
 		}
 
-		FracturePiece* frac = new FracturePiece(cell, point);
+		Fractures[p] = FracturePiece2D(cell, point);
 	}
 
 }
 
-bool Voronoi2D::IsPointInPolygon(Vector2D Point, Array<Vector2D> Polygon)
+bool Voronoi2D::IsPointInPolygon(const Vector2D& Point, const Array<Vector2D>& Polygon)
 {
 	for (size_t i = 0; i < Polygon.GetSize(); i++)
 	{
-		Vector2D t = { Polygon[i].X - Polygon[(i + 1) % Polygon.GetSize()].X,   Polygon[i].Y - Polygon[(i + 1) % Polygon.GetSize()].Y };
-		Vector2D u = {Point.X - Polygon[(i + 1) % Polygon.GetSize()].X, Point.Y - Polygon[(i + 1) % Polygon.GetSize()].Y };
-		Vector2D v = {Polygon[(i+2)%Polygon.GetSize()].X - Polygon[(i + 1) % Polygon.GetSize()].X  , Polygon[(i + 2) % Polygon.GetSize()].Y - Polygon[(i + 1) % Polygon.GetSize()].Y };
+		//checks if the point is inside the shape formed by polygon->polygon(i+1)
+		// and polygon(i+1)->Polygon(i+2)
+
+		const Vector2D t = Polygon[i] - Polygon[(i + 1) % Polygon.GetSize()];
+		const Vector2D u = Point - Polygon[(i + 1) % Polygon.GetSize()];
+		const Vector2D v = Polygon[(i+2)%Polygon.GetSize()] - Polygon[(i + 1) % Polygon.GetSize()];
 
 		if (!(Vector2D::Cross(t, u) * Vector2D::Cross(t, v) >= 0 && Vector2D::Cross(v, u) * Vector2D::Cross(v, t) >= 0)) return false;
 
@@ -222,38 +228,15 @@ bool Voronoi2D::IsPointInPolygon(Vector2D Point, Array<Vector2D> Polygon)
 
 	return true;
 }
-FracturePiece::FracturePiece(Array<Vector2D> cell, Vector2D Point)
+FracturePiece2D::FracturePiece2D(const Array<Vector2D>& cell, const Vector2D& Point)
 {
-
-//	cell = { {0, 1},  { 1,1 }, {1, -1}, {0, -1}, {0, -1}, {-1, -1}, {-1, 1}, {0, 1} };
-	//cell = {{0.5, 0.5}, {1, 1}, {-1 , -1}};
-
-	//Array<Vector2D> solo;
-
-	//for (Vector2D vert : cell)
-	//{
-	//	unsigned int index;
-	//	if (solo.Contains(vert, index))
-	//	{
-	//		continue;
-	//	}
-	//	solo.Add(vert);
-	//}
-
-	//cell = solo;
+	shader = Shader("ColorShape", "/Shaders/");
 
 	for (Vector2D vert : cell)
 	{
 		Verts.Add(vert.X);
 		Verts.Add(vert.Y);
 	}
-
-	//std::cout << "Inds: ";
-	//for (size_t i = 0; i < cell.GetSize() || i % 3 != 0; i++)
-	//{
-	//	Inds.Add(i % cell.GetSize());
-	//	std::cout << i % cell.GetSize();
-	//}
 
 	for (size_t i = 1; i + 1 < cell.GetSize(); i++)
 	{
@@ -262,85 +245,42 @@ FracturePiece::FracturePiece(Array<Vector2D> cell, Vector2D Point)
 		Inds.Add(i + 1);
 	}
 
-	//Inds = { 0, 1, 3,  // first Triangle
-	//	1, 2, 3 };
+	::DataBuffers::GenBuffer(VAO);
 
-	//Verts = { 0.5f,  0.5f, 0.0f,  // top right
-	//	 0.5f, -0.5f, 0.0f,  // bottom right
-	//	-0.5f, -0.5f, 0.0f,  // bottom left
-	//	-0.5f,  0.5f, 0.0f };
 
-	//std::cout << "Vert: " << "\n";
+	DataBuffers::BindVertexInfo(VAO, 0, 0, sizeof(Vector2D), 0, Vector2);
 
-	//for (Vector2D vert : Verts)
-	//{
 
-	//	vert.Print();
-	//}
+	::DataBuffers::BufferData(VAO, Verts.GetSize() * sizeof(float), Verts.GetFirstPtr(), BufferTargets::VERTEX);
+	DataBuffers::BufferDataIndex(VAO, Inds.GetSize() * sizeof(uint16_t), Inds.GetFirstPtr());
 
-	glGenVertexArrays(1, &VAO);
-	glGenBuffers(1, &VBO);
-	glGenBuffers(1, &EBO);
-
-	glBindVertexArray(VAO);
-
-	glBindBuffer(GL_ARRAY_BUFFER, VBO);
-
-	glBufferData(GL_ARRAY_BUFFER, Verts.GetSize() * sizeof(float), Verts.GetFirstPtr(), GL_STATIC_DRAW);
-
-	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
-
-	glBufferData(GL_ELEMENT_ARRAY_BUFFER, Inds.GetSize() * sizeof(int), Inds.GetFirstPtr(), GL_STATIC_DRAW);
-
-	glEnableVertexAttribArray(0);
-	glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 2 * sizeof(float), (void*)0);
-
-	glBindVertexArray(0);
-
-	glGenVertexArrays(1, &PVAO);
-	glGenBuffers(1, &PVBO);
-
-	glBindVertexArray(PVAO);
-
-	glBindBuffer(GL_ARRAY_BUFFER, PVBO);
-
-	Array<float> Points = { Point.X, Point.Y };
-
-	glBufferData(GL_ARRAY_BUFFER, 2 * sizeof(float), Points.GetFirstPtr(), GL_STATIC_DRAW);
-
-	glEnableVertexAttribArray(0);
-	glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 2 * sizeof(float), (void*)0);
-
+	::Renderer::AddFracture(this);
 
 	color = Vector3D::RandomRange(Vector3D(30, 30, 30), Vector3D(255, 255, 255));
 
-
-//	Renderer::FracturesToDraw.Add(this);
+	transform.Position = { 0, 0, -3 };
 }
 
-void FracturePiece::Draw(const Shader* InShader)
+void FracturePiece2D::Draw()
 {
-	InShader->Use();
-	//InShader->SetVec3("Color", color);
+	shader.Use();
 
-	//std::cout << "DrawCalled";
+	DataBuffers::BindBuffer(VAO);
 
-	//TODO find a way to separate this from model
-	//used for reflection InShade
-	glPointSize(5);
-	glBindVertexArray(VAO);
-	//glBindBuffer(GL_ARRAY_BUFFER, VBO);
-	//glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
-	glDrawElements(GL_TRIANGLES, static_cast<GLsizei>(Inds.GetSize()), GL_UNSIGNED_INT, nullptr);
-	glBindVertexArray(0);
-	glUseProgram(0);
+	DataBuffers::DrawVertexData(VAO);
 
-	PointShader.Use();
-	glBindVertexArray(PVAO);
-	//glBindBuffer(GL_ARRAY_BUFFER, VBO);
-	//glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
-	glDrawArrays(GL_POINTS, 0, 1);
-	glBindVertexArray(0);
-	glUseProgram(0);
+	PerInstanceTransforms ubo;
+	ubo.Model = transform.GetModelMatrix();
+	ubo.Color = color;
+
+	GlobalTransforms g;
+	g.View = Camera::GetActiveCamera()->GetLook();
+
+	g.Projection = Camera::GetActiveCamera()->GetProjection();
+
+	shader.SetUniformBuffer(0, &g, sizeof(GlobalTransforms));
+
+	shader.SetUniformBuffer(1, &ubo, sizeof(PerInstanceTransforms));
+
+	::Renderer::Draw(Inds.GetSize());
 }
-

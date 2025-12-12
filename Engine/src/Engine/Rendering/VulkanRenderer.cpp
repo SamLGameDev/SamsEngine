@@ -18,6 +18,7 @@
 #include "glm/ext/matrix_transform.hpp"
 #include "Voronoi.h"
 #include "InterfaceRenderer.h"
+#include "Voronoi2D.h"
 
 
 namespace Vulkan
@@ -278,6 +279,12 @@ namespace Vulkan
 		{
 			model->Draw();
 		}
+
+		for (FracturePiece2D* piece : Fracture2DToRender)
+		{
+			piece->Draw();
+		}
+
 
 		vkCmdEndRenderPass(Buffer);
 

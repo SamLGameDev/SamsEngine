@@ -16,12 +16,10 @@
 
 void RunEngine(Vulkan::RuntimeEngine engine)
 {
-	Model backpack = Model("/Models/BackPack/backpack.obj", Shader("BasicTexture", "/Shaders/"));
 
-	Model asteroid = Model("/Models/Asteroid/rock.obj", Shader("BasicTexture", "/Shaders/"));
-	
-	backpack.ModelTransform.Position = { 5,0, 0 };
-	asteroid.ModelTransform.Position = { 0, 0, -3 };
+	Voronoi2D vorn;
+	vorn.FracturePlaneRandom({-1, 1}, {-1, -1}, 
+		{1, 1}, {1, -1}, 100);
 
 	while (!RuntimeEngine::ShouldClose())
 	{
