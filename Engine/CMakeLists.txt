@@ -243,9 +243,6 @@ target_include_directories(EngineCore PRIVATE ${Stb_INCLUDE_DIR})
 find_package(Vulkan REQUIRED)
 target_link_libraries(EngineCore PUBLIC Vulkan::Vulkan)
 
-find_package(CGAL REQUIRED)
-target_link_libraries(EngineCore PRIVATE CGAL::CGAL)
-
 target_compile_definitions(EngineCore PUBLIC CONTENTS_DIR="${Contents}")
 
     install(EXPORT EngineCoreTargets FILE EngineCoreTargets.cmake NAMESPACE EngineCore:: DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/EngineCore)
