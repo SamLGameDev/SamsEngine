@@ -27,6 +27,7 @@
     </li>
     <li><a href="#building-this-project">Building this project</a></li>
         <li><a href="#controls">Controls</a></li>
+    <li><a href="#dependencies">Dependencies</a></li>
   </ol>
 </details>
 
@@ -254,4 +255,15 @@ Mouse to look around
 Left arrow to explode the shape.
 
 Right arrow to condese the shape.
+
+## Dependencies
+* glfw3
+* vcpkg
+* cmake
+* glad
+* stb
+* glm
+* assimp
+* nlohmann json
+* OpenGL
 
