@@ -1,3 +1,36 @@
+## Table of contents
+<details>
+  <summary>Table of Contents</summary>
+  <ol>
+    <li>
+      <a href="#do-not-mark">DO NOT MARK</a>
+    </li>
+        <li>
+        <a href="#description">Description</a>
+    </li>
+        <li>
+        <a href="#methodology">Methodology</a>
+    </li>
+        <li>
+        <a href="#optimisation">Optimisation</a>
+           <ul>
+        <li><a href="#cpu">CPU</a></li>
+        <li><a href="#memory">Memory</a></li>
+        <li><a href="#gpu">GPU</a></li>
+      </ul>
+    </li>
+         <li>
+        <a href="#references">References</a>
+    </li>
+    <li>
+        <a href="#documentation">Documentation</a>
+    </li>
+    <li><a href="#building-this-project">Building this project</a></li>
+        <li><a href="#controls">Controls</a></li>
+  </ol>
+</details>
+
+
 ## DO NOT MARK
 StaticMeshComponent.cpp and h
 Item.cpp and h
@@ -40,7 +73,11 @@ MeshObject.cpp and h
 
 ## Description
 
-This project aims to implement a 3D voronoi fracturing algorithm [1] using vulkan[2]. Vulkan has been chosen over alternatives like OpenGL[3] due to its ability to take advantage of the parallelism of modern GPU's [4], which will be cruicial in this project as there will be many points to calculate which can be calculated independently of one another. A triangulation algorithm will also be needed to generate a mesh from the fractured points, and as such delaunay triangulation [8] will be used. This should result in significant performance gains. For future work, this project would aim at implimenting a clipped voronoi diagram[7], allowing the fracturing of a complex 3D mesh. The project has currently generated a voronoi diagram in 3D, though it still needs a triangulation algorithm added to function properly. This is what will be added in worksheet 4.
+This project aims to implement a 3D voronoi fracturing algorithm [1] using vulkan[2]. Vulkan has been chosen over alternatives like OpenGL[3] due to its ability to take advantage of the parallelism of modern GPU's [4], which will be cruicial in this project as there will be many points to calculate which can be calculated independently of one another. A triangulation algorithm will also be needed to generate a mesh from the fractured points, and as such delaunay triangulation [8] will be used. This should result in significant performance gains. For future work, this project would aim at implimenting a clipped voronoi diagram[7], allowing the fracturing of a complex 3D mesh. 
+
+As stated in the previous worksheet, this iteration aimed to impliment a 3D delaunay triangulation to fix the clipping issue with the current iteraction. This was successfully done, but unfortunatly did not result in a fixed diagram. This is because delaunay does not retain the previous shape of the input verticies, resulting in the same clipping as before. The solution to this is to impliment constrained elaunay triangulation, but unfortunaly the remaining time is too short for such an implimentation. However, this does not mean the porblem can not be solved inellegantly, and as such, a simple triangulation algorithm has been implimented on each face of the fracture, before combining them to recieve similar results as CDT. 
+
+For additional interactability, controls using the arrow keys have been implimented to show a fracture level for the mesh, allowing a more detailed view of the diagram. However, this lead me to discover that my current algorithm has failed to properly impliment a voronoi diagram, as whilst the outside appear fine, the inside fractures are not cut properly, and are missing faces/misformed. A deeper investigation has lead to the discovery that this is due how intersect faces are added after a slice, being added last, which is out of order. Even fixing this ordering issue however did not fix it, leading me to believe that this is due to the intersect face needing to be modified for all faces. This would be hard to impliment for my algorithm, leading me to believe my current algorithm is fundementally wrong. After reading up on this, i have decided to attemp to impliment a different voronoi algorithm using the flip approch. 
 
 ## Methodology
 This project is going to be implimented by adapting the current half plane clipping algorithm for 3D [5][6]. The pesudocode for that can be found in fig 1.
@@ -111,42 +148,55 @@ This algorithm works by cutting a cube by a perpendicular bi-sector plane of eve
 
 ### CPU
 
-Currenty, the major bottleneck to the program is creating new fracture objects for rendering, taking 83.36% of the processing time. This is shown in figure 2
+Currenty, the major bottleneck to the program is slicing the shape by the plane. This is taking up 81.84% of the program time, as shown in figure 2
 
-<img width="722" alt="image" src="https://github.falmouth.ac.uk/user-attachments/assets/4b6eb04a-a471-4423-aaf7-186378811aa3" />
+<img width="257" alt="image" src="https://github.falmouth.ac.uk/user-attachments/assets/1a7da11c-c6a3-476a-8d25-9c530e362c1b" />
 
 Figure 2
 
-After investigating why, it has been discovered that it is because of two major points, shader creation and buffering data, as shown in figures 3 and 4.
+After investigating why, it has been discovered that it is because of two major points, 13% with copying the face into the new faces array (fig 3), and 46.43% spend on adding a face to the array (fig 4).
+This could be mitigated by pre-allocating the array, saving on the amount of new used, saving significant time. Parrallel processing would also help, as each fracture is unrealted to each other, meaning they can be executed in parrallel.
 
-<img width="433" alt="image" src="https://github.falmouth.ac.uk/user-attachments/assets/db70cdfe-4b7a-446a-bf33-7101303d1046" />
+<img width="254" alt="image" src="https://github.falmouth.ac.uk/user-attachments/assets/cdb3e2ca-ad1c-4e50-b90b-2360f0889b79" />
 
 Figure 3
 
-<img width="782" alt="image" src="https://github.falmouth.ac.uk/user-attachments/assets/e143085c-5463-4752-b6cd-b114e6ceb3cd" />
+<img width="253" alt="image" src="https://github.falmouth.ac.uk/user-attachments/assets/e654f470-7b16-40e9-9c71-cdc9e215791e" />
 
 Figure 4
 
-To solve this, The shader could be created once for the class, but the problem is that currently the shader class allocates uniform buffers on a per shader basis, so the shader class would need to be re-written to allocate one large buffer that is used per class, saving on multiple shader creation. We could do something similar with vulkan memeory allocation, and allocate once in bulk beforehand
-
 ### Memory
 
-<img width="311" alt="image" src="https://github.falmouth.ac.uk/user-attachments/assets/62745c86-1aeb-4601-93c9-e22964aeab18" />
+<img width="310" alt="image" src="https://github.falmouth.ac.uk/user-attachments/assets/d683824f-e25d-4520-ab50-75ba3109e604" />
+
 
 Figure 5
 
-<img width="946" alt="image" src="https://github.falmouth.ac.uk/user-attachments/assets/98e1beb9-7faf-4364-82d7-a0e0f6d1d371" />
+<img width="781" alt="image" src="https://github.falmouth.ac.uk/user-attachments/assets/cd45806f-ba5c-46f5-ac49-88b6c1ff1af1" />
 
 Figure 6
 
-Figure 5 shows that the algorithm is allocating 1.217 mb more memory than before the call. This is not a significant amount of memory, but it could be reduced. As figure 6 shows, the main bottleneck is creating FracturePieces, the reson being they are allocated on the heap. Significant memory could be saved by allocating them on the stack instead. This will be one of the aims for the next interation. 
+Figure 5 shows we are allocating around 2.48 mb of extra memory when running the program. Most of the memory being allocted comes from the model class, being from the stored vertices. This could be reduced by not keeping track of stored vertices after buffering them, as that is no longer neccessary.
 
 ### GPU
 
-<img width="811" alt="image" src="https://github.falmouth.ac.uk/user-attachments/assets/45eab56e-3131-41f4-8610-4f2aecc2178c" />
-Firgure 7
+<img width="896" alt="image" src="https://github.falmouth.ac.uk/user-attachments/assets/4f491712-509c-44b4-afc8-45c6a5012103" />
 
-As shown in figure 7, the bulk of our GPU activity happens at the start. This is not as much as a problem, as by doing it in bulk here, we save on processing power later, but if we wanted to reduce this, we could draw the voronoi diagram when it is first interacted with, instead of at the start.
+Figure 7
+
+As shown in figure 7, there is a period of gpu activity at the start, before stopping for around 3 seconds, before it picks up again. This suggests out program has a lull of GPU inactivity, which could potentially be used for compute shaders, speeding up the processing speed of the program. The usage as a whole is very low, suggesting gpu usage isnt a bottleneck.
+
+<img width="440" alt="image" src="https://github.falmouth.ac.uk/user-attachments/assets/98a4cefd-97d0-4f6a-bcb5-0873b44c6c6e" />
+
+Figure 8
+
+As shown in figure 8, variables are as expected, showing data is being passed to the GPU correctly.
+
+<img width="434" alt="image" src="https://github.falmouth.ac.uk/user-attachments/assets/c68d6704-88ea-4a92-bf7b-0b9b673c2b23" />
+
+Figure 9
+
+As figure 9 shows, the fragment is malformed, not forming a convex shape. This will be fixed with the new method.
 
 ## Documentation
 
@@ -194,4 +244,14 @@ Another option is to use CLion, you can get free Educational licences while you 
 
 ##What to open
 You should open the Game folder with cmake. This wll contain the worksheets runable code, as all engine contains are unit tests. To run unit tests open engine and run project-unit.exe
+
+## Controls
+
+WASD to move
+
+Mouse to look around
+
+Left arrow to explode the shape.
+
+Right arrow to condese the shape.
 
