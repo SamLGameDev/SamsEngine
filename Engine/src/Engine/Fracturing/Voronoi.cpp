@@ -673,6 +673,11 @@ void Voronoi::GenerateVoronoiCellsDelaunay(Array<Vector3D>& Points, const Model&
 }
 
 
+FracturePiece3D::~FracturePiece3D()
+{
+	::Renderer::RemoveFracture(this);
+}
+
 FracturePiece3D::FracturePiece3D(Array<Face> cell, Vector3D Point) : WorldObject()
 {
 

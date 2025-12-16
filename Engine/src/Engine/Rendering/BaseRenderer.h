@@ -17,10 +17,12 @@ public:
 	void AddFracture(FracturePiece3D* Piece);
 	void AddFracture(FracturePiece2D* Piece);
 	void ReplaceFracture(const FracturePiece3D* Old, const FracturePiece3D* New);
+	void RemoveFracture(FracturePiece3D* ToRemove);
+
 	void ReplaceFracture(const FracturePiece2D* Old, const FracturePiece2D* New);
 	void AddWireShape(WireObject* Shape);
 	void AddModel(Model* InModel);
-
+	void RemoveModel(Model* InModel);
 	virtual void Draw(const size_t& Size) = 0;
 
 	Array<FracturePiece3D*> FracturesToRender;

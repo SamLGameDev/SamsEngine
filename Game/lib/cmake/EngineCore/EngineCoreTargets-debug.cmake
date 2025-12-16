@@ -8,7 +8,7 @@ set(CMAKE_IMPORT_FILE_VERSION 1)
 # Import target "EngineCore::EngineCore" for configuration "Debug"
 set_property(TARGET EngineCore::EngineCore APPEND PROPERTY IMPORTED_CONFIGURATIONS DEBUG)
 set_target_properties(EngineCore::EngineCore PROPERTIES
-  IMPORTED_LINK_INTERFACE_LANGUAGES_DEBUG "CXX"
+  IMPORTED_LINK_INTERFACE_LANGUAGES_DEBUG "C;CXX"
   IMPORTED_LOCATION_DEBUG "${_IMPORT_PREFIX}/lib/EngineCore.lib"
   )
 

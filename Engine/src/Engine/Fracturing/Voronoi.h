@@ -16,6 +16,8 @@ public:
 
 	FracturePiece3D() = default;
 
+	~FracturePiece3D();
+
 	FracturePiece3D(Array<Face> cell, Vector3D Point);
 
 	void Copy(const FracturePiece3D& Other)

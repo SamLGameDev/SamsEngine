@@ -461,29 +461,61 @@ TEST(Tringulation, Delauney)
 ////
 ////	ASSERT_EQ(tet.IsPointInCircumSphere({ 0.9, 1, 1 }), true);
 }
-TEST(Fracturing, Diagram) {
-	Vulkan::RuntimeEngine engine;
-	engine.Init();
 
-	Voronoi* vorn = new Voronoi;
+void RunEngine(Vulkan::RuntimeEngine engine)
+{
 
-	//Model* model = new Model("/Models/Asteroid/rock.obj", Shader("BasicTexture", "/Shaders/"));
-
-	Model* model2 = new Model("/Models/BackPack/backpack.obj", Shader("BasicTexture", "/Shaders/"));
-
-	model2->ModelTransform.Position = { 5,0, 0 };
-
-	vorn->FractureDelaunayRandom(*model2, 100);
-
-	while (!Vulkan::RuntimeEngine::ShouldClose())
+	Model model = Model("/Models/BackPack/backpack.obj", Shader("BasicTexture", "/Shaders/"));
+	model.ModelTransform.Position = { 5, 0, 0 };
+	Voronoi vorn;
+	vorn.FracturePlaneRandom(model, 100);
+	while (!RuntimeEngine::ShouldClose())
 	{
 		engine.Loop();
 	}
 
-
 	Vulkan::RuntimeEngine::WaitForFrameToFinish();
-	delete vorn;
-	delete model2;
+}
+
+void EnginePlane()
+{
+	Vulkan::RuntimeEngine engine;
+	engine.Init();
+
+	RunEngine(engine);
 
 	engine.ShutDown();
+}
+
+
+void RunEngineDelaunay(Vulkan::RuntimeEngine engine)
+{
+	Model model = Model("/Models/BackPack/backpack.obj", Shader("BasicTexture", "/Shaders/"));
+	model.ModelTransform.Position = { 5, 0, 0 };
+	Voronoi vorn;
+	vorn.FractureDelaunayRandom(model, 100);
+
+	while (!RuntimeEngine::ShouldClose())
+	{
+		engine.Loop();
+	}
+
+	Vulkan::RuntimeEngine::WaitForFrameToFinish();
+}
+
+
+void EngineDelaunay()
+{
+	Vulkan::RuntimeEngine engine;
+	engine.Init();
+
+	RunEngineDelaunay(engine);
+
+	engine.ShutDown();
+}
+
+TEST(Fracturing, Diagram) {
+	EnginePlane();
+
+	EngineDelaunay();
 }

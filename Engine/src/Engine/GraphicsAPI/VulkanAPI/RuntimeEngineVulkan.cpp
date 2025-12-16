@@ -42,6 +42,10 @@ namespace Vulkan
 
 		delete SubsystemManager;
 
+		Object::TickDel.RemoveAll();
+
+		Model::LoadedTextures.Empty();
+
 		glfwTerminate();
 
 		return SUCCEEDED;

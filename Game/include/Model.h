@@ -86,7 +86,10 @@ public:
 
 	//TODO get rid of this, need to rework bounds recalculation
 	Transform ModelTransform;
-
+	/**
+	* All the textures that have currently been loaded, so we don't have to load them again when we have duplicates
+	*/
+	static Array<Texture> LoadedTextures;
 private:
 
 	std::string StorageLocation;
@@ -125,10 +128,7 @@ private:
 	Shader ModelShader;
 
 
-	/**
-	 * All the textures that have currently been loaded, so we don't have to load them again when we have duplicates
-	 */
-	static Array<Texture> LoadedTextures;
+
 
 	double Time;
 
