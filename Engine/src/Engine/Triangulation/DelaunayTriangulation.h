@@ -1,17 +1,19 @@
 
 #pragma once
 
+#include <stack>
+
 #include "ErrorCodes.h"
 #include "SubsystemInitialiser.h"
 
 
 struct Edge
 {
-	Vector2D P1;
-	Vector2D P2;
-	Edge(const Vector2D& InP1, const Vector2D& InP2) : P1(InP1), P2(InP2) {};
+	Vector3D P1;
+	Vector3D P2;
+	Edge(const Vector3D& InP1, const Vector3D& InP2) : P1(InP1), P2(InP2) {};
 
-	Edge() : P1(Vector2D::Zero), P2(Vector2D::Zero) {};
+	Edge() : P1(Vector3D::Zero), P2(Vector3D::Zero) {};
 
 	bool operator==(const Edge& other) const
 	{
@@ -93,7 +95,7 @@ class DelaunayTriangulation
 public:
 
 	void Triangulate(Array<Vector2D>& Vertices, Array<uint16_t>& Indicies);
-	void Triangulate(Array<Vector3D>& Vertices, Array<uint16_t>& Indicies);
+	void Triangulate(Array<Vector3D>& Points, Array<Tetrahedron>& Tetrahedrons);
 
 private:
 

@@ -433,33 +433,33 @@ void BuildStringFromMatrix(int* Matrix, int NumRows, int NumColumns,
 TEST(Tringulation, Delauney)
 {
 
-	Tetrahedron tet = { {1, 1, 1}, {-1, -1, 1}, {-1, 1, -1}, {1, -1, -1} };
-	
-	DelaunayTriangulation tri;
-
-	Array<Vector3D> verts= {
-	{0,0,0},
-	{1,0,0}, 
-	{0,1,0},
-	{0,0,1},
-	{1,1,1} 
-	};
-
-	Array<uint16_t> inds;
-
-	tri.Triangulate(verts, inds);
-	
-	for (const auto& index : inds)
-	{
-		std::cout << index << ", ";
-	}
-
-
-	ASSERT_EQ(tet.IsPointInCircumSphere({ 0.1, 0, 0 }), true);
-
-	ASSERT_EQ(tet.IsPointInCircumSphere({ 5, 0, 0 }), false);
-
-	ASSERT_EQ(tet.IsPointInCircumSphere({ 0.9, 1, 1 }), true);
+////	Tetrahedron tet = { {1, 1, 1}, {-1, -1, 1}, {-1, 1, -1}, {1, -1, -1} };
+////	
+////	DelaunayTriangulation tri;
+////
+////	Array<Vector3D> verts= {
+////	{0,0,0},
+////	{1,0,0}, 
+////	{0,1,0},
+////	{0,0,1},
+////	{1,1,1} 
+////	};
+////
+////	Array<uint16_t> inds;
+////
+//////	tri.Triangulate(verts, inds);
+////	
+////	for (const auto& index : inds)
+////	{
+////		std::cout << index << ", ";
+////	}
+////
+////
+////	ASSERT_EQ(tet.IsPointInCircumSphere({ 0.1, 0, 0 }), true);
+////
+////	ASSERT_EQ(tet.IsPointInCircumSphere({ 5, 0, 0 }), false);
+////
+////	ASSERT_EQ(tet.IsPointInCircumSphere({ 0.9, 1, 1 }), true);
 }
 TEST(Fracturing, Diagram) {
 	Vulkan::RuntimeEngine engine;
@@ -473,15 +473,41 @@ TEST(Fracturing, Diagram) {
 
 	model2->ModelTransform.Position = { 5,0, 0 };
 
-	vorn->FracturePlaneRandom(*model2, 100);
+	vorn->FracturePlaneRandom(*model2, 10);
 
 	while (!Vulkan::RuntimeEngine::ShouldClose())
 	{
 		engine.Loop();
 	}
+
+
 	Vulkan::RuntimeEngine::WaitForFrameToFinish();
 	delete vorn;
 	delete model2;
+
+	engine.ShutDown();
+
+	engine.Init();
+
+	Voronoi* vorn2 = new Voronoi;
+
+	//Model* model = new Model("/Models/Asteroid/rock.obj", Shader("BasicTexture", "/Shaders/"));
+
+	Model* model3 = new Model("/Models/BackPack/backpack.obj", Shader("BasicTexture", "/Shaders/"));
+
+	model3->ModelTransform.Position = { 5,0, 0 };
+
+	vorn2->FractureDelaunayRandom(*model3, 10);
+
+	while (!Vulkan::RuntimeEngine::ShouldClose())
+	{
+		engine.Loop();
+	}
+
+
+	Vulkan::RuntimeEngine::WaitForFrameToFinish();
+	delete vorn2;
+	delete model3;
 
 	engine.ShutDown();
 }

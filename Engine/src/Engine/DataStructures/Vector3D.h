@@ -1,4 +1,5 @@
 #pragma once
+#include <array>
 
 struct Vector3D
 {
@@ -153,12 +154,20 @@ public:
 	static bool GetIntersectionPointWithPlane(const Vector3D& Mid, const Vector3D& Normal, const Vector3D& Point,
 	                                          const Vector3D& LineDir, Vector3D& Out);
 
+	static Vector3D GetLineIntersectionPointWithPlane(const Vector3D& Normal, const double& D,
+	                                                  const Vector3D& LineStart, const Vector3D& LineEnd);
+
 	[[nodiscard]] static bool IsAlmostEqual(const Vector3D& A, const Vector3D& B, const float& Range = 1e-6);
 
 	void Print() const;
 
 	[[nodiscard]] static Vector3D Abs(const Vector3D& V);
 	[[nodiscard]] Vector3D Abs() const;
+
+	std::array<double, 3> GetAsDoubleArray() const
+	{
+		return { X, Y, Z };
+	}
 
 	float X = 0;
 	float Y = 0;

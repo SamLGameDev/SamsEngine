@@ -144,21 +144,35 @@ private:
 };
 
 
+struct AnglePointPair
+{
+	Vector3D point;
+	double angle;
+
+	bool operator<(const AnglePointPair& Other)const
+	{
+		return angle < Other.angle;
+	}  
+};
+
 class Voronoi
 {
 public:
 
 	//Fracture the model into a voronoi diagram based on random points
 	void FracturePlaneRandom(Model& InModel, const size_t& NumPoints);
+	Array<Vector3D> GenerateRandomPointsInBounds(Model& InModel, const size_t& NumPoints, Array<Vector3D>& Points);
+
+	void FractureDelaunayRandom(Model& InModel, const size_t& NumPoints);
 
 private:
 	static void GetFirstIntersection(const Vector3D& Normal, const Vector3D& Center, const Face& CurrentFace, Face& NewFace,
 	                                 size_t& FirstIntersectionIndex, Vector3D& FirstIntersection);
 
-	size_t GetAllVertsUntilSecondIntersection(const Vector3D& Normal, const Vector3D& Center, const Face& CurrentFace, Face& NewFace,
+	static size_t GetAllVertsUntilSecondIntersection(const Vector3D& Normal, const Vector3D& Center, const Face& CurrentFace, Face& NewFace,
 	                                          const size_t& FirstIntersectionIndex, Vector3D& SecondIntersection);
 
-	void GetFaceReveresed(Face& IntersectFace, const Face& CurrentFace, Face& NewFace, const size_t& FirstIntersectionIndex,
+	static void GetFaceReveresed(Face& IntersectFace, const Face& CurrentFace, Face& NewFace, const size_t& FirstIntersectionIndex,
 	                      const Vector3D& FirstIntersection, const Vector3D& SecondIntersection, const size_t& SecondIntersectionIndex);
 
 	void SliceFaceByPlane(const Array<Face>& Faces, const Vector3D& Normal, const Vector3D& Center, Array<Face>& NewFaces,
@@ -177,6 +191,14 @@ private:
 	Array<Face> fractureFaces;
 
 	Array<FracturePiece3D> Fractures;
+
+	static Vector3D GetCircumCenter(const Vector3D& A, const Vector3D& B, const Vector3D& C, const Vector3D& D);
+
+	static void ClipCellToBox(const Model& InModel, Array<Face>& Cell);
+
+	static Face ClipFaceToBox(const Array<Face>& ClippingPlanes, const Face& ClippedFace, const Vector3D& Center);
+
+	void GenerateVoronoiCellsDelaunay(Array<Vector3D>& Points, const Model& InModel);
 
 };
 

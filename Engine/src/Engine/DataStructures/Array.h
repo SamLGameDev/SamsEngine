@@ -7,6 +7,13 @@
 #include <memory>
 
 template<typename T>
+concept EqualityComparable =
+	requires(const T & a, const T & b)
+{
+	{ a == b } -> std::convertible_to<bool>;
+};
+
+template<typename T>
 class Array
 {
 	template<typename T>
@@ -14,6 +21,8 @@ class Array
 
 	template<typename U>
 	struct is_unique_ptr<std::unique_ptr<U>> : std::true_type {};
+
+
 
 public:
 	Array()
@@ -318,7 +327,7 @@ public:
 	/// <param name="Item"></param>
 	/// <param name="Index"></param>
 	/// <returns></returns>
-	bool Contains(const T& Item, size_t& Index) const
+	bool Contains(const T& Item, size_t& Index) const requires EqualityComparable<T>
 	{
 		for (size_t i = 0; i < NumItems; i++)
 		{
@@ -366,7 +375,7 @@ public:
 		return false;
 	}
 
-	void Remove(const T& Item)
+	void Remove(const T& Item) requires EqualityComparable<T>
 	{
 		size_t index;
 
@@ -438,6 +447,7 @@ public:
 		DynamicArray[From] = std::move(DynamicArray[To]);
 		DynamicArray[To] = std::move(temp);
 	}
+
 
 	T* begin() { return DynamicArray; }
 	T* end() { return DynamicArray + NumItems; }
