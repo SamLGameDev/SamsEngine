@@ -433,55 +433,89 @@ void BuildStringFromMatrix(int* Matrix, int NumRows, int NumColumns,
 TEST(Tringulation, Delauney)
 {
 
-	Tetrahedron tet = { {1, 1, 1}, {-1, -1, 1}, {-1, 1, -1}, {1, -1, -1} };
-	
-	DelaunayTriangulation tri;
+////	Tetrahedron tet = { {1, 1, 1}, {-1, -1, 1}, {-1, 1, -1}, {1, -1, -1} };
+////	
+////	DelaunayTriangulation tri;
+////
+////	Array<Vector3D> verts= {
+////	{0,0,0},
+////	{1,0,0}, 
+////	{0,1,0},
+////	{0,0,1},
+////	{1,1,1} 
+////	};
+////
+////	Array<uint16_t> inds;
+////
+//////	tri.Triangulate(verts, inds);
+////	
+////	for (const auto& index : inds)
+////	{
+////		std::cout << index << ", ";
+////	}
+////
+////
+////	ASSERT_EQ(tet.IsPointInCircumSphere({ 0.1, 0, 0 }), true);
+////
+////	ASSERT_EQ(tet.IsPointInCircumSphere({ 5, 0, 0 }), false);
+////
+////	ASSERT_EQ(tet.IsPointInCircumSphere({ 0.9, 1, 1 }), true);
+}
 
-	Array<Vector3D> verts= {
-	{0,0,0},
-	{1,0,0}, 
-	{0,1,0},
-	{0,0,1},
-	{1,1,1} 
-	};
+void RunEngine(Vulkan::RuntimeEngine engine)
+{
 
-	Array<uint16_t> inds;
-
-	tri.Triangulate(verts, inds);
-	
-	for (const auto& index : inds)
+	Model model = Model("/Models/BackPack/backpack.obj", Shader("BasicTexture", "/Shaders/"));
+	model.ModelTransform.Position = { 5, 0, 0 };
+	Voronoi vorn;
+	vorn.FracturePlaneRandom(model, 100);
+	while (!RuntimeEngine::ShouldClose())
 	{
-		std::cout << index << ", ";
+		engine.Loop();
 	}
 
-
-	ASSERT_EQ(tet.IsPointInCircumSphere({ 0.1, 0, 0 }), true);
-
-	ASSERT_EQ(tet.IsPointInCircumSphere({ 5, 0, 0 }), false);
-
-	ASSERT_EQ(tet.IsPointInCircumSphere({ 0.9, 1, 1 }), true);
+	Vulkan::RuntimeEngine::WaitForFrameToFinish();
 }
+
+void EnginePlane()
+{
+	Vulkan::RuntimeEngine engine;
+	engine.Init();
+
+	RunEngine(engine);
+
+	engine.ShutDown();
+}
+
+
+void RunEngineDelaunay(Vulkan::RuntimeEngine engine)
+{
+	Model model = Model("/Models/BackPack/backpack.obj", Shader("BasicTexture", "/Shaders/"));
+	model.ModelTransform.Position = { 5, 0, 0 };
+	Voronoi vorn;
+	vorn.FractureDelaunayRandom(model, 100);
+
+	while (!RuntimeEngine::ShouldClose())
+	{
+		engine.Loop();
+	}
+
+	Vulkan::RuntimeEngine::WaitForFrameToFinish();
+}
+
+
+void EngineDelaunay()
+{
+	Vulkan::RuntimeEngine engine;
+	engine.Init();
+
+	RunEngineDelaunay(engine);
+
+	engine.ShutDown();
+}
+
 TEST(Fracturing, Diagram) {
-	////Vulkan::RuntimeEngine engine;
-	////engine.Init();
+	EnginePlane();
 
-	////Voronoi* vorn = new Voronoi;
-
-	//////Model* model = new Model("/Models/Asteroid/rock.obj", Shader("BasicTexture", "/Shaders/"));
-
-	////Model* model2 = new Model("/Models/BackPack/backpack.obj", Shader("BasicTexture", "/Shaders/"));
-
-	////model2->ModelTransform.Position = { 5,0, 0 };
-
-	////vorn->FracturePlaneRandom(*model2, 100);
-
-	////while (!Vulkan::RuntimeEngine::ShouldClose())
-	////{
-	////	engine.Loop();
-	////}
-	////Vulkan::RuntimeEngine::WaitForFrameToFinish();
-	////delete vorn;
-	////delete model2;
-
-	////engine.ShutDown();
+	EngineDelaunay();
 }

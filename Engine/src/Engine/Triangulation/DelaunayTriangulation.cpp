@@ -114,11 +114,11 @@ void DelaunayTriangulation::Triangulate(Array<Vector2D>& Vertices, Array<uint16_
 
 }
 
-void DelaunayTriangulation::Triangulate(Array<Vector3D>& Vertices, Array<uint16_t>& Indicies)
+void DelaunayTriangulation::Triangulate(Array<Vector3D>& Vertices, Array<Tetrahedron>& Tetrahedra)
 {
 	Tetrahedron superTetrahedron = GetSuperTetrahedron(Vertices);
 
-	Array<Tetrahedron> tetrahedra = { superTetrahedron };
+    Tetrahedra = { superTetrahedron };
 
 	for (const auto& point : Vertices)
 	{
@@ -126,7 +126,7 @@ void DelaunayTriangulation::Triangulate(Array<Vector3D>& Vertices, Array<uint16_
 
 		Array<Face> faces;
 
-		for (const auto& tetrahedron : tetrahedra)
+		for (const auto& tetrahedron : Tetrahedra)
 		{
 
  			if (!tetrahedron.IsPointInCircumSphere(point)) {
@@ -158,7 +158,7 @@ void DelaunayTriangulation::Triangulate(Array<Vector3D>& Vertices, Array<uint16_
 		}
 
 		if (boundaryFaces.IsEmpty()) {
-			tetrahedra = newTetrahedron; continue;
+			Tetrahedra = newTetrahedron; continue;
 		}
 
 
@@ -166,19 +166,19 @@ void DelaunayTriangulation::Triangulate(Array<Vector3D>& Vertices, Array<uint16_
 		{
 			newTetrahedron.Add(Tetrahedron(f.Vertices[0], f.Vertices[1], f.Vertices[2], point));
 		}
-		tetrahedra = newTetrahedron;
+		Tetrahedra = newTetrahedron;
 	}
 
-	Vertices.Empty();
+	//Vertices.Empty();
 
-	for (const auto& tet : tetrahedra)
+	for (const auto& tet : Tetrahedra)
 	{
 		//if (tet.point1 == superTetrahedron.point1 || tet.point1 == superTetrahedron.point2 || tet.point1 == superTetrahedron.point3 || tet.point1 == superTetrahedron.point4) continue;
 		//if (tet.point2 == superTetrahedron.point1 || tet.point2 == superTetrahedron.point2 || tet.point2 == superTetrahedron.point3 || tet.point2 == superTetrahedron.point4) continue;
 		//if (tet.point3 == superTetrahedron.point1 || tet.point3 == superTetrahedron.point2 || tet.point3 == superTetrahedron.point3 || tet.point3 == superTetrahedron.point4) continue;
 		//if (tet.point4 == superTetrahedron.point1 || tet.point4 == superTetrahedron.point2 || tet.point4 == superTetrahedron.point3 || tet.point4 == superTetrahedron.point4) continue;
 
-		for (const auto& face : tet.faces)
+	/*	for (const auto& face : tet.faces)
 		{
 			bool skipFace = false;
 
@@ -228,7 +228,7 @@ void DelaunayTriangulation::Triangulate(Array<Vector3D>& Vertices, Array<uint16_
 					Indicies.Add(Vertices.GetSize() - 1);
 				}
 			}
-		}
+		}*/
 	}
 }
 

@@ -1,10 +1,17 @@
 #pragma once
+#include <array>
+
+
+
+struct Vector2D;
 
 struct Vector3D
 {
 public:
 
 	constexpr Vector3D() noexcept : X(0), Y(0), Z(0){};
+
+	Vector3D(const Vector2D& Other);
 
 	//constexpr Vector3D(const float InX, const float InY, const float InZ) noexcept : X(InX), Y(InY), Z(InZ) {};
 
@@ -153,12 +160,20 @@ public:
 	static bool GetIntersectionPointWithPlane(const Vector3D& Mid, const Vector3D& Normal, const Vector3D& Point,
 	                                          const Vector3D& LineDir, Vector3D& Out);
 
+	static Vector3D GetLineIntersectionPointWithPlane(const Vector3D& Normal, const double& D,
+	                                                  const Vector3D& LineStart, const Vector3D& LineEnd);
+
 	[[nodiscard]] static bool IsAlmostEqual(const Vector3D& A, const Vector3D& B, const float& Range = 1e-6);
 
 	void Print() const;
 
 	[[nodiscard]] static Vector3D Abs(const Vector3D& V);
 	[[nodiscard]] Vector3D Abs() const;
+
+	std::array<double, 3> GetAsDoubleArray() const
+	{
+		return { X, Y, Z };
+	}
 
 	float X = 0;
 	float Y = 0;
@@ -168,6 +183,8 @@ public:
 	static const Vector3D Zero;
 	static const Vector3D One;
 };
+
+
 
 [[nodiscard]] inline Vector3D operator*(const float& Multiplier, const Vector3D& Vec)
 {

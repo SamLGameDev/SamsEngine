@@ -1,17 +1,19 @@
 
 #pragma once
 
+#include <stack>
+
 #include "ErrorCodes.h"
 #include "SubsystemInitialiser.h"
 
 
 struct Edge
 {
-	Vector2D P1;
-	Vector2D P2;
-	Edge(const Vector2D& InP1, const Vector2D& InP2) : P1(InP1), P2(InP2) {};
+	Vector3D P1;
+	Vector3D P2;
+	Edge(const Vector3D& InP1, const Vector3D& InP2) : P1(InP1), P2(InP2) {};
 
-	Edge() : P1(Vector2D::Zero), P2(Vector2D::Zero) {};
+	Edge() : P1(Vector3D::Zero), P2(Vector3D::Zero) {};
 
 	bool operator==(const Edge& other) const
 	{
@@ -85,6 +87,27 @@ struct Tetrahedron
 		faces[3] = { {InP2, InP3, InP4} };
 	};
 
+	Vector3D operator[](const size_t& Index) const
+	{
+		if (Index == 0) return point1;
+		if (Index == 1) return point2;
+		if (Index == 2) return point3;
+		if (Index == 3) return point4;
+		throw std::runtime_error("Tetrahedron out of index");
+	}
+
+	bool ContainsPoint(const Vector3D& Point) const
+	{
+		for (size_t i = 0; i < 4; i++)
+		{
+			if ((*this)[i] == Point)
+			{
+				return true;
+			}
+		}
+		return false;
+	}
+
 	Tetrahedron() = default;
 };
 
@@ -93,7 +116,7 @@ class DelaunayTriangulation
 public:
 
 	void Triangulate(Array<Vector2D>& Vertices, Array<uint16_t>& Indicies);
-	void Triangulate(Array<Vector3D>& Vertices, Array<uint16_t>& Indicies);
+	void Triangulate(Array<Vector3D>& Points, Array<Tetrahedron>& Tetrahedrons);
 
 private:
 

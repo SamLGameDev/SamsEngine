@@ -21,6 +21,11 @@ void Renderer::ReplaceFracture(const FracturePiece3D* Old, const FracturePiece3D
 	RealRenderer->ReplaceFracture(Old, New);
 }
 
+void Renderer::RemoveFracture(FracturePiece3D* ToRemove)
+{
+	RealRenderer->RemoveFracture(ToRemove);
+}
+
 void Renderer::ReplaceFracture(const FracturePiece2D* Old, const FracturePiece2D* New)
 {
 	RealRenderer->ReplaceFracture(Old, New);
@@ -39,4 +44,8 @@ void Renderer::AddModel(Model* InModel)
 void Renderer::Draw(const size_t& Size)
 {
 	RealRenderer->Draw(Size);
+}
+void Renderer::RemoveModel(Model* InModel)
+{
+	RealRenderer->RemoveModel(InModel);
 }

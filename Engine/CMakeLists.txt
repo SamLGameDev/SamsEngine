@@ -27,7 +27,7 @@ option(FAL_TESTS "Should we enable unit test support?" ON)
 option(FAL_DOCS "Should we attempt to build documentation?" ON)
 
 
-project(EngineCore LANGUAGES CXX)
+project(EngineCore LANGUAGES C CXX)
 
 include(GNUInstallDirs)
 
@@ -87,6 +87,7 @@ add_library(EngineCore STATIC
     "src/Engine/FileSystem/Path.cpp"
     "src/Engine/FileSystem/CorePaths.cpp"
     "src/PreprocessorDefinitions.cpp"
+    "src/Engine/Math/Predictates.c"
     "src/Engine/GraphicsAPI/VulkanAPI/RuntimeEngineVulkan.cpp"
     "src/Engine/RuntimeEngine.cpp"
     "src/Engine/GraphicsAPI/DataBuffers/DataBuffers.cpp"
@@ -194,6 +195,7 @@ install(FILES
     src/Engine/Objects/Placement/Meshes/Mesh.h
     src/Engine/Objects/Placement/Debug/WireFrame/WireShapes.h
     src/Engine/Math/MathCore.h
+    src/Engine/Math/Predictates.h
     src/Engine/Triangulation/DelaunayTriangulation.h
     src/Engine/Physics/Collision/Casters/CollisionCast.h
     src/Engine/Lighting/BaseLight.h
@@ -240,8 +242,16 @@ target_link_libraries(EngineCore PRIVATE assimp::assimp)
 find_package(Stb REQUIRED)
 target_include_directories(EngineCore PRIVATE ${Stb_INCLUDE_DIR})
 
+find_package(CGAL REQUIRED)
+target_link_libraries(EngineCore PUBLIC CGAL::CGAL)
+
 find_package(Vulkan REQUIRED)
 target_link_libraries(EngineCore PUBLIC Vulkan::Vulkan)
+
+set_source_files_properties(
+    Predictates.c
+    PROPERTIES LANGUAGE C
+)
 
 target_compile_definitions(EngineCore PUBLIC CONTENTS_DIR="${Contents}")
 

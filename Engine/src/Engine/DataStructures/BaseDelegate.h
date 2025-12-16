@@ -80,6 +80,11 @@ public:
 		}
 	}
 
+	void RemoveAll()
+	{
+		Funcs.Empty();
+	}
+
 private:
 
 	Array<std::unique_ptr<FuncWrapperBase>> Funcs;

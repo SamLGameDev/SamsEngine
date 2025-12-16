@@ -46,6 +46,7 @@ Model::Model(const std::string& Path, const Shader& InShader)
 
 Model::~Model()
 {
+	::Renderer::RemoveModel(this);
 }
 
 void Model::Copy(const Model& Other)

@@ -2,6 +2,10 @@
 
 #include <cstdint>
 
+
+
+struct Vector3D;
+
 struct Vector2D
 {
 public:
@@ -12,6 +16,8 @@ public:
 
 	constexpr Vector2D(const float InX, const float InY)noexcept : X(InX), Y(InY) {};
 	constexpr Vector2D(const double InX, const double InY)noexcept : X(InX), Y(InY) {};
+
+	Vector2D(const Vector3D& Other);
 
 
 	constexpr Vector2D(const std::uint32_t InX, const std::uint32_t InY)noexcept : X(InX), Y(InY) {};
@@ -62,6 +68,8 @@ public:
 
 	const static Vector2D Zero;
 };
+
+
 [[nodiscard]] inline Vector2D operator*(const float& multiplier, const Vector2D& vec)
 {
 	return vec * multiplier;

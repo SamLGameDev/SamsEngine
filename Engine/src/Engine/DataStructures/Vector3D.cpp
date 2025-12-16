@@ -4,6 +4,7 @@
 
 #include<random>
 #include<iostream>
+#include "Vector2D.h"
 
 Vector3D const Vector3D::Up = Vector3D(0, 1, 0);
 
@@ -136,6 +137,12 @@ bool Vector3D::GetIntersectionPointWithPlane(const Vector3D& Mid, const Vector3D
 	return true;
 }
 
+Vector3D Vector3D::GetLineIntersectionPointWithPlane(const Vector3D& Normal, const double& D, const Vector3D& LineStart,
+                                                     const Vector3D& LineEnd)
+{
+	return LineStart + (LineEnd - LineStart) * (-(Dot(Normal, LineStart) + D) / Dot(Normal, LineEnd - LineStart));
+}
+
 bool Vector3D::IsAlmostEqual(const Vector3D& A, const Vector3D& B, const float& Range)
 {
 	Vector3D diff = A - B;
@@ -157,3 +164,9 @@ Vector3D Vector3D::Abs() const
 	return {std::abs(X), std::abs(Y), std::abs(Z)};
 }
 
+Vector3D::Vector3D(const Vector2D& Other)
+{
+	X = Other.X;
+	Y = Other.Y;
+	Z = 0;
+}

@@ -13,17 +13,38 @@
 #include <Voronoi2D.h>
 #include <RuntimeEngineVulkan.h>
 
-
 void RunEngine(Vulkan::RuntimeEngine engine)
 {
 
 	Model model = Model("/Models/BackPack/backpack.obj", Shader("BasicTexture", "/Shaders/"));
-
-	model.ModelTransform.Position = { 5,0, 0 };
-
-
+	model.ModelTransform.Position = { 5, 0, 0 };
 	Voronoi vorn;
 	vorn.FracturePlaneRandom(model, 100);
+	while (!RuntimeEngine::ShouldClose())
+	{
+		engine.Loop();
+	}
+
+	Vulkan::RuntimeEngine::WaitForFrameToFinish();
+}
+
+void EnginePlane()
+{
+	Vulkan::RuntimeEngine engine;
+	engine.Init();
+
+	RunEngine(engine);
+
+	engine.ShutDown();
+}
+
+
+void RunEngineDelaunay(Vulkan::RuntimeEngine engine)
+{
+	Model model = Model("/Models/BackPack/backpack.obj", Shader("BasicTexture", "/Shaders/"));
+	model.ModelTransform.Position = { 5, 0, 0 };
+	Voronoi vorn;
+	vorn.FractureDelaunayRandom( model, 100);
 
 	while (!RuntimeEngine::ShouldClose())
 	{
@@ -33,14 +54,22 @@ void RunEngine(Vulkan::RuntimeEngine engine)
 	Vulkan::RuntimeEngine::WaitForFrameToFinish();
 }
 
-int main(int argc, char* argv[])
+
+void EngineDelaunay()
 {
 	Vulkan::RuntimeEngine engine;
 	engine.Init();
 
-	RunEngine(engine);
+	RunEngineDelaunay(engine);
 
 	engine.ShutDown();
+}
+
+int main(int argc, char* argv[])
+{
+	EnginePlane();
+
+	EngineDelaunay();
 
 	return EXIT_SUCCESS;
 }

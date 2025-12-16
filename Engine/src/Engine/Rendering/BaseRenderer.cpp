@@ -18,6 +18,11 @@ void BaseRenderer::ReplaceFracture(const FracturePiece3D* Old, const FracturePie
 	FracturesToRender.Replace(oldPtr, newPtr);
 }
 
+void BaseRenderer::RemoveFracture(FracturePiece3D* ToRemove)
+{
+	FracturesToRender.Remove(ToRemove);
+}
+
 void BaseRenderer::ReplaceFracture(const FracturePiece2D* Old, const FracturePiece2D* New)
 {
 	FracturePiece2D* oldPtr = const_cast<FracturePiece2D*>(Old);
@@ -33,4 +38,9 @@ void BaseRenderer::AddWireShape(WireObject* Shape)
 void BaseRenderer::AddModel(Model* InModel)
 {
 	ModelsToRender.Add(InModel);
+}
+
+void BaseRenderer::RemoveModel(Model* InModel)
+{
+	ModelsToRender.Remove(InModel);
 }
