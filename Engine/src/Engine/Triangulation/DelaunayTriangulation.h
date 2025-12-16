@@ -87,6 +87,27 @@ struct Tetrahedron
 		faces[3] = { {InP2, InP3, InP4} };
 	};
 
+	Vector3D operator[](const size_t& Index) const
+	{
+		if (Index == 0) return point1;
+		if (Index == 1) return point2;
+		if (Index == 2) return point3;
+		if (Index == 3) return point4;
+		throw std::runtime_error("Tetrahedron out of index");
+	}
+
+	bool ContainsPoint(const Vector3D& Point) const
+	{
+		for (size_t i = 0; i < 4; i++)
+		{
+			if ((*this)[i] == Point)
+			{
+				return true;
+			}
+		}
+		return false;
+	}
+
 	Tetrahedron() = default;
 };
 

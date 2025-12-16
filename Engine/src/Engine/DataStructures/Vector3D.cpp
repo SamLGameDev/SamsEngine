@@ -4,6 +4,7 @@
 
 #include<random>
 #include<iostream>
+#include "Vector2D.h"
 
 Vector3D const Vector3D::Up = Vector3D(0, 1, 0);
 
@@ -163,3 +164,9 @@ Vector3D Vector3D::Abs() const
 	return {std::abs(X), std::abs(Y), std::abs(Z)};
 }
 
+constexpr Vector3D::Vector3D(const Vector2D& Other)
+{
+	X = Other.X;
+	Y = Other.Y;
+	Z = 0;
+}

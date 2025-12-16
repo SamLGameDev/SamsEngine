@@ -1,11 +1,17 @@
 #pragma once
 #include <array>
 
+
+
+struct Vector2D;
+
 struct Vector3D
 {
 public:
 
 	constexpr Vector3D() noexcept : X(0), Y(0), Z(0){};
+
+	constexpr Vector3D(const Vector2D& Other);
 
 	//constexpr Vector3D(const float InX, const float InY, const float InZ) noexcept : X(InX), Y(InY), Z(InZ) {};
 
@@ -177,6 +183,8 @@ public:
 	static const Vector3D Zero;
 	static const Vector3D One;
 };
+
+
 
 [[nodiscard]] inline Vector3D operator*(const float& Multiplier, const Vector3D& Vec)
 {

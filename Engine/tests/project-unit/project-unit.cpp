@@ -473,7 +473,7 @@ TEST(Fracturing, Diagram) {
 
 	model2->ModelTransform.Position = { 5,0, 0 };
 
-	vorn->FracturePlaneRandom(*model2, 10);
+	vorn->FractureDelaunayRandom(*model2, 10);
 
 	while (!Vulkan::RuntimeEngine::ShouldClose())
 	{
@@ -484,30 +484,6 @@ TEST(Fracturing, Diagram) {
 	Vulkan::RuntimeEngine::WaitForFrameToFinish();
 	delete vorn;
 	delete model2;
-
-	engine.ShutDown();
-
-	engine.Init();
-
-	Voronoi* vorn2 = new Voronoi;
-
-	//Model* model = new Model("/Models/Asteroid/rock.obj", Shader("BasicTexture", "/Shaders/"));
-
-	Model* model3 = new Model("/Models/BackPack/backpack.obj", Shader("BasicTexture", "/Shaders/"));
-
-	model3->ModelTransform.Position = { 5,0, 0 };
-
-	vorn2->FractureDelaunayRandom(*model3, 10);
-
-	while (!Vulkan::RuntimeEngine::ShouldClose())
-	{
-		engine.Loop();
-	}
-
-
-	Vulkan::RuntimeEngine::WaitForFrameToFinish();
-	delete vorn2;
-	delete model3;
 
 	engine.ShutDown();
 }
