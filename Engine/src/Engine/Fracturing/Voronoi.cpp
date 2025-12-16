@@ -527,12 +527,13 @@ Face Voronoi::ClipFaceToBox(const Array<Face>& ClippingPlanes, const Face& Clipp
 
 void Voronoi::GenerateVoronoiCellsDelaunay(Array<Vector3D>& Points, const Model& InModel)
 {
+	//Points = { {0.8, 0.4, 0.2}, {0.4, 0.8, 0.6}, {0.1, 0.1, 0.1} };
 	//Instead of this, extended ghost points that get clipped?
 	for (const auto& p : InModel.BoundingBox->Vertices)
 	{
 		Vector3D dir = p.Position.Normalised();
 
-		Points.Add(p.Position + (dir * 4));
+		Points.Add(p.Position + (dir * 4) );
 	}
 
 
@@ -544,6 +545,11 @@ void Voronoi::GenerateVoronoiCellsDelaunay(Array<Vector3D>& Points, const Model&
 		dtPoints.Add({ p.X, p.Y, p.Z });
 	}
 
+	DelaunayTriangulation test;
+
+	Array<Tetrahedron> alltets;
+	test.Triangulate(Points, alltets);
+
 	DT dt;
 	dt.insert(dtPoints.begin(), dtPoints.end());
 
@@ -551,22 +557,30 @@ void Voronoi::GenerateVoronoiCellsDelaunay(Array<Vector3D>& Points, const Model&
 
 		Array<Tetrahedron> tets;
 
-		for (auto cell = dt.finite_cells_begin();
-			cell != dt.finite_cells_end();
-			++cell)
+		for (const auto& tet : alltets)
 		{
-			Vector3D a = { cell->vertex(0)->point().x(), cell->vertex(0)->point().y(), cell->vertex(0)->point().z() };
-			Vector3D b = { cell->vertex(1)->point().x(), cell->vertex(1)->point().y(), cell->vertex(1)->point().z() };
-			Vector3D c = { cell->vertex(2)->point().x(), cell->vertex(2)->point().y(), cell->vertex(2)->point().z() };
-			Vector3D d = { cell->vertex(3)->point().x(), cell->vertex(3)->point().y(), cell->vertex(3)->point().z() };
-
-
-			if (a == point || b == point || c == point || d == point)
+			if (tet.point1 == point || tet.point2 == point || tet.point3 == point || tet.point4 == point)
 			{
-				tets.Add(Tetrahedron(a, b, c, d));
+				tets.Add(tet);
 			}
-
 		}
+
+		//for (auto cell = dt.finite_cells_begin();
+		//	cell != dt.finite_cells_end();
+		//	++cell)
+		//{
+		//	Vector3D a = { cell->vertex(0)->point().x(), cell->vertex(0)->point().y(), cell->vertex(0)->point().z() };
+		//	Vector3D b = { cell->vertex(1)->point().x(), cell->vertex(1)->point().y(), cell->vertex(1)->point().z() };
+		//	Vector3D c = { cell->vertex(2)->point().x(), cell->vertex(2)->point().y(), cell->vertex(2)->point().z() };
+		//	Vector3D d = { cell->vertex(3)->point().x(), cell->vertex(3)->point().y(), cell->vertex(3)->point().z() };
+
+
+		//	if (a == point || b == point || c == point || d == point)
+		//	{
+		//		tets.Add(Tetrahedron(a, b, c, d));
+		//	}
+
+		//}
 
 		Array<Edge> Edges;
 		for (const auto& tet : tets)

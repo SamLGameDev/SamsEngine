@@ -164,7 +164,7 @@ Vector3D Vector3D::Abs() const
 	return {std::abs(X), std::abs(Y), std::abs(Z)};
 }
 
-constexpr Vector3D::Vector3D(const Vector2D& Other)
+Vector3D::Vector3D(const Vector2D& Other)
 {
 	X = Other.X;
 	Y = Other.Y;

@@ -110,7 +110,7 @@ Vector2D Vector2D::Lerp(const Vector2D& A, const Vector2D& B, const float& T)
 {
 	return A + (B - A) * T;
 }
-constexpr Vector2D::Vector2D(const Vector3D& Other)
+Vector2D::Vector2D(const Vector3D& Other)
 {
 	X = Other.X;
 	Y = Other.Y;

@@ -473,7 +473,7 @@ TEST(Fracturing, Diagram) {
 
 	model2->ModelTransform.Position = { 5,0, 0 };
 
-	vorn->FractureDelaunayRandom(*model2, 10);
+	vorn->FractureDelaunayRandom(*model2, 100);
 
 	while (!Vulkan::RuntimeEngine::ShouldClose())
 	{
