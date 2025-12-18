@@ -11,12 +11,6 @@
 #include "ObjectFactory.h"
 #include "InterfaceRenderer.h"
 #include "glm/gtc/type_ptr.hpp"
-#include <CGAL/Exact_predicates_inexact_constructions_kernel.h>
-#include <CGAL/Delaunay_triangulation_3.h>
-#include "Predictates.h"
-using Kernel = CGAL::Exact_predicates_inexact_constructions_kernel;
-using Point = Kernel::Point_3;
-using DT = CGAL::Delaunay_triangulation_3<Kernel>;
 
 void Voronoi::GetFirstIntersection(const Vector3D& Normal, const Vector3D& Center, const Face& CurrentFace, Face& NewFace, size_t& FirstIntersectionIndex, Vector3D& FirstIntersection)
 {

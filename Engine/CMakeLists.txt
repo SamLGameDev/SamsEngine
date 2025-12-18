@@ -244,9 +244,6 @@ target_link_libraries(EngineCore PRIVATE assimp::assimp)
 find_package(Stb REQUIRED)
 target_include_directories(EngineCore PRIVATE ${Stb_INCLUDE_DIR})
 
-find_package(CGAL REQUIRED)
-target_link_libraries(EngineCore PUBLIC CGAL::CGAL)
-
 find_package(Vulkan REQUIRED)
 target_link_libraries(EngineCore PUBLIC Vulkan::Vulkan)
 
