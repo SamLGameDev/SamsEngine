@@ -1,6 +1,7 @@
 
 #include "Voronoi.h"
 #include "transform.h"
+#include <algorithm>
 #include <iostream>
 
 #include "Camera.h"
@@ -219,21 +220,21 @@ void Voronoi::SliceShapeByPlane(const Array<Vector3D>& Points, const size_t& Ind
 	if (intersectFace.Vertices.GetSize() > 2)
 	{
 		size_t index = 0;
-		float mostdot = -1.1f;
-		Vector3D mostn;
+		float mostAlignedDot = -1.1f;
+		Vector3D mostAlignedN;
 		for (size_t i = 0; i <  newFaces.GetSize(); i++)
 		{
 			Vector3D normal = ComputePolygonNormal(newFaces[i].Vertices);
 
-			if (float d = Vector3D::Dot(normal, -Normal) > mostdot)
+			if (float d = Vector3D::Dot(normal, -Normal) > mostAlignedDot)
 			{
 				index = i;
-				mostdot = d;
-				mostn = normal;
+				mostAlignedDot = d;
+				mostAlignedN = normal;
 			}
 		}
 
-		Vector3D cross = Vector3D::Cross(mostn, Normal).Normalised();
+		Vector3D cross = Vector3D::Cross(mostAlignedN, Normal).Normalised();
 
 		if (Vector3D::Dot(cross, -Right) < 0)
 		{
@@ -271,10 +272,6 @@ void Voronoi::FracturePlaneRandom(Model& InModel, const size_t& NumPoints)
 	Array<Vector3D> points;
 	GenerateRandomPointsInBounds(InModel, NumPoints, points);
 
-	//TestPoints
-	//points = { {0.8, 0.4, 0.2}, {0.4, 0.8, 0.6}, {0.1, 0.1, 0.1} };
-	//points = { {0.1, 0.1, 0.1}, {0.8, 0.4, 0.2} };
-
 
 	for (size_t i = 0; i < points.GetSize(); i++)
 	{
@@ -291,17 +288,7 @@ void Voronoi::FracturePlaneRandom(Model& InModel, const size_t& NumPoints)
 
 		auto color = Vector3D::RandomRange(Vector3D(30, 30, 30), Vector3D(255, 255, 255));
 
-
-		//for (auto& face : Faces)
-		//{
-		//	FracturePiece3D* frac = CreateObjectPtr<FracturePiece3D>(face.Vertices, currentPoint);
-		//	frac->color = color;
-		//	fractureFaces.Add(face);
-		//}
-//
-		Array<Face> test = { Faces };
-
-		FracturePiece3D frac = CreateObjectRaw<FracturePiece3D>(test, currentPoint);
+		FracturePiece3D frac = CreateObjectRaw<FracturePiece3D>(Faces, currentPoint);
 		frac.color = color;
 		Fractures.Add({ frac });
 
@@ -321,8 +308,6 @@ Array<Vector3D> Voronoi::GenerateRandomPointsInBounds(Model& InModel, const size
 		{
 			point1 = InModel.ModelTransform.GetRandomPointInBounds();
 		} while (Points.Contains(point1) && IsPointTooClose(point1, Points));
-
-		//TestSquare.push_back(DrawWireCube(point1, { 0.5, 0.5, 0.5 }, { 0.1f, 0.1f, 0.1f }, { 0.5, 0.5, 0.5 }));
 
 		Points[i] = point1;
 	}
@@ -384,286 +369,192 @@ bool Voronoi::IsPointTooClose(const Vector3D& Point, const Array<Vector3D>& Poin
 
 Vector3D Voronoi::GetCircumCenter(const Vector3D& A, const Vector3D& B, const Vector3D& C, const Vector3D& D)
 {
+	//make D the origin
 	Vector3D a = A - D;
 	Vector3D b = B - D;
 	Vector3D c = C - D;
 
-	double denom = 2.0 * Vector3D::Dot(a, Vector3D::Cross(b, c));
+	const double denom = 2.0 * Vector3D::Dot(a, Vector3D::Cross(b, c));
+
+	//offset D by each point
 
 	Vector3D center =
 		D +
-		( Vector3D::Cross(b, c) * Vector3D::Dot(a, a) +
-			Vector3D::Cross(c, a) * Vector3D::Dot(b, b) +
-			Vector3D::Cross(a, b) * Vector3D::Dot(c, c)) / denom;
+		( Vector3D::Cross(b, c) * a.GetSquaredLength() +
+			Vector3D::Cross(c, a) * b.GetSquaredLength() +
+			Vector3D::Cross(a, b) * c.GetSquaredLength()) / denom;
+
 	return center;
 }
 
-void Voronoi::ClipCellToBox(const Model& InModel, Array<Face>& Cell)
+void Voronoi::ClipVertexToPlane(const Vector3D& Normal, const double& D, VoronoiFace& IntersectFace, const AnglePointPair& Vertex,
+	const AnglePointPair& NextVertex, VoronoiFace& NewFace)
+{
+	const double D1 = Vector3D::Dot(Normal, Vertex.point) + D;
+	const double D2 = Vector3D::Dot(Normal, NextVertex.point) + D;
+
+	if (D1 <= 0 && D2 <= 0 || (D1 > 0 && MathCore::IsNearlyZero(D2))) NewFace.Vertices.Add(NextVertex);
+
+	else if (MathCore::IsNearlyZero(D1) && D2 > 0) return;
+
+	else if (D1 <= 0 && D2 > 0)
+	{
+		const Vector3D intersectPoint = Vector3D::GetLineIntersectionPointWithPlane(Normal, D, Vertex.point, NextVertex.point);
+		NewFace.Vertices.Add({.point = intersectPoint, .angle = 0 });
+					
+		IntersectFace.Vertices.Add({.point = intersectPoint, .angle = 0 });
+	}
+
+	else if (D1 > 0 && D2 <= 0)
+	{
+		const Vector3D intersectPoint = Vector3D::GetLineIntersectionPointWithPlane(Normal, D, Vertex.point, NextVertex.point);
+
+		NewFace.Vertices.Add({.point = intersectPoint, .angle = 0 });
+		IntersectFace.Vertices.Add({.point = intersectPoint, .angle = 0 });
+		NewFace.Vertices.Add(NextVertex);
+	}
+}
+
+void Voronoi::ClipCellToPlane(Array<VoronoiFace>& Cell, const Face& Plane)
+{
+	//As plane is box, we can assume [1] and [2] from zero would cove x and y
+	Vector3D Normal = Vector3D::Cross(Plane.Vertices[1] - Plane.Vertices[0], Plane.Vertices[2] - Plane.Vertices[0]).Normalised();
+
+	//If its not facing outwards
+	if (Vector3D::Dot(Normal, Plane.Vertices[0] - Vector3D::Zero) < 0) Normal = -Normal;
+
+	const double d = -Vector3D::Dot(Normal, Plane.Vertices[0]);
+
+	VoronoiFace IntersectFace;
+
+	for (auto& face : Cell)
+	{
+		if (face.Vertices.IsEmpty())
+		{
+			continue;
+		}
+
+		VoronoiFace NewFace;
+
+		for (size_t i = 0; i < face.Vertices.GetSize(); i++)
+		{
+			const AnglePointPair& point = face.Vertices[i];
+			const AnglePointPair& next = face.Vertices[(i + 1) % face.Vertices.GetSize()];
+			ClipVertexToPlane(Normal, d, IntersectFace, point, next, NewFace);
+		}
+		face = NewFace;
+	}
+	Cell.Add(IntersectFace);
+}
+
+void Voronoi::ClipCellToBox(const Model& InModel, Array<VoronoiFace>& Cell)
 {
 	Array<Face> ClippingPlanes = InModel.BoundingBox->Faces;
 
-	Array<Face> newCell;
+	Array<VoronoiFace> newCell;
 
 	for (auto& plane : ClippingPlanes)
 	{
-		Vector3D Normal = Vector3D::Cross(plane.Vertices[1] - plane.Vertices[0], plane.Vertices[2] - plane.Vertices[0]).Normalised();
-
-		if (Vector3D::Dot(Normal, plane.Vertices[0] - Vector3D::Zero) < 0) Normal = -Normal;
-
-		const double d = -Vector3D::Dot(Normal, plane.Vertices[0]);
-
-		Face IntersectFace;
-
-		for (auto& face : Cell)
-		{
-			if (face.Vertices.IsEmpty())
-			{
-				continue;
-			};
-
-
-			Face NewFace;
-
-			for (size_t i = 0; i < face.Vertices.GetSize(); i++)
-			{
-				Vector3D point = face.Vertices[i];
-				Vector3D next = face.Vertices[(i + 1) % face.Vertices.GetSize()];
-				const double D1 = Vector3D::Dot(Normal, point) + d;
-				const double D2 = Vector3D::Dot(Normal, next) + d;
-
-				if (D1 <= 0 && D2 <= 0)
-				{
-					NewFace.Vertices.Add(next);
-				}
-				else if (D1 > 0 && MathCore::IsNearlyZero(D2))
-				{
-					NewFace.Vertices.Add(next);
-				}
-				else if (MathCore::IsNearlyZero(D1) && D2 > 0)
-				{
-					continue;
-				}
-				else if (D1 <= 0 && D2 > 0)
-				{
-					Vector3D intersectPoint = Vector3D::GetLineIntersectionPointWithPlane(Normal, d, point, next);
-					NewFace.Vertices.Add(intersectPoint);
-					IntersectFace.Vertices.Add(intersectPoint);
-					
-				}
-				else if (D1 > 0 && D2 <= 0)
-				{
-					Vector3D intersectPoint = Vector3D::GetLineIntersectionPointWithPlane(Normal, d, point, next);
-					NewFace.Vertices.Add(intersectPoint);
-					IntersectFace.Vertices.Add(intersectPoint);
-					NewFace.Vertices.Add(next);
-				}
-			}
-			face = NewFace;
-		}
-		Cell.Add(IntersectFace);
+		ClipCellToPlane(Cell, plane);
 	}
 
-	//for (auto& face : Cell)
-	//{
-	//	newCell.Add(ClipFaceToBox(ClippingPlanes, face, Vector3D::Zero));
-	//}
-	//Cell = newCell;
 }
 
-Face Voronoi::ClipFaceToBox(const Array<Face>& ClippingPlanes, const Face& ClippedFace, const Vector3D& Center)
+void Voronoi::GetAllIncidentTets(const Array<Tetrahedron>& Tetrahedra, const Vector3D& Point, Array<TetRing>& Rings)
 {
-	//Need to create faces from intersect points. 
-	//Instead clip each cell face by bounds face, that way can get intersect face
-	Face clippedFace = ClippedFace;
-
-	for (const auto& face : ClippingPlanes)
+	for (const auto& tet : Tetrahedra)
 	{
-		if (clippedFace.Vertices.IsEmpty())
-		{
-			return clippedFace;
-		};
-
-		Vector3D Normal = Vector3D::Cross(face.Vertices[1] - face.Vertices[0], face.Vertices[2] - face.Vertices[0]).Normalised();
-
-		if (Vector3D::Dot(Normal, face.Vertices[0] - Center) < 0) Normal = -Normal;
-
-		const double d = -Vector3D::Dot(Normal, face.Vertices[0]);
-
-		Face NewFace;
-
-		for (size_t i = 0; i < clippedFace.Vertices.GetSize(); i++)
-		{
-			Vector3D point = clippedFace.Vertices[i];
-			Vector3D next = clippedFace.Vertices[(i + 1) % clippedFace.Vertices.GetSize()];
-			const double D1 = Vector3D::Dot(Normal, point) + d;
-			const double D2 = Vector3D::Dot(Normal, next) + d;
-
-			if (D1 <= 0 && D2 <= 0)
-			{
-				NewFace.Vertices.Add(next);
-			}
-			else if (D1 > 0 && MathCore::IsNearlyZero(D2))
-			{
-				NewFace.Vertices.Add(next);
-			}
-			else if (MathCore::IsNearlyZero(D1) && D2 > 0)
-			{
-				continue;
-			}
-			else if (D1 <= 0 && D2 > 0)
-			{
-				NewFace.Vertices.Add(Vector3D::GetLineIntersectionPointWithPlane(Normal, d, point, next));
-			}
-			else if (D1 > 0 && D2 <= 0)
-			{
-				NewFace.Vertices.Add(Vector3D::GetLineIntersectionPointWithPlane(Normal, d, point, next));
-				NewFace.Vertices.Add(next);
-			}
-		}
-		clippedFace = NewFace;
-	}
-	return clippedFace;
-}
-
-void Voronoi::GenerateVoronoiCellsDelaunay(Array<Vector3D>& Points, const Model& InModel)
-{
-	//Points = { {0.8, 0.4, 0.2}, {0.4, 0.8, 0.6}, {0.1, 0.1, 0.1} };
-	//Instead of this, extended ghost points that get clipped?
-	for (const auto& p : InModel.BoundingBox->Vertices)
-	{
-		Vector3D dir = p.Position.Normalised();
-
-		Points.Add(p.Position + (dir * 4) );
-	}
-
-
-
-	Array<Point> dtPoints;
-
-	for (const auto& p : Points)
-	{
-		dtPoints.Add({ p.X, p.Y, p.Z });
-	}
-
-	DelaunayTriangulation test;
-
-	Array<Tetrahedron> alltets;
-	test.Triangulate(Points, alltets);
-
-	DT dt;
-	dt.insert(dtPoints.begin(), dtPoints.end());
-
-	for (const auto& point : Points) {
-
-		Array<Tetrahedron> tets;
-
-		for (const auto& tet : alltets)
-		{
-			if (tet.point1 == point || tet.point2 == point || tet.point3 == point || tet.point4 == point)
-			{
-				tets.Add(tet);
-			}
-		}
-
-		//for (auto cell = dt.finite_cells_begin();
-		//	cell != dt.finite_cells_end();
-		//	++cell)
-		//{
-		//	Vector3D a = { cell->vertex(0)->point().x(), cell->vertex(0)->point().y(), cell->vertex(0)->point().z() };
-		//	Vector3D b = { cell->vertex(1)->point().x(), cell->vertex(1)->point().y(), cell->vertex(1)->point().z() };
-		//	Vector3D c = { cell->vertex(2)->point().x(), cell->vertex(2)->point().y(), cell->vertex(2)->point().z() };
-		//	Vector3D d = { cell->vertex(3)->point().x(), cell->vertex(3)->point().y(), cell->vertex(3)->point().z() };
-
-
-		//	if (a == point || b == point || c == point || d == point)
-		//	{
-		//		tets.Add(Tetrahedron(a, b, c, d));
-		//	}
-
-		//}
-
-		Array<Edge> Edges;
-		for (const auto& tet : tets)
+		if (tet.point1 == Point || tet.point2 == Point || tet.point3 == Point || tet.point4 == Point)
 		{
 			for (size_t i = 0; i < 4; i++)
 			{
-				if (tet[i] == point) continue;
-				Edge e(tet[i], point);
+				if (tet[i] == Point) continue;
 
-				if (Edges.Contains(e)) continue;
+				const TetRing ring({ tet[i], Point }, { tet });
 
-				Edges.Add(e);
-			}
-		}
-
-
-		Array<Face> faces;
-		bool bIsInfinite = false;
-		for (const auto& edge : Edges)
-		{
-
-			Array<Tetrahedron> ring;
-
-			for (const auto& tet : tets)
-			{
-				if (tet.ContainsPoint(edge.P1) && tet.ContainsPoint(edge.P2))
+				size_t index = 0;
+				if (Rings.Contains(ring, index))
 				{
-					ring.Add(tet);
+					Rings[index].Tets.Add(tet);
 				}
+				Rings.Add(ring);
 			}
-			;
-			Array<Vector3D> circumcenters;
-
-			for (const auto& tet : ring)
-			{
-				circumcenters.Add(GetCircumCenter(tet.point1, tet.point2, tet.point3, tet.point4));
-			}
-
-			Vector3D axis = (edge.P2 - edge.P1).Normalised();
-
-			Vector3D center = Vector3D::Zero;
-
-			for (const auto& c : circumcenters)
-			{
-				center += c;
-			}
-			center = center / circumcenters.GetSize();
-
-			Vector3D arbitraryUp = Vector3D::Up;
-			if (fabs(Vector3D::Dot(axis, arbitraryUp)) > 0.99f) {
-				arbitraryUp = Vector3D(1, 0, 0);
-			}
-
-			Vector3D u = Vector3D::Cross(axis, arbitraryUp).Normalised();
-			Vector3D t = Vector3D::Cross(axis, u);
-
-			std::vector<AnglePointPair> OrderedPoints;
-
-			for (const auto& c : circumcenters)
-			{
-				Vector3D d = c - center;
-				double x = Vector3D::Dot(d, u);
-				double y = Vector3D::Dot(d, t);
-				double angle = std::atan2(y, x);
-
-				OrderedPoints.push_back(AnglePointPair(c, angle));
-
-			}
-			std::sort(OrderedPoints.begin(), OrderedPoints.end());
-			Face f;
-			for (const auto& p : OrderedPoints)
-			{
-				f.Vertices.Add(p.point);
-			}
-			faces.Add(f);
 		}
+	}
+}
 
+void Voronoi::GetCellFace(Array<VoronoiFace>& Faces, const TetRing& Ring)
+{
+	Array<Vector3D> circumcenters;
+	Vector3D center = Vector3D::Zero;
+
+	for (const auto& tet : Ring.Tets)
+	{
+		circumcenters.Add(GetCircumCenter(tet.point1, tet.point2, tet.point3, tet.point4));
+
+		center += *circumcenters.GetLastPtr();
+	}
+
+	center = center / circumcenters.GetSize();
+
+	
+	const Vector3D axis = (Ring.edge.P2 - Ring.edge.P1).Normalised();
+
+	Vector3D arbitraryUp = Vector3D::Up;
+	if (fabs(Vector3D::Dot(axis, arbitraryUp)) > 0.99f) {
+		arbitraryUp = Vector3D(1, 0, 0);
+	}
+
+	const Vector3D u = Vector3D::Cross(axis, arbitraryUp).Normalised();
+	const Vector3D t = Vector3D::Cross(axis, u);
+
+	VoronoiFace OrderedPoints;
+
+	for (const auto& c : circumcenters)
+	{
+		//Gets the cell angle so it can be ordered properly
+
+		const Vector3D d = c - center;
+		const double x = Vector3D::Dot(d, u);
+		const double y = Vector3D::Dot(d, t);
+		const double angle = std::atan2(y, x);
+
+		OrderedPoints.Vertices.Add({ c, angle });
+
+	}
+	std::ranges::sort(OrderedPoints.Vertices, std::less{});
+	Faces.Add(OrderedPoints);
+}
+
+Array<VoronoiFace> Voronoi::GetCell(const Array<Tetrahedron>& tetrahedra, const Vector3D& point)
+{
+	Array<TetRing> rings;
+
+	GetAllIncidentTets(tetrahedra, point, rings);
+
+	Array<VoronoiFace> faces;
+	for (const auto& ring : rings)
+	{
+		GetCellFace(faces, ring);
+	}
+	return faces;
+}
+
+void Voronoi::GenerateVoronoiCellsDelaunay(const Array<Vector3D>& Points, const Model& InModel)
+{
+
+	DelaunayTriangulation dt;
+
+	Array<Tetrahedron> tetrahedra;
+	dt.Triangulate(Points, tetrahedra);
+
+	for (const auto& point : Points) {
+
+		Array<VoronoiFace> faces = GetCell(tetrahedra, point);
 
 		ClipCellToBox(InModel, faces);
 
-		auto color = Vector3D::RandomRange(Vector3D(30, 30, 30), Vector3D(255, 255, 255));
-
-
+		const auto color = Vector3D::RandomRange(Vector3D(30, 30, 30), Vector3D(255, 255, 255));
 
 		FracturePiece3D frac = CreateObjectRaw<FracturePiece3D>(faces, point);
 		frac.color = color;
@@ -678,9 +569,69 @@ FracturePiece3D::~FracturePiece3D()
 	::Renderer::RemoveFracture(this);
 }
 
-FracturePiece3D::FracturePiece3D(Array<Face> cell, Vector3D Point) : WorldObject()
+void FracturePiece3D::AddOrMakeInd(const Vector3D& Vert)
 {
+	size_t index = 0;
+	if (Verts.Contains(Vert, index))
+	{
+		Inds.Add(index);
+	}
+	else
+	{
+		Inds.Add(Verts.GetSize());
+		Verts.Add(Vert);
+	}
+}
 
+void FracturePiece3D::TriangulateCell(const Array<Face>& cell)
+{
+	for (const auto& face : cell)
+	{
+		for (size_t i = 1; i + 1 < face.Vertices.GetSize(); i++)
+		{
+			AddOrMakeInd(face.Vertices[0]);
+
+			AddOrMakeInd(face.Vertices[i]);
+
+			AddOrMakeInd(face.Vertices[i+1]);
+
+		}
+	}
+}
+
+void FracturePiece3D::TriangulateCell(const Array<VoronoiFace>& cell)
+{
+	for (const auto& face : cell)
+	{
+		for (size_t i = 1; i + 1 < face.Vertices.GetSize(); i++)
+		{
+			AddOrMakeInd(face.Vertices[0].point);
+
+			AddOrMakeInd(face.Vertices[i].point);
+
+			AddOrMakeInd(face.Vertices[i + 1].point);
+		}
+	}
+}
+
+FracturePiece3D::FracturePiece3D(const Array<Face>& cell, const Vector3D& Point)
+{
+	SetupControls(Point);
+
+	shader = Shader("ColorShape", "/Shaders/");
+
+	TriangulateCell(cell);
+
+	if (Inds.IsEmpty())
+	{
+		return;
+	}
+
+	BufferData();
+}
+
+void FracturePiece3D::SetupControls(const Vector3D& Point)
+{
 	InputManager* inputManager = Camera::GetActiveCamera()->GetActiveInputManager();
 	LeftArrow = std::make_unique<InputAction>(GLFW_KEY_LEFT, inputManager, Camera::GetActiveWindow());
 
@@ -691,86 +642,35 @@ FracturePiece3D::FracturePiece3D(Array<Face> cell, Vector3D Point) : WorldObject
 	RightArrow->Actions.BindMember(this, &FracturePiece3D::Converge);
 
 	dir = (Point - Vector3D::Zero).Normalised();
+}
+
+void FracturePiece3D::BufferData()
+{
+	::DataBuffers::GenBuffer(VAO);
+
+	DataBuffers::BindVertexInfo(VAO, 0, 0, sizeof(Vector3D), 0, Vector3);
+
+	::DataBuffers::BufferData(VAO, Verts.GetSize() * sizeof(Vector3D), Verts.GetFirstPtr(), BufferTargets::VERTEX);
+	DataBuffers::BufferDataIndex(VAO, Inds.GetSize() * sizeof(uint16_t), Inds.GetFirstPtr());
+
+	::Renderer::AddFracture(this);
+}
+
+FracturePiece3D::FracturePiece3D(const Array<VoronoiFace>& cell, const Vector3D& Point) : WorldObject()
+{
+
+	SetupControls(Point);
 
 	shader = Shader("ColorShape", "/Shaders/");
 
-	Array<Vector3D> newVerts;
-
-	//dir = Vector3D::RandomRange(Vector3D::Zero, Vector3D(100, 100, 100));
-
-	//dir = dir.Normalised();
-
-
-	for (const auto& face : cell)
-	{
-		for (size_t i = 1; i + 1 < face.Vertices.GetSize(); i++)
-		{
-			size_t index = 0;
-			if (newVerts.Contains(face.Vertices[0], index))
-			{
-				Inds.Add(index);
-			}
-			else
-			{
-				Inds.Add(newVerts.GetSize());
-				newVerts.Add(face.Vertices[0]);
-			}
-
-			if (newVerts.Contains(face.Vertices[i], index))
-			{
-				Inds.Add(index);
-			}
-			else
-			{
-				Inds.Add(newVerts.GetSize());
-				newVerts.Add(face.Vertices[i]);
-			}
-
-			if (newVerts.Contains(face.Vertices[i + 1], index))
-			{
-				Inds.Add(index);
-			}
-			else
-			{
-				Inds.Add(newVerts.GetSize());
-				newVerts.Add(face.Vertices[i+1]);
-			}
-
-		}
-	}
-
-	
-	for (const Vector3D& vert : newVerts) {
-		Verts.Add(vert.X);
-		Verts.Add(vert.Y);
-		Verts.Add(vert.Z);
-	}
-
-	////for (size_t i = 1; i + 1< cell.GetSize(); i++)
-	////{
-	////	Inds.Add(0);
-	////	Inds.Add(i);
-	////	Inds.Add(i + 1);
-	////}
-
+	TriangulateCell(cell);
 
 	if (Inds.IsEmpty())
 	{
 		return;
 	}
 
-	::DataBuffers::GenBuffer(VAO);
-
-
-	DataBuffers::BindVertexInfo(VAO, 0, 0, sizeof(Vector3D), 0, Vector3);
-
-
-	::DataBuffers::BufferData(VAO, Verts.GetSize() * sizeof(float), Verts.GetFirstPtr(), BufferTargets::VERTEX);
-	DataBuffers::BufferDataIndex(VAO, Inds.GetSize() * sizeof(uint16_t), Inds.GetFirstPtr());
-
-
-
-	::Renderer::AddFracture(this);
+	BufferData();
 }
 
 void FracturePiece3D::Draw()
@@ -806,12 +706,6 @@ void FracturePiece3D::Start()
 void FracturePiece3D::Tick(const double& DeltaTime)
 {
 	WorldObject::Tick(DeltaTime);
-
-	//if (glfwGetTime() > 10)
-	//{
-
-	//	transform.Position = transform.Position + (dir * 5) * DeltaTime;
-	//}
 
 }
 

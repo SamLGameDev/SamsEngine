@@ -7,7 +7,7 @@
 
 bool Tetrahedron::IsPointInCircumSphere(const Vector3D& Point) const
 {
-
+	//Calculate orientation, then determinant
 	Matrix<4, 4> sign = {
 		point1.X, point1.Y, point1.Z, 1,
 		point2.X, point2.Y, point2.Z, 1,
@@ -17,8 +17,7 @@ bool Tetrahedron::IsPointInCircumSphere(const Vector3D& Point) const
 
 	const float signDet = sign.CalculateDeterminant();
 
-	if (signDet == 0) return false;
-
+	if (MathCore::IsNearlyZero(signDet)) return false;
 
 	Matrix<5, 5> mat = 
 	{
@@ -27,7 +26,6 @@ bool Tetrahedron::IsPointInCircumSphere(const Vector3D& Point) const
 		point3.X, point3.Y, point3.Z, (point3.X * point3.X) + (point3.Y * point3.Y) + (point3.Z * point3.Z),1.0f,
 		point4.X, point4.Y, point4.Z, (point4.X * point4.X) + (point4.Y * point4.Y) + (point4.Z * point4.Z),1.0f,
 		Point.X,  Point.Y,   Point.Z,   (Point.X * Point.X) + (Point.Y * Point.Y) + (Point.Z * Point.Z),  1.0f
-		
 	};
 
 	const float deternminate = mat.CalculateDeterminant();
@@ -35,69 +33,53 @@ bool Tetrahedron::IsPointInCircumSphere(const Vector3D& Point) const
 	return signDet > 0 ? deternminate > 0 : deternminate < 0;
 }
 
-void DelaunayTriangulation::Triangulate(Array<Vector2D>& Vertices, Array<uint16_t>& Indicies)
+void DelaunayTriangulation::GetTrianglesWithCircumcirclesContainingPoint(const Array<Triangle>& Triangles, const Vector2D& Point, Array<Triangle>& NewTriangles, Array<Edge>& Edges)
 {
-	Triangle superTriangle = GetSuperTriangle(Vertices);
-
-	Array<Triangle> Triangles = { superTriangle };
-
-	for (const auto& point : Vertices)
-	{
-		Array<Triangle> NewTriangles;
-
-		Array<Edge> Edges;
-
-		for (const auto& triangle : Triangles)
-		{
-
-			if (!triangle.IsPointInCircumference(point)) {
-				NewTriangles.Add(triangle);
-				continue;
-			}
-			Edges.Add({ triangle.point1, triangle.point2 });
-			Edges.Add({ triangle.point2, triangle.point3 });
-			Edges.Add({ triangle.point3, triangle.point1});
-		}
-
-
-		Array<Edge> uniqueEdges;
-
-		for (size_t i = 0; i < Edges.GetSize(); i++)
-		{
-			bool unique = true;
-
-			for (size_t j = 0; j < Edges.GetSize(); j++)
-			{
-				if (i == j) continue;
-
-				if (Edges[i] == Edges[j])
-				{
-					unique = false;
-					break;
-				}
-			}
-
-			if (unique)
-			{
-				uniqueEdges.Add(Edges[i]);
-			}
-		}
-
-		for (const auto& edge : uniqueEdges)
-		{
-			NewTriangles.Add({ edge.P1, edge.P2, point });
-		}
-
-
-		Triangles = NewTriangles;
-
-	}
-
 	for (const auto& triangle : Triangles)
 	{
-		if (triangle.point1 == superTriangle.point1 || triangle.point1 == superTriangle.point2 || triangle.point1 == superTriangle.point3) continue;
-		if (triangle.point2 == superTriangle.point1 || triangle.point2 == superTriangle.point2 || triangle.point2 == superTriangle.point3) continue;
-		if (triangle.point3 == superTriangle.point1 || triangle.point3 == superTriangle.point2 || triangle.point3 == superTriangle.point3) continue;
+
+		if (!triangle.IsPointInCircumference(Point)) {
+			NewTriangles.Add(triangle);
+			continue;
+		}
+		Edges.Add({ triangle.point1, triangle.point2 });
+		Edges.Add({ triangle.point2, triangle.point3 });
+		Edges.Add({ triangle.point3, triangle.point1});
+	}
+}
+
+void DelaunayTriangulation::GetUniqueEdges(const Array<Edge>& Edges, Array<Edge>& UniqueEdges)
+{
+	for (size_t i = 0; i < Edges.GetSize(); i++)
+	{
+		bool unique = true;
+
+		for (size_t j = 0; j < Edges.GetSize(); j++)
+		{
+			if (i == j) continue;
+
+			if (Edges[i] == Edges[j])
+			{
+				unique = false;
+				break;
+			}
+		}
+
+		if (unique)
+		{
+			UniqueEdges.Add(Edges[i]);
+		}
+	}
+}
+
+void DelaunayTriangulation::RemoveSuperTriangleAndIndex(const Array<Vector2D>& Vertices, Array<uint16_t>& Indicies, const Triangle& SuperTriangle, const Array<Triangle>&
+                                                        Triangles)
+{
+	for (const auto& triangle : Triangles)
+	{
+		if (triangle.point1 == SuperTriangle.point1 || triangle.point1 == SuperTriangle.point2 || triangle.point1 == SuperTriangle.point3) continue;
+		if (triangle.point2 == SuperTriangle.point1 || triangle.point2 == SuperTriangle.point2 || triangle.point2 == SuperTriangle.point3) continue;
+		if (triangle.point3 == SuperTriangle.point1 || triangle.point3 == SuperTriangle.point2 || triangle.point3 == SuperTriangle.point3) continue;
 		size_t index1 = 0;
 		size_t index2 = 0;
 		size_t index3 = 0;
@@ -111,10 +93,77 @@ void DelaunayTriangulation::Triangulate(Array<Vector2D>& Vertices, Array<uint16_
 		Indicies.Add(index2);
 		Indicies.Add(index3);
 	}
+}
+
+void DelaunayTriangulation::Triangulate(const Array<Vector2D>& Vertices, Array<uint16_t>& Indicies)
+{
+	Triangle superTriangle = GetSuperTriangle(Vertices);
+
+	Array<Triangle> triangles = { superTriangle };
+
+	for (const auto& point : Vertices)
+	{
+		Array<Triangle> newTriangles;
+
+		Array<Edge> edges;
+
+		GetTrianglesWithCircumcirclesContainingPoint(triangles, point, newTriangles, edges);
+
+		Array<Edge> uniqueEdges;
+
+		GetUniqueEdges(edges, uniqueEdges);
+
+		for (const auto& edge : uniqueEdges)
+		{
+			newTriangles.Add({ edge.P1, edge.P2, point });
+		}
+
+		triangles = newTriangles;
+
+	}
+
+	RemoveSuperTriangleAndIndex(Vertices, Indicies, superTriangle, triangles);
 
 }
 
-void DelaunayTriangulation::Triangulate(Array<Vector3D>& Vertices, Array<Tetrahedron>& Tetrahedra)
+void DelaunayTriangulation::GetTetsWithPointInCircumsphere(const Array<Tetrahedron>& Tetrahedra, const Vector3D& Point, Array<Tetrahedron>& NewTetrahedron, Array<Face>& Faces)
+{
+	for (const auto& tetrahedron : Tetrahedra)
+	{
+
+		if (!tetrahedron.IsPointInCircumSphere(Point)) {
+			NewTetrahedron.Add(tetrahedron);
+			continue;
+		}
+		for (const auto& face : tetrahedron.faces)
+		{
+			Faces.Add(face);
+		}
+	}
+}
+
+void DelaunayTriangulation::GetUniqueFaces(const Array<Face>& Faces, Array<Face>& UniqueFaces)
+{
+	Array<Face> appearedFaces;
+	for (size_t i = 0; i < Faces.GetSize(); i++)
+	{
+		if (!appearedFaces.Contains(Faces[i]))
+		{
+			size_t index;
+			if (UniqueFaces.Contains(Faces[i], index))
+			{
+				UniqueFaces.RemoveAt(index);
+				appearedFaces.Add(Faces[i]);
+			}
+			else
+			{
+				UniqueFaces.Add(Faces[i]);
+			}
+		}
+	}
+}
+
+void DelaunayTriangulation::Triangulate(const Array<Vector3D>& Vertices, Array<Tetrahedron>& Tetrahedra)
 {
 	Tetrahedron superTetrahedron = GetSuperTetrahedron(Vertices);
 
@@ -126,110 +175,25 @@ void DelaunayTriangulation::Triangulate(Array<Vector3D>& Vertices, Array<Tetrahe
 
 		Array<Face> faces;
 
-		for (const auto& tetrahedron : Tetrahedra)
+		GetTetsWithPointInCircumsphere(Tetrahedra, point, newTetrahedron, faces);
+
+		Array<Face> uniqueFaces;
+		GetUniqueFaces(faces, uniqueFaces);
+
+		if (uniqueFaces.IsEmpty())
 		{
-
- 			if (!tetrahedron.IsPointInCircumSphere(point)) {
-				newTetrahedron.Add(tetrahedron);
-				continue;
-			}
-			for (const auto& face : tetrahedron.faces)
-			{
-				faces.Add(face);
-			}
+			Tetrahedra = newTetrahedron;
+			continue;
 		}
 
-		Array<Face> boundaryFaces;
-		Array<Face> appearedFaces;
-		for (int i = 0; i < faces.GetSize(); ++i)
-		{
-			if (!appearedFaces.Contains(faces[i]))
-			{
-				if (boundaryFaces.Contains(faces[i]))
-				{
-					boundaryFaces.Remove(faces[i]);
-					appearedFaces.Add(faces[i]);
-				}
-				else
-				{
-					boundaryFaces.Add(faces[i]);
-				}
-			}
-		}
-
-		if (boundaryFaces.IsEmpty()) {
-			Tetrahedra = newTetrahedron; continue;
-		}
-
-
-		for (const auto& f: boundaryFaces)
+		for (const auto& f: uniqueFaces)
 		{
 			newTetrahedron.Add(Tetrahedron(f.Vertices[0], f.Vertices[1], f.Vertices[2], point));
 		}
 		Tetrahedra = newTetrahedron;
 	}
 
-	//Vertices.Empty();
-
-	for (const auto& tet : Tetrahedra)
-	{
-		//if (tet.point1 == superTetrahedron.point1 || tet.point1 == superTetrahedron.point2 || tet.point1 == superTetrahedron.point3 || tet.point1 == superTetrahedron.point4) continue;
-		//if (tet.point2 == superTetrahedron.point1 || tet.point2 == superTetrahedron.point2 || tet.point2 == superTetrahedron.point3 || tet.point2 == superTetrahedron.point4) continue;
-		//if (tet.point3 == superTetrahedron.point1 || tet.point3 == superTetrahedron.point2 || tet.point3 == superTetrahedron.point3 || tet.point3 == superTetrahedron.point4) continue;
-		//if (tet.point4 == superTetrahedron.point1 || tet.point4 == superTetrahedron.point2 || tet.point4 == superTetrahedron.point3 || tet.point4 == superTetrahedron.point4) continue;
-
-	/*	for (const auto& face : tet.faces)
-		{
-			bool skipFace = false;
-
-			for (const auto& verts : face.Vertices)
-			{
-				if (verts == superTetrahedron.point1 || verts == superTetrahedron.point2 || verts == superTetrahedron.point3 || verts == superTetrahedron.point4)
-				{
-					skipFace = true;
-					break;
-				}
-			}
-			
-			if (skipFace) continue;
-
-			for (size_t t= 1; t < 3; t++)
-			{
-
-				size_t index = 0;
-
-				if (Vertices.Contains(face.Vertices[0], index))
-				{
-					Indicies.Add(index);
-				}
-				else
-				{
-
-					Vertices.Add(face.Vertices[t]);
-					Indicies.Add(Vertices.GetSize() - 1);
-				}
-
-				if (Vertices.Contains(face.Vertices[t], index))
-				{
-					Indicies.Add(index);
-				}
-				else
-				{
-					Vertices.Add(face.Vertices[t]);
-					Indicies.Add(Vertices.GetSize() - 1);
-				}
-				if (Vertices.Contains(face.Vertices[(t + 1) % 3], index))
-				{
-					Indicies.Add(index);
-				}
-				else
-				{
-					Vertices.Add(face.Vertices[(t + 1) % 3]);
-					Indicies.Add(Vertices.GetSize() - 1);
-				}
-			}
-		}*/
-	}
+	//Dont remove super triangle, as voronoi needs it to clip to box without adding box bounding points
 }
 
 Triangle DelaunayTriangulation::GetSuperTriangle(const Array<Vector2D>& Vertices)
@@ -249,9 +213,9 @@ Triangle DelaunayTriangulation::GetSuperTriangle(const Array<Vector2D>& Vertices
 	const float diffX = (XRange.Y - XRange.X)* 10;
 	const float diffY = (YRange.Y - YRange.X) * 10;
 
-	
-
-	return { {XRange.X - diffX, YRange.X - diffY * 3} , {XRange.X - diffX, YRange.Y + diffY}, {XRange.Y + diffX * 3, YRange.Y + diffY} };
+	return { {XRange.X - diffX, YRange.X - diffY * 3} ,
+		{XRange.X - diffX, YRange.Y + diffY},
+		{XRange.Y + diffX * 3, YRange.Y + diffY} };
 }
 
 Tetrahedron DelaunayTriangulation::GetSuperTetrahedron(const Array<Vector3D>& Vertices)
@@ -272,154 +236,46 @@ Tetrahedron DelaunayTriangulation::GetSuperTetrahedron(const Array<Vector3D>& Ve
 
 	const Vector3D center = (min + max) / 2.0f;
 
-	Vector3D BoundingBoxLength = max - min;
+	const Vector3D BoundingBoxLength = max - min;
 
 	const float radius = BoundingBoxLength.GetLength();
 
-	float pad = std::max({ BoundingBoxLength.X, BoundingBoxLength.Y, BoundingBoxLength.Z });
+	const float pad = std::max({ BoundingBoxLength.X, BoundingBoxLength.Y, BoundingBoxLength.Z });
 
 	const float safeRadius = pad * 10.0f;
 
-	Vector3D a = center + Vector3D(safeRadius * 2, safeRadius, safeRadius);
-	Vector3D b = center + Vector3D(-(safeRadius * 2), -safeRadius, safeRadius);
-	Vector3D c = center + Vector3D(-(2 *safeRadius), safeRadius, -safeRadius);
-	Vector3D d = center + Vector3D(2 *safeRadius, -safeRadius, -safeRadius);
+	const Vector3D a = center + Vector3D(safeRadius * 2, safeRadius, safeRadius);
+	const Vector3D b = center + Vector3D(-(safeRadius * 2), -safeRadius, safeRadius);
+	const Vector3D c = center + Vector3D(-(2 *safeRadius), safeRadius, -safeRadius);
+	const Vector3D d = center + Vector3D(2 *safeRadius, -safeRadius, -safeRadius);
 
 
 	return { a, b, c, d};
 }
 
-Circle Triangle::GetMinCircleTrivial(Array<Vector2D>& EdgeRPoints) const
-{
-	assert(EdgeRPoints.GetSize() <= 3);
-
-	if (EdgeRPoints.IsEmpty()) return { Vector2D::Zero, 0 };
-
-	if (EdgeRPoints.GetSize() == 1) return { EdgeRPoints[0], 0 };
-
-	if (EdgeRPoints.GetSize() == 2) return { EdgeRPoints[0], EdgeRPoints[1] };
-
-	for (size_t i = 0; i < 2; i++)
-	{
-		for (size_t j = i+1; j < 3; j++)
-		{
-			Circle c = { EdgeRPoints[i], EdgeRPoints[j] };
-			if (c.ArePointsInsideCircle(EdgeRPoints)) return c;
-		}
-	}
-	return { EdgeRPoints[0], EdgeRPoints[1], EdgeRPoints[2] };
-}
-
-Circle Triangle::GetSmallestCircle(Array<Vector2D>& Points, Array<Vector2D> EdgeRPoints, const size_t& Size) const
-{
-	if (Size == 0 || EdgeRPoints.GetSize() == 3) return GetMinCircleTrivial(EdgeRPoints);
-
-	size_t index = MathCore::RandomRange<int>(0, Size - 1);
-	Vector2D point = Points[index];
-
-	Points.Swap(index, Size - 1);
-
-	Circle c = GetSmallestCircle(Points, EdgeRPoints, Size - 1);
-
-	if (c.IsPointInsideCircle(point)) return c;
-
-	EdgeRPoints.Add(point);
-
-	c = GetSmallestCircle(Points, EdgeRPoints, Size - 1);
-
-	return c;
-
-}
 
 bool Triangle::IsPointInCircumference(const Vector2D& Point) const
 {
-	//Array<Vector2D> Points = { point1, point2, point3 };
-	//Array<Vector2D> EdgeRPoints;
 
-	//const Circle c = GetSmallestCircle(Points, EdgeRPoints, Points.GetSize());
+	const EquationLine LineAB = EquationLine(point1, point2);
+	const EquationLine LineBC = EquationLine(point2, point3);
 
-	//if (c.IsPointInsideCircle(Point)) return true;
+	const Vector2D midpointAB = Vector2D::Lerp(point1, point2, 0.5f);
+	const Vector2D midpointBC = Vector2D::Lerp(point2, point3, 0.5f);
 
-	EquationLine LineAB = EquationLine(point1, point2);
-	EquationLine LineBC = EquationLine(point2, point3);
+	const EquationLine perpendicularAB = LineAB.PerpendicularLineAt(midpointAB);
+	const EquationLine perpendicularBC = LineBC.PerpendicularLineAt(midpointBC);
 
-	Vector2D midpointAB = Vector2D::Lerp(point1, point2, 0.5f);
-	Vector2D midpointBC = Vector2D::Lerp(point2, point3, 0.5f);
+	const float determinant = perpendicularAB.A * perpendicularBC.B - perpendicularBC.A * perpendicularAB.B;
+	const float determinantX = perpendicularAB.C * perpendicularBC.B - perpendicularBC.C * perpendicularAB.B;
+	const float determinantY = perpendicularAB.A * perpendicularBC.C - perpendicularBC.A * perpendicularAB.C;
 
-	EquationLine perpendicularAB = LineAB.PerpendicularLineAt(midpointAB);
-	EquationLine perpendicularBC = LineBC.PerpendicularLineAt(midpointBC);
+	const Vector2D circle = {determinantX / determinant, determinantY / determinant};
 
-	float determinant = perpendicularAB.A * perpendicularBC.B - perpendicularBC.A * perpendicularAB.B;
-	float determinantX = perpendicularAB.C * perpendicularBC.B - perpendicularBC.C * perpendicularAB.B;
-	float determinantY = perpendicularAB.A * perpendicularBC.C - perpendicularBC.A * perpendicularAB.C;
+	const float radius = (point1 - circle).GetLength();
 
-	Vector2D circle = {determinantX / determinant, determinantY / determinant};
-
-	float radius = (point1 - circle).GetLength();
-
-	Circle c = { circle, radius };
+	const Circle c = { circle, radius };
 
 	return c.IsPointInsideCircle(Point);
 }
 
-EquationLine::EquationLine(const Vector2D& InA, const Vector2D& InB)
-{
-	Vector2D delta = InB - InA;
-	A = delta.Y;
-	B = -delta.X;
-	C = A * InA.X + B * InA.Y;
-}
-
-EquationLine EquationLine::PerpendicularLineAt(const Vector2D& Pos)
-{
-	EquationLine line;
-	line.A = -B;
-	line.B = A;
-	line.C = line.A * Pos.X + line.B * Pos.Y;
-	return line;
-}
-
-Circle::Circle(const Vector2D& P1, const Vector2D& P2)
-{
-	Pos = (P1 + P2) / 2;
-
-	Radius = ((P1 - P2) / 2).GetLength();
-
-}
-
-Circle::Circle(const Vector2D& P1, const Vector2D& P2, const Vector2D& P3)
-{
-	Pos = P1 + GetCircleCenter(P2 - P1, P3 - P1);
-
-	Radius = (Pos - P1).GetLength();
-}
-
-Vector2D Circle::GetCircleCenter(const Vector2D& AToB, const Vector2D& AToC)
-{
-
-
-	const double b = AToB.GetSquaredLength();
-	const double c = AToC.GetSquaredLength();
-
-	const float d = 2 * Vector2D::Cross(AToB, AToC);
-
-	return { (AToC.Y * b - AToB.Y * c) / d, (AToB.X * c - AToC.X * b) / d };
-}
-
-bool Circle::ArePointsInsideCircle(const Array<Vector2D>& Points) const
-{
-	return std::ranges::all_of(Points, [this](const Vector2D& p)
-	{
-		return IsPointInsideCircle(p);
-	});
-}
-
-bool Circle::IsPointInsideCircle(const Vector2D& Point) const
-{
-	float length = (Point - Pos).GetSquaredLength();
-	float slength = (Radius * Radius);
-
-	if (length <= slength) return true;
-
-	return false;
-}

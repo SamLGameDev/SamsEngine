@@ -2,6 +2,7 @@
 #pragma once
 
 #include "Camera.h"
+
 #include "InputAction.h"
 #include "InterfaceRenderer.h"
 #include "Vector3D.h"
@@ -10,6 +11,19 @@
 #include "WorldObject.h"
 
 
+struct TetRing
+{
+	Edge edge;
+	Array<Tetrahedron> Tets;
+
+	bool operator==(const TetRing& Other) const
+	{
+		return edge == Other.edge;
+	}
+
+};
+
+struct VoronoiFace;
 class FracturePiece3D : WorldObject
 {
 public:
@@ -17,8 +31,15 @@ public:
 	FracturePiece3D() = default;
 
 	~FracturePiece3D();
+	void TriangulateCell(const Array<Face>& cell);
+	void TriangulateCell(const Array<VoronoiFace>& cell);
 
-	FracturePiece3D(Array<Face> cell, Vector3D Point);
+
+	FracturePiece3D(const Array<Face>& cell, const Vector3D& Point);
+	void SetupControls(const Vector3D& Point);
+	void BufferData();
+
+	FracturePiece3D(const Array<VoronoiFace>& cell, const Vector3D& Point);
 
 	void Copy(const FracturePiece3D& Other)
 	{
@@ -133,7 +154,7 @@ private:
 	GLuint PVAO, PVBO;
 
 
-	Array<float> Verts;
+	Array<Vector3D> Verts;
 
 	Array<uint16_t> Inds;
 
@@ -143,6 +164,8 @@ private:
 
 	std::unique_ptr<InputAction> LeftArrow;
 	std::unique_ptr<InputAction> RightArrow;
+
+	void AddOrMakeInd(const Vector3D& Vert);
 };
 
 
@@ -156,6 +179,12 @@ struct AnglePointPair
 		return angle < Other.angle;
 	}  
 };
+
+struct VoronoiFace
+{
+	Array<AnglePointPair> Vertices;
+};
+
 
 class Voronoi
 {
@@ -195,12 +224,18 @@ private:
 	Array<FracturePiece3D> Fractures;
 
 	static Vector3D GetCircumCenter(const Vector3D& A, const Vector3D& B, const Vector3D& C, const Vector3D& D);
+	static void ClipVertexToPlane(const Vector3D& Normal, const double& D, VoronoiFace& IntersectFace, const AnglePointPair& Vertex,
+	                              const AnglePointPair& NextVertex, VoronoiFace& NewFace);
+	static void ClipCellToPlane(Array<VoronoiFace>& Cell, const Face& Plane);
 
-	static void ClipCellToBox(const Model& InModel, Array<Face>& Cell);
+	static void ClipCellToBox(const Model& InModel, Array<VoronoiFace>& Cell);
+	static void GetAllIncidentTets(const Array<Tetrahedron>& Tetrahedra, const Vector3D& Point, Array<TetRing>& Rings);
+	static void GetCellFace(Array<VoronoiFace>& Faces, const TetRing& Ring);
+	static Array<VoronoiFace> GetCell(const Array<Tetrahedron>& tetrahedra, const Vector3D& point);
 
 	static Face ClipFaceToBox(const Array<Face>& ClippingPlanes, const Face& ClippedFace, const Vector3D& Center);
 
-	void GenerateVoronoiCellsDelaunay(Array<Vector3D>& Points, const Model& InModel);
+	void GenerateVoronoiCellsDelaunay(const Array<Vector3D>& Points, const Model& InModel);
 
 };
 

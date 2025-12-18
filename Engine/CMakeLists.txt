@@ -74,6 +74,7 @@ add_library(EngineCore STATIC
     "src/Engine/Objects/Placement/Meshes/Mesh.cpp"
     "src/Engine/Objects/Placement/Debug/WireFrame/WireShapes.cpp"
     "src/Engine/Math/MathCore.cpp"
+    "src/Engine/Math/SmallestCircle.cpp"
     "src/Engine/Triangulation/DelaunayTriangulation.cpp"
     "src/Engine/Physics/Collision/Casters/CollisionCast.cpp"
     "src/Engine/Lighting/BaseLight.cpp"
@@ -196,6 +197,7 @@ install(FILES
     src/Engine/Objects/Placement/Debug/WireFrame/WireShapes.h
     src/Engine/Math/MathCore.h
     src/Engine/Math/Predictates.h
+    src/Engine/Math/SmallestCircle.h
     src/Engine/Triangulation/DelaunayTriangulation.h
     src/Engine/Physics/Collision/Casters/CollisionCast.h
     src/Engine/Lighting/BaseLight.h

@@ -399,6 +399,39 @@ public:
 		}
 	}
 
+	void RemoveAll(const T& Item) requires EqualityComparable<T>
+	{
+
+		Array<size_t> Indicies;
+
+		for (size_t i = 0; i < NumItems; i++)
+		{
+			if (DynamicArray[i] == Item)
+			{
+				Indicies.Add(i);
+			}
+		}
+
+
+
+		T* NewArray = new T[ArraySize - Indicies.GetSize()];
+
+		size_t Skip = 0;
+		for (size_t i = 0; i < NumItems - Indicies.GetSize(); i++)
+		{
+			if (i + Skip== Indicies[Skip])
+			{
+				Skip++;
+			}
+
+			NewArray[i] = std::move(DynamicArray[i + Skip]);
+		}
+		delete[] DynamicArray;
+		DynamicArray = NewArray;
+		NumItems -= Indicies.GetSize();
+		ArraySize -= Indicies.GetSize();
+	}
+
 
 	bool RemoveAt(const size_t& Index)
 	{
