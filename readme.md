@@ -349,5 +349,3 @@ Right arrow to condese the shape.
 * assimp
 * nlohmann json
 * OpenGL
-* CGAL
-
