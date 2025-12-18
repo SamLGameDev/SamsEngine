@@ -384,14 +384,18 @@ Vector3D Voronoi::GetCircumCenter(const Vector3D& A, const Vector3D& B, const Ve
 void Voronoi::ClipVertexToPlane(const Vector3D& Normal, const double& D, VoronoiFace& IntersectFace, const AnglePointPair& Vertex,
 	const AnglePointPair& NextVertex, VoronoiFace& NewFace)
 {
-	const double D1 = Vector3D::Dot(Normal, Vertex.point) + D;
-	const double D2 = Vector3D::Dot(Normal, NextVertex.point) + D;
+	const double d1 = Vector3D::Dot(Normal, Vertex.point) + D;
+	const double d2 = Vector3D::Dot(Normal, NextVertex.point) + D;
 
-	if (D1 <= 0 && D2 <= 0 || (D1 > 0 && MathCore::IsNearlyZero(D2))) NewFace.Vertices.Add(NextVertex);
+	const auto inside = [&](const double& d) { return d <= 0; };
+	const auto outside = [&](const double& d) { return d > 0; };
+	const auto onPlane = [&](const double& d) { return MathCore::IsNearlyZero(d); };
 
-	else if (MathCore::IsNearlyZero(D1) && D2 > 0) return;
+	if (inside(d1) && inside(d2)|| (outside(d1) && onPlane(d2))) NewFace.Vertices.Add(NextVertex);
 
-	else if (D1 <= 0 && D2 > 0)
+	else if (MathCore::IsNearlyZero(d1) && d2 > 0) return;
+
+	else if (inside(d1) && outside(d2))
 	{
 		const Vector3D intersectPoint = Vector3D::GetLineIntersectionPointWithPlane(Normal, D, Vertex.point, NextVertex.point);
 		NewFace.Vertices.Add({.point = intersectPoint, .angle = 0 });
@@ -399,7 +403,7 @@ void Voronoi::ClipVertexToPlane(const Vector3D& Normal, const double& D, Voronoi
 		IntersectFace.Vertices.Add({.point = intersectPoint, .angle = 0 });
 	}
 
-	else if (D1 > 0 && D2 <= 0)
+	else if (outside(d1) && inside(d2))
 	{
 		const Vector3D intersectPoint = Vector3D::GetLineIntersectionPointWithPlane(Normal, D, Vertex.point, NextVertex.point);
 
@@ -409,17 +413,68 @@ void Voronoi::ClipVertexToPlane(const Vector3D& Normal, const double& D, Voronoi
 	}
 }
 
+void Voronoi::GetFaceAxis(const Vector3D& Normal, Vector3D& T, Vector3D& U)
+{
+	Vector3D arbitraryUp = Vector3D::Up;
+	if (fabs(Vector3D::Dot(Normal, arbitraryUp)) > 0.99f) {
+		arbitraryUp = Vector3D(1, 0, 0);
+	}
+
+	U = Vector3D::Cross(Normal, arbitraryUp).Normalised();
+	T = Vector3D::Cross(Normal, U);
+}
+
+void Voronoi::OrderVertices(const VoronoiFace& IntersectFace, const Vector3D& Center, const Vector3D& Normal, VoronoiFace& OrderedFace)
+{
+	Vector3D t, u;
+	GetFaceAxis(Normal, t, u);
+
+	for (const auto& c : IntersectFace.Vertices)
+	{
+		//Gets the cell angle so it can be ordered properly
+
+		const Vector3D d = c.point - Center;
+		const double x = Vector3D::Dot(d, u);
+		const double y = Vector3D::Dot(d, t);
+		const double angle = std::atan2(y, x);
+
+		OrderedFace.Vertices.Add({ c.point, angle });
+
+	}
+	std::ranges::sort(OrderedFace.Vertices, std::less{});
+}
+
+void Voronoi::OrderVertices(const Array<Vector3D>& Vertices, const Vector3D& Center, const Vector3D& Normal, VoronoiFace& OrderedFace)
+{
+	Vector3D t, u;
+	GetFaceAxis(Normal, t, u);
+
+	for (const auto& vert : Vertices)
+	{
+		//Gets the cell angle so it can be ordered properly
+
+		const Vector3D d = vert - Center;
+		const double x = Vector3D::Dot(d, u);
+		const double y = Vector3D::Dot(d, t);
+		const double angle = std::atan2(y, x);
+
+		OrderedFace.Vertices.Add({ vert, angle });
+
+	}
+	std::ranges::sort(OrderedFace.Vertices, std::less{});
+}
+
 void Voronoi::ClipCellToPlane(Array<VoronoiFace>& Cell, const Face& Plane)
 {
 	//As plane is box, we can assume [1] and [2] from zero would cove x and y
-	Vector3D Normal = Vector3D::Cross(Plane.Vertices[1] - Plane.Vertices[0], Plane.Vertices[2] - Plane.Vertices[0]).Normalised();
+	Vector3D normal = Vector3D::Cross(Plane.Vertices[1] - Plane.Vertices[0], Plane.Vertices[2] - Plane.Vertices[0]).Normalised();
 
 	//If its not facing outwards
-	if (Vector3D::Dot(Normal, Plane.Vertices[0] - Vector3D::Zero) < 0) Normal = -Normal;
+	if (Vector3D::Dot(normal, Plane.Vertices[0] - Vector3D::Zero) < 0) normal = -normal;
 
-	const double d = -Vector3D::Dot(Normal, Plane.Vertices[0]);
+	const double d = -Vector3D::Dot(normal, Plane.Vertices[0]);
 
-	VoronoiFace IntersectFace;
+	VoronoiFace intersectFace;
 
 	for (auto& face : Cell)
 	{
@@ -428,17 +483,32 @@ void Voronoi::ClipCellToPlane(Array<VoronoiFace>& Cell, const Face& Plane)
 			continue;
 		}
 
-		VoronoiFace NewFace;
+		VoronoiFace newFace;
 
 		for (size_t i = 0; i < face.Vertices.GetSize(); i++)
 		{
 			const AnglePointPair& point = face.Vertices[i];
 			const AnglePointPair& next = face.Vertices[(i + 1) % face.Vertices.GetSize()];
-			ClipVertexToPlane(Normal, d, IntersectFace, point, next, NewFace);
+			ClipVertexToPlane(normal, d, intersectFace, point, next, newFace);
 		}
-		face = NewFace;
+		face = newFace;
 	}
-	Cell.Add(IntersectFace);
+
+	if (intersectFace.Vertices.GetSize() < 3) return;
+
+	Vector3D center = Vector3D::Zero;
+
+	for (const auto& tet : intersectFace.Vertices)
+	{
+		center += tet.point;
+	}
+
+	center = center / intersectFace.Vertices.GetSize();
+
+	VoronoiFace orderedPoints;
+	OrderVertices(intersectFace, center, normal, orderedPoints);
+
+	Cell.Add(orderedPoints);
 }
 
 void Voronoi::ClipCellToBox(const Model& InModel, Array<VoronoiFace>& Cell)
@@ -447,7 +517,7 @@ void Voronoi::ClipCellToBox(const Model& InModel, Array<VoronoiFace>& Cell)
 
 	Array<VoronoiFace> newCell;
 
-	for (auto& plane : ClippingPlanes)
+	for (const auto& plane : ClippingPlanes)
 	{
 		ClipCellToPlane(Cell, plane);
 	}
@@ -492,32 +562,12 @@ void Voronoi::GetCellFace(Array<VoronoiFace>& Faces, const TetRing& Ring)
 	center = center / circumcenters.GetSize();
 
 	
-	const Vector3D axis = (Ring.edge.P2 - Ring.edge.P1).Normalised();
+	const Vector3D normal = (Ring.edge.P2 - Ring.edge.P1).Normalised();
+	
+	VoronoiFace orderedPoints;
+	OrderVertices(circumcenters, center, normal, orderedPoints);
 
-	Vector3D arbitraryUp = Vector3D::Up;
-	if (fabs(Vector3D::Dot(axis, arbitraryUp)) > 0.99f) {
-		arbitraryUp = Vector3D(1, 0, 0);
-	}
-
-	const Vector3D u = Vector3D::Cross(axis, arbitraryUp).Normalised();
-	const Vector3D t = Vector3D::Cross(axis, u);
-
-	VoronoiFace OrderedPoints;
-
-	for (const auto& c : circumcenters)
-	{
-		//Gets the cell angle so it can be ordered properly
-
-		const Vector3D d = c - center;
-		const double x = Vector3D::Dot(d, u);
-		const double y = Vector3D::Dot(d, t);
-		const double angle = std::atan2(y, x);
-
-		OrderedPoints.Vertices.Add({ c, angle });
-
-	}
-	std::ranges::sort(OrderedPoints.Vertices, std::less{});
-	Faces.Add(OrderedPoints);
+	Faces.Add(orderedPoints);
 }
 
 Array<VoronoiFace> Voronoi::GetCell(const Array<Tetrahedron>& tetrahedra, const Vector3D& point)
@@ -536,14 +586,13 @@ Array<VoronoiFace> Voronoi::GetCell(const Array<Tetrahedron>& tetrahedra, const 
 
 void Voronoi::GenerateVoronoiCellsDelaunay(const Array<Vector3D>& Points, const Model& InModel)
 {
-
+	
 	DelaunayTriangulation dt;
 
 	Array<Tetrahedron> tetrahedra;
 	dt.Triangulate(Points, tetrahedra);
 
 	for (const auto& point : Points) {
-
 		Array<VoronoiFace> faces = GetCell(tetrahedra, point);
 
 		ClipCellToBox(InModel, faces);

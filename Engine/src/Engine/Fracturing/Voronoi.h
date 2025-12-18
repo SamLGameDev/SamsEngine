@@ -226,14 +226,16 @@ private:
 	static Vector3D GetCircumCenter(const Vector3D& A, const Vector3D& B, const Vector3D& C, const Vector3D& D);
 	static void ClipVertexToPlane(const Vector3D& Normal, const double& D, VoronoiFace& IntersectFace, const AnglePointPair& Vertex,
 	                              const AnglePointPair& NextVertex, VoronoiFace& NewFace);
+	static void GetFaceAxis(const Vector3D& Normal, Vector3D& T, Vector3D& U);
+	static void OrderVertices(const VoronoiFace& IntersectFace, const Vector3D& Center, const Vector3D& Normal, VoronoiFace& OrderedFace);
+	static void OrderVertices(const Array<Vector3D>& Vertices, const Vector3D& Center, const Vector3D& Normal,
+	                          VoronoiFace& OrderedFace);
 	static void ClipCellToPlane(Array<VoronoiFace>& Cell, const Face& Plane);
 
 	static void ClipCellToBox(const Model& InModel, Array<VoronoiFace>& Cell);
 	static void GetAllIncidentTets(const Array<Tetrahedron>& Tetrahedra, const Vector3D& Point, Array<TetRing>& Rings);
 	static void GetCellFace(Array<VoronoiFace>& Faces, const TetRing& Ring);
 	static Array<VoronoiFace> GetCell(const Array<Tetrahedron>& tetrahedra, const Vector3D& point);
-
-	static Face ClipFaceToBox(const Array<Face>& ClippingPlanes, const Face& ClippedFace, const Vector3D& Center);
 
 	void GenerateVoronoiCellsDelaunay(const Array<Vector3D>& Points, const Model& InModel);
 
