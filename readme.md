@@ -282,6 +282,10 @@ Plane Bi-secting method. This is the broken one.
 
 https://github.falmouth.ac.uk/user-attachments/assets/c6b487de-a8e4-432b-a18b-cb7c080ff8ed
 
+Delaunay extraction method, Works perfectly! 
+
+https://github.falmouth.ac.uk/user-attachments/assets/37f4714d-12af-48df-8fc1-39d4b4927bc4
+
 ## References
 
 [1] Georges Vorono¨ı. New applications of continuous parameters to the
