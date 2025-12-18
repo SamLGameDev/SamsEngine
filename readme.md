@@ -278,6 +278,8 @@ https://samlgamedev.github.io/samsenginedocs.github.io/
 
 ## Video
 
+Plane Bi-secting method. This is the broken one.
+
 https://github.falmouth.ac.uk/user-attachments/assets/c6b487de-a8e4-432b-a18b-cb7c080ff8ed
 
 ## References
