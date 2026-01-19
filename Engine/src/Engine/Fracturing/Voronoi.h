@@ -50,6 +50,7 @@ public:
 		PVAO = Other.PVAO;
 		PVBO = Other.PVBO;
 		Verts = Other.Verts;
+		CellFaces = Other.CellFaces;
 		Inds = Other.Inds;
 		VAO = Other.VAO;
 		VBO = Other.VBO;
@@ -86,6 +87,7 @@ public:
 		PVAO = Other.PVAO;
 		PVBO = Other.PVBO;
 		Verts = Other.Verts;
+		CellFaces = Other.CellFaces;
 		Inds = Other.Inds;
 		VAO = Other.VAO;
 		VBO = Other.VBO;
@@ -147,11 +149,12 @@ public:
 
 	Transform transform;
 
-
+	Array<VoronoiFace> CellFaces;
 private:
 
 
 	GLuint PVAO, PVBO;
+
 
 
 	Array<Vector3D> Verts;
@@ -178,11 +181,21 @@ struct AnglePointPair
 	{
 		return angle < Other.angle;
 	}  
+
+	bool operator==(const AnglePointPair& Other) const
+	{
+		return point == Other.point;
+	}
 };
 
 struct VoronoiFace
 {
 	Array<AnglePointPair> Vertices;
+
+	bool operator==(const VoronoiFace& Other) const
+	{
+		return Vertices == Other.Vertices;
+	}
 };
 
 
@@ -195,6 +208,8 @@ public:
 	Array<Vector3D> GenerateRandomPointsInBounds(Model& InModel, const size_t& NumPoints, Array<Vector3D>& Points);
 
 	void FractureDelaunayRandom(Model& InModel, const size_t& NumPoints);
+
+	Array<FracturePiece3D> Fractures;
 
 private:
 	static void GetFirstIntersection(const Vector3D& Normal, const Vector3D& Center, const Face& CurrentFace, Face& NewFace,
@@ -221,7 +236,7 @@ private:
 
 	Array<Face> fractureFaces;
 
-	Array<FracturePiece3D> Fractures;
+
 
 	static Vector3D GetCircumCenter(const Vector3D& A, const Vector3D& B, const Vector3D& C, const Vector3D& D);
 	static void ClipVertexToPlane(const Vector3D& Normal, const double& D, VoronoiFace& IntersectFace, const AnglePointPair& Vertex,

@@ -14,6 +14,13 @@ concept EqualityComparable =
 };
 
 template<typename T>
+concept NotEqualityComparable =
+	requires(const T & a, const T & b)
+{
+	{ a != b } -> std::convertible_to<bool>;
+};
+
+template<typename T>
 class Array
 {
 	template<typename T>
@@ -114,7 +121,7 @@ public:
 
 
 
-	bool operator==(const Array& other) const
+	bool operator==(const Array& other) const requires NotEqualityComparable<T>
 	{
 		if (other.GetSize() != NumItems)
 		{

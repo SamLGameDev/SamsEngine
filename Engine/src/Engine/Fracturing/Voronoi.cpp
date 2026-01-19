@@ -594,11 +594,9 @@ void Voronoi::GenerateVoronoiCellsDelaunay(const Array<Vector3D>& Points, const 
 
 	for (const auto& point : Points) {
 		Array<VoronoiFace> faces = GetCell(tetrahedra, point);
-
 		ClipCellToBox(InModel, faces);
 
-		const auto color = Vector3D::RandomRange(Vector3D(30, 30, 30), Vector3D(255, 255, 255));
-
+		auto color = Vector3D::RandomRange(Vector3D(30, 30, 30), Vector3D(255, 255, 255));
 		FracturePiece3D frac = CreateObjectRaw<FracturePiece3D>(faces, point);
 		frac.color = color;
 		Fractures.Add({ frac });
@@ -701,7 +699,7 @@ void FracturePiece3D::BufferData()
 
 FracturePiece3D::FracturePiece3D(const Array<VoronoiFace>& cell, const Vector3D& Point) : WorldObject()
 {
-
+	CellFaces = cell;
 	SetupControls(Point);
 
 	shader = Shader("ColorShape", "/Shaders/");

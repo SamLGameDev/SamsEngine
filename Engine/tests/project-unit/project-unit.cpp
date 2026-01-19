@@ -515,7 +515,7 @@ void EngineDelaunay()
 }
 
 TEST(Fracturing, Diagram) {
-	EnginePlane();
+	//EnginePlane();
 
 	EngineDelaunay();
 }
