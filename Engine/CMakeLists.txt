@@ -77,6 +77,7 @@ add_library(EngineCore STATIC
     "src/Engine/Math/SmallestCircle.cpp"
     "src/Engine/Triangulation/DelaunayTriangulation.cpp"
     "src/Engine/Physics/Collision/Casters/CollisionCast.cpp"
+    "src/Engine/Physics/Collision/AABB/AABB.cpp"
     "src/Engine/Lighting/BaseLight.cpp"
     "src/Engine/Lighting/LightManager.cpp"
     "src/Engine/Lighting/DirectionalLight.cpp"
@@ -132,6 +133,7 @@ target_include_directories(EngineCore
                            "$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/src/Engine/Objects/World>"
                            "$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/src/Engine/Physics>"
                            "$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/src/Engine/Physics/Collision>"
+                           "$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/src/Engine/Physics/Collision/AABB>"
                            "$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/src/Engine/Physics/Collision/Casters>"
                            "$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/src/Engine/Rendering>"
                            "$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/src/Engine/Rendering/Buffers>"
@@ -201,6 +203,7 @@ install(FILES
     src/Engine/Math/SmallestCircle.h
     src/Engine/Triangulation/DelaunayTriangulation.h
     src/Engine/Physics/Collision/Casters/CollisionCast.h
+    src/Engine/Physics/Collision/AABB/AABB.h
     src/Engine/Lighting/BaseLight.h
     src/Engine/Lighting/LightManager.h
     src/Engine/Lighting/DirectionalLight.h

@@ -199,6 +199,31 @@ public:
 		ArraySize = NumItems;
 	}
 
+	void Emplace(T&& Item)
+	{
+		//Depreciated for now, as arraySize needs to be seperated from NumItems properly
+		if (NumItems + 1 < ArraySize)
+		{
+			NumItems++;
+			DynamicArray[NumItems] = std::move(Item);
+			return;
+		}
+
+		T* NewArray = new T[NumItems + 1];
+
+		for (size_t i = 0; i < NumItems; i++)
+		{
+			NewArray[i] = std::move(DynamicArray[i]);
+		}
+		NewArray[NumItems] = std::move(Item);
+		NumItems++;
+
+		delete[] DynamicArray;
+		DynamicArray = NewArray;
+
+		ArraySize = NumItems;
+	}
+
 	void Add(T& Item) requires is_unique_ptr<T>::value
 	{
 		//Depreciated for now, as arraySize needs to be seperated from NumItems properly

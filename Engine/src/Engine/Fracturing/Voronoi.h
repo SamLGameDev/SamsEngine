@@ -1,6 +1,8 @@
 
 #pragma once
 
+#include <mutex>
+
 #include "Camera.h"
 
 #include "InputAction.h"
@@ -150,6 +152,10 @@ public:
 	Transform transform;
 
 	Array<VoronoiFace> CellFaces;
+
+	Array<Vector3D> Verts;
+
+	Array<uint16_t> Inds;
 private:
 
 
@@ -157,9 +163,9 @@ private:
 
 
 
-	Array<Vector3D> Verts;
 
-	Array<uint16_t> Inds;
+
+
 
 	GLuint VAO, VBO, EBO;
 
@@ -209,6 +215,8 @@ public:
 
 	void FractureDelaunayRandom(Model& InModel, const size_t& NumPoints);
 
+	std::mutex VoronoiMutex;
+
 	Array<FracturePiece3D> Fractures;
 
 private:
@@ -251,6 +259,7 @@ private:
 	static void GetAllIncidentTets(const Array<Tetrahedron>& Tetrahedra, const Vector3D& Point, Array<TetRing>& Rings);
 	static void GetCellFace(Array<VoronoiFace>& Faces, const TetRing& Ring);
 	static Array<VoronoiFace> GetCell(const Array<Tetrahedron>& tetrahedra, const Vector3D& point);
+	void GenerateVoronoiCellDelaunay(const Model& InModel, const Array<Tetrahedron>& Tetrahedra, const Vector3D& Point);
 
 	void GenerateVoronoiCellsDelaunay(const Array<Vector3D>& Points, const Model& InModel);
 

@@ -131,6 +131,11 @@ public:
 		return X >= Value.X && Y >= Value.Y && Z >= Value.Z;
 	}
 
+	[[nodiscard]] bool operator<=(const Vector3D& Value) const
+	{
+		return X <= Value.X && Y <= Value.Y && Z <= Value.Z;
+	}
+
 	[[nodiscard]] Vector3D Normalised() const;
 
 	[[nodiscard]] float GetLength() const;

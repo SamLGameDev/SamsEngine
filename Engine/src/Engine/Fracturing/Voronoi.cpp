@@ -3,6 +3,7 @@
 #include "transform.h"
 #include <algorithm>
 #include <iostream>
+#include <thread>
 
 #include "Camera.h"
 #include "DataBuffers.h"
@@ -584,6 +585,18 @@ Array<VoronoiFace> Voronoi::GetCell(const Array<Tetrahedron>& tetrahedra, const 
 	return faces;
 }
 
+void Voronoi::GenerateVoronoiCellDelaunay(const Model& InModel, const Array<Tetrahedron>& Tetrahedra, const Vector3D& Point)
+{
+	Array<VoronoiFace> faces = GetCell(Tetrahedra, Point);
+	ClipCellToBox(InModel, faces);
+
+	auto color = Vector3D::RandomRange(Vector3D(30, 30, 30), Vector3D(255, 255, 255));
+	std::scoped_lock lock(VoronoiMutex);
+	FracturePiece3D frac = CreateObjectRaw<FracturePiece3D>(faces, Point);
+	frac.color = color;
+	Fractures.Emplace( std::move(frac) );
+}
+
 void Voronoi::GenerateVoronoiCellsDelaunay(const Array<Vector3D>& Points, const Model& InModel)
 {
 	
@@ -591,15 +604,12 @@ void Voronoi::GenerateVoronoiCellsDelaunay(const Array<Vector3D>& Points, const 
 
 	Array<Tetrahedron> tetrahedra;
 	dt.Triangulate(Points, tetrahedra);
-
-	for (const auto& point : Points) {
-		Array<VoronoiFace> faces = GetCell(tetrahedra, point);
-		ClipCellToBox(InModel, faces);
-
-		auto color = Vector3D::RandomRange(Vector3D(30, 30, 30), Vector3D(255, 255, 255));
-		FracturePiece3D frac = CreateObjectRaw<FracturePiece3D>(faces, point);
-		frac.color = color;
-		Fractures.Add({ frac });
+	Array<std::jthread> threads;
+	for (const auto& point : Points)
+	{
+		//GenerateVoronoiCellDelaunay(InModel, tetrahedra, point);
+		std::jthread t(&Voronoi::GenerateVoronoiCellDelaunay,this,std::cref(InModel), std::cref(tetrahedra),point);
+		threads.Emplace(std::move(t));
 	}
 
 }

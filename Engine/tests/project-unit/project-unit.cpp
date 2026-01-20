@@ -11,6 +11,7 @@
 #include "RuntimeEngine.h"
 #include "Voronoi2D.h"
 #include "RuntimeEngineVulkan.h"
+#include "VoronoiClipping.h"
 
 int main(int argc, char** argv) {
 	::testing::InitGoogleTest(&argc, argv);
@@ -494,6 +495,9 @@ void RunEngineDelaunay(Vulkan::RuntimeEngine engine)
 	model.ModelTransform.Position = { 5, 0, 0 };
 	Voronoi vorn;
 	vorn.FractureDelaunayRandom(model, 100);
+	std::cout << "Generated Voronoi Diagram with " << vorn.Fractures.GetSize() << " cells." << std::endl;
+	VoronoiClipping clipper;
+	clipper.ClipMeshToVoronoi(vorn, model);
 
 	while (!RuntimeEngine::ShouldClose())
 	{
