@@ -4,6 +4,8 @@
 
 #include "AABB.h"
 #include "CollisionCast.h"
+#include "SutherlandHodegman.h"
+
 void VoronoiClipping::ClipMeshToVoronoi(const Voronoi& Diagram, const Model& Mesh)
 {
 	const FracturePiece3D& cell = Diagram.Fractures[0];
@@ -15,7 +17,7 @@ void VoronoiClipping::ClipMeshToVoronoi(const Voronoi& Diagram, const Model& Mes
 	Array<FTriangle> ClippedTriangles;
 
 	uint32_t numTris = 0;
-	//for each cell face, clip triangle
+
 	for (const auto& mesh : Mesh.Meshes)
 	{
 		for (size_t i = 0; i+2 < mesh.Indices.GetSize(); i+=3)
@@ -54,4 +56,23 @@ void VoronoiClipping::ClipMeshToVoronoi(const Voronoi& Diagram, const Model& Mes
 	std::cout << "Inside Triangles: " << InsideTriangles.GetSize() << std::endl;
 	std::cout << "Clipped Triangles: " << ClippedTriangles.GetSize() << std::endl;
 	std::cout << "Total Triangles: " << numTris << std::endl;
+
+	Array<Face> ResultFaces;
+	ResultFaces.Reallocate(ClippedTriangles.GetSize());
+
+	for (size_t i = 0; i < ClippedTriangles.GetSize(); i++)
+	{
+		Face outFace;
+		SutherlandHodgeman::Clip3D(cell.CellFaces, ClippedTriangles[i], outFace, cell.Point);
+		ResultFaces[i] = outFace;
+
+		outFace.Normal = Vector3D::Cross(
+			ClippedTriangles[i][1] - ClippedTriangles[i][0],
+			ClippedTriangles[i][2] - ClippedTriangles[i][3]).Normalised();
+	}
+
+	for (const auto& face : ResultFaces)
+	{
+		
+	}
 }

@@ -39,6 +39,8 @@ public:
 
 	Array<Vector3D> Vertices;
 
+	Vector3D Normal;
+
 	bool operator==(const Face& other) const {
 		if (other.Vertices.GetSize() == Vertices.GetSize())
 		{

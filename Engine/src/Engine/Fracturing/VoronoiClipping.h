@@ -16,6 +16,19 @@ struct FTriangle
 		Verts[1] = B;
 		Verts[2] = C;
 	}
+
+	Vector3D& operator[](const size_t& Index)
+	{
+		if (Index > 2)
+		{
+			throw std::runtime_error("Triangle out of index");
+		}
+
+		return Verts[Index];
+	}
+
+	Vector3D& begin() { return Verts[0]; }
+	Vector3D& end() { return Verts[2]; }
 };
 
 class VoronoiClipping

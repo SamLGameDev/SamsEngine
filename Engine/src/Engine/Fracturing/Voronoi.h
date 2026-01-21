@@ -156,6 +156,9 @@ public:
 	Array<Vector3D> Verts;
 
 	Array<uint16_t> Inds;
+
+	Vector3D Point;
+
 private:
 
 

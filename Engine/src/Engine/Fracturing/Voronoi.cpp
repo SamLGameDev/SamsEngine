@@ -607,7 +607,6 @@ void Voronoi::GenerateVoronoiCellsDelaunay(const Array<Vector3D>& Points, const 
 	Array<std::jthread> threads;
 	for (const auto& point : Points)
 	{
-		//GenerateVoronoiCellDelaunay(InModel, tetrahedra, point);
 		std::jthread t(&Voronoi::GenerateVoronoiCellDelaunay,this,std::cref(InModel), std::cref(tetrahedra),point);
 		threads.Emplace(std::move(t));
 	}
@@ -693,6 +692,8 @@ void FracturePiece3D::SetupControls(const Vector3D& Point)
 	RightArrow->Actions.BindMember(this, &FracturePiece3D::Converge);
 
 	dir = (Point - Vector3D::Zero).Normalised();
+
+	this->Point = Point;
 }
 
 void FracturePiece3D::BufferData()
