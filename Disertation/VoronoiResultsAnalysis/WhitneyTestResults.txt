@@ -1,0 +1,4 @@
+
+Set: 10 ,statistic: 126.0 , p_value: 0.532690480327402
+Set: 10 ,statistic: 126.0 , p_value: 0.532690480327402
+Set: 100 ,statistic: 8.0 , p_value: 1.0
