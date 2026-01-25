@@ -131,6 +131,10 @@ void Model::LoadModel()
 
 	CalculateBoundPoints(scene->mRootNode, scene);
 
+	ModelTransform.HighestPoints += Vector3D(1, 1, 1);
+
+	ModelTransform.LowestPoints -= Vector3D(1, 1, 1);
+
 	ModelTransform.CalculateBounds();
 
 	size_t numMeshes = scene->mNumMeshes;

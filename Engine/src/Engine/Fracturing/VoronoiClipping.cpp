@@ -25,6 +25,22 @@ FracturedMeshPiece::FracturedMeshPiece(const Array<Face>& cell, const Vector3D& 
 	BufferData();
 }
 
+FracturedMeshPiece::FracturedMeshPiece(const Array<FTriangle>& cell, const Vector3D& Point)
+{
+	SetupControls(Point);
+
+	shader = Shader("ColorShape", "/Shaders/");
+
+	TriangulateCell(cell);
+
+	if (Inds.IsEmpty())
+	{
+		return;
+	}
+
+	BufferData();
+}
+
 void FracturedMeshPiece::SetupControls(const Vector3D& point)
 {
 	InputManager* inputManager = Camera::GetActiveCamera()->GetActiveInputManager();
@@ -44,12 +60,12 @@ void FracturedMeshPiece::SetupControls(const Vector3D& point)
 void FracturedMeshPiece::Seperate()
 {
 
-	//transform.Position += (dir * 5) * World->GetDeltaTime();
+	transform.Position += (dir * 5) * World->GetDeltaTime();
 
 }
 void FracturedMeshPiece::Converge()
 {
-	//transform.Position -= (dir * 5) * World->GetDeltaTime();
+	transform.Position -= (dir * 5) * World->GetDeltaTime();
 }
 
 void FracturedMeshPiece::TriangulateCell(const Array<Face>& cell)
@@ -65,6 +81,16 @@ void FracturedMeshPiece::TriangulateCell(const Array<Face>& cell)
 			AddOrMakeInd(face.Vertices[i + 1]);
 
 		}
+	}
+}
+
+void FracturedMeshPiece::TriangulateCell(const Array<FTriangle>& cell)
+{
+	for (const auto& tri : cell)
+	{
+		AddOrMakeInd(tri[0]);
+		AddOrMakeInd(tri[1]);
+		AddOrMakeInd(tri[2]);
 	}
 }
 
@@ -144,77 +170,6 @@ void VoronoiClipping::ClipMeshToVoronoi(Voronoi& Diagram, const Model& Mesh)
 		cen = cen / cell.Verts.GetSize();
 
 
-		//for (size_t j = 0; j < cell.CellFaces.GetSize(); j++)
-		//{
-		//	VoronoiFace& f = cell.CellFaces[j];
-
-
-		//	Vector3D v1 = f.Vertices[0].point;
-		//	Vector3D v2 = f.Vertices[1].point;
-		//	Vector3D v3 = f.Vertices[2].point;
-		//	Vector3D n = Vector3D::Cross(v2 - v1, v3 - v1).Normalised();
-
-		//	float d = Vector3D::Dot(n, (v1 - cen).Normalised());
-
-		//	if (d < 0) n = -n;
-
-		//	Face t;
-		//	t.Vertices.Add(v1);
-		//	t.Vertices.Add(v1 + (n* 2));
-		//	t.Vertices.Add(v1 + (n*2) + Vector3D(0.01, 0.01, 0.01));
-
-
-
-		//	if ((t.Vertices[2] - t.Vertices[0]).GetLength() > 2)
-		//	{
-		//		t.Vertices[2].Print();
-
-		//	};
-
-		//	Array<Face> ResultFaces;
-		//	ResultFaces.Add(t);
-
-		//	auto color = Vector3D::RandomRange(Vector3D(30, 30, 30), Vector3D(255, 255, 255));
-		//	std::cout << "Length too big: " << d << " Color: "<<  std::endl;
-		//	color.Print();
-		//	FracturedMeshPiece frac = CreateObjectRaw<FracturedMeshPiece>(ResultFaces, cell.Point);
-		//	frac.Color = color;
-		//	FracturedPieces.Emplace(std::move(frac));
-
-		//	ResultFaces.Empty();
-		//	Face face;
-		//	for (const auto& vert : f.Vertices)
-		//	{
-		//		face.Vertices.Add(vert.point);
-		//	}
-
-		//	if (face.Vertices.IsEmpty()) continue;
-
-		//	ResultFaces.Add(face);
-
-
-
-		//	FracturedMeshPiece frac2 = CreateObjectRaw<FracturedMeshPiece>(ResultFaces, cell.Point);
-		//	frac2.Color = color;
-		//	FracturedPieces.Emplace(std::move(frac2));
-
-		//	ResultFaces.Empty();
-
-		//	Face g;
-		//	t.Vertices.Add(cell.Point);
-		//	t.Vertices.Add(v1);
-		//	t.Vertices.Add(v1 + Vector3D(0.01, 0.01, 0.01));
-		//	ResultFaces.Add(g);
-
-		//	FracturedMeshPiece frac3 = CreateObjectRaw<FracturedMeshPiece>(ResultFaces, cell.Point);
-		//	frac3.Color = {0, 0, 0};
-		//	FracturedPieces.Emplace(std::move(frac3));
-
-
-		//}
-		////cell.ToggleRendering();
-		//return;
-
 		FBox box = FBox(cell.Verts);
 
 		Array<FTriangle> InsideTriangles;
@@ -283,52 +238,89 @@ void VoronoiClipping::ClipMeshToVoronoi(Voronoi& Diagram, const Model& Mesh)
 		std::cout << "Clipped Triangles: " << ClippedTriangles.GetSize() << std::endl;
 		std::cout << "Total Triangles: " << numTris << std::endl;
 
-		if (InsideTriangles.IsEmpty() || ClippedTriangles.IsEmpty())
+		if (InsideTriangles.IsEmpty() && ClippedTriangles.IsEmpty())
 		{
 			continue;
 		}
 
 		Array<Face> ResultFaces;
+
+		Array<FTriangle>ResultTris;
 		//ResultFaces.Reallocate(InsideTriangles.GetSize());
 		//ResultFaces.Reallocate(InsideTriangles.GetSize() + ClippedTriangles.GetSize());
 		//ResultFaces.Reallocate(ClippedTriangles.GetSize());
 
 		for (size_t i = 0; i < ClippedTriangles.GetSize(); i++)
 		{
-			//ResultFaces.Add( { {ClippedTriangles[i].Verts[0], ClippedTriangles[i].Verts[1], ClippedTriangles[i].Verts[2] } });
 			Face outFace;
 			SutherlandHodgeman::Clip3D(cell.CellFaces, ClippedTriangles[i], outFace, cen);
+
+
+
+			for (size_t j = 1; j +1< outFace.Vertices.GetSize(); j++)
+			{
+				ResultTris.Add({ outFace.Vertices[0], outFace.Vertices[j], outFace.Vertices[j + 1] });
+			}
+
 			ResultFaces.Add(outFace);
 
 			//outFace.Normal = Vector3D::Cross(
 			//	ClippedTriangles[i][1] - ClippedTriangles[i][0],
 			//	ClippedTriangles[i][2] - ClippedTriangles[i][0]).Normalised();
 
-			if (outFace.Vertices.GetSize() > 20)
-			{
-				std::cout << "Clipped face has too many verts: " << outFace.Vertices.GetSize() << std::endl;
-			}
-
 		}
 
 		for (size_t i = 0; i < InsideTriangles.GetSize(); i++)
 		{
 			ResultFaces.Add( { {InsideTriangles[i].Verts[0], InsideTriangles[i].Verts[1], InsideTriangles[i].Verts[2]} });
+			ResultTris.Add(InsideTriangles[i]);
 		}
-		//for (size_t i = 0; i < InsideTriangles.GetSize(); i++)
-		//{
-		//	ResultFaces[i] = { {InsideTriangles[i].Verts[0], InsideTriangles[i].Verts[1], InsideTriangles[i].Verts[2]} };
-		//}
 
-		cell.ToggleRendering();
 
-		FracturedMeshPiece frac = CreateObjectRaw<FracturedMeshPiece>(ResultFaces, cell.Point);
-		frac.Color = { 50, 50, 0 };
-		FracturedPieces.Emplace(std::move(frac));
+		Array<Array<FTriangle>> Shapes;
 
-		//FracturedMeshPiece frac2 = CreateObjectRaw<FracturedMeshPiece>(box.GetFaces(), cell.Point);
-		//frac2.Color = { 0, 50, 50 };
-		//FracturedPieces.Emplace(std::move(frac2));
-		break;
+		while (!ResultTris.IsEmpty())
+		{
+			bool bFoundShared = false;
+			Array<FTriangle> ProcessedTris = ResultTris;
+			Array<FTriangle> shape;
+			shape.Add(ResultTris[0]);
+			ProcessedTris.RemoveAt(0);
+			ResultTris.RemoveAt(0);
+			while (!bFoundShared) {
+				bFoundShared = true;
+				for (size_t t = 0; t < shape.GetSize(); t++)
+				{
+					for (size_t i = 0; i < ProcessedTris.GetSize(); i++)
+					{
+						if (shape[t].ShareEdge(ProcessedTris[i]))
+						{
+							shape.Add(ProcessedTris[i]);
+							FTriangle trian = ProcessedTris[i];
+							ResultTris.RemoveAll(trian);
+							bFoundShared = false;
+						}
+					}
+
+					ProcessedTris = ResultTris;
+				}
+			}
+			Shapes.Add(shape);
+
+		}
+		//cell.ToggleRendering();
+
+		for (const auto& shape : Shapes)
+		{
+			Vector3D color = Vector3D::RandomRange(Vector3D(30, 30, 30), Vector3D(255, 255, 255));
+			FracturedMeshPiece frac = CreateObjectRaw<FracturedMeshPiece>(shape, cen);
+			frac.Color = color;
+			FracturedPieces.Emplace(std::move(frac));
+		}
+
+
+		//FracturedMeshPiece frac = CreateObjectRaw<FracturedMeshPiece>(ResultFaces, cen);
+		//frac.Color = { 50, 50, 0 };
+		//FracturedPieces.Emplace(std::move(frac));
 	}
 }

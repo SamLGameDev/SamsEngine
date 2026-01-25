@@ -27,6 +27,44 @@ struct FTriangle
 		return Verts[Index];
 	}
 
+	const Vector3D& operator[](const size_t& Index) const
+	{
+		if (Index > 2)
+		{
+			throw std::runtime_error("Triangle out of index");
+		}
+
+		return Verts[Index];
+	}
+
+	bool operator==(const FTriangle& Other) const
+	{
+		const bool bContainsA = Other[0] == Verts[0] || Other[0] == Verts[1] || Other[0] == Verts[2];
+		const bool bContainsB = Other[1] == Verts[0] || Other[1] == Verts[1] || Other[1] == Verts[2];
+		const bool bContainsC = Other[2] == Verts[0] || Other[2] == Verts[1] || Other[2] == Verts[2];
+
+		if (bContainsA && bContainsB && bContainsC)
+		{
+			return true;
+		}
+		return false;
+	}
+
+	bool ShareEdge(FTriangle& Other) const
+	{
+		const bool bContainsA = Other[0] == Verts[0] || Other[0] == Verts[1] || Other[0] == Verts[2]; 
+		const bool bContainsB = Other[1] == Verts[0] || Other[1] == Verts[1] || Other[1] == Verts[2];
+		const bool bContainsC = Other[2] == Verts[0] || Other[2] == Verts[1] || Other[2] == Verts[2];
+
+		if ((bContainsA && bContainsB) || (bContainsA && bContainsC) || (bContainsB && bContainsC))
+		{
+			return true;
+		}
+		return false;
+
+	}
+
+
 	Vector3D& begin() { return Verts[0]; }
 	Vector3D& end() { return Verts[2]; }
 };
@@ -38,6 +76,8 @@ public:
 	FracturedMeshPiece() = default;
 
 	FracturedMeshPiece(const Array<Face>& cell, const Vector3D& Point);
+	FracturedMeshPiece(const Array<FTriangle>& cell, const Vector3D& Point);
+
 
 	void Copy(const FracturedMeshPiece& Other)
 	{
@@ -145,6 +185,7 @@ protected:
 	void Seperate();
 	void Converge();
 	void TriangulateCell(const Array<Face>& cell);
+	void TriangulateCell(const Array<FTriangle>& cell);
 	void AddOrMakeInd(const Vector3D& Vert);
 	void BufferData();
 
