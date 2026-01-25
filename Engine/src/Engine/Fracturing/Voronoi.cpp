@@ -680,7 +680,7 @@ FracturePiece3D::FracturePiece3D(const Array<Face>& cell, const Vector3D& Point)
 	BufferData();
 }
 
-void FracturePiece3D::SetupControls(const Vector3D& Point)
+void FracturePiece3D::SetupControls(const Vector3D& point)
 {
 	InputManager* inputManager = Camera::GetActiveCamera()->GetActiveInputManager();
 	LeftArrow = std::make_unique<InputAction>(GLFW_KEY_LEFT, inputManager, Camera::GetActiveWindow());
@@ -696,9 +696,9 @@ void FracturePiece3D::SetupControls(const Vector3D& Point)
 
 	Hide->Actions.BindMember(this, &FracturePiece3D::ToggleRendering);
 
-	dir = (Point - Vector3D::Zero).Normalised();
+	dir = (point - Vector3D::Zero).Normalised();
 
-	this->Point = Point;
+	this->Point = point;
 }
 
 void FracturePiece3D::BufferData()
@@ -713,11 +713,11 @@ void FracturePiece3D::BufferData()
 	::Renderer::AddFracture(this);
 }
 
-FracturePiece3D::FracturePiece3D(const Array<VoronoiFace>& cell, const Vector3D& Point) : WorldObject()
+FracturePiece3D::FracturePiece3D(const Array<VoronoiFace>& cell, const Vector3D& point) : WorldObject()
 {
 	CellFaces = cell;
 
-	SetupControls(Point);
+	SetupControls(point);
 
 	shader = Shader("ColorShape", "/Shaders/");
 

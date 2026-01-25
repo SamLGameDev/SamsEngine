@@ -1,3 +1,6 @@
+#include <iostream>
+#include <ostream>
+
 #include "AABB.h"
 #include "MathCore.h"
 #include "SutherlandHodegman.h"
@@ -8,22 +11,22 @@ void SutherlandHodgeman::Clip3D(const Array<VoronoiFace>& Bounds, const FTriangl
 {
 
 	OutClipped.Vertices = { ToClip.Verts[0], ToClip.Verts[1], ToClip.Verts[2] };
-	Face newFace;
+
 
 	for (const auto& bound : Bounds)
 	{
-		Vector3D normal;
-		for (size_t i = 0; i < bound.Vertices.GetSize(); i++)
+		Face newFace;
+		if (bound.Vertices.GetSize() < 3) continue;
+
+		if (OutClipped.Vertices.GetSize() > 20)
 		{
-			const Vector3D& current = bound.Vertices[i].point;
-			const Vector3D& next = bound.Vertices[(i + 1) % bound.Vertices.GetSize()].point;
-			normal.X += (current.Y - next.Y) * (current.Z + next.Z);
-			normal.Y += (current.Z - next.Z) * (current.X + next.X);
-			normal.Z += (current.X - next.X) * (current.Y + next.Y);
-		}
-		normal = normal.Normalised();
+			std::cout << "Clipping failed, too many vertices" << std::endl;
+		};
+
+		Vector3D normal = Vector3D::Cross(bound.Vertices[1].point - bound.Vertices[0].point, bound.Vertices[2].point - bound.Vertices[0].point).Normalised();
 
 		if (Vector3D::Dot(normal, bound.Vertices[0].point - Center) < 0) normal = -normal;
+
 		const double d = -Vector3D::Dot(normal, bound.Vertices[0].point);
 		for (size_t i = 0; i < OutClipped.Vertices.GetSize(); i++)
 		{
@@ -55,6 +58,6 @@ void SutherlandHodgeman::Clip3D(const Array<VoronoiFace>& Bounds, const FTriangl
 			}
 
 		}
-		//face = newFace;
+		OutClipped = newFace;
 	}
 }

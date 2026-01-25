@@ -102,7 +102,7 @@ private:
 
 	double LastX, LastY;
 
-	constexpr static float Speed = 10.0f;
+	constexpr static float Speed = 5.0f;
 
 	constexpr static float LookSpeed = 0.1f;
 

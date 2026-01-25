@@ -38,10 +38,10 @@ public:
 
 
 	FracturePiece3D(const Array<Face>& cell, const Vector3D& Point);
-	void SetupControls(const Vector3D& Point);
+	void SetupControls(const Vector3D& point);
 	void BufferData();
 
-	FracturePiece3D(const Array<VoronoiFace>& cell, const Vector3D& Point);
+	FracturePiece3D(const Array<VoronoiFace>& cell, const Vector3D& point);
 
 	void Copy(const FracturePiece3D& Other)
 	{
