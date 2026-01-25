@@ -4,75 +4,287 @@
 
 #include "AABB.h"
 #include "CollisionCast.h"
+#include "DataBuffers.h"
+#include "ObjectFactory.h"
 #include "SutherlandHodegman.h"
 
-void VoronoiClipping::ClipMeshToVoronoi(const Voronoi& Diagram, const Model& Mesh)
+FracturedMeshPiece::FracturedMeshPiece(const Array<Face>& cell, const Vector3D& Point)
 {
-	const FracturePiece3D& cell = Diagram.Fractures[0];
+	SetupControls(Point);
 
-	FBox box = FBox(cell.Verts);
+	shader = Shader("ColorShape", "/Shaders/");
 
-	Array<FTriangle> InsideTriangles;
+	TriangulateCell(cell);
 
-	Array<FTriangle> ClippedTriangles;
-
-	uint32_t numTris = 0;
-
-	for (const auto& mesh : Mesh.Meshes)
+	if (Inds.IsEmpty())
 	{
-		for (size_t i = 0; i+2 < mesh.Indices.GetSize(); i+=3)
+		return;
+	}
+
+	BufferData();
+}
+
+void FracturedMeshPiece::SetupControls(const Vector3D& point)
+{
+	InputManager* inputManager = Camera::GetActiveCamera()->GetActiveInputManager();
+	LeftArrow = std::make_unique<InputAction>(GLFW_KEY_LEFT, inputManager, Camera::GetActiveWindow());
+
+	LeftArrow->Actions.BindMember(this, &FracturedMeshPiece::Seperate);
+
+	RightArrow = std::make_unique<InputAction>(GLFW_KEY_RIGHT, inputManager, Camera::GetActiveWindow());
+
+	RightArrow->Actions.BindMember(this, &FracturedMeshPiece::Converge);
+
+	dir = (point - Vector3D::Zero).Normalised();
+
+	this->Point = point;
+}
+
+void FracturedMeshPiece::Seperate()
+{
+
+	transform.Position += (dir * 5) * World->GetDeltaTime();
+
+}
+void FracturedMeshPiece::Converge()
+{
+	transform.Position -= (dir * 5) * World->GetDeltaTime();
+}
+
+void FracturedMeshPiece::TriangulateCell(const Array<Face>& cell)
+{
+	for (const auto& face : cell)
+	{
+		for (size_t i = 1; i + 1 < face.Vertices.GetSize(); i++)
 		{
-			Vertex p1 = mesh.Vertices[mesh.Indices[i]];
-			Vertex p2 = mesh.Vertices[mesh.Indices[i+1]];
-			Vertex p3 = mesh.Vertices[mesh.Indices[i+2]];
+			AddOrMakeInd(face.Vertices[0]);
 
-			bool bP1Inside = AABB::IsPointInsideBox(box, p1.Position);
-			bool bP2Inside = AABB::IsPointInsideBox(box, p2.Position);
-			bool bP3Inside = AABB::IsPointInsideBox(box, p3.Position);
+			AddOrMakeInd(face.Vertices[i]);
 
-			numTris++;
-
-			if (bP1Inside || bP2Inside || bP3Inside)
-			{
-
-				bP1Inside = CollisionCast::RayCastShape(p1.Position, Vector3D::Up, cell.Verts, cell.Inds);
-				bP2Inside = CollisionCast::RayCastShape(p2.Position, Vector3D::Up, cell.Verts, cell.Inds);
-				bP3Inside = CollisionCast::RayCastShape(p3.Position, Vector3D::Up, cell.Verts, cell.Inds);
-
-				if (bP1Inside || bP2Inside || bP3Inside)
-				{
-					if (bP1Inside && bP2Inside && bP3Inside)
-					{
-						InsideTriangles.Add(FTriangle(p1.Position, p2.Position, p3.Position));
-						continue;
-					}
-					ClippedTriangles.Add(FTriangle(p1.Position, p2.Position, p3.Position));
-				}
-			}
-
+			AddOrMakeInd(face.Vertices[i + 1]);
 
 		}
 	}
-	std::cout << "Inside Triangles: " << InsideTriangles.GetSize() << std::endl;
-	std::cout << "Clipped Triangles: " << ClippedTriangles.GetSize() << std::endl;
-	std::cout << "Total Triangles: " << numTris << std::endl;
+}
 
-	Array<Face> ResultFaces;
-	ResultFaces.Reallocate(ClippedTriangles.GetSize());
-
-	for (size_t i = 0; i < ClippedTriangles.GetSize(); i++)
+void FracturedMeshPiece::AddOrMakeInd(const Vector3D& Vert)
+{
+	size_t index = 0;
+	if (Verts.Contains(Vert, index))
 	{
-		Face outFace;
-		SutherlandHodgeman::Clip3D(cell.CellFaces, ClippedTriangles[i], outFace, cell.Point);
-		ResultFaces[i] = outFace;
-
-		outFace.Normal = Vector3D::Cross(
-			ClippedTriangles[i][1] - ClippedTriangles[i][0],
-			ClippedTriangles[i][2] - ClippedTriangles[i][3]).Normalised();
+		Inds.Add(index);
 	}
-
-	for (const auto& face : ResultFaces)
+	else
 	{
-		
+		Inds.Add(Verts.GetSize());
+		Verts.Add(Vert);
+	}
+}
+
+void FracturedMeshPiece::BufferData()
+{
+	::DataBuffers::GenBuffer(VAO);
+
+	DataBuffers::BindVertexInfo(VAO, 0, 0, sizeof(Vector3D), 0, Vector3);
+
+	::DataBuffers::BufferData(VAO, Verts.GetSize() * sizeof(Vector3D), Verts.GetFirstPtr(), BufferTargets::VERTEX);
+	DataBuffers::BufferDataIndex(VAO, Inds.GetSize() * sizeof(uint16_t), Inds.GetFirstPtr());
+
+	::Renderer::AddMeshFracturePiece(this);
+}
+void FracturedMeshPiece::Draw()
+{
+	shader.Use();
+
+	DataBuffers::BindBuffer(VAO);
+
+	DataBuffers::DrawVertexData(VAO);
+
+	PerInstanceTransforms ubo;
+	ubo.Model = transform.GetModelMatrix();
+	ubo.Color = Color;
+
+	GlobalTransforms g;
+	g.View = Camera::GetActiveCamera()->GetLook();
+
+	g.Projection = Camera::GetActiveCamera()->GetProjection();
+
+	shader.SetUniformBuffer(0, &g, sizeof(GlobalTransforms));
+
+	shader.SetUniformBuffer(1, &ubo, sizeof(PerInstanceTransforms));
+
+	::Renderer::Draw(Inds.GetSize());
+
+}
+
+void FracturedMeshPiece::Start()
+{
+	WorldObject::Start();
+}
+
+void FracturedMeshPiece::Tick(const double& DeltaTime)
+{
+	WorldObject::Tick(DeltaTime);
+}
+
+
+void VoronoiClipping::ClipMeshToVoronoi(Voronoi& Diagram, const Model& Mesh)
+{
+	for (auto& cell : Diagram.Fractures)
+	{
+
+		//for (size_t j = 0; j < cell.CellFaces.GetSize(); j++)
+		//{
+		//	VoronoiFace& f = cell.CellFaces[j];
+
+		//	Vector3D v1 = f.Vertices[0].point;
+		//	Vector3D v2 = f.Vertices[1].point;
+		//	Vector3D v3 = f.Vertices[2].point;
+		//	Vector3D n = Vector3D::Cross(v2 - v1, v3 - v1).Normalised();
+
+		//	if (Vector3D::Dot(n, (v1 - cell.Point).Normalised()) < 0) n = -n;
+
+		//	Face t;
+		//	t.Vertices.Add(v1);
+		//	t.Vertices.Add(v1 + (n* 2));
+		//	t.Vertices.Add(v1 + (n*2) + Vector3D(0.01, 0.01, 0.01));
+
+		//	if ((t.Vertices[2] - t.Vertices[0]).GetLength() > 2)
+		//	{
+		//		t.Vertices[2].Print();
+		//	};
+
+		//	Array<Face> ResultFaces;
+		//	ResultFaces.Add(t);
+
+		//	auto color = Vector3D::RandomRange(Vector3D(30, 30, 30), Vector3D(255, 255, 255));
+		//	FracturedMeshPiece frac = CreateObjectRaw<FracturedMeshPiece>(ResultFaces, cell.Point);
+		//	frac.Color = color;
+		//	FracturedPieces.Emplace(std::move(frac));
+
+		//	ResultFaces.Empty();
+		//	Face face;
+		//	for (const auto& vert : f.Vertices)
+		//	{
+		//		face.Vertices.Add(vert.point);
+		//	}
+
+		//	if (face.Vertices.IsEmpty()) continue;
+
+		//	ResultFaces.Add(face);
+
+
+
+		//	FracturedMeshPiece frac2 = CreateObjectRaw<FracturedMeshPiece>(ResultFaces, cell.Point);
+		//	frac2.Color = color;
+		//	FracturedPieces.Emplace(std::move(frac2));
+
+		//}
+		////cell.ToggleRendering();
+		//return;
+
+		FBox box = FBox(cell.Verts);
+
+		Array<FTriangle> InsideTriangles;
+
+		Array<FTriangle> ClippedTriangles;
+
+		uint32_t numTris = 0;
+
+		for (const auto& mesh : Mesh.Meshes)
+		{
+			for (size_t i = 0; i + 2 < mesh.Indices.GetSize(); i += 3)
+			{
+				Vertex p1 = mesh.Vertices[mesh.Indices[i]];
+				Vertex p2 = mesh.Vertices[mesh.Indices[i + 1]];
+				Vertex p3 = mesh.Vertices[mesh.Indices[i + 2]];
+
+				bool bP1Inside = AABB::IsPointInsideBox(box, p1.Position);
+				bool bP2Inside = AABB::IsPointInsideBox(box, p2.Position);
+				bool bP3Inside = AABB::IsPointInsideBox(box, p3.Position);
+
+				numTris++;
+
+				if (bP1Inside || bP2Inside || bP3Inside)
+				{
+
+					for (size_t j = 0; j < cell.CellFaces.GetSize(); j++)
+					{
+						VoronoiFace& f = cell.CellFaces[j];
+
+						if (f.Vertices.GetSize() < 3) continue;
+
+						Vector3D v1 = f.Vertices[0].point;
+						Vector3D v2 = f.Vertices[1].point;
+						Vector3D v3 = f.Vertices[2].point;
+						Vector3D n = Vector3D::Cross(v2 - v1, v3 - v1).Normalised();
+				
+						if (Vector3D::Dot(n, (v1 - cell.Point).Normalised() ) < 0) n = -n;
+
+						float d1 = Vector3D::Dot(n, (v1 - p1.Position).Normalised());
+						float d2 = Vector3D::Dot(n, (v1 - p2.Position).Normalised());
+						float d3 = Vector3D::Dot(n, (v1 - p3.Position).Normalised());
+
+						if (bP1Inside) bP1Inside = d1 <= 0;
+						if (bP2Inside) bP2Inside = d2 <= 0;
+						if (bP3Inside) bP3Inside = d3 <= 0;
+
+					}
+
+					if (bP1Inside || bP2Inside || bP3Inside)
+					{
+						if (bP1Inside && bP2Inside && bP3Inside)
+						{
+							InsideTriangles.Add(FTriangle(p1.Position, p2.Position, p3.Position));
+							continue;
+						}
+						ClippedTriangles.Add(FTriangle(p1.Position, p2.Position, p3.Position));
+					}
+
+				}
+			}
+		}
+
+
+		std::cout << "Inside Triangles: " << InsideTriangles.GetSize() << std::endl;
+		std::cout << "Clipped Triangles: " << ClippedTriangles.GetSize() << std::endl;
+		std::cout << "Total Triangles: " << numTris << std::endl;
+
+		if (InsideTriangles.IsEmpty() || ClippedTriangles.IsEmpty())
+		{
+			continue;
+		}
+
+		Array<Face> ResultFaces;
+		ResultFaces.Reallocate(InsideTriangles.GetSize() + ClippedTriangles.GetSize());
+		//ResultFaces.Reallocate(ClippedTriangles.GetSize());
+
+		for (size_t i = 0; i < ClippedTriangles.GetSize(); i++)
+		{
+			//ResultFaces[i] = { {ClippedTriangles[i].Verts[0], ClippedTriangles[i].Verts[1], ClippedTriangles[i].Verts[2] } };
+			Face outFace;
+			SutherlandHodgeman::Clip3D(cell.CellFaces, ClippedTriangles[i], outFace, cell.Point);
+			ResultFaces[i] = outFace;
+
+			outFace.Normal = Vector3D::Cross(
+				ClippedTriangles[i][1] - ClippedTriangles[i][0],
+				ClippedTriangles[i][2] - ClippedTriangles[i][0]).Normalised();
+		}
+
+		for (size_t i = ClippedTriangles.GetSize(); i < InsideTriangles.GetSize() + ClippedTriangles.GetSize(); i++)
+		{
+			ResultFaces[i] = { {InsideTriangles[i].Verts[0], InsideTriangles[i].Verts[1], InsideTriangles[i].Verts[2]} };
+		}
+
+		cell.ToggleRendering();
+
+		FracturedMeshPiece frac = CreateObjectRaw<FracturedMeshPiece>(ResultFaces, cell.Point);
+		frac.Color = { 50, 50, 0 };
+		FracturedPieces.Emplace(std::move(frac));
+
+		FracturedMeshPiece frac2 = CreateObjectRaw<FracturedMeshPiece>(box.GetFaces(), cell.Point);
+		frac2.Color = { 0, 50, 50 };
+		FracturedPieces.Emplace(std::move(frac2));
+		break;
 	}
 }

@@ -1,5 +1,6 @@
 #pragma once
 
+class FracturedMeshPiece;
 class FracturePiece2D;
 class Model;
 class WireObject;
@@ -25,6 +26,10 @@ public:
 	static void RemoveModel(Model* InModel);
 
 	static void Draw(const size_t& Size);
+
+	static void AddMeshFracturePiece(FracturedMeshPiece* Piece);
+	static void RemoveMeshFracturePiece(FracturedMeshPiece* Piece);
+	static void ReplaceMeshFracturePiece(const FracturedMeshPiece* Old, const FracturedMeshPiece* New);
 
 	static BaseRenderer* RealRenderer;
 };

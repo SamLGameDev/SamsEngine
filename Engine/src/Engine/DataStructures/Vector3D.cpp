@@ -12,6 +12,12 @@ Vector3D const Vector3D::Zero = Vector3D(0, 0, 0);
 
 Vector3D const Vector3D::One = Vector3D(1, 1, 1);
 
+Vector3D const Vector3D::NumericMin = Vector3D(std::numeric_limits<float>::lowest(), std::numeric_limits<float>::lowest(),
+	std::numeric_limits<float>::lowest());
+
+Vector3D const Vector3D::NumericMax = Vector3D(std::numeric_limits<float>::max(), std::numeric_limits<float>::max(),
+	std::numeric_limits<float>::max());
+
 
 /// <summary>
 /// Normalises the vector, however if the length is near zero by 1e-6, will return a zero vector
@@ -162,6 +168,16 @@ Vector3D Vector3D::Abs(const Vector3D& V)
 Vector3D Vector3D::Abs() const
 {
 	return {std::abs(X), std::abs(Y), std::abs(Z)};
+}
+
+Vector3D Vector3D::min(const Vector3D& A, const Vector3D B)
+{
+	return { std::min(A.X, B.X), std::min(A.Y, B.Y), std::min(A.Z, B.Z) };
+}
+
+Vector3D Vector3D::max(const Vector3D& A, const Vector3D B)
+{
+	return { std::max(A.X, B.X), std::max(A.Y, B.Y), std::max(A.Z, B.Z) };
 }
 
 Vector3D::Vector3D(const Vector2D& Other)

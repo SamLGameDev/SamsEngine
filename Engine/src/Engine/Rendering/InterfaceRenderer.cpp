@@ -45,6 +45,22 @@ void Renderer::Draw(const size_t& Size)
 {
 	RealRenderer->Draw(Size);
 }
+
+void Renderer::AddMeshFracturePiece(FracturedMeshPiece* Piece)
+{
+	RealRenderer->AddMeshFracturePiece(Piece);
+}
+
+void Renderer::RemoveMeshFracturePiece(FracturedMeshPiece* Piece)
+{
+	RealRenderer->RemoveMeshFracturePiece(Piece);
+}
+
+void Renderer::ReplaceMeshFracturePiece(const FracturedMeshPiece* Old, const FracturedMeshPiece* New)
+{
+	RealRenderer->ReplaceMeshFracturePiece(Old, New);
+}
+
 void Renderer::RemoveModel(Model* InModel)
 {
 	RealRenderer->RemoveModel(InModel);

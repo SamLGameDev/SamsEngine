@@ -5,6 +5,7 @@ class FracturePiece2D;
 class Model;
 class WireObject;
 class FracturePiece3D;
+class FracturedMeshPiece;
 
 class BaseRenderer
 {
@@ -25,6 +26,10 @@ public:
 	void RemoveModel(Model* InModel);
 	virtual void Draw(const size_t& Size) = 0;
 
+	void AddMeshFracturePiece(FracturedMeshPiece* Piece);
+	void RemoveMeshFracturePiece(FracturedMeshPiece* Piece);
+	void ReplaceMeshFracturePiece(const FracturedMeshPiece* Old, const FracturedMeshPiece* New);
+
 	Array<FracturePiece3D*> FracturesToRender;
 
 	Array<WireObject*> WireShapesToRender;
@@ -32,5 +37,7 @@ public:
 	Array<Model*> ModelsToRender;
 
 	Array <FracturePiece2D*> Fracture2DToRender;
+
+	Array<FracturedMeshPiece*> MeshFracturePiecesToRender;
 
 };

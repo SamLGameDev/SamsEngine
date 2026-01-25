@@ -72,6 +72,9 @@ public:
 
 		RightArrow->Actions.BindMember(this, &FracturePiece3D::Converge);
 
+		Hide = std::make_unique<InputAction>(GLFW_KEY_H, inputManager, Camera::GetActiveWindow());
+		Hide->Actions.BindMember(this, &FracturePiece3D::ToggleRendering);
+
 	}
 
 	FracturePiece3D(const FracturePiece3D& Other) : WorldObject()
@@ -107,6 +110,9 @@ public:
 
 		RightArrow->Actions.BindMember(this, &FracturePiece3D::Converge);
 
+		Hide = std::make_unique<InputAction>(GLFW_KEY_H, inputManager, Camera::GetActiveWindow());
+		Hide->Actions.BindMember(this, &FracturePiece3D::ToggleRendering);
+
 		TickDel.Remove(&Other, &FracturePiece3D::Tick);
 		TickDel.BindMember(this, &FracturePiece3D::Tick);
 	}
@@ -137,6 +143,8 @@ public:
 	void Seperate();
 
 	void Converge();
+
+	void ToggleRendering();
 
 	void Draw();
 
@@ -176,6 +184,9 @@ private:
 
 	std::unique_ptr<InputAction> LeftArrow;
 	std::unique_ptr<InputAction> RightArrow;
+	std::unique_ptr<InputAction> Hide;
+
+	bool bIsHidden = true;
 
 	void AddOrMakeInd(const Vector3D& Vert);
 };

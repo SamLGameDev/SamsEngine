@@ -44,3 +44,20 @@ void BaseRenderer::RemoveModel(Model* InModel)
 {
 	ModelsToRender.Remove(InModel);
 }
+
+void BaseRenderer::AddMeshFracturePiece(FracturedMeshPiece* Piece)
+{
+	MeshFracturePiecesToRender.Add(Piece);
+}
+
+void BaseRenderer::RemoveMeshFracturePiece(FracturedMeshPiece* Piece)
+{
+	MeshFracturePiecesToRender.Remove(Piece);
+}
+
+void BaseRenderer::ReplaceMeshFracturePiece(const FracturedMeshPiece* Old, const FracturedMeshPiece* New)
+{
+	FracturedMeshPiece* oldPtr = const_cast<FracturedMeshPiece*>(Old);
+	FracturedMeshPiece* newPtr = const_cast<FracturedMeshPiece*>(New);
+	MeshFracturePiecesToRender.Replace(oldPtr, newPtr);
+}

@@ -6,11 +6,12 @@
 
 #include "Array.h"
 #include "Vector3D.h"
+#include "Verticie.h"
 
 struct FBox
 {
-	Vector3D min;
-	Vector3D max;
+	Vector3D min = Vector3D::NumericMax;
+	Vector3D max = Vector3D::NumericMin;
 
 
 	FBox();
@@ -26,6 +27,8 @@ struct FBox
 			max.Z = std::max(max.Z, point.Z);
 		}
 	}
+
+	Array<Face> GetFaces() const;
 
 };
 

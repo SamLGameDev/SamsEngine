@@ -31,10 +31,149 @@ struct FTriangle
 	Vector3D& end() { return Verts[2]; }
 };
 
+class FracturedMeshPiece : WorldObject
+{
+public:
+
+	FracturedMeshPiece() = default;
+
+	FracturedMeshPiece(const Array<Face>& cell, const Vector3D& Point);
+
+	void Copy(const FracturedMeshPiece& Other)
+	{
+		Color = Other.Color;
+
+		dir = Other.dir;
+		transform = Other.transform;
+		//PVAO = Other.PVAO;
+		//PVBO = Other.PVBO;
+		Verts = Other.Verts;
+	//	CellFaces = Other.CellFaces;
+		Inds = Other.Inds;
+		VAO = Other.VAO;
+		VBO = Other.VBO;
+		EBO = Other.EBO;
+		shader = Other.shader;
+
+		::Renderer::ReplaceMeshFracturePiece(&Other, this);
+
+		TickDel.BindMember(this, &FracturedMeshPiece::Tick);
+
+		InputManager* inputManager = Camera::GetActiveCamera()->GetActiveInputManager();
+		LeftArrow = std::make_unique<InputAction>(GLFW_KEY_LEFT, inputManager, Camera::GetActiveWindow());
+
+		LeftArrow->Actions.BindMember(this, &FracturedMeshPiece::Seperate);
+
+		RightArrow = std::make_unique<InputAction>(GLFW_KEY_RIGHT, inputManager, Camera::GetActiveWindow());
+
+		RightArrow->Actions.BindMember(this, &FracturedMeshPiece::Converge);
+
+	}
+
+	FracturedMeshPiece(const FracturedMeshPiece& Other) : WorldObject()
+	{
+		Copy(Other);
+	}
+
+
+	void Move(FracturedMeshPiece& Other)
+	{
+		Color = Other.Color;
+
+		dir = Other.dir;
+		transform = Other.transform;
+		//PVAO = Other.PVAO;
+	//	PVBO = Other.PVBO;
+		Verts = Other.Verts;
+		//CellFaces = Other.CellFaces;
+		Inds = Other.Inds;
+		VAO = Other.VAO;
+		VBO = Other.VBO;
+		EBO = Other.EBO;
+		shader = Other.shader;
+
+		::Renderer::ReplaceMeshFracturePiece(&Other, this);
+
+		InputManager* inputManager = Camera::GetActiveCamera()->GetActiveInputManager();
+		LeftArrow = std::make_unique<InputAction>(GLFW_KEY_LEFT, inputManager, Camera::GetActiveWindow());
+
+		LeftArrow->Actions.BindMember(this, &FracturedMeshPiece::Seperate);
+
+		RightArrow = std::make_unique<InputAction>(GLFW_KEY_RIGHT, inputManager, Camera::GetActiveWindow());
+
+		RightArrow->Actions.BindMember(this, &FracturedMeshPiece::Converge);
+
+		TickDel.Remove(&Other, &FracturedMeshPiece::Tick);
+		TickDel.BindMember(this, &FracturedMeshPiece::Tick);
+	}
+
+	FracturedMeshPiece& operator=(const FracturedMeshPiece& Other)
+	{
+		if (this != &Other)
+		{
+			Copy(Other);
+		}
+		return *this;
+	}
+
+	FracturedMeshPiece(FracturedMeshPiece&& Other) noexcept
+	{
+		Move(Other);
+	}
+
+	FracturedMeshPiece& operator=(FracturedMeshPiece&& other) noexcept
+	{
+		if (this != &other)
+		{
+			Move(other);
+		}
+		return *this;
+	}
+
+	void Draw();
+
+	void Start() override;
+
+	void Tick(const double& DeltaTime) override;
+
+
+	Vector3D Color;
+
+protected:
+
+	void SetupControls(const Vector3D& point);
+	void Seperate();
+	void Converge();
+	void TriangulateCell(const Array<Face>& cell);
+	void AddOrMakeInd(const Vector3D& Vert);
+	void BufferData();
+
+
+	Vector3D dir;
+
+	Transform transform;
+
+	Array<Vector3D> Verts;
+
+	Array<uint16_t> Inds;
+
+	Shader shader;
+
+	std::unique_ptr<InputAction> LeftArrow;
+	std::unique_ptr<InputAction> RightArrow;
+
+	Vector3D Point;
+
+	GLuint VAO, VBO, EBO;
+
+};
+
 class VoronoiClipping
 {
 public:
-	void ClipMeshToVoronoi(const Voronoi& Diagram, const Model& Mesh);
+	void ClipMeshToVoronoi(Voronoi& Diagram, const Model& Mesh);
+
+	Array<FracturedMeshPiece> FracturedPieces;
 };
 
 

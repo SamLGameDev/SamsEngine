@@ -691,6 +691,11 @@ void FracturePiece3D::SetupControls(const Vector3D& Point)
 
 	RightArrow->Actions.BindMember(this, &FracturePiece3D::Converge);
 
+
+	Hide = std::make_unique<InputAction>(GLFW_KEY_H, inputManager, Camera::GetActiveWindow());
+
+	Hide->Actions.BindMember(this, &FracturePiece3D::ToggleRendering);
+
 	dir = (Point - Vector3D::Zero).Normalised();
 
 	this->Point = Point;
@@ -711,6 +716,7 @@ void FracturePiece3D::BufferData()
 FracturePiece3D::FracturePiece3D(const Array<VoronoiFace>& cell, const Vector3D& Point) : WorldObject()
 {
 	CellFaces = cell;
+
 	SetupControls(Point);
 
 	shader = Shader("ColorShape", "/Shaders/");
@@ -727,6 +733,7 @@ FracturePiece3D::FracturePiece3D(const Array<VoronoiFace>& cell, const Vector3D&
 
 void FracturePiece3D::Draw()
 {
+	if (bIsHidden) return;
 	shader.Use();
 
 	DataBuffers::BindBuffer(VAO);
@@ -770,5 +777,10 @@ void FracturePiece3D::Seperate()
 void FracturePiece3D::Converge()
 {
 	transform.Position -= (dir * 5) * World->GetDeltaTime();
+}
+
+void FracturePiece3D::ToggleRendering()
+{
+	bIsHidden = !bIsHidden;
 }
 

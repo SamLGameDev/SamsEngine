@@ -175,6 +175,10 @@ public:
 	[[nodiscard]] static Vector3D Abs(const Vector3D& V);
 	[[nodiscard]] Vector3D Abs() const;
 
+	[[nodiscard]] static Vector3D min(const Vector3D& A, const Vector3D B);
+	[[nodiscard]] static Vector3D max(const Vector3D& A, const Vector3D B);
+
+
 	std::array<double, 3> GetAsDoubleArray() const
 	{
 		return { X, Y, Z };
@@ -187,6 +191,8 @@ public:
 	static const Vector3D Up;
 	static const Vector3D Zero;
 	static const Vector3D One;
+	static const Vector3D NumericMax;
+	static const Vector3D NumericMin;
 };
 
 

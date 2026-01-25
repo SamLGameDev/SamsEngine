@@ -19,7 +19,7 @@
 #include "Voronoi.h"
 #include "InterfaceRenderer.h"
 #include "Voronoi2D.h"
-
+#include "VoronoiClipping.h"
 
 namespace Vulkan
 {
@@ -284,7 +284,10 @@ namespace Vulkan
 		{
 			piece->Draw();
 		}
-
+		for (FracturedMeshPiece* shape :MeshFracturePiecesToRender )
+		{
+			shape->Draw();
+		}
 
 		vkCmdEndRenderPass(Buffer);
 
