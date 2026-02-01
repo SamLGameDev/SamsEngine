@@ -94,6 +94,7 @@ public:
 		VBO = Other.VBO;
 		EBO = Other.EBO;
 		shader = Other.shader;
+		bHidable = Other.bHidable;
 
 		::Renderer::ReplaceMeshFracturePiece(&Other, this);
 
@@ -107,6 +108,9 @@ public:
 		RightArrow = std::make_unique<InputAction>(GLFW_KEY_RIGHT, inputManager, Camera::GetActiveWindow());
 
 		RightArrow->Actions.BindMember(this, &FracturedMeshPiece::Converge);
+
+		Hide = std::make_unique<InputAction>(GLFW_KEY_J, inputManager, Camera::GetActiveWindow());
+		Hide->Actions.BindMember(this, &FracturedMeshPiece::ToggleHidden);
 
 	}
 
@@ -132,6 +136,8 @@ public:
 		EBO = Other.EBO;
 		shader = Other.shader;
 
+		bHidable = Other.bHidable;
+
 		::Renderer::ReplaceMeshFracturePiece(&Other, this);
 
 		InputManager* inputManager = Camera::GetActiveCamera()->GetActiveInputManager();
@@ -142,6 +148,10 @@ public:
 		RightArrow = std::make_unique<InputAction>(GLFW_KEY_RIGHT, inputManager, Camera::GetActiveWindow());
 
 		RightArrow->Actions.BindMember(this, &FracturedMeshPiece::Converge);
+
+		Hide = std::make_unique<InputAction>(GLFW_KEY_J, inputManager, Camera::GetActiveWindow());
+		Hide->Actions.BindMember(this, &FracturedMeshPiece::ToggleHidden);
+
 
 		TickDel.Remove(&Other, &FracturedMeshPiece::Tick);
 		TickDel.BindMember(this, &FracturedMeshPiece::Tick);
@@ -179,11 +189,17 @@ public:
 
 	Vector3D Color;
 
+	bool bHidden = false;
+	bool bHidable = false;
+
 protected:
 
 	void SetupControls(const Vector3D& point);
 	void Seperate();
 	void Converge();
+
+	void ToggleHidden();
+
 	void TriangulateCell(const Array<Face>& cell);
 	void TriangulateCell(const Array<FTriangle>& cell);
 	void AddOrMakeInd(const Vector3D& Vert);
@@ -202,6 +218,8 @@ protected:
 
 	std::unique_ptr<InputAction> LeftArrow;
 	std::unique_ptr<InputAction> RightArrow;
+
+	std::unique_ptr<InputAction> Hide;
 
 	Vector3D Point;
 

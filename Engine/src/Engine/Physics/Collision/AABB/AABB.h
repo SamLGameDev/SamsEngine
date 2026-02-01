@@ -36,5 +36,7 @@ class AABB
 {
 public:
 	static bool IsPointInsideBox(const FBox& Box, const Vector3D& Point);
+
+	static bool IsBoxIntersectingBox(const FBox& Box1, const FBox& Box2);
 }
 ;

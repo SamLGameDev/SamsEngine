@@ -211,6 +211,32 @@ void Voronoi::SliceShapeByPlane(const Array<Vector3D>& Points, const size_t& Ind
 		SliceFaceByPlane(Faces, Normal, Center, newFaces, intersectFace, f);
 	}
 
+	Vector3D center;
+
+	for (const auto& tet : intersectFace.Vertices)
+	{
+		center += tet;
+	}
+
+	center = center / intersectFace.Vertices.GetSize();
+
+	//As plane is box, we can assume [1] and [2] from zero would cove x and y
+	Vector3D normal = Vector3D::Cross(intersectFace.Vertices[1] - intersectFace.Vertices[0], intersectFace.Vertices[2] - intersectFace.Vertices[0]).Normalised();
+
+	//If its not facing outwards
+	if (Vector3D::Dot(normal, intersectFace.Vertices[0] - Vector3D::Zero) < 0) normal = -normal;
+
+	VoronoiFace orderedFace;
+
+	OrderVertices(intersectFace.Vertices, center, normal, orderedFace);
+
+	intersectFace.Vertices.Empty();
+
+	for (const auto& vert : orderedFace.Vertices)
+	{
+		intersectFace.Vertices.Add(vert.point);
+	}
+
 	//if there is a valid intersect face, add it to the list of faces
 	if (intersectFace.Vertices.GetSize() > 2)
 	{
@@ -315,6 +341,13 @@ void Voronoi::FractureDelaunayRandom(Model& InModel, const size_t& NumPoints)
 	GenerateRandomPointsInBounds(InModel, NumPoints, points);
 
 	GenerateVoronoiCellsDelaunay(points, InModel);
+
+	InputManager* inputManager = Camera::GetActiveCamera()->GetActiveInputManager();
+	Next = std::make_unique<InputAction>(GLFW_KEY_I, inputManager, Camera::GetActiveWindow());
+	Next->Actions.BindMember(this, &Voronoi::NextCell);
+
+	Fractures[0].ToggleRendering();
+
 }
 
 void Voronoi::DefinePlane(Vector3D& normal, const Vector3D& CurrentPoint, const Vector3D& closestPoint, Vector3D& Right, Vector3D& Up, Vector3D& PlaneCenter)
@@ -597,6 +630,16 @@ void Voronoi::GenerateVoronoiCellDelaunay(const Model& InModel, const Array<Tetr
 	Fractures.Emplace( std::move(frac) );
 }
 
+void Voronoi::NextCell()
+{
+	Fractures[current].bIsHidden = true;
+
+	current = (current + 1) % Fractures.GetSize();
+
+	Fractures[current].bIsHidden = false;
+
+}
+
 void Voronoi::GenerateVoronoiCellsDelaunay(const Array<Vector3D>& Points, const Model& InModel)
 {
 	
@@ -781,6 +824,6 @@ void FracturePiece3D::Converge()
 
 void FracturePiece3D::ToggleRendering()
 {
-	bIsHidden = !bIsHidden;
+	bIsHidden = true;
 }
 

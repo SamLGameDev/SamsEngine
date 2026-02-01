@@ -105,7 +105,7 @@ void Vector3D::Clamp(Vector3D& Value, const Vector3D& MinRange, const Vector3D& 
 	}
 }
 
-float Vector3D::Dot(const Vector3D& A, const Vector3D& B)
+double Vector3D::Dot(const Vector3D& A, const Vector3D& B)
 {
 	return A.X * B.X + A.Y * B.Y + A.Z * B.Z;
 }
@@ -146,7 +146,11 @@ bool Vector3D::GetIntersectionPointWithPlane(const Vector3D& Mid, const Vector3D
 Vector3D Vector3D::GetLineIntersectionPointWithPlane(const Vector3D& Normal, const double& D, const Vector3D& LineStart,
                                                      const Vector3D& LineEnd)
 {
-	return LineStart + (LineEnd - LineStart) * (-(Dot(Normal, LineStart) + D) / Dot(Normal, LineEnd - LineStart));
+	const double d = -(Dot(Normal, LineStart) + D);
+	const double d2 = Dot(Normal, LineEnd - LineStart);
+	const double result = d / d2;
+
+	return LineStart + (LineEnd - LineStart) * result;
 }
 
 bool Vector3D::IsAlmostEqual(const Vector3D& A, const Vector3D& B, const float& Range)

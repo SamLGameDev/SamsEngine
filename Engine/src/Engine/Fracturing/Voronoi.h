@@ -58,7 +58,7 @@ public:
 		VBO = Other.VBO;
 		EBO = Other.EBO;
 		shader = Other.shader;
-
+		Point = Other.Point;
 		::Renderer::ReplaceFracture(&Other, this);
 
 		TickDel.BindMember(this, &FracturePiece3D::Tick);
@@ -98,6 +98,7 @@ public:
 		VBO = Other.VBO;
 		EBO = Other.EBO;
 		shader = Other.shader;
+		Point = Other.Point;
 
 		::Renderer::ReplaceFracture(&Other, this);
 
@@ -166,6 +167,7 @@ public:
 	Array<uint16_t> Inds;
 
 	Vector3D Point;
+	bool bIsHidden = true;
 
 private:
 
@@ -186,7 +188,7 @@ private:
 	std::unique_ptr<InputAction> RightArrow;
 	std::unique_ptr<InputAction> Hide;
 
-	bool bIsHidden = true;
+
 
 	void AddOrMakeInd(const Vector3D& Vert);
 };
@@ -233,6 +235,10 @@ public:
 
 	Array<FracturePiece3D> Fractures;
 
+	static void OrderVertices(const VoronoiFace& IntersectFace, const Vector3D& Center, const Vector3D& Normal, VoronoiFace& OrderedFace);
+	static void OrderVertices(const Array<Vector3D>& Vertices, const Vector3D& Center, const Vector3D& Normal,
+		VoronoiFace& OrderedFace);
+
 private:
 	static void GetFirstIntersection(const Vector3D& Normal, const Vector3D& Center, const Face& CurrentFace, Face& NewFace,
 	                                 size_t& FirstIntersectionIndex, Vector3D& FirstIntersection);
@@ -258,15 +264,13 @@ private:
 
 	Array<Face> fractureFaces;
 
-
+	std::unique_ptr<InputAction> Next;
 
 	static Vector3D GetCircumCenter(const Vector3D& A, const Vector3D& B, const Vector3D& C, const Vector3D& D);
 	static void ClipVertexToPlane(const Vector3D& Normal, const double& D, VoronoiFace& IntersectFace, const AnglePointPair& Vertex,
 	                              const AnglePointPair& NextVertex, VoronoiFace& NewFace);
 	static void GetFaceAxis(const Vector3D& Normal, Vector3D& T, Vector3D& U);
-	static void OrderVertices(const VoronoiFace& IntersectFace, const Vector3D& Center, const Vector3D& Normal, VoronoiFace& OrderedFace);
-	static void OrderVertices(const Array<Vector3D>& Vertices, const Vector3D& Center, const Vector3D& Normal,
-	                          VoronoiFace& OrderedFace);
+
 	static void ClipCellToPlane(Array<VoronoiFace>& Cell, const Face& Plane);
 
 	static void ClipCellToBox(const Model& InModel, Array<VoronoiFace>& Cell);
@@ -274,6 +278,10 @@ private:
 	static void GetCellFace(Array<VoronoiFace>& Faces, const TetRing& Ring);
 	static Array<VoronoiFace> GetCell(const Array<Tetrahedron>& tetrahedra, const Vector3D& point);
 	void GenerateVoronoiCellDelaunay(const Model& InModel, const Array<Tetrahedron>& Tetrahedra, const Vector3D& Point);
+
+	void NextCell();
+
+	size_t current = 0;
 
 	void GenerateVoronoiCellsDelaunay(const Array<Vector3D>& Points, const Model& InModel);
 

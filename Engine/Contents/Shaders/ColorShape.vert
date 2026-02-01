@@ -19,6 +19,14 @@ layout (std140, binding = 1) uniform InstanceTransform
 };
 
 void main() {
+
     gl_Position = Projection * View * Model * vec4(aPos, 1.0);
-    fragColors = Color;
+	if (Color == vec3(0, 0, 0))
+	{
+		fragColors = vec3(200, 200, 200);
+	}
+	else
+	{
+		fragColors = Color;
+	}
 }

@@ -57,7 +57,7 @@ public:
 		return {X - Other.X, Y - Other.Y, Z - Other.Z};
 	}
 
-	[[nodiscard]] Vector3D operator*(const float& Multiplier)const
+	[[nodiscard]] Vector3D operator*(const double& Multiplier)const
 	{
 		return {X * Multiplier, Y * Multiplier, Z * Multiplier};
 	}
@@ -149,7 +149,7 @@ public:
 
 	static void Clamp(Vector3D& Value, const Vector3D& MinRange, const Vector3D& MaxRange);
 
-	[[nodiscard]] static float Dot(const Vector3D& A, const Vector3D& B);
+	[[nodiscard]] static double Dot(const Vector3D& A, const Vector3D& B);
 
 	[[nodiscard]] static Vector3D Cross(const Vector3D& A, const Vector3D& B);
 

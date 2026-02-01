@@ -16,3 +16,8 @@ bool AABB::IsPointInsideBox(const FBox& Box, const Vector3D& Point)
 {
 	return Point >= Box.min && Point <= Box.max;
 }
+
+bool AABB::IsBoxIntersectingBox(const FBox& Box1, const FBox& Box2)
+{
+	return Box1.min <= Box2.max && Box1.max >= Box2.min;
+}

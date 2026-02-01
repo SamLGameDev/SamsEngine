@@ -469,7 +469,11 @@ void RunEngine(Vulkan::RuntimeEngine engine)
 	Model model = Model("/Models/BackPack/backpack.obj", Shader("BasicTexture", "/Shaders/"));
 	model.ModelTransform.Position = { 5, 0, 0 };
 	Voronoi vorn;
-	vorn.FracturePlaneRandom(model, 100);
+	vorn.FracturePlaneRandom(model, 1000);
+
+	//VoronoiClipping clipper;
+	//clipper.ClipMeshToVoronoi(vorn, model);
+
 	while (!RuntimeEngine::ShouldClose())
 	{
 		engine.Loop();
@@ -491,7 +495,7 @@ void EnginePlane()
 
 void RunEngineDelaunay(Vulkan::RuntimeEngine engine)
 {
-	Model model = Model("/Models/BackPack/backpack.obj", Shader("BasicTexture", "/Shaders/"));
+	Model model = Model("/Models/Asteroid/rock.obj", Shader("ColorShape", "/Shaders/"));
 	model.ModelTransform.Position = { 5, 0, 0 };
 	Voronoi vorn;
 	vorn.FractureDelaunayRandom(model, 100);
