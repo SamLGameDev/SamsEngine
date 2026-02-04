@@ -20,6 +20,7 @@
 #include "InterfaceRenderer.h"
 #include "Voronoi2D.h"
 #include "VoronoiClipping.h"
+#include "VulkanWindow.h"
 
 namespace Vulkan
 {
@@ -220,9 +221,9 @@ namespace Vulkan
 
 		result = vkQueuePresentKHR(OwningCard->GetLogicalDevice()->GetGraphicsQueue(), &presentInfo);
 
-		if (result == VK_ERROR_OUT_OF_DATE_KHR || result == VK_SUBOPTIMAL_KHR || FirstWindow::HasWindowBeenResized())
+		if (result == VK_ERROR_OUT_OF_DATE_KHR || result == VK_SUBOPTIMAL_KHR || Camera::GetActiveWindow()->HasWindowBeenResized())
 		{
-			FirstWindow::ResetWindowResize();
+			Camera::GetActiveWindow()->ResetWindowResize();
 			OwningCard->GetLogicalDevice()->GetSwapChain()->RecreateSwapChain();
 		}
 		else if (result != VK_SUCCESS) return;

@@ -10,6 +10,8 @@ Camera* Camera::ActiveCamera;
 
 Window* Camera::ActiveWindow;
 
+std::int8_t Camera::ProjectonDir = 1;
+
 void Camera::SetUpInputs(Window* Window, InputManager* Manager)
 {
 	WKey = std::make_unique<InputAction>(GLFW_KEY_W, Manager, Window);
@@ -152,13 +154,13 @@ glm::mat4 Camera::GetProjection()
 	glm::mat4 projection = glm::perspective<float>
 	(
 		glm::radians(FOV),
-		static_cast<float>(FirstWindow::GetWindowWidth()) / static_cast<float>(FirstWindow::GetWindowHeight()),
+		static_cast<float>(ActiveWindow->GetWindowWidth()) / static_cast<float>(ActiveWindow->GetWindowHeight()),
 		NearView,
 		FarView
 	);
 
 	//Reverse for vulkan
 	//TODO make this more part of vulkan, so it doesnt interfere with OpenGL
-	projection[1][1] *= -1;
+	projection[1][1] *= ProjectonDir;
 	return projection;
 }

@@ -1,24 +1,23 @@
-#include "VulkanSubsystemInitialiser.h"
+// DO NOT MARK.
+//This is because it has been submitted for my dissertation. Link to Original: https://github.falmouth.ac.uk/GA-Undergrad-Student-Work-25-26/Dissertation-SL295211.git
+
+
+#include "SubsystemInitialiser.h"
 
 #include <exception>
 #include <iostream>
 
 #include "DataBuffers.h"
-#include "DataBuffersVulkan.h"
+#include "DataBuffersOpenGL.h"
 #include "WorldObject.h"
 #include "ObjectFactory.h"
-#include "VulkanInstance.h"
-#include "VulkanWindow.h"
-#include "Shader.h"
-#include "VulkanShader.h"
-#include "VulkanTexture.h"
-#include "Texture.h"
-#include "InterfaceRenderer.h"
 #include "Predictates.h"
+#include "InitialiseOpenGL.h"
+#include "OpenGLInstance.h"
+#include "OpenGLShader.h"
+#include "OpenGLTexture.h"
 
-namespace Vulkan
-{
-
+namespace OpenGL {
 	ErrorCodes SubsystemInitialiser::Init()
 	{
 		exactinit();
@@ -34,7 +33,7 @@ namespace Vulkan
 
 		try
 		{
-			APIConstructer = new InitialiseVulkan();
+			APIConstructer = new CInitialiseOpenGL();
 			APIConstructer->Init();
 		}
 		catch (const std::exception& error)
@@ -53,27 +52,28 @@ namespace Vulkan
 			return ERROR;
 		}
 
-		::Shader::ShaderCreationFunc = Vulkan::Shader::CreateVulkanShader;
 
-		::Texture::TextureCreationFunc = Vulkan::Texture::CreateVulkanTexture;
+		::Shader::ShaderCreationFunc = OpenGL::Shader::CreateOpenGLShader;
 
-		::DataBuffers::APIBufferInstance = new Vulkan::DataBuffers();
+		::Texture::TextureCreationFunc = OpenGL::Texture::CreateOpenGLTexture;
+
+		::DataBuffers::APIBufferInstance = new OpenGL::DataBuffers();
 
 		try
 		{
-			SInstance::GetInstance()->GraphicsCard = new UGraphicsCard();
-			GraphicsCard = SInstance::GetInstance()->GraphicsCard;
-			GraphicsCard->Init();
+			renderer = new Renderer;
+			SInstance::GetInstance()->Renderer = renderer;
+
 		}
 		catch (const std::exception& error)
 		{
-			std::cerr << error.what() << "\n";
+			std::cout << error.what() << "\n";
 			return ERROR;
 		}
 
 		try
 		{
-			inputManager = new InputManager(Window->GetWindow());
+			inputManager = new ::InputManager(Window->GetWindow());
 		}
 		catch (const std::exception& error)
 		{
@@ -100,16 +100,12 @@ namespace Vulkan
 
 			Camera::SetActiveWindow(Window);
 
-			Camera::ProjectonDir = -1;
-
 		}
 		catch (const std::exception& error)
 		{
 			std::cout << error.what() << "\n";
 			return ERROR;
 		}
-
-	
 
 		return SUCCEEDED;
 	}
@@ -122,16 +118,16 @@ namespace Vulkan
 
 		delete inputManager;
 
-		 delete ::DataBuffers::APIBufferInstance;
-
+		delete ::DataBuffers::APIBufferInstance;
 		try
 		{
-			GraphicsCard->ShutDown();
+			renderer->ShutDown();
 			SInstance::GetInstance()->ShutDown();
+			delete renderer;
 		}
 		catch (const std::exception& error)
 		{
-			std::cerr << error.what() << "\n";
+			std::cout << error.what() << "\n";
 			return ERROR;
 		}
 
@@ -144,6 +140,7 @@ namespace Vulkan
 			std::cout << error.what() << "\n";
 			return ERROR;
 		}
+
 
 		try
 		{
@@ -165,8 +162,6 @@ namespace Vulkan
 			std::cout << error.what() << "\n";
 			return ERROR;
 		}
-
-
 
 		return SUCCEEDED;
 	}

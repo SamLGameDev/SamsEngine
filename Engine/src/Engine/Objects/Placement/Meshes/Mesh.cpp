@@ -56,8 +56,6 @@ void Mesh::Draw(const Transform* ModelTransform)
 
 void Mesh::Draw(const Transform* ModelTransform, ::Shader& InShader) const
 {
-
-
 	InShader.Use();
 
 	DataBuffers::BindBuffer(VAO);
@@ -99,11 +97,12 @@ void Mesh::SetUpMesh()
 	::DataBuffers::GenBuffer(VAO);
 
 
-	DataBuffers::BindVertexInfo(VAO, 0, 0, sizeof(Vector3D), 0, Vector3);
-	DataBuffers::BindVertexInfo(VAO, 1, 0, sizeof(Vector2D), 0, Vector2);
-
+	DataBuffers::BindVertexInfo(VAO, 0, 0, sizeof(Vector3D), sizeof(Vector3D), Vector3);
 	::DataBuffers::BufferData(VAO, FVerts.GetSize() * sizeof(Vector3D), FVerts.GetFirstPtr(), BufferTargets::VERTEX);
+	DataBuffers::BindVertexInfo(VAO, 1, 0, sizeof(Vector2D), sizeof(Vector2D), Vector2);
+
 	DataBuffers::BufferDataIndex(VAO, Indices.GetSize() * sizeof(uint16_t), Indices.GetFirstPtr());
+
 	DataBuffers::BufferData(VAO, FTexCoords.GetSize() * sizeof(Vector2D), FTexCoords.GetFirstPtr(), BufferTargets::VERTEX);
 
 }

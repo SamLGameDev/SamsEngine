@@ -17,7 +17,6 @@ namespace Vulkan
 
 	FirstWindow::~FirstWindow()
 	{
-
 		vkDestroySurfaceKHR(SInstance::GetInstance()->VulkanInstance, SInstance::GetInstance()->WindowsInterface, nullptr);
 	}
 

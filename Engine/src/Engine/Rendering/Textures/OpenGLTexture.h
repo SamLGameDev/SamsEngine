@@ -6,6 +6,8 @@
 #include <string>
 #include <map>
 #include <cstdint>
+#include <memory>
+
 #include "BaseTexture.h"
 
 #include "glad/glad.h"
@@ -69,6 +71,9 @@ namespace OpenGL {
 		{
 			return Type;
 		}
+
+
+		static std::shared_ptr<BaseTexture> CreateOpenGLTexture(const std::string_view& InTextureLocation, const TextureType& InType);
 
 	private:
 

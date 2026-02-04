@@ -8,6 +8,9 @@
 #include <sstream>
 #include <iostream>
 #include "CorePaths.h"
+#include "DataBuffers.h"
+#include "DataBuffersOpenGL.h"
+#include "Transform.h"
 
 namespace OpenGL {
 
@@ -17,6 +20,12 @@ namespace OpenGL {
 
 	Shader::Shader(const std::string_view& InName, const std::string_view& InStorageLocation)
 	{
+
+		GLenum error = glGetError();
+		if (error != GL_NO_ERROR)
+		{
+			std::cout << "ERROR::UNIFORMBUFFER::" << std::to_string(error) << std::endl;
+		}
 		StorageLocation = InStorageLocation;
 
 		Name = InName;
@@ -79,14 +88,30 @@ namespace OpenGL {
 		}
 
 		CreateProgram(vertex, fragment, geometry);
-	}
 
-	void Shader::Use() const
-	{
-		glUseProgram(ID);
-	}
+		GLuint GlobalSize = sizeof(GlobalTransforms);
 
-	
+		GLuint LocalSize = sizeof(PerInstanceTransforms);
+
+		Array<GLuint> sizes = { GlobalSize, LocalSize };
+
+		size_t index = 0;
+		error = glGetError();
+		if (error != GL_NO_ERROR)
+		{
+			std::cout << "ERROR::UNIFORMBUFFER::" << std::to_string(error) << std::endl;
+		}
+
+		for (const auto& size : sizes)
+		{
+			uint32_t id;
+			::DataBuffers::GenBuffer(id);
+
+			UniformBufferID.Add(id);
+			UniformMappedData.Add(::DataBuffers::GenerateUniformDataBuffer(id, size));
+		}
+
+	}
 
 	void Shader::ApplyTextures() const
 	{
@@ -143,6 +168,28 @@ namespace OpenGL {
 		}
 	}
 
+	void Shader::Use()
+	{
+		glUseProgram(ID);
+
+		if (Textures.IsEmpty()) return;
+
+		SetInt("texSampler", 0);
+		glBindTexture(GL_TEXTURE_2D, Textures[0].GetID());
+		glActiveTexture(GL_TEXTURE0);
+	}
+
+	void Shader::SetUniformBuffer(const size_t& Location, const void* Data, const size_t& Size)
+	{
+
+		DataBuffer* buffer = dynamic_cast<DataBuffer*>(::DataBuffers::GetBuffer(UniformBufferID[Location]));
+
+		glBindBufferBase(GL_UNIFORM_BUFFER, Location, buffer->UBO);
+
+		memcpy(UniformMappedData[Location], Data, Size);
+	}
+	
+
 	void Shader::AddTexture(const Texture InTexture)
 	{
 		Textures.Add(InTexture);
@@ -189,6 +236,18 @@ namespace OpenGL {
 	void Shader::AddCubeMap(const CubeMap& InMap)
 	{
 		Map = InMap;
+	}
+	void Shader::SetInt(const std::string_view& InName, const int& Value) const
+	{
+		glUniform1i(glGetUniformLocation(ID, InName.data()), Value);
+	}
+
+	std::shared_ptr<BaseShader> Shader::CreateOpenGLShader(const std::string_view& InName,
+		const std::string_view& InStorageLocation)
+	{
+		std::shared_ptr<Shader> shader = std::make_shared<Shader>(InName, InStorageLocation);
+
+		return shader;
 	}
 
 	bool Shader::CreateDefaultShaderFile() const

@@ -7,58 +7,24 @@
 
 #include "Window.h"
 #include "glad/glad.h"
+namespace OpenGL {
 
-
-class FirstWindow final : public Window 
-{
-public:
-
-	FirstWindow();
-
-	~FirstWindow();
-
-	[[nodiscard]] inline GLFWwindow* GetWindow() const
+	class FirstWindow final : public Window
 	{
-		return DisplayWindow;
-	}
+	public:
 
-	static inline void SetWindowWidth(const GLint InWidth)
-	{
-		Width = InWidth;
-	}
+		FirstWindow();
 
-	static inline void SetWindowHeight(const GLint InHeight)
-	{
-		Height = InHeight;
-	}
+		~FirstWindow();
 
-	[[nodiscard]] static inline GLint GetWindowWidth()
-	{
-		return Width;
-	}
-	[[nodiscard]] static inline GLint GetWindowHeight()
-	{
-		return Height;
-	}
+	private:
 
-	[[nodiscard]] static inline bool HasWindowBeenResized()
-	{
-		return bFrameBufferResized;
-	}
+		void CreateWindow();
 
 
-	static void ResetWindowResize()
-	{
-		bFrameBufferResized = false;
-	}
+		void OnWindowResize() override;
 
-private:
+		static bool bFrameBufferResized;
 
-	void CreateWindow();
-
-
-	void OnWindowResize() override;
-
-	static bool bFrameBufferResized;
-
-};
+	};
+}

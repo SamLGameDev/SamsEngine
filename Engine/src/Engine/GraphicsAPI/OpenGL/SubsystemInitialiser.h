@@ -18,30 +18,36 @@
 
 #include <memory>
 
-class SubsystemInitialiser
-{
-public:
+namespace OpenGL {
+	class CInitialiseOpenGL;
 
-	SubsystemInitialiser(){};
+	class SubsystemInitialiser
+	{
+	public:
 
-	ErrorCodes Init();
+		SubsystemInitialiser() {};
 
-	ErrorCodes ShutDown();
+		ErrorCodes Init();
 
-private:
+		ErrorCodes ShutDown();
 
-	FirstWindow* Window;
+	private:
 
-	InputManager* inputManager;
+		CInitialiseOpenGL* APIConstructer;
 
-	World* world;
+		FirstWindow* Window;
 
-	Camera* camera;
+		::InputManager* inputManager;
 
-	OpenGL::Renderer* renderer;
+		World* world;
 
-	LightManager* lightManager;
+		Camera* camera;
 
-	CorePaths* PathManager;
+		OpenGL::Renderer* renderer;
 
-};
+		LightManager* lightManager;
+
+		CorePaths* PathManager;
+
+	};
+}

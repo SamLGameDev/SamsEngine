@@ -171,7 +171,7 @@ void VoronoiClipping::ClipMeshToVoronoi(Voronoi& Diagram, const Model& Mesh)
 	size_t numcells = 0;
 
 
-	Array<FracturePiece3D> Boundary;
+	Array<FracturePiece3D*> Boundary;
 
 	//Find Boundary, make inside cells visable. Disacrd outside cells
 	//Remember about the triangle clipping, but having all 3 points outside.
@@ -193,22 +193,7 @@ void VoronoiClipping::ClipMeshToVoronoi(Voronoi& Diagram, const Model& Mesh)
 				const FBox clippingBox = FBox({ p1.Position, p2.Position, p3.Position });
 				if (AABB::IsBoxIntersectingBox(box, clippingBox))
 				{
-					for (size_t j = 0; j < cell.CellFaces.GetSize(); j++)
-					{
-						const VoronoiFace& f = cell.CellFaces[j];
-
-						if (f.Vertices.GetSize() < 3) continue;
-
-
-						Vector3D v1 = f.Vertices[0].point;
-						Vector3D v2 = f.Vertices[1].point;
-						Vector3D v3 = f.Vertices[2].point;
-						Vector3D n = Vector3D::Cross(v2 - v1, v3 - v1).Normalised();
-						const double d = Vector3D::Dot(n, (v1 - cell.Point).Normalised());
-
-						if (d < 0) n = -n;
-
-					}
+				
 				}
 
 			}
@@ -436,34 +421,38 @@ void VoronoiClipping::ClipMeshToVoronoi(Voronoi& Diagram, const Model& Mesh)
 				testTris.Add(FTriangle(cell.Verts[cell.Inds[i]], cell.Verts[cell.Inds[i + 1]], cell.Verts[cell.Inds[i + 2]]));
 			}
 
-			for (const auto& tri : testTris)
-			{
-				Face f;
-				SutherlandHodgeman::Clip3D(shape, tri, f, Vector3D::Zero);
-				outFace.Add(f);
-			}
+				//Array<Face> f;
+				SutherlandHodgeman::Clip3D(shape, cell.CellFaces, outFace, cell.Point);
+				//outFace.Add(f);
+			
 
 			//SutherlandHodgeman::Clip3D(shape, cell.CellFaces, outFace, Vector3D::Zero);
 
-			for (const auto& tri : shape)
-			{
-				Face f;
-				f.Vertices.Add(tri[0]);
-				f.Vertices.Add(tri[1]);
-				f.Vertices.Add(tri[2]);
-				outFace.Add(f);
-			}
+		//	for (const auto& tri : shape)
+			//{
+			//	Face f;
+			//	f.Vertices.Add(tri[0]);
+			//	f.Vertices.Add(tri[1]);
+			//	f.Vertices.Add(tri[2]);
+			//	outFace.Add(f);
+		//	}
 
 			Vector3D color = Vector3D::RandomRange(Vector3D(30, 30, 30), Vector3D(255, 255, 255));
-			FracturedMeshPiece frac = CreateObjectRaw<FracturedMeshPiece>(outFace, cen);
+			FracturedMeshPiece frac = CreateObjectRaw<FracturedMeshPiece>(shape, cen);
 			frac.Color = color;
 			FracturedPieces.Emplace(std::move(frac));
+
+			Vector3D color2 = Vector3D::RandomRange(Vector3D(30, 30, 30), Vector3D(255, 255, 255));
+			FracturedMeshPiece frac2 = CreateObjectRaw<FracturedMeshPiece>(outFace, cen);
+			frac2.Color = color2;
+			FracturedPieces.Emplace(std::move(frac2));
 
 		//	FracturedMeshPiece frac2 = CreateObjectRaw<FracturedMeshPiece>(ResultTris, cen);
 			//frac2.Color = {10, 10, 10};
 			//frac2.bHidable = true;
 			//FracturedPieces.Emplace(std::move(frac2));
 			//cell.ToggleRendering();
+			//return;
 		}
 		cell.bIsHidden = true;
 			//numcells++;

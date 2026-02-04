@@ -92,9 +92,16 @@ void SutherlandHodgeman::Clip3D(const Array<FTriangle>& Bounds, const FTriangle&
 
 		Vector3D normal = Vector3D::Cross(bound[1] - bound[0], bound[2] - bound[0]).Normalised();
 
-		if (Vector3D::Dot(normal, bound[0] - Center) < 0) normal = -normal;
+		//if (Vector3D::Dot(normal, bound[0] - Center) < 0) normal = -normal;
 
-		const double d = -Vector3D::Dot(normal, bound[0]);
+		double d = -Vector3D::Dot(normal, bound[0]);
+
+		if (Vector3D::Dot(normal, bound[0]) + d > 0)
+		{
+			normal = -normal;
+			d = -d;
+		}
+
 		for (size_t i = 0; i < OutClipped.Vertices.GetSize(); i++)
 		{
 			const Vector3D& point = OutClipped.Vertices[i];
@@ -132,20 +139,28 @@ void SutherlandHodgeman::Clip3D(const Array<FTriangle>& Bounds, const FTriangle&
 			return;
 		}
 
-		Vector3D n = Vector3D::Cross(OutClipped.Vertices[1] - OutClipped.Vertices[0], OutClipped.Vertices[2] - OutClipped.Vertices[0]).Normalised();
+		//Vector3D n = Vector3D::Cross(OutClipped.Vertices[1] - OutClipped.Vertices[0], OutClipped.Vertices[2] - OutClipped.Vertices[0]).Normalised();
 
-		if (Vector3D::Dot(normal, OutClipped.Vertices[0] - Center) < 0) n = -n;
+		//double p = -Vector3D::Dot(normal, bound[0]);
 
-		VoronoiFace orderedFace;
+		//if (Vector3D::Dot(normal, bound[0]) + p > 0)
+		//{
+		//	normal = -normal;
+		//	p = -p;
+		//}
 
-		Voronoi::OrderVertices(OutClipped.Vertices, Center, normal, orderedFace);
+		////if (Vector3D::Dot(normal, OutClipped.Vertices[0] - Center) < 0) n = -n;
 
-		OutClipped.Vertices.Empty();
+		//VoronoiFace orderedFace;
 
-		for (const auto& vert : orderedFace.Vertices)
-		{
-			OutClipped.Vertices.Add(vert.point);
-		}
+		//Voronoi::OrderVertices(OutClipped.Vertices, Center, normal, orderedFace);
+
+		//OutClipped.Vertices.Empty();
+
+		//for (const auto& vert : orderedFace.Vertices)
+		//{
+		//	OutClipped.Vertices.Add(vert.point);
+		//}
 
 		OutClipped = newFace;
 	}
@@ -180,9 +195,15 @@ void SutherlandHodgeman::Clip3D(const Array<FTriangle>& Bounds, const Array<Voro
 
 			Vector3D normal = Vector3D::Cross(bound[1] - bound[0], bound[2] - bound[0]).Normalised();
 
-			if (Vector3D::Dot(normal, bound[0] - Center) < 0) normal = -normal;
+			//if (Vector3D::Dot(normal, bound[0] - Center) < 0) normal = -normal;
 
-			const double d = -Vector3D::Dot(normal, bound[0]);
+			double d = -Vector3D::Dot(normal, bound[0]);
+
+			if (Vector3D::Dot(normal, bound[0]) + d > 0)
+			{
+				normal = -normal;
+				d = -d;
+			}
 			for (size_t i = 0; i < vface.Vertices.GetSize(); i++)
 			{
 				const Vector3D& point = vface.Vertices[i];
@@ -214,6 +235,30 @@ void SutherlandHodgeman::Clip3D(const Array<FTriangle>& Bounds, const Array<Voro
 
 
 			}
+
+			Vector3D n = Vector3D::Cross(newFace.Vertices[1] - newFace.Vertices[0], newFace.Vertices[2] - newFace.Vertices[0]).Normalised();
+
+			double p = -Vector3D::Dot(normal, newFace.Vertices[0]);
+
+			if (Vector3D::Dot(normal, newFace.Vertices[0]) + p > 0)
+			{
+				normal = -normal;
+				p = -p;
+			}
+
+			//if (Vector3D::Dot(normal, OutClipped.Vertices[0] - Center) < 0) n = -n;
+
+			VoronoiFace orderedFace;
+
+			Voronoi::OrderVertices(newFace.Vertices, Center, normal, orderedFace);
+
+			newFace.Vertices.Empty();
+
+			for (const auto& vert : orderedFace.Vertices)
+			{
+				newFace.Vertices.Add(vert.point);
+			}
+
 			newFaces.Add(newFace);
 
 		}

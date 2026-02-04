@@ -52,7 +52,8 @@ add_library(EngineCore STATIC
     "src/Engine/Window/FirstWindow.cpp"
     "src/Engine/Window/Window.cpp"
     "src/Engine/Window/VulkanWindow.cpp"
-    "src/Engine/SubsystemInitialiser.cpp"
+    "src/Engine/GraphicsAPI/OpenGL/SubsystemInitialiser.cpp"
+    "src/Engine/GraphicsAPI/OpenGL/InitialiseOpenGL.cpp"
     "src/Engine/GraphicsAPI/VulkanAPI/VulkanSubsystemInitialiser.cpp"
     "src/Engine/ErrorHandling/ErrorCodes.cpp"
     "src/Engine/Input/InputManager.cpp"
@@ -93,7 +94,8 @@ add_library(EngineCore STATIC
     "src/PreprocessorDefinitions.cpp"
     "src/Engine/Math/Predictates.c"
     "src/Engine/GraphicsAPI/VulkanAPI/RuntimeEngineVulkan.cpp"
-    "src/Engine/RuntimeEngine.cpp"
+    "src/Engine/GraphicsAPI/OpenGL/OpenGLInstance.cpp"
+    "src/Engine//GraphicsAPI/OpenGL/RuntimeEngine.cpp"
     "src/Engine/GraphicsAPI/DataBuffers/DataBuffers.cpp"
     "src/Engine/GraphicsAPI/DataBuffers/BaseDataBuffers.cpp"
     "src/Engine/GraphicsAPI/DataBuffers/DataBuffersVulkan.cpp"
@@ -147,6 +149,7 @@ target_include_directories(EngineCore
                            "$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/src/Engine/Triangulation>"
                            "$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/src/Engine/GraphicsAPI>"
                            "$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/src/Engine/GraphicsAPI/VulkanAPI>"
+                           "$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/src/Engine/GraphicsAPI/OpenGL>"
                            "$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/src/Engine/GraphicsAPI/DataBuffers>"
 
                            "$<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}>")
@@ -178,7 +181,8 @@ install(FILES
     src/Engine/Window/FirstWindow.h
     src/Engine/Window/Window.h
     src/Engine/Window/VulkanWindow.h
-    src/Engine/SubsystemInitialiser.h
+    src/Engine//GraphicsAPI/OpenGL/SubsystemInitialiser.h
+    src/Engine//GraphicsAPI/OpenGL/InitialiseOpenGL.h
     src/Engine/GraphicsAPI/VulkanAPI/VulkanSubsystemInitialiser.h
     src/Engine/ErrorHandling/ErrorCodes.h
     src/Engine/Input/InputManager.h
@@ -218,7 +222,8 @@ install(FILES
     src/Engine/Fracturing/VoronoiClipping.h
     src/Engine/Fracturing/Voronoi2D.h
     src/PreprocessorDefinitions.h
-    src/Engine/RuntimeEngine.h
+    src/Engine/GraphicsAPI/OpenGL/RuntimeEngine.h
+    src/Engine/GraphicsAPI/OpenGL/OpenGLInstance.h
     src/Engine/GraphicsAPI/DataBuffers/DataBuffers.h
     src/Engine/GraphicsAPI/DataBuffers/BaseDataBuffers.h
     src/Engine/GraphicsAPI/DataBuffers/DataBuffersOpenGL.h

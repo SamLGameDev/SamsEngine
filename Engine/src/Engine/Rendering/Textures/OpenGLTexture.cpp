@@ -100,6 +100,12 @@ namespace OpenGL {
 		return  CorePaths::Contents.Path + "/" + TextureLocation;
 	}
 
+	std::shared_ptr<BaseTexture> Texture::CreateOpenGLTexture(const std::string_view& InTextureLocation,
+		const TextureType& InType)
+	{
+		return std::make_shared<OpenGL::Texture>(InTextureLocation, InType);
+	}
+
 	unsigned char* Texture::LoadTexture(int* Width, int* Height, int* nrChannels) const
 	{
 		stbi_set_flip_vertically_on_load(true);

@@ -93,6 +93,7 @@ public:
 
 	Transform transform;
 
+	static std::int8_t ProjectonDir;
 private:
 
 	double Yaw = -90;
@@ -131,4 +132,6 @@ private:
 	uint32_t GlobalTransformsID;
 
 	InputManager* AInputManger;
+
+
 };

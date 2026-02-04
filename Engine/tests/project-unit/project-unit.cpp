@@ -463,7 +463,7 @@ TEST(Tringulation, Delauney)
 ////	ASSERT_EQ(tet.IsPointInCircumSphere({ 0.9, 1, 1 }), true);
 }
 
-void RunEngine(Vulkan::RuntimeEngine engine)
+void RunEngine(Vulkan::RuntimeEngine& engine)
 {
 
 	Model model = Model("/Models/BackPack/backpack.obj", Shader("BasicTexture", "/Shaders/"));
@@ -474,7 +474,7 @@ void RunEngine(Vulkan::RuntimeEngine engine)
 	//VoronoiClipping clipper;
 	//clipper.ClipMeshToVoronoi(vorn, model);
 
-	while (!RuntimeEngine::ShouldClose())
+	while (!engine.ShouldClose())
 	{
 		engine.Loop();
 	}
@@ -493,22 +493,48 @@ void EnginePlane()
 }
 
 
-void RunEngineDelaunay(Vulkan::RuntimeEngine engine)
+void RunEngineDelaunay(Vulkan::RuntimeEngine& engine)
 {
+
 	Model model = Model("/Models/Asteroid/rock.obj", Shader("ColorShape", "/Shaders/"));
-	model.ModelTransform.Position = { 5, 0, 0 };
+	//model.ModelTransform.Position = { 5, 0, 0 };
 	Voronoi vorn;
 	vorn.FractureDelaunayRandom(model, 100);
 	std::cout << "Generated Voronoi Diagram with " << vorn.Fractures.GetSize() << " cells." << std::endl;
 	VoronoiClipping clipper;
 	clipper.ClipMeshToVoronoi(vorn, model);
 
-	while (!RuntimeEngine::ShouldClose())
+	while (!engine.ShouldClose())
 	{
 		engine.Loop();
 	}
 
 	Vulkan::RuntimeEngine::WaitForFrameToFinish();
+}
+
+void OpenGLTest()
+{
+	OpenGL::RuntimeEngine engine;
+	engine.Init();
+
+	Model model = Model("/Models/Asteroid/rock.obj", Shader("BasicTexture", "/Shaders/"));
+	model.ModelTransform.Position = { 5, 0, 0 };
+	GLenum error = glGetError();
+	if (error != GL_NO_ERROR)
+	{
+		std::cout << "ERROR::UNIFORMBUFFER::" << std::to_string(error) << std::endl;
+	}
+	Voronoi vorn;
+	vorn.FractureDelaunayRandom(model, 100);
+	//std::cout << "Generated Voronoi Diagram with " << vorn.Fractures.GetSize() << " cells." << std::endl;
+	//VoronoiClipping clipper;
+	//clipper.ClipMeshToVoronoi(vorn, model);
+	while (!engine.ShouldClose())
+	{
+		engine.Loop();
+	}
+
+	engine.ShutDown();
 }
 
 
@@ -525,5 +551,6 @@ void EngineDelaunay()
 TEST(Fracturing, Diagram) {
 	//EnginePlane();
 
-	EngineDelaunay();
+	//EngineDelaunay();
+	OpenGLTest();
 }

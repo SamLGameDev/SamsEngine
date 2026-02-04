@@ -515,7 +515,7 @@ public:
 
 
 	T* begin() { return DynamicArray; }
-	T* end() { return DynamicArray + NumItems; }
+	T* end() {return DynamicArray + NumItems;}
 	const T* begin() const { return DynamicArray; }
 	const T* end() const { return DynamicArray + NumItems; }
 

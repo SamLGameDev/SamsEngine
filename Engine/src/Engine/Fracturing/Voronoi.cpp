@@ -624,7 +624,6 @@ void Voronoi::GenerateVoronoiCellDelaunay(const Model& InModel, const Array<Tetr
 	ClipCellToBox(InModel, faces);
 
 	auto color = Vector3D::RandomRange(Vector3D(30, 30, 30), Vector3D(255, 255, 255));
-	std::scoped_lock lock(VoronoiMutex);
 	FracturePiece3D frac = CreateObjectRaw<FracturePiece3D>(faces, Point);
 	frac.color = color;
 	Fractures.Emplace( std::move(frac) );
@@ -647,11 +646,14 @@ void Voronoi::GenerateVoronoiCellsDelaunay(const Array<Vector3D>& Points, const 
 
 	Array<Tetrahedron> tetrahedra;
 	dt.Triangulate(Points, tetrahedra);
-	Array<std::jthread> threads;
+	GLenum error = glGetError();
+	if (error != GL_NO_ERROR)
+	{
+		std::cout << "ERROR::UNIFORMBUFFER::" << std::to_string(error) << std::endl;
+	}
 	for (const auto& point : Points)
 	{
-		std::jthread t(&Voronoi::GenerateVoronoiCellDelaunay,this,std::cref(InModel), std::cref(tetrahedra),point);
-		threads.Emplace(std::move(t));
+		GenerateVoronoiCellDelaunay(InModel, tetrahedra, point);
 	}
 
 }
@@ -758,11 +760,16 @@ void FracturePiece3D::BufferData()
 
 FracturePiece3D::FracturePiece3D(const Array<VoronoiFace>& cell, const Vector3D& point) : WorldObject()
 {
+	GLenum error = glGetError();
+	if (error != GL_NO_ERROR)
+	{
+		std::cout << "ERROR::UNIFORMBUFFER::" << std::to_string(error) << std::endl;
+	}
 	CellFaces = cell;
 
 	SetupControls(point);
 
-	shader = Shader("ColorShape", "/Shaders/");
+	shader = ::Shader("ColorShape", "/Shaders/");
 
 	TriangulateCell(cell);
 
@@ -772,6 +779,11 @@ FracturePiece3D::FracturePiece3D(const Array<VoronoiFace>& cell, const Vector3D&
 	}
 
 	BufferData();
+	error = glGetError();
+	if (error != GL_NO_ERROR)
+	{
+		std::cout << "ERROR::UNIFORMBUFFER::" << std::to_string(error) << std::endl;
+	}
 }
 
 void FracturePiece3D::Draw()
@@ -824,6 +836,6 @@ void FracturePiece3D::Converge()
 
 void FracturePiece3D::ToggleRendering()
 {
-	bIsHidden = true;
+	bIsHidden = !bIsHidden;
 }
 
