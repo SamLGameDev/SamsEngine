@@ -7,7 +7,8 @@
 #include "Verticie.h"
 #include "VoronoiClipping.h"
 
-void SutherlandHodgeman::Clip3D(const Array<VoronoiFace>& Bounds, const FTriangle& ToClip, Face& OutClipped, const Vector3D& Center)
+void SutherlandHodgeman::Clip3D(const Array<Face>& Bounds, const FTriangle& ToClip, Face& OutClipped,
+                                const Vector3D& Center)
 {
 
 	OutClipped.Vertices = { ToClip.Verts[0], ToClip.Verts[1], ToClip.Verts[2] };
@@ -18,11 +19,11 @@ void SutherlandHodgeman::Clip3D(const Array<VoronoiFace>& Bounds, const FTriangl
 		Face newFace;
 		if (bound.Vertices.GetSize() < 3) continue;
 
-		Vector3D normal = Vector3D::Cross(bound.Vertices[1].point - bound.Vertices[0].point, bound.Vertices[2].point - bound.Vertices[0].point).Normalised();
+		Vector3D normal = Vector3D::Cross(bound.Vertices[1] - bound.Vertices[0], bound.Vertices[2] - bound.Vertices[0]).Normalised();
 
-		if (Vector3D::Dot(normal, bound.Vertices[0].point - Center) < 0) normal = -normal;
+		if (Vector3D::Dot(normal, bound.Vertices[0] - Center) < 0) normal = -normal;
 
-		const double d = -Vector3D::Dot(normal, bound.Vertices[0].point);
+		const double d = -Vector3D::Dot(normal, bound.Vertices[0]);
 		for (size_t i = 0; i < OutClipped.Vertices.GetSize(); i++)
 		{
 			const Vector3D& point = OutClipped.Vertices[i];
@@ -167,7 +168,7 @@ void SutherlandHodgeman::Clip3D(const Array<FTriangle>& Bounds, const FTriangle&
 
 }
 
-void SutherlandHodgeman::Clip3D(const Array<FTriangle>& Bounds, const Array<VoronoiFace>& ToClip, Array<Face>& OutClipped,
+void SutherlandHodgeman::Clip3D(const Array<FTriangle>& Bounds, const Array<Face>& ToClip, Array<Face>& OutClipped,
                                 const Vector3D& Center)
 {
 
@@ -178,7 +179,7 @@ void SutherlandHodgeman::Clip3D(const Array<FTriangle>& Bounds, const Array<Voro
 		Face newFace;
 		for (const auto& vert : face.Vertices)
 		{
-			newFace.Vertices.Add(vert.point);
+			newFace.Vertices.Add(vert);
 		}
 
 		if (newFace.Vertices.GetSize() < 3) continue;
@@ -248,16 +249,7 @@ void SutherlandHodgeman::Clip3D(const Array<FTriangle>& Bounds, const Array<Voro
 
 			//if (Vector3D::Dot(normal, OutClipped.Vertices[0] - Center) < 0) n = -n;
 
-			VoronoiFace orderedFace;
-
-			Voronoi::OrderVertices(newFace.Vertices, Center, normal, orderedFace);
-
-			newFace.Vertices.Empty();
-
-			for (const auto& vert : orderedFace.Vertices)
-			{
-				newFace.Vertices.Add(vert.point);
-			}
+			Vector3D::OrderByAngle(newFace.Vertices, Center, normal);
 
 			newFaces.Add(newFace);
 

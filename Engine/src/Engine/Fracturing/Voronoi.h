@@ -24,8 +24,6 @@ struct TetRing
 	}
 
 };
-
-struct VoronoiFace;
 class FracturePiece3D : WorldObject
 {
 public:
@@ -34,14 +32,10 @@ public:
 
 	~FracturePiece3D();
 	void TriangulateCell(const Array<Face>& cell);
-	void TriangulateCell(const Array<VoronoiFace>& cell);
-
 
 	FracturePiece3D(const Array<Face>& cell, const Vector3D& Point);
 	void SetupControls(const Vector3D& point);
 	void BufferData();
-
-	FracturePiece3D(const Array<VoronoiFace>& cell, const Vector3D& point);
 
 	void Copy(const FracturePiece3D& Other)
 	{
@@ -160,7 +154,7 @@ public:
 
 	Transform transform;
 
-	Array<VoronoiFace> CellFaces;
+	Array<Face> CellFaces;
 
 	Array<Vector3D> Verts;
 
@@ -193,34 +187,6 @@ private:
 	void AddOrMakeInd(const Vector3D& Vert);
 };
 
-
-struct AnglePointPair
-{
-	Vector3D point;
-	double angle;
-
-	bool operator<(const AnglePointPair& Other)const
-	{
-		return angle < Other.angle;
-	}  
-
-	bool operator==(const AnglePointPair& Other) const
-	{
-		return point == Other.point;
-	}
-};
-
-struct VoronoiFace
-{
-	Array<AnglePointPair> Vertices;
-
-	bool operator==(const VoronoiFace& Other) const
-	{
-		return Vertices == Other.Vertices;
-	}
-};
-
-
 class Voronoi
 {
 public:
@@ -234,10 +200,6 @@ public:
 	std::mutex VoronoiMutex;
 
 	Array<FracturePiece3D> Fractures;
-
-	static void OrderVertices(const VoronoiFace& IntersectFace, const Vector3D& Center, const Vector3D& Normal, VoronoiFace& OrderedFace);
-	static void OrderVertices(const Array<Vector3D>& Vertices, const Vector3D& Center, const Vector3D& Normal,
-		VoronoiFace& OrderedFace);
 
 private:
 	static void GetFirstIntersection(const Vector3D& Normal, const Vector3D& Center, const Face& CurrentFace, Face& NewFace,
@@ -267,16 +229,16 @@ private:
 	std::unique_ptr<InputAction> Next;
 
 	static Vector3D GetCircumCenter(const Vector3D& A, const Vector3D& B, const Vector3D& C, const Vector3D& D);
-	static void ClipVertexToPlane(const Vector3D& Normal, const double& D, VoronoiFace& IntersectFace, const AnglePointPair& Vertex,
-	                              const AnglePointPair& NextVertex, VoronoiFace& NewFace);
+	static void ClipVertexToPlane(const Vector3D& Normal, const double& D, Face& IntersectFace, const Vector3D& Vertex,
+	                              const Vector3D& NextVertex, Face& NewFace);
 	static void GetFaceAxis(const Vector3D& Normal, Vector3D& T, Vector3D& U);
 
-	static void ClipCellToPlane(Array<VoronoiFace>& Cell, const Face& Plane);
+	static void ClipCellToPlane(Array<Face>& Cell, const Face& Plane);
 
-	static void ClipCellToBox(const Model& InModel, Array<VoronoiFace>& Cell);
+	static void ClipCellToBox(const Model& InModel, Array<Face>& Cell);
 	static void GetAllIncidentTets(const Array<Tetrahedron>& Tetrahedra, const Vector3D& Point, Array<TetRing>& Rings);
-	static void GetCellFace(Array<VoronoiFace>& Faces, const TetRing& Ring);
-	static Array<VoronoiFace> GetCell(const Array<Tetrahedron>& tetrahedra, const Vector3D& point);
+	static void GetCellFace(Array<Face>& Faces, const TetRing& Ring);
+	static Array<Face> GetCell(const Array<Tetrahedron>& tetrahedra, const Vector3D& point);
 	void GenerateVoronoiCellDelaunay(const Model& InModel, const Array<Tetrahedron>& Tetrahedra, const Vector3D& Point);
 
 	void NextCell();

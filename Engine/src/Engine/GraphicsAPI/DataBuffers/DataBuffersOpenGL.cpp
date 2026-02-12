@@ -46,7 +46,7 @@ namespace OpenGL
 		GLint length = Format == BufferFormat::Vector3 ? 3 : 2;
 
 		glEnableVertexAttribArray(Location);
-		glVertexAttribPointer(Location, length, GL_FLOAT, GL_FALSE, Offset, static_cast<void*>(0));
+		glVertexAttribPointer(Location, length, GL_FLOAT, GL_FALSE, Stride, static_cast<void*>(0));
 		glBindVertexArray(0);
 
 	}

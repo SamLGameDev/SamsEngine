@@ -4,6 +4,8 @@
 
 #include<random>
 #include<iostream>
+
+#include "Array.h"
 #include "Vector2D.h"
 
 Vector3D const Vector3D::Up = Vector3D(0, 1, 0);
@@ -184,9 +186,62 @@ Vector3D Vector3D::max(const Vector3D& A, const Vector3D B)
 	return { std::max(A.X, B.X), std::max(A.Y, B.Y), std::max(A.Z, B.Z) };
 }
 
+double Vector3D::GetSignedDistance(const Vector3D& Point, const Vector3D& Normal, const Vector3D& PointOnPlane)
+{
+	return Dot(Normal, Point) - Dot(Normal, PointOnPlane);
+}
+
 Vector3D::Vector3D(const Vector2D& Other)
 {
 	X = Other.X;
 	Y = Other.Y;
 	Z = 0;
+}
+void Vector3D::OrderByAngle(Array<Vector3D>& Vertices, const Vector3D& Center, const Vector3D& Normal)
+{
+	Vector3D t, u;
+	GetPlaneAxis(Normal, t, u);
+
+	Array<AnglePointPair> anglePointPairs;
+
+	for (const auto& vert : Vertices)
+	{
+		//Gets the cell angle so it can be ordered properly
+
+		const Vector3D d = vert - Center;
+		const double x = Vector3D::Dot(d, u);
+		const double y = Vector3D::Dot(d, t);
+		const double angle = std::atan2(y, x);
+
+		anglePointPairs.Add({ vert, angle });
+
+	}
+	std::ranges::sort(anglePointPairs, std::less{});
+
+	Vertices.Empty();
+
+	for (const auto& pair : anglePointPairs)
+	{
+		Vertices.Add(pair.point);
+	}
+
+}
+
+void Vector3D::GetPlaneAxis(const Vector3D& Normal, Vector3D& T, Vector3D& U)
+{
+	Vector3D arbitraryUp = Vector3D::Up;
+	if (fabs(Vector3D::Dot(Normal, arbitraryUp)) > 0.99f) {
+		arbitraryUp = Vector3D(1, 0, 0);
+	}
+
+	U = Vector3D::Cross(Normal, arbitraryUp).Normalised();
+	T = Vector3D::Cross(Normal, U);
+}
+
+Vector3D Vector3D::GetPlaneNormal(const Array<Vector3D>& ClippingPlane, const Vector3D& Center)
+{
+	Vector3D normal = Cross(ClippingPlane[1] - ClippingPlane[0], ClippingPlane[2] - ClippingPlane[0]).Normalised();
+
+	if (Dot(normal, ClippingPlane[0] - Center) < 0) normal = -normal;
+	return normal;
 }

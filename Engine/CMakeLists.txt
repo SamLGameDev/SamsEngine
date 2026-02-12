@@ -80,6 +80,7 @@ add_library(EngineCore STATIC
     "src/Engine/Physics/Collision/Casters/CollisionCast.cpp"
     "src/Engine/Physics/Collision/AABB/AABB.cpp"
     "src/Engine/Physics/Clipping/SutherlandHodgeman.cpp"
+    "src/Engine/Physics/Clipping/PlaneClipping.cpp"
     "src/Engine/Lighting/BaseLight.cpp"
     "src/Engine/Lighting/LightManager.cpp"
     "src/Engine/Lighting/DirectionalLight.cpp"
@@ -210,6 +211,7 @@ install(FILES
     src/Engine/Physics/Collision/Casters/CollisionCast.h
     src/Engine/Physics/Collision/AABB/AABB.h
     src/Engine/Physics/Clipping/SutherlandHodgeman.h
+    src/Engine/Physics/Clipping/PlaneClipping.h
     src/Engine/Lighting/BaseLight.h
     src/Engine/Lighting/LightManager.h
     src/Engine/Lighting/DirectionalLight.h
@@ -252,6 +254,11 @@ target_link_libraries(EngineCore PRIVATE glm::glm)
 
 find_package(assimp REQUIRED)
 target_link_libraries(EngineCore PRIVATE assimp::assimp)
+
+
+find_package(CGAL REQUIRED)
+target_link_libraries(EngineCore PRIVATE CGAL::CGAL)
+
 
 find_package(Stb REQUIRED)
 target_include_directories(EngineCore PRIVATE ${Stb_INCLUDE_DIR})

@@ -3,6 +3,25 @@
 
 #include "Voronoi.h"
 
+struct FTetrahedron
+{
+	Array<Vector3D> Verts;
+
+	Array<Face> Faces;
+
+	FTetrahedron(const Vector3D& A, const Vector3D& B, const Vector3D& C, const Vector3D& D)
+	{
+		Verts = { A, B, C, D };
+		Faces.Add(Face({ A, B, C }));
+		Faces.Add({ {A, B, D} });
+		Faces.Add({ {A, C, D} });
+		Faces.Add({ {B, C, D} });
+	}
+
+	FTetrahedron() = default;
+
+};
+
 
 struct FTriangle
 {
@@ -231,6 +250,8 @@ class VoronoiClipping
 {
 public:
 	void ClipMeshToVoronoi(Voronoi& Diagram, const Model& Mesh);
+
+	Array<FTetrahedron> TetrahredraliseMesh(const Model& Mesh);
 
 	Array<FracturedMeshPiece> FracturedPieces;
 };

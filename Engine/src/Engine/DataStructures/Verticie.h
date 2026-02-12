@@ -82,6 +82,16 @@ public:
 
 		return true; 
 	}
+
+	Vector3D GetCenter() const
+	{
+		Vector3D center = Vector3D::Zero;
+		for (const auto& vert : Vertices)
+		{
+			center += vert;
+		}
+		return center / Vertices.GetSize();
+	}
 };
 struct Edge
 {

@@ -466,13 +466,15 @@ TEST(Tringulation, Delauney)
 void RunEngine(Vulkan::RuntimeEngine& engine)
 {
 
-	Model model = Model("/Models/BackPack/backpack.obj", Shader("BasicTexture", "/Shaders/"));
+	//Model model = Model("/Models/BackPack/backpack.obj", Shader("BasicTexture", "/Shaders/"));
+	Model model = Model("/Models/Asteroid/rock.obj", Shader("ColorShape", "/Shaders/"));
+	//Model model = Model("/Models/SkyBox/SkyBox.obj", Shader("ColorShape", "/Shaders/"));
 	model.ModelTransform.Position = { 5, 0, 0 };
 	Voronoi vorn;
-	vorn.FracturePlaneRandom(model, 1000);
+	vorn.FracturePlaneRandom(model, 10);
 
-	//VoronoiClipping clipper;
-	//clipper.ClipMeshToVoronoi(vorn, model);
+	VoronoiClipping clipper;
+	clipper.ClipMeshToVoronoi(vorn, model);
 
 	while (!engine.ShouldClose())
 	{
@@ -497,7 +499,7 @@ void RunEngineDelaunay(Vulkan::RuntimeEngine& engine)
 {
 
 	Model model = Model("/Models/Asteroid/rock.obj", Shader("ColorShape", "/Shaders/"));
-	//model.ModelTransform.Position = { 5, 0, 0 };
+	model.ModelTransform.Position = { 5, 0, 0 };
 	Voronoi vorn;
 	vorn.FractureDelaunayRandom(model, 100);
 	std::cout << "Generated Voronoi Diagram with " << vorn.Fractures.GetSize() << " cells." << std::endl;
@@ -527,8 +529,8 @@ void OpenGLTest()
 	Voronoi vorn;
 	vorn.FractureDelaunayRandom(model, 100);
 	//std::cout << "Generated Voronoi Diagram with " << vorn.Fractures.GetSize() << " cells." << std::endl;
-	//VoronoiClipping clipper;
-	//clipper.ClipMeshToVoronoi(vorn, model);
+	VoronoiClipping clipper;
+	clipper.ClipMeshToVoronoi(vorn, model);
 	while (!engine.ShouldClose())
 	{
 		engine.Loop();
@@ -549,8 +551,8 @@ void EngineDelaunay()
 }
 
 TEST(Fracturing, Diagram) {
-	//EnginePlane();
+	EnginePlane();
 
 	//EngineDelaunay();
-	OpenGLTest();
+	//OpenGLTest();
 }

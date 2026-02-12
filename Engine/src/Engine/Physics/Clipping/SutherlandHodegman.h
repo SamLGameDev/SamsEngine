@@ -7,7 +7,6 @@
 
 struct Face;
 struct FTriangle;
-struct VoronoiFace;
 
 class SutherlandHodgeman
 {
@@ -16,10 +15,10 @@ class SutherlandHodgeman
 
 public:
 
-	static void Clip3D(const Array<VoronoiFace>& Bounds, const FTriangle& ToClip, Face& OutClipped, const Vector3D& Center);
+	static void Clip3D(const Array<Face>& Bounds, const FTriangle& ToClip, Face& OutClipped, const Vector3D& Center);
 
 	static void Clip3D(const Array<FTriangle>& Bounds, const FTriangle& ToClip, Face& OutClipped, const Vector3D& Center);
 
-	static void Clip3D(const Array<FTriangle>& Bounds, const Array<VoronoiFace>& ToClip, Array<Face>& OutClipped, const Vector3D& Center);
+	static void Clip3D(const Array<FTriangle>& Bounds, const Array<Face>& ToClip, Array<Face>& OutClipped, const Vector3D& Center);
 
 };
