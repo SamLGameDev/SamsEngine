@@ -240,8 +240,27 @@ void Vector3D::GetPlaneAxis(const Vector3D& Normal, Vector3D& T, Vector3D& U)
 
 Vector3D Vector3D::GetPlaneNormal(const Array<Vector3D>& ClippingPlane, const Vector3D& Center)
 {
-	Vector3D normal = Cross(ClippingPlane[1] - ClippingPlane[0], ClippingPlane[2] - ClippingPlane[0]).Normalised();
 
-	if (Dot(normal, ClippingPlane[0] - Center) < 0) normal = -normal;
-	return normal;
+	Vector3D normal = Vector3D::Zero;
+
+	for (int i = 0; i < ClippingPlane.GetSize(); ++i)
+	{
+		const Vector3D& current = ClippingPlane[i];
+		const Vector3D& next = ClippingPlane[(i + 1) % ClippingPlane.GetSize()];
+
+		normal.X += (current.Y - next.Y) * (current.Z + next.Z);
+		normal.Y += (current.Z - next.Z) * (current.X + next.X);
+		normal.Z += (current.X - next.X) * (current.Y + next.Y);
+	}
+
+	float lenSq = normal.GetSquaredLength();
+	if (lenSq < 1e-12f)
+		return Vector3D::Zero;
+
+	return normal.Normalised();
+
+	//Vector3D normal = Cross(ClippingPlane[1] - ClippingPlane[0], ClippingPlane[2] - ClippingPlane[0]).Normalised();
+
+	//if (Dot(normal, ClippingPlane[0] - Center) < 0) normal = -normal;
+	//return normal;
 }

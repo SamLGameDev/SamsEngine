@@ -31,7 +31,13 @@ public:
 	static void GetTetsWithPointInCircumsphere(const Array<Tetrahedron>& Tetrahedra, const Vector3D& Point,
 	                                           Array<Tetrahedron>& NewTetrahedron, Array<Face>& Faces);
 	static void GetUniqueFaces(const Array<Face>& Faces, Array<Face>& UniqueFaces);
-	static void Triangulate(const Array<Vector3D>& Points, Array<Tetrahedron>& Tetrahedrons);
+	void Triangulate(const Array<Vector3D>& Points);
+
+	void RemoveSuperTriangle();
+
+	Array<Tetrahedron> Tetrahedrons;
+
+	Tetrahedron SuperTetrahedron;
 
 private:
 	static Triangle GetSuperTriangle(const Array<Vector2D>& Vertices);

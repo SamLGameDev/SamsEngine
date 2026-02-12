@@ -30,12 +30,12 @@ void PlaneClipping::ClipCellByFaces(Array<Face>& ToClip, const Array<Face>& Clip
 		{
 			std::cout << "Plane normal is zero, skipping clipping for this plane." << std::endl; continue;
 		}
-
-		std::cout << "Clipping by plane with normal: " << normal.X << ", " << normal.Y << ", " << normal.Z << std::endl;
-		std::cout << "Plane center: " << plane.GetCenter().X << ", " << plane.GetCenter().Y << ", " << plane.GetCenter().Z << std::endl;
-		std::cout << "Clipping cell center " << center.X  << "," << center.Y << "," << center.Z << std::endl;
-
 		ClipCellByFace(ToClip, plane.GetCenter(), normal);
+
+		for (auto& face : ToClip)
+		{
+			Vector3D::OrderByAngle(face.Vertices, face.GetCenter(), normal);
+		}
 	}
 }
 
@@ -47,11 +47,6 @@ void PlaneClipping::ClipCellByFace(Array<Face>& ToClip, const Vector3D& Center, 
 
 	for (const auto& face : ToClip)
 	{
-		std::cout << "Face before clipping: " << std::endl;
-		for (size_t i = 0; i < face.Vertices.GetSize(); i++)
-		{
-			std::cout << "Face vert: " << face.Vertices[i].X << ", " << face.Vertices[i].Y << ", " << face.Vertices[i].Z << std::endl;
-		}
 
 		Face outFace;
 		ClipFaceByFace(face, Center, outFace, normal, intersectFace);
@@ -59,21 +54,11 @@ void PlaneClipping::ClipCellByFace(Array<Face>& ToClip, const Vector3D& Center, 
 		{
 			newFaces.Add(outFace);
 		}
-		std::cout << "Face after clipping: " << std::endl;
-		for (size_t i = 0; i < outFace.Vertices.GetSize(); i++)
-		{
-			std::cout << "Face vert: " << outFace.Vertices[i].X << ", " << outFace.Vertices[i].Y << ", " << outFace.Vertices[i].Z << std::endl;
-		}
 	}
 
 	if (intersectFace.Vertices.GetSize() >= 3)
 	{
 		Vector3D::OrderByAngle(intersectFace.Vertices, Center, normal);
-		std::cout << "Intersect Face: " << std::endl;
-		for (size_t i = 0; i < intersectFace.Vertices.GetSize(); i++)
-		{
-			std::cout << "Intersect Face: " << intersectFace.Vertices[i].X << ", " << intersectFace.Vertices[i].Y << ", " << intersectFace.Vertices[i].Z << std::endl;
-		}
 
 		newFaces.Add(intersectFace);
 	}

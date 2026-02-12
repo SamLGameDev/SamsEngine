@@ -471,7 +471,7 @@ void RunEngine(Vulkan::RuntimeEngine& engine)
 	//Model model = Model("/Models/SkyBox/SkyBox.obj", Shader("ColorShape", "/Shaders/"));
 	model.ModelTransform.Position = { 5, 0, 0 };
 	Voronoi vorn;
-	vorn.FracturePlaneRandom(model, 10);
+	vorn.FracturePlaneRandom(model, 100);
 
 	VoronoiClipping clipper;
 	clipper.ClipMeshToVoronoi(vorn, model);

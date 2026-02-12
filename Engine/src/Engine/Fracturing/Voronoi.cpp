@@ -557,11 +557,10 @@ void Voronoi::GenerateVoronoiCellsDelaunay(const Array<Vector3D>& Points, const 
 	
 	DelaunayTriangulation dt;
 
-	Array<Tetrahedron> tetrahedra;
-	dt.Triangulate(Points, tetrahedra);
+	dt.Triangulate(Points);
 	for (const auto& point : Points)
 	{
-		GenerateVoronoiCellDelaunay(InModel, tetrahedra, point);
+		GenerateVoronoiCellDelaunay(InModel, dt.Tetrahedrons, point);
 	}
 
 }
@@ -613,9 +612,19 @@ FracturePiece3D::FracturePiece3D(const Array<Face>& cell, const Vector3D& Point)
 		{
 			continue;
 		}
-		CellFaces.Add(face);
+		Face newFace;
+		for (const auto& vert : face.Vertices)
+		{
+			if (newFace.Vertices.Contains(vert))
+			{
+				continue;
+			}
+			newFace.Vertices.Add(vert);
+		}
 
-		Vector3D::OrderByAngle(CellFaces.GetLastPtr()->Vertices, face.GetCenter(), Vector3D::GetPlaneNormal(CellFaces.GetLastPtr()->Vertices, face.GetCenter()));
+		CellFaces.Add(newFace);
+
+		Vector3D::OrderByAngle(CellFaces.GetLastPtr()->Vertices, newFace.GetCenter(), Vector3D::GetPlaneNormal(CellFaces.GetLastPtr()->Vertices, newFace.GetCenter()));
 
 	}
 

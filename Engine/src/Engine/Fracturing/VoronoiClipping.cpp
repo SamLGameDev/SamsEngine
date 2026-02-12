@@ -11,6 +11,7 @@
 #include <CGAL/Exact_predicates_inexact_constructions_kernel.h>
 #include <CGAL/Delaunay_triangulation_3.h>
 
+#include "DelaunayTriangulation.h"
 #include "PlaneClipping.h"
 #include "Predictates.h"
 using Kernel = CGAL::Exact_predicates_inexact_constructions_kernel;
@@ -183,8 +184,6 @@ void VoronoiClipping::ClipMeshToVoronoi(Voronoi& Diagram, const Model& Mesh)
 
 		Array<Face> newCell;
 
-		std::cout << "NewCell ------------------------------------------------------------------------------------------------ \n";
-
 		for (auto& tet : tets)
 		{
 
@@ -198,7 +197,7 @@ void VoronoiClipping::ClipMeshToVoronoi(Voronoi& Diagram, const Model& Mesh)
 		}
 
 		Vector3D color = Vector3D::RandomRange(Vector3D(30, 30, 30), Vector3D(255, 255, 255));
-		FracturedMeshPiece frac = CreateObjectRaw<FracturedMeshPiece>(newCell, Vector3D::Zero);
+		FracturedMeshPiece frac = CreateObjectRaw<FracturedMeshPiece>(newCell, cell.Point);
 		frac.Color = color;
 		FracturedPieces.Emplace(std::move(frac));
 	}
@@ -206,35 +205,58 @@ void VoronoiClipping::ClipMeshToVoronoi(Voronoi& Diagram, const Model& Mesh)
 
 Array<FTetrahedron> VoronoiClipping::TetrahredraliseMesh(const Model& Mesh)
 {
-
-	Array<Point> dtPoints;
-
-	for (const auto& p : Mesh.Meshes[0].Vertices)
-	{
-		dtPoints.Add({ p.Position.X, p.Position.Y, p.Position.Z });
-	}
-
-	DT dt;
-	dt.insert(dtPoints.begin(), dtPoints.end());
-
 	Array<FTetrahedron> tetrahedra;
+	for (const auto& subMesh : Mesh.Meshes) {
 
-	for (auto cell = dt.finite_cells_begin(); cell != dt.finite_cells_end(); ++cell)
-	{
-		const Point& p0 = cell->vertex(0)->point();
-		const Point& p1 = cell->vertex(1)->point();
-		const Point& p2 = cell->vertex(2)->point();
-		const Point& p3 = cell->vertex(3)->point();
+		DelaunayTriangulation dt;
+		Array<Vector3D> points;
+		points.Reallocate(subMesh.Vertices.GetSize());
+		for (size_t i= 0; i < subMesh.Vertices.GetSize(); i++)
+		{
+			points[i] = subMesh.Vertices[i].Position;
+		}
 
-		const Vector3D v0 = Vector3D(p0.x(), p0.y(), p0.z());
-		const Vector3D v1 = Vector3D(p1.x(), p1.y(), p1.z());
-		const Vector3D v2 = Vector3D(p2.x(), p2.y(), p2.z());
-		const Vector3D v3 = Vector3D(p3.x(), p3.y(), p3.z());
+		dt.Triangulate(points);
 
-		tetrahedra.Add({ v0, v1, v2, v3 });
-	}
+		dt.RemoveSuperTriangle();
 
+		for (const auto& tet : dt.Tetrahedrons)
+		{
+			tetrahedra.Add({ tet.point1, tet.point2, tet.point3, tet.point4 });
+		}
+	} 
 	return tetrahedra;
 
-
 }
+//Array<FTetrahedron> VoronoiClipping::TetrahredraliseMeshCGAL(const Model& Mesh) {
+//	Array<FTetrahedron> tetrahedra; for (const auto& subMesh : Mesh.Meshes) {
+//
+//		Array<Point> dtPoints;
+//
+//		for (const auto& p : subMesh.Vertices)
+//		{
+//			dtPoints.Add({ p.Position.X, p.Position.Y, p.Position.Z });
+//		}
+//
+//		DT dt;
+//		dt.insert(dtPoints.begin(), dtPoints.end());
+//
+//		for (auto cell = dt.finite_cells_begin(); cell != dt.finite_cells_end(); ++cell)
+//		{
+//			const Point& p0 = cell->vertex(0)->point();
+//			const Point& p1 = cell->vertex(1)->point();
+//			const Point& p2 = cell->vertex(2)->point();
+//			const Point& p3 = cell->vertex(3)->point();
+//
+//			const Vector3D v0 = Vector3D(p0.x(), p0.y(), p0.z());
+//			const Vector3D v1 = Vector3D(p1.x(), p1.y(), p1.z());
+//			const Vector3D v2 = Vector3D(p2.x(), p2.y(), p2.z());
+//			const Vector3D v3 = Vector3D(p3.x(), p3.y(), p3.z());
+//
+//			tetrahedra.Add({ v0, v1, v2, v3 });
+//		}
+//	}
+//	return tetrahedra;
+//
+//
+//}

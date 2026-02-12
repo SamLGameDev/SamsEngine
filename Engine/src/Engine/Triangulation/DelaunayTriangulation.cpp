@@ -163,11 +163,11 @@ void DelaunayTriangulation::GetUniqueFaces(const Array<Face>& Faces, Array<Face>
 	}
 }
 
-void DelaunayTriangulation::Triangulate(const Array<Vector3D>& Vertices, Array<Tetrahedron>& Tetrahedra)
+void DelaunayTriangulation::Triangulate(const Array<Vector3D>& Vertices)
 {
-	Tetrahedron superTetrahedron = GetSuperTetrahedron(Vertices);
+	SuperTetrahedron = GetSuperTetrahedron(Vertices);
 
-    Tetrahedra = { superTetrahedron };
+    Tetrahedrons = { SuperTetrahedron };
 
 	for (const auto& point : Vertices)
 	{
@@ -175,14 +175,14 @@ void DelaunayTriangulation::Triangulate(const Array<Vector3D>& Vertices, Array<T
 
 		Array<Face> faces;
 
-		GetTetsWithPointInCircumsphere(Tetrahedra, point, newTetrahedron, faces);
+		GetTetsWithPointInCircumsphere(Tetrahedrons, point, newTetrahedron, faces);
 
 		Array<Face> uniqueFaces;
 		GetUniqueFaces(faces, uniqueFaces);
 
 		if (uniqueFaces.IsEmpty())
 		{
-			Tetrahedra = newTetrahedron;
+			Tetrahedrons = newTetrahedron;
 			continue;
 		}
 
@@ -190,10 +190,29 @@ void DelaunayTriangulation::Triangulate(const Array<Vector3D>& Vertices, Array<T
 		{
 			newTetrahedron.Add(Tetrahedron(f.Vertices[0], f.Vertices[1], f.Vertices[2], point));
 		}
-		Tetrahedra = newTetrahedron;
+		Tetrahedrons = newTetrahedron;
 	}
 
+
+
 	//Dont remove super triangle, as voronoi needs it to clip to box without adding box bounding points
+}
+
+void DelaunayTriangulation::RemoveSuperTriangle()
+{
+	Array<Tetrahedron> unique;
+	for (const auto& tetrahedron : Tetrahedrons)
+	{
+		if (tetrahedron.ContainsPoint(SuperTetrahedron.point1)
+			|| tetrahedron.ContainsPoint(SuperTetrahedron.point2)
+			|| tetrahedron.ContainsPoint(SuperTetrahedron.point3)
+			|| tetrahedron.ContainsPoint(SuperTetrahedron.point4))
+		{
+			continue;
+		}
+		unique.Add(tetrahedron);
+	}
+	Tetrahedrons = unique;
 }
 
 Triangle DelaunayTriangulation::GetSuperTriangle(const Array<Vector2D>& Vertices)
