@@ -249,9 +249,14 @@ protected:
 class VoronoiClipping
 {
 public:
+	void ClipCellToMesh(Array<FTetrahedron>& tets, const FracturePiece3D& cell);
 	void ClipMeshToVoronoi(Voronoi& Diagram, const Model& Mesh);
 
 	Array<FTetrahedron> TetrahredraliseMesh(const Model& Mesh);
+	Array<FTetrahedron> TetrahredraliseMeshCGAL(const Model& Mesh);
+
+
+	std::mutex VoronoiMutex;
 
 	Array<FracturedMeshPiece> FracturedPieces;
 };

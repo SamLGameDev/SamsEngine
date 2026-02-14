@@ -20,6 +20,9 @@ using DT = CGAL::Delaunay_triangulation_3<Kernel>;
 
 FracturedMeshPiece::FracturedMeshPiece(const Array<Face>& cell, const Vector3D& Point)
 {
+	Verts.ReSize(cell.GetSize() * 10);
+	Inds.ReSize(cell.GetSize() * 10);
+
 	SetupControls(Point);
 
 	shader = Shader("ColorShape", "/Shaders/");
@@ -174,33 +177,48 @@ void FracturedMeshPiece::Tick(const double& DeltaTime)
 }
 
 
+void VoronoiClipping::ClipCellToMesh(Array<FTetrahedron>& tets, const FracturePiece3D& cell)
+{
+	FBox cellBox(cell.Verts);
+	Array<Face> newCell;
+	newCell.ReSize(tets.GetSize());
+
+	for (auto& tet : tets)
+	{
+
+		if (!AABB::IsBoxIntersectingBox(cellBox, FBox(tet.Verts))) continue;
+
+		Array<Face> copyFaces = tet.Faces;
+		PlaneClipping::ClipCellByFaces(copyFaces, cell.CellFaces);
+
+		if (copyFaces.IsEmpty()) continue;
+
+		newCell.Add(copyFaces);
+
+		//Fix emplace
+
+		//newCell.Emplace(std::move(copyFaces));
+	}
+	std::scoped_lock lock(VoronoiMutex);
+	Vector3D color = Vector3D::RandomRange(Vector3D(30, 30, 30), Vector3D(255, 255, 255));
+	FracturedMeshPiece frac = CreateObjectRaw<FracturedMeshPiece>(newCell, cell.Point);
+	frac.Color = color;
+	FracturedPieces.Emplace(std::move(frac));
+}
+
 void VoronoiClipping::ClipMeshToVoronoi(Voronoi& Diagram, const Model& Mesh)
 {
-	Array<FTetrahedron> tets =  TetrahredraliseMesh(Mesh);
-
+	Array<FTetrahedron> tets =  TetrahredraliseMeshCGAL(Mesh);
+	//Array<std::jthread> threads;
 	for (const auto& cell : Diagram.Fractures)
 	{
-		FBox cellBox(cell.Verts);
-
-		Array<Face> newCell;
-
-		for (auto& tet : tets)
-		{
-
-			if (!AABB::IsBoxIntersectingBox(cellBox, FBox(tet.Verts))) continue;
-
-			Array<Face> copyFaces = tet.Faces;
-			PlaneClipping::ClipCellByFaces(copyFaces, cell.CellFaces);
-
-			newCell.Add(copyFaces);
-			
-		}
-
-		Vector3D color = Vector3D::RandomRange(Vector3D(30, 30, 30), Vector3D(255, 255, 255));
-		FracturedMeshPiece frac = CreateObjectRaw<FracturedMeshPiece>(newCell, cell.Point);
-		frac.Color = color;
-		FracturedPieces.Emplace(std::move(frac));
+		//std::jthread thread(&VoronoiClipping::ClipCellToMesh, this, std::ref(tets), std::ref(cell));
+		//threads.Emplace(std::move(thread));
+		ClipCellToMesh(tets, cell);
 	}
+
+
+
 }
 
 Array<FTetrahedron> VoronoiClipping::TetrahredraliseMesh(const Model& Mesh)
@@ -228,35 +246,37 @@ Array<FTetrahedron> VoronoiClipping::TetrahredraliseMesh(const Model& Mesh)
 	return tetrahedra;
 
 }
-//Array<FTetrahedron> VoronoiClipping::TetrahredraliseMeshCGAL(const Model& Mesh) {
-//	Array<FTetrahedron> tetrahedra; for (const auto& subMesh : Mesh.Meshes) {
-//
-//		Array<Point> dtPoints;
-//
-//		for (const auto& p : subMesh.Vertices)
-//		{
-//			dtPoints.Add({ p.Position.X, p.Position.Y, p.Position.Z });
-//		}
-//
-//		DT dt;
-//		dt.insert(dtPoints.begin(), dtPoints.end());
-//
-//		for (auto cell = dt.finite_cells_begin(); cell != dt.finite_cells_end(); ++cell)
-//		{
-//			const Point& p0 = cell->vertex(0)->point();
-//			const Point& p1 = cell->vertex(1)->point();
-//			const Point& p2 = cell->vertex(2)->point();
-//			const Point& p3 = cell->vertex(3)->point();
-//
-//			const Vector3D v0 = Vector3D(p0.x(), p0.y(), p0.z());
-//			const Vector3D v1 = Vector3D(p1.x(), p1.y(), p1.z());
-//			const Vector3D v2 = Vector3D(p2.x(), p2.y(), p2.z());
-//			const Vector3D v3 = Vector3D(p3.x(), p3.y(), p3.z());
-//
-//			tetrahedra.Add({ v0, v1, v2, v3 });
-//		}
-//	}
-//	return tetrahedra;
-//
-//
-//}
+Array<FTetrahedron> VoronoiClipping::TetrahredraliseMeshCGAL(const Model& Mesh) {
+	Array<FTetrahedron> tetrahedra;
+	tetrahedra.ReSize(Mesh.Meshes.GetSize() * 10000); // Arbitrary number, should be enough for most meshes, but can be changed if needed
+	for (const auto& subMesh : Mesh.Meshes) {
+
+		Array<Point> dtPoints;
+		dtPoints.ReSize(subMesh.Vertices.GetSize());
+
+		for (const auto& p : subMesh.Vertices)
+		{
+			dtPoints.Add({ p.Position.X, p.Position.Y, p.Position.Z });
+		}
+
+		DT dt;
+		dt.insert(dtPoints.begin(), dtPoints.end());
+		for (auto cell = dt.finite_cells_begin(); cell != dt.finite_cells_end(); ++cell)
+		{
+			const Point& p0 = cell->vertex(0)->point();
+			const Point& p1 = cell->vertex(1)->point();
+			const Point& p2 = cell->vertex(2)->point();
+			const Point& p3 = cell->vertex(3)->point();
+
+			const Vector3D v0 = Vector3D(p0.x(), p0.y(), p0.z());
+			const Vector3D v1 = Vector3D(p1.x(), p1.y(), p1.z());
+			const Vector3D v2 = Vector3D(p2.x(), p2.y(), p2.z());
+			const Vector3D v3 = Vector3D(p3.x(), p3.y(), p3.z());
+
+			tetrahedra.Add({ v0, v1, v2, v3 });
+		}
+	}
+	return tetrahedra;
+
+
+}

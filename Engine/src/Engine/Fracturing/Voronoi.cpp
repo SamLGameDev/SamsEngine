@@ -622,6 +622,11 @@ FracturePiece3D::FracturePiece3D(const Array<Face>& cell, const Vector3D& Point)
 			newFace.Vertices.Add(vert);
 		}
 
+		if (newFace.Vertices.GetSize() < 3)
+		{
+			continue;
+		}
+
 		CellFaces.Add(newFace);
 
 		Vector3D::OrderByAngle(CellFaces.GetLastPtr()->Vertices, newFace.GetCenter(), Vector3D::GetPlaneNormal(CellFaces.GetLastPtr()->Vertices, newFace.GetCenter()));

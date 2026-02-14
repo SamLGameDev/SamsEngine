@@ -202,7 +202,9 @@ void Vector3D::OrderByAngle(Array<Vector3D>& Vertices, const Vector3D& Center, c
 	Vector3D t, u;
 	GetPlaneAxis(Normal, t, u);
 
+
 	Array<AnglePointPair> anglePointPairs;
+	anglePointPairs.ReSize(Vertices.GetSize());
 
 	for (const auto& vert : Vertices)
 	{
@@ -218,11 +220,9 @@ void Vector3D::OrderByAngle(Array<Vector3D>& Vertices, const Vector3D& Center, c
 	}
 	std::ranges::sort(anglePointPairs, std::less{});
 
-	Vertices.Empty();
-
-	for (const auto& pair : anglePointPairs)
+	for (size_t i = 0; i < anglePointPairs.GetSize(); i++)
 	{
-		Vertices.Add(pair.point);
+		Vertices[i] =  anglePointPairs[i].point;
 	}
 
 }
@@ -243,7 +243,7 @@ Vector3D Vector3D::GetPlaneNormal(const Array<Vector3D>& ClippingPlane, const Ve
 
 	Vector3D normal = Vector3D::Zero;
 
-	for (int i = 0; i < ClippingPlane.GetSize(); ++i)
+	for (size_t i = 0; i < ClippingPlane.GetSize(); ++i)
 	{
 		const Vector3D& current = ClippingPlane[i];
 		const Vector3D& next = ClippingPlane[(i + 1) % ClippingPlane.GetSize()];
@@ -253,14 +253,5 @@ Vector3D Vector3D::GetPlaneNormal(const Array<Vector3D>& ClippingPlane, const Ve
 		normal.Z += (current.X - next.X) * (current.Y + next.Y);
 	}
 
-	float lenSq = normal.GetSquaredLength();
-	if (lenSq < 1e-12f)
-		return Vector3D::Zero;
-
 	return normal.Normalised();
-
-	//Vector3D normal = Cross(ClippingPlane[1] - ClippingPlane[0], ClippingPlane[2] - ClippingPlane[0]).Normalised();
-
-	//if (Dot(normal, ClippingPlane[0] - Center) < 0) normal = -normal;
-	//return normal;
 }

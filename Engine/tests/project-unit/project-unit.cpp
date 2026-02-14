@@ -471,7 +471,7 @@ void RunEngine(Vulkan::RuntimeEngine& engine)
 	//Model model = Model("/Models/SkyBox/SkyBox.obj", Shader("ColorShape", "/Shaders/"));
 	model.ModelTransform.Position = { 5, 0, 0 };
 	Voronoi vorn;
-	vorn.FracturePlaneRandom(model, 100);
+	vorn.FracturePlaneRandom(model, 5);
 
 	VoronoiClipping clipper;
 	clipper.ClipMeshToVoronoi(vorn, model);
@@ -501,7 +501,7 @@ void RunEngineDelaunay(Vulkan::RuntimeEngine& engine)
 	Model model = Model("/Models/Asteroid/rock.obj", Shader("ColorShape", "/Shaders/"));
 	model.ModelTransform.Position = { 5, 0, 0 };
 	Voronoi vorn;
-	vorn.FractureDelaunayRandom(model, 100);
+	vorn.FractureDelaunayRandom(model, 10);
 	std::cout << "Generated Voronoi Diagram with " << vorn.Fractures.GetSize() << " cells." << std::endl;
 	VoronoiClipping clipper;
 	clipper.ClipMeshToVoronoi(vorn, model);

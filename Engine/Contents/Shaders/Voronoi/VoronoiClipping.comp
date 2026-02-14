@@ -1,0 +1,76 @@
+#version 450
+
+
+struct Face
+{
+    uint VertexStart;
+    uint VertexCount;
+};
+
+struct Cell {
+    uint FaceStart;
+    uint FaceCount;
+};
+
+layout(std140, binding = 1) readonly buffer VoronoiSSBOIn {
+    vec3 cellVertices[];
+};
+
+layout (std140, binding = 2) readonly buffer TetrahedronVertsSSBOIn
+{
+    vec3 TetrahedronsVertices[];
+};
+
+layout(std140, binding = 3) readonly buffer CellsSSBOIn {
+    Cell cells[];
+};
+
+layout (std140, binding = 4) readonly buffer CellFacesSSBOIn
+{
+    Face cellFaces[];
+};
+
+layout (std140, binding = 5) readonly buffer TetrahedronFacesSSBOIn
+{
+    Face TetrahedronsFaces[];
+};
+
+layout (std140, binding = 6) readonly buffer TetrahedronsSSBOIn
+{
+    Cell Tetrahedrons[];
+};
+
+
+layout(std140, binding = 3) buffer VoronoiSSBOOut {
+    Cell CutCells[];
+};
+layout (local_size_x = 256, local_size_y = 1, local_size_z = 1) in;
+
+vec3 GetFaceCenter(Face face)
+{
+    vec3 faceCenter = vec3(0, 0, 0);
+    for (uint j = face.VertexStart; j < face.VertexStart + face.VertexCount - 1; j++)
+    {
+        faceCenter += cellVerticies[j];
+    }
+    faceCenter /= face.VertexCount;
+    return faceCenter;
+}
+void main()
+{
+    uint index = gl_GlobalInvocationID.x;
+    Cell cell = cells[index];
+    vec3 cellCenter = vec3(0, 0, 0);
+    for (uint i = cell.FaceStart; i < cell.FaceStart + cell.FaceCount - 1; i++)
+    {
+        Face face = cellFaces[j];
+        cellCenter += GetFaceCenter(face);;
+    }
+    cellCenter /= cell.FaceCount;
+
+    for (uint i = cell.FaceStart; i < cell.FaceStart + cell.FaceCount - 1; i++)
+    {
+        
+    }   
+    
+}

@@ -4,6 +4,7 @@
 #include <stdexcept>
 
 #include "vulkan/vulkan_core.h"
+#include <iostream>
 #include <memory>
 
 template<typename T>
@@ -37,7 +38,6 @@ public:
 		// TODO Need to separate numItems and ArraySize, but problem is vulkan stuff accesses the array directly, so size won't be updated
 		NumItems = 0;
 		ArraySize = 0;
-		DynamicArray = new T[1];
 	}
 	~Array()
 	{
@@ -105,6 +105,7 @@ public:
 		DynamicArray = other.DynamicArray;
 		NumItems = other.NumItems;
 		ArraySize = other.ArraySize;
+
 		other.DynamicArray = nullptr;
 		other.NumItems = 0;
 		other.ArraySize = 0;
@@ -176,11 +177,10 @@ public:
 
 	void Add(const T& Item)
 	{
-		//Depreciated for now, as arraySize needs to be seperated from NumItems properly
 		if (NumItems + 1 < ArraySize)
 		{
-			NumItems++;
 			DynamicArray[NumItems] = Item;
+			NumItems++;
 			return;
 		}
 
@@ -201,11 +201,10 @@ public:
 
 	void Emplace(T&& Item)
 	{
-		//Depreciated for now, as arraySize needs to be seperated from NumItems properly
 		if (NumItems + 1 < ArraySize)
 		{
-			NumItems++;
 			DynamicArray[NumItems] = std::move(Item);
+			NumItems++;
 			return;
 		}
 
@@ -224,13 +223,49 @@ public:
 		ArraySize = NumItems;
 	}
 
+	void Emplace(Array&& Item)
+	{
+		if (ArraySize > NumItems + Item.GetSize())
+		{
+			if constexpr (std::is_trivially_copyable_v<T>)
+			{
+				std::memcpy(DynamicArray + NumItems,Item.GetArray(),Item.GetSize() * sizeof(T));
+			}
+			else
+			{
+				std::move(Item.GetArray(), Item.GetLastPtr() ,DynamicArray + NumItems);
+			}
+			NumItems += Item.GetSize();
+			return;
+		}
+
+		T* NewArray = new T[NumItems + Item.GetSize()];
+
+		if constexpr (std::is_trivially_copyable_v<T>)
+		{
+			if (DynamicArray != nullptr) std::memcpy(NewArray, DynamicArray, NumItems * sizeof(T));
+			std::memcpy(NewArray + NumItems, Item.GetArray(), Item.GetSize() * sizeof(T));
+		}
+		else
+		{
+			if (DynamicArray != nullptr) std::move(DynamicArray, GetLastPtr(), NewArray);
+			std::move(Item.GetArray(), Item.GetLastPtr(), NewArray + NumItems);
+		}
+
+		NumItems += Item.GetSize();
+
+		delete[] DynamicArray;
+		DynamicArray = NewArray;
+
+		ArraySize = NumItems;
+	}
+
 	void Add(T& Item) requires is_unique_ptr<T>::value
 	{
-		//Depreciated for now, as arraySize needs to be seperated from NumItems properly
 		if (NumItems + 1 < ArraySize)
 		{
-			NumItems++;
 			DynamicArray[NumItems] = std::move(Item);
+			NumItems++;
 			return;
 		}
 
@@ -251,12 +286,11 @@ public:
 
 	void Add(const Array& Item)
 	{
-		//Depreciated for now, as arraySize needs to be seperated from NumItems properly
 		if (ArraySize > NumItems + Item.GetSize())
 		{
 			for (size_t i = 0; i < Item.GetSize(); i++)
 			{
-				DynamicArray[i + NumItems] = std::move(Item.GetItemAt(i));;
+				DynamicArray[i + NumItems] = std::move(Item.GetItemAt(i));
 			}
 			NumItems += Item.GetSize();
 			return;
@@ -274,7 +308,7 @@ public:
 			NewArray[i + NumItems] = std::move(Item.GetItemAt(i));
 		}
 
-		NumItems += Item.GetSize();;
+		NumItems += Item.GetSize();
 
 		delete[] DynamicArray;
 		DynamicArray = NewArray;
@@ -330,7 +364,41 @@ public:
 		return DynamicArray;
 	}
 
+	/// <summary>
+	/// Resizes th array and number of items
+	/// </summary>
+	/// <param name="Size"></param>
+	/// <returns></returns>
 	bool Reallocate(const size_t& Size)
+	{
+		if (Size < NumItems)
+		{
+			return false;
+		}
+
+		T* NewArray = new T[Size];
+
+		for (size_t i = 0; i < NumItems; i++)
+		{
+			NewArray[i] = GetItemAt(i);
+		}
+
+		ArraySize = Size;
+		NumItems = Size;
+
+		delete[] DynamicArray;
+		DynamicArray = NewArray;
+
+		return true;
+	}
+
+	
+	/// <summary>
+	/// Resizes the array, but does not change the number of items, so new items will be default initialised
+	/// </summary>
+	/// <param name="Size"></param>
+	/// <returns></returns>
+	bool ReSize(const size_t& Size)
 	{
 		if (Size < ArraySize)
 		{
@@ -345,7 +413,6 @@ public:
 		}
 
 		ArraySize = Size;
-		NumItems = Size;
 
 		delete[] DynamicArray;
 		DynamicArray = NewArray;
@@ -523,7 +590,7 @@ private:
 
 	void Copy(const Array& other)
 	{
-		if (other.GetSize() == 0)
+		if (other.ArraySize == 0)
 		{
 			delete[] DynamicArray;
 			DynamicArray = new T[1];
@@ -533,18 +600,27 @@ private:
 		}
 
 		delete[] DynamicArray;
-		DynamicArray = new T[other.GetSize()];
-		for (size_t i = 0; i < other.GetSize(); i++)
+		DynamicArray = new T[other.ArraySize];
+
+		if constexpr (std::is_trivially_copyable_v<T>)
 		{
-			DynamicArray[i] = std::move(other.GetItemAt(i));
+			std::memcpy(DynamicArray, other.DynamicArray, sizeof(T) * other.NumItems);
 		}
+		else
+		{
+			for (size_t i = 0; i < other.GetSize(); i++)
+			{
+				DynamicArray[i] = other.GetItemAt(i);
+			}
+		}
+
 		NumItems = other.GetSize();
 		ArraySize = other.ArraySize;
 	}
 
 	T* DynamicArray = nullptr;
 
-	size_t NumItems;
+	size_t NumItems = 0;
 
-	size_t ArraySize;
+	size_t ArraySize= 0;
 };

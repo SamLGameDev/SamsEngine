@@ -42,13 +42,15 @@ void PlaneClipping::ClipCellByFaces(Array<Face>& ToClip, const Array<Face>& Clip
 void PlaneClipping::ClipCellByFace(Array<Face>& ToClip, const Vector3D& Center, const Vector3D& normal)
 {
 	Face intersectFace;
-
+	intersectFace.Vertices.ReSize(20);
 	Array<Face> newFaces;
+	newFaces.ReSize(ToClip.GetSize() * 2); 
 
 	for (const auto& face : ToClip)
 	{
 
 		Face outFace;
+		outFace.Vertices.ReSize(face.Vertices.GetSize() + 2);
 		ClipFaceByFace(face, Center, outFace, normal, intersectFace);
 		if (!outFace.Vertices.IsEmpty())
 		{
