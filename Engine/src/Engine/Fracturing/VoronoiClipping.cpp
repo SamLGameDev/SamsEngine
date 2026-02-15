@@ -10,13 +10,26 @@
 #include "SutherlandHodegman.h"
 #include <CGAL/Exact_predicates_inexact_constructions_kernel.h>
 #include <CGAL/Delaunay_triangulation_3.h>
+#include <CGAL/Exact_predicates_inexact_constructions_kernel.h>
+#include <CGAL/IO/polygon_mesh_io.h>
+#include <CGAL/Surface_mesh.h>
+#include <CGAL/make_conforming_constrained_Delaunay_triangulation_3.h>
+#include <CGAL/IO/write_MEDIT.h>
+
+#include <cassert>
 
 #include "DelaunayTriangulation.h"
 #include "PlaneClipping.h"
 #include "Predictates.h"
 using Kernel = CGAL::Exact_predicates_inexact_constructions_kernel;
+using K = CGAL::Exact_predicates_inexact_constructions_kernel;
 using Point = Kernel::Point_3;
 using DT = CGAL::Delaunay_triangulation_3<Kernel>;
+
+FracturedMeshPiece::~FracturedMeshPiece()
+{
+	::Renderer::RemoveMeshFracturePiece(this);
+}
 
 FracturedMeshPiece::FracturedMeshPiece(const Array<Face>& cell, const Vector3D& Point)
 {
@@ -181,7 +194,7 @@ void VoronoiClipping::ClipCellToMesh(Array<FTetrahedron>& tets, const FracturePi
 {
 	FBox cellBox(cell.Verts);
 	Array<Face> newCell;
-	newCell.ReSize(tets.GetSize());
+	newCell.ReSize(tets.GetSize() / 2);
 
 	for (auto& tet : tets)
 	{
@@ -193,12 +206,12 @@ void VoronoiClipping::ClipCellToMesh(Array<FTetrahedron>& tets, const FracturePi
 
 		if (copyFaces.IsEmpty()) continue;
 
-		newCell.Add(copyFaces);
+		newCell.Emplace(std::move(copyFaces));
 
-		//Fix emplace
-
-		//newCell.Emplace(std::move(copyFaces));
 	}
+
+	if (newCell.IsEmpty()) return;
+
 	std::scoped_lock lock(VoronoiMutex);
 	Vector3D color = Vector3D::RandomRange(Vector3D(30, 30, 30), Vector3D(255, 255, 255));
 	FracturedMeshPiece frac = CreateObjectRaw<FracturedMeshPiece>(newCell, cell.Point);
@@ -208,7 +221,7 @@ void VoronoiClipping::ClipCellToMesh(Array<FTetrahedron>& tets, const FracturePi
 
 void VoronoiClipping::ClipMeshToVoronoi(Voronoi& Diagram, const Model& Mesh)
 {
-	Array<FTetrahedron> tets =  TetrahredraliseMeshCGAL(Mesh);
+	Array<FTetrahedron> tets =  TetrahredraliseMesh(Mesh);
 	//Array<std::jthread> threads;
 	for (const auto& cell : Diagram.Fractures)
 	{
@@ -248,20 +261,39 @@ Array<FTetrahedron> VoronoiClipping::TetrahredraliseMesh(const Model& Mesh)
 }
 Array<FTetrahedron> VoronoiClipping::TetrahredraliseMeshCGAL(const Model& Mesh) {
 	Array<FTetrahedron> tetrahedra;
-	tetrahedra.ReSize(Mesh.Meshes.GetSize() * 10000); // Arbitrary number, should be enough for most meshes, but can be changed if needed
+	tetrahedra.ReSize(Mesh.Meshes.GetSize() * 20000); 
+	FracturedPieces.ReSize(40000);// Arbitrary number, should be enough for most meshes, but can be changed if needed
 	for (const auto& subMesh : Mesh.Meshes) {
 
-		Array<Point> dtPoints;
-		dtPoints.ReSize(subMesh.Vertices.GetSize());
+		//CGAL::Surface_mesh<K::Point_3> dtPoints;
+		std::vector<K::Point_3> dtPoints;
+		dtPoints.reserve(subMesh.Vertices.GetSize());
+
+		//if (!CGAL::IO::read_polygon_mesh("D:/Comp303-SL295211-VoronoiClipping/Engine/Contents/Models/Bunny/Bunny.obj", dtPoints)) {
+		//	std::cerr << "Error: cannot read file "  << std::endl;
+		//}
+
+		std::vector<std::vector<uint16_t>> inds;
+		inds.reserve(subMesh.Indices.GetSize() / 3);
+
+		for (size_t i = 0; i + 2< subMesh.Indices.GetSize(); i+=3)
+		{
+			std::vector<uint16_t> tri = { subMesh.Indices[i], subMesh.Indices[i+1], subMesh.Indices[i+2] };
+
+			inds.push_back(tri);
+		}
 
 		for (const auto& p : subMesh.Vertices)
 		{
-			dtPoints.Add({ p.Position.X, p.Position.Y, p.Position.Z });
+			dtPoints.push_back({ p.Position.X, p.Position.Y, p.Position.Z });
 		}
 
-		DT dt;
-		dt.insert(dtPoints.begin(), dtPoints.end());
-		for (auto cell = dt.finite_cells_begin(); cell != dt.finite_cells_end(); ++cell)
+		auto dt = CGAL::make_conforming_constrained_Delaunay_triangulation_3(dtPoints, inds);
+
+
+		//DT dt;
+		//dt.insert(dtPoints.begin(), dtPoints.end());
+		for (auto cell = dt.triangulation().finite_cells_begin(); cell != dt.triangulation().finite_cells_end(); ++cell)
 		{
 			const Point& p0 = cell->vertex(0)->point();
 			const Point& p1 = cell->vertex(1)->point();
@@ -272,8 +304,8 @@ Array<FTetrahedron> VoronoiClipping::TetrahredraliseMeshCGAL(const Model& Mesh) 
 			const Vector3D v1 = Vector3D(p1.x(), p1.y(), p1.z());
 			const Vector3D v2 = Vector3D(p2.x(), p2.y(), p2.z());
 			const Vector3D v3 = Vector3D(p3.x(), p3.y(), p3.z());
-
 			tetrahedra.Add({ v0, v1, v2, v3 });
+
 		}
 	}
 	return tetrahedra;

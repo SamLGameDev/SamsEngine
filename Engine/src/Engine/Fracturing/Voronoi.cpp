@@ -250,6 +250,8 @@ void Voronoi::FracturePlaneRandom(Model& InModel, const size_t& NumPoints)
 	Array<Vector3D> points;
 	GenerateRandomPointsInBounds(InModel, NumPoints, points);
 
+	Fractures.ReSize(NumPoints);
+
 	for (size_t i = 0; i < points.GetSize(); i++)
 	{
 		Vector3D currentPoint = points[i];
@@ -267,10 +269,10 @@ void Voronoi::FracturePlaneRandom(Model& InModel, const size_t& NumPoints)
 			//SliceShapeByPlane(points, i, currentPoint, Faces, normal, right, up, center, j);
 		}
 
-		auto color = Vector3D::RandomRange(Vector3D(30, 30, 30), Vector3D(255, 255, 255));
+		//auto color = Vector3D::RandomRange(Vector3D(30, 30, 30), Vector3D(255, 255, 255));
 
 		FracturePiece3D frac = CreateObjectRaw<FracturePiece3D>(Faces, currentPoint);
-		frac.color = color;
+		//frac.color = color;
 		Fractures.Add({ frac });
 
 	}
@@ -604,7 +606,7 @@ void FracturePiece3D::TriangulateCell(const Array<Face>& cell)
 
 FracturePiece3D::FracturePiece3D(const Array<Face>& cell, const Vector3D& Point)
 {
-	SetupControls(Point);
+	//SetupControls(Point);
 
 	for (const auto& face : cell)
 	{
@@ -633,7 +635,7 @@ FracturePiece3D::FracturePiece3D(const Array<Face>& cell, const Vector3D& Point)
 
 	}
 
-	shader = Shader("ColorShape", "/Shaders/");
+	//shader = Shader("ColorShape", "/Shaders/");
 
 	TriangulateCell(cell);
 
@@ -642,7 +644,7 @@ FracturePiece3D::FracturePiece3D(const Array<Face>& cell, const Vector3D& Point)
 		return;
 	}
 
-	BufferData();
+	//BufferData();
 }
 
 void FracturePiece3D::SetupControls(const Vector3D& point)

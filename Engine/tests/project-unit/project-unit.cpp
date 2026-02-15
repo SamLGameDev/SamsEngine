@@ -65,6 +65,44 @@ TEST(Array, Searching)
 	ASSERT_EQ(1, index);
 }
 
+TEST(Array, Move)
+{
+	// Arrange two faces, each with a small vertex list
+	Face fa;
+	Face fb;
+	Face fc;
+
+	fa.Vertices = Array<Vector3D>{ Vector3D(1,0,0), Vector3D(0,1,0) };
+	fb.Vertices = Array<Vector3D>{ Vector3D(0,0,1), Vector3D(-1,0,0) };
+	fc.Vertices = Array<Vector3D>{ Vector3D(0,0,0), Vector3D(-1,0,0), Vector3D(2, 53, 43) };
+
+	const size_t aBefore = fa.Vertices.GetSize();
+	const size_t bBefore = fb.Vertices.GetSize();
+	const size_t cBefore = fc.Vertices.GetSize();
+
+	// Act: append fb's vertices into fa
+	fa.Vertices.Emplace(std::move(fb.Vertices));
+
+	// Assert combined contents and size (order preserved)
+	ASSERT_EQ(fa.Vertices.GetSize(), aBefore + bBefore);
+	ASSERT_EQ(fa.Vertices[0], Vector3D(1, 0, 0));
+	ASSERT_EQ(fa.Vertices[1], Vector3D(0, 1, 0));
+	ASSERT_EQ(fa.Vertices[2], Vector3D(0, 0, 1));
+	ASSERT_EQ(fa.Vertices[3], Vector3D(-1, 0, 0));
+
+	fa.Vertices.Emplace(std::move(fc.Vertices));
+
+	ASSERT_EQ(fa.Vertices.GetSize(), aBefore + bBefore + cBefore);
+	ASSERT_EQ(fa.Vertices[0], Vector3D(1, 0, 0));
+	ASSERT_EQ(fa.Vertices[1], Vector3D(0, 1, 0));
+	ASSERT_EQ(fa.Vertices[2], Vector3D(0, 0, 1));
+	ASSERT_EQ(fa.Vertices[3], Vector3D(-1, 0, 0));
+	ASSERT_EQ(fa.Vertices[4], Vector3D(0, 0, 0));
+	ASSERT_EQ(fa.Vertices[5], Vector3D(-1, 0, 0));
+	ASSERT_EQ(fa.Vertices[6], Vector3D(2, 53, 43));
+	ASSERT_EQ(bBefore, 2);
+}
+
 
 TEST(LinkedList, Allocation)
 {
@@ -468,10 +506,11 @@ void RunEngine(Vulkan::RuntimeEngine& engine)
 
 	//Model model = Model("/Models/BackPack/backpack.obj", Shader("BasicTexture", "/Shaders/"));
 	Model model = Model("/Models/Asteroid/rock.obj", Shader("ColorShape", "/Shaders/"));
+	//Model model = Model("/Models/Bunny/Bunny.obj", Shader("ColorShape", "/Shaders/"));
 	//Model model = Model("/Models/SkyBox/SkyBox.obj", Shader("ColorShape", "/Shaders/"));
 	model.ModelTransform.Position = { 5, 0, 0 };
 	Voronoi vorn;
-	vorn.FracturePlaneRandom(model, 5);
+	vorn.FracturePlaneRandom(model, 100);
 
 	VoronoiClipping clipper;
 	clipper.ClipMeshToVoronoi(vorn, model);
@@ -514,11 +553,8 @@ void RunEngineDelaunay(Vulkan::RuntimeEngine& engine)
 	Vulkan::RuntimeEngine::WaitForFrameToFinish();
 }
 
-void OpenGLTest()
+void RunEngineOpenGL(OpenGL::RuntimeEngine engine)
 {
-	OpenGL::RuntimeEngine engine;
-	engine.Init();
-
 	Model model = Model("/Models/Asteroid/rock.obj", Shader("BasicTexture", "/Shaders/"));
 	model.ModelTransform.Position = { 5, 0, 0 };
 	GLenum error = glGetError();
@@ -527,7 +563,7 @@ void OpenGLTest()
 		std::cout << "ERROR::UNIFORMBUFFER::" << std::to_string(error) << std::endl;
 	}
 	Voronoi vorn;
-	vorn.FractureDelaunayRandom(model, 100);
+	vorn.FracturePlaneRandom(model, 100);
 	//std::cout << "Generated Voronoi Diagram with " << vorn.Fractures.GetSize() << " cells." << std::endl;
 	VoronoiClipping clipper;
 	clipper.ClipMeshToVoronoi(vorn, model);
@@ -535,6 +571,14 @@ void OpenGLTest()
 	{
 		engine.Loop();
 	}
+}
+
+void OpenGLTest()
+{
+	OpenGL::RuntimeEngine engine;
+	engine.Init();
+
+	RunEngineOpenGL(engine);
 
 	engine.ShutDown();
 }
@@ -551,8 +595,8 @@ void EngineDelaunay()
 }
 
 TEST(Fracturing, Diagram) {
-	EnginePlane();
+	//EnginePlane();
 
 	//EngineDelaunay();
-	//OpenGLTest();
+	OpenGLTest();
 }

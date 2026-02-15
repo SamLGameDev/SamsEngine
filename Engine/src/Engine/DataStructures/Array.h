@@ -184,19 +184,16 @@ public:
 			return;
 		}
 
-		T* NewArray = new T[NumItems + 1];
+		T* NewArray = MakeNewArray(NumItems + 1);
 
-		for (size_t i = 0; i < NumItems; i++)
-		{
-			NewArray[i] = std::move(DynamicArray[i]);
-		}
+		std::move(DynamicArray, DynamicArray + NumItems, NewArray);
+
 		NewArray[NumItems] = Item;
 		NumItems++;
 
 		delete[] DynamicArray;
 		DynamicArray = NewArray;
 
-		ArraySize = NumItems;
 	}
 
 	void Emplace(T&& Item)
@@ -208,19 +205,16 @@ public:
 			return;
 		}
 
-		T* NewArray = new T[NumItems + 1];
+		T* NewArray = MakeNewArray(NumItems + 1);
 
-		for (size_t i = 0; i < NumItems; i++)
-		{
-			NewArray[i] = std::move(DynamicArray[i]);
-		}
+
+		std::move(DynamicArray, DynamicArray + NumItems, NewArray);
+
 		NewArray[NumItems] = std::move(Item);
 		NumItems++;
 
 		delete[] DynamicArray;
 		DynamicArray = NewArray;
-
-		ArraySize = NumItems;
 	}
 
 	void Emplace(Array&& Item)
@@ -233,13 +227,13 @@ public:
 			}
 			else
 			{
-				std::move(Item.GetArray(), Item.GetLastPtr() ,DynamicArray + NumItems);
+				std::move(Item.GetArray(), Item.DynamicArray + Item.NumItems ,DynamicArray + NumItems);
 			}
 			NumItems += Item.GetSize();
 			return;
 		}
 
-		T* NewArray = new T[NumItems + Item.GetSize()];
+		T* NewArray = MakeNewArray(NumItems + Item.GetSize());
 
 		if constexpr (std::is_trivially_copyable_v<T>)
 		{
@@ -248,16 +242,14 @@ public:
 		}
 		else
 		{
-			if (DynamicArray != nullptr) std::move(DynamicArray, GetLastPtr(), NewArray);
-			std::move(Item.GetArray(), Item.GetLastPtr(), NewArray + NumItems);
+			if (DynamicArray != nullptr) std::move(DynamicArray, DynamicArray + NumItems, NewArray);
+			std::move(Item.GetArray(), Item.DynamicArray + Item.NumItems, NewArray + NumItems);
 		}
 
 		NumItems += Item.GetSize();
 
 		delete[] DynamicArray;
 		DynamicArray = NewArray;
-
-		ArraySize = NumItems;
 	}
 
 	void Add(T& Item) requires is_unique_ptr<T>::value
@@ -269,19 +261,15 @@ public:
 			return;
 		}
 
-		T* NewArray = new T[NumItems + 1];
+		T* NewArray = MakeNewArray(NumItems+ 1);
 
-		for (size_t i = 0; i < NumItems; i++)
-		{
-			NewArray[i] = std::move(GetItemAt(i));
-		}
+		std::move(DynamicArray, DynamicArray + NumItems, NewArray);
+
 		NewArray[NumItems] = std::move(Item);
 		NumItems++;
 
 		delete[] DynamicArray;
 		DynamicArray = NewArray;
-
-		ArraySize = NumItems;
 	}
 
 	void Add(const Array& Item)
@@ -296,12 +284,9 @@ public:
 			return;
 		}
 
-		T* NewArray = new T[NumItems + Item.GetSize()];
-
-		for (size_t i = 0; i < NumItems; i++)
-		{
-			NewArray[i] = std::move(GetItemAt(i));
-		}
+		T* NewArray = MakeNewArray(NumItems + Item.GetSize());
+		
+		std::move(DynamicArray, DynamicArray + NumItems, NewArray);
 
 		for (size_t i = 0; i < Item.GetSize(); i++)
 		{
@@ -312,8 +297,6 @@ public:
 
 		delete[] DynamicArray;
 		DynamicArray = NewArray;
-
-		ArraySize = NumItems;
 	}
 
 	void Insert(const T& Item, const size_t& Index)
@@ -378,10 +361,7 @@ public:
 
 		T* NewArray = new T[Size];
 
-		for (size_t i = 0; i < NumItems; i++)
-		{
-			NewArray[i] = GetItemAt(i);
-		}
+		std::move(DynamicArray, DynamicArray + NumItems, NewArray);
 
 		ArraySize = Size;
 		NumItems = Size;
@@ -407,10 +387,7 @@ public:
 
 		T* NewArray = new T[Size];
 
-		for (size_t i = 0; i < NumItems; i++)
-		{
-			NewArray[i] = GetItemAt(i);
-		}
+		std::move(DynamicArray, DynamicArray + NumItems, NewArray);
 
 		ArraySize = Size;
 
@@ -565,7 +542,7 @@ public:
 
 		ArraySize = 0;
 		NumItems = 0;
-		DynamicArray = new T[1];
+		DynamicArray = nullptr;
 	}
 
 	[[nodiscard]] bool IsEmpty() const
@@ -593,7 +570,6 @@ private:
 		if (other.ArraySize == 0)
 		{
 			delete[] DynamicArray;
-			DynamicArray = new T[1];
 			NumItems = 0;
 			ArraySize = 0;
 			return;
@@ -616,6 +592,12 @@ private:
 
 		NumItems = other.GetSize();
 		ArraySize = other.ArraySize;
+	}
+
+	T* MakeNewArray(const size_t newSize)
+	{
+		ArraySize = newSize * 2;
+		return new T[newSize * 2];
 	}
 
 	T* DynamicArray = nullptr;

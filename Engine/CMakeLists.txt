@@ -94,6 +94,7 @@ add_library(EngineCore STATIC
     "src/Engine/FileSystem/CorePaths.cpp"
     "src/PreprocessorDefinitions.cpp"
     "src/Engine/Math/Predictates.c"
+    "src/Engine/PerformanceTesting/PerformanceRecord.cpp"
     "src/Engine/GraphicsAPI/VulkanAPI/RuntimeEngineVulkan.cpp"
     "src/Engine/GraphicsAPI/OpenGL/OpenGLInstance.cpp"
     "src/Engine//GraphicsAPI/OpenGL/RuntimeEngine.cpp"
@@ -152,6 +153,7 @@ target_include_directories(EngineCore
                            "$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/src/Engine/GraphicsAPI/VulkanAPI>"
                            "$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/src/Engine/GraphicsAPI/OpenGL>"
                            "$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/src/Engine/GraphicsAPI/DataBuffers>"
+                           "$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/src/Engine/PerformanceTesting>"
 
                            "$<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}>")
 
@@ -180,6 +182,7 @@ install(FILES
     src/Engine/DataStructures/Matrix.h
     src/Engine/DataStructures/Verticie.h
     src/Engine/Window/FirstWindow.h
+    src/Engine/PerformanceTesting/PerformanceRecord.h
     src/Engine/Window/Window.h
     src/Engine/Window/VulkanWindow.h
     src/Engine//GraphicsAPI/OpenGL/SubsystemInitialiser.h

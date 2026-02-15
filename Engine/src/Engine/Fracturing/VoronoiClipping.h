@@ -94,6 +94,7 @@ public:
 
 	FracturedMeshPiece() = default;
 
+	~FracturedMeshPiece();
 	FracturedMeshPiece(const Array<Face>& cell, const Vector3D& Point);
 	FracturedMeshPiece(const Array<FTriangle>& cell, const Vector3D& Point);
 
