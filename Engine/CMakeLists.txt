@@ -32,6 +32,7 @@ project(EngineCore LANGUAGES C CXX)
 include(GNUInstallDirs)
 
 add_library(EngineCore STATIC
+    "src/Engine/Hardware/HardwareDetails.cpp"
     "src/Engine/Rendering/Shaders/Shader.cpp"
     "src/Engine/Rendering/Shaders/BaseShader.cpp"
     "src/Engine/Rendering/Shaders/OpenGLShader.cpp"
@@ -91,6 +92,7 @@ add_library(EngineCore STATIC
     "src/Engine/Fracturing/VoronoiClipping.cpp"
     "src/Engine/Fracturing/Voronoi2D.cpp"
     "src/Engine/FileSystem/Path.cpp"
+    "src/Engine/FileSystem/FileSaving.cpp"
     "src/Engine/FileSystem/CorePaths.cpp"
     "src/PreprocessorDefinitions.cpp"
     "src/Engine/Math/Predictates.c"
@@ -154,7 +156,7 @@ target_include_directories(EngineCore
                            "$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/src/Engine/GraphicsAPI/OpenGL>"
                            "$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/src/Engine/GraphicsAPI/DataBuffers>"
                            "$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/src/Engine/PerformanceTesting>"
-
+                           "$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/src/Engine/Hardware>"
                            "$<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}>")
 
 install(TARGETS EngineCore
@@ -164,6 +166,7 @@ install(TARGETS EngineCore
         RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
         INCLUDES DESTINATION ${CMAKE_INSTALL_INCLUDEDIR})
 install(FILES
+    src/Engine/Hardware/HardwareDetails.h
     src/Engine/Rendering/Shaders/Shader.h 
     src/Engine/Rendering/Shaders/BaseShader.h
     src/Engine/Rendering/Shaders/OpenGLShader.h
@@ -221,6 +224,7 @@ install(FILES
     src/Engine/Lighting/SpotLight.h
     src/Engine/Lighting/PointLight.h
     src/Engine/Components/StaticMeshComponent.h
+    src/Engine/FileSystem/FileSaving.h
     src/Engine/FileSystem/Path.h
     src/Engine/FileSystem/CorePaths.h
     src/Engine/Fracturing/Voronoi.h
@@ -268,6 +272,8 @@ target_include_directories(EngineCore PRIVATE ${Stb_INCLUDE_DIR})
 
 find_package(Vulkan REQUIRED)
 target_link_libraries(EngineCore PUBLIC Vulkan::Vulkan)
+find_package(nlohmann_json REQUIRED)
+target_link_libraries(EngineCore PUBLIC nlohmann_json::nlohmann_json)
 
 set_source_files_properties(
     Predictates.c

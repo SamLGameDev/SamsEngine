@@ -16,6 +16,8 @@ public:
 
 	constexpr Vector2D(const float InX, const float InY)noexcept : X(InX), Y(InY) {};
 	constexpr Vector2D(const double InX, const double InY)noexcept : X(InX), Y(InY) {};
+	constexpr Vector2D(const size_t InX, const size_t InY)noexcept : X(InX), Y(InY) {};
+	constexpr Vector2D(const size_t InX, const int InY)noexcept : X(InX), Y(InY) {};
 
 	Vector2D(const Vector3D& Other);
 

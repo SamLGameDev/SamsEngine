@@ -9,6 +9,7 @@
 
 #include "DataBuffers.h"
 #include "DataBuffersOpenGL.h"
+#include "HardwareDetails.h"
 #include "WorldObject.h"
 #include "ObjectFactory.h"
 #include "Predictates.h"
@@ -16,6 +17,8 @@
 #include "OpenGLInstance.h"
 #include "OpenGLShader.h"
 #include "OpenGLTexture.h"
+
+#include "HardwareDetails.h"
 
 namespace OpenGL {
 	ErrorCodes SubsystemInitialiser::Init()
@@ -52,6 +55,10 @@ namespace OpenGL {
 			return ERROR;
 		}
 
+		
+		UHardwareDetails::GetGPU = [this] { return GetGPUInfo(); };
+
+		UHardwareDetails::API = "OpenGL";
 
 		::Shader::ShaderCreationFunc = OpenGL::Shader::CreateOpenGLShader;
 

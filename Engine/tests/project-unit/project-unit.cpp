@@ -8,10 +8,12 @@
 #include "Vector2D.h"
 #include "CorePaths.h"
 #include "DelaunayTriangulation.h"
+#include "HardwareDetails.h"
 #include "RuntimeEngine.h"
 #include "Voronoi2D.h"
 #include "RuntimeEngineVulkan.h"
 #include "VoronoiClipping.h"
+#include <string>
 
 int main(int argc, char** argv) {
 	::testing::InitGoogleTest(&argc, argv);
@@ -510,15 +512,16 @@ void RunEngine(Vulkan::RuntimeEngine& engine)
 	//Model model = Model("/Models/SkyBox/SkyBox.obj", Shader("ColorShape", "/Shaders/"));
 	model.ModelTransform.Position = { 5, 0, 0 };
 	Voronoi vorn;
+	//vorn.GenerateNewPointSets(model);
 	vorn.FracturePlaneRandom(model, 100);
 
-	VoronoiClipping clipper;
+	/*VoronoiClipping clipper;
 	clipper.ClipMeshToVoronoi(vorn, model);
 
 	while (!engine.ShouldClose())
 	{
 		engine.Loop();
-	}
+	}*/
 
 	Vulkan::RuntimeEngine::WaitForFrameToFinish();
 }
@@ -527,7 +530,6 @@ void EnginePlane()
 {
 	Vulkan::RuntimeEngine engine;
 	engine.Init();
-
 	RunEngine(engine);
 
 	engine.ShutDown();
@@ -556,6 +558,7 @@ void RunEngineDelaunay(Vulkan::RuntimeEngine& engine)
 void RunEngineOpenGL(OpenGL::RuntimeEngine engine)
 {
 	Model model = Model("/Models/Asteroid/rock.obj", Shader("BasicTexture", "/Shaders/"));
+	//Model model = Model("/Models/Bunny/Bunny.obj", Shader("ColorShape", "/Shaders/"));
 	model.ModelTransform.Position = { 5, 0, 0 };
 	GLenum error = glGetError();
 	if (error != GL_NO_ERROR)
@@ -595,8 +598,8 @@ void EngineDelaunay()
 }
 
 TEST(Fracturing, Diagram) {
-	//EnginePlane();
+	EnginePlane();
 
 	//EngineDelaunay();
-	OpenGLTest();
+	//OpenGLTest();
 }

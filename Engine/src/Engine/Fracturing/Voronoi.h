@@ -33,7 +33,7 @@ public:
 	~FracturePiece3D();
 	void TriangulateCell(const Array<Face>& cell);
 
-	FracturePiece3D(const Array<Face>& cell, const Vector3D& Point);
+	FracturePiece3D(const Array<Face>& cell, const Vector3D& CellPoint);
 	void SetupControls(const Vector3D& point);
 	void BufferData();
 
@@ -200,6 +200,9 @@ public:
 	std::mutex VoronoiMutex;
 
 	Array<FracturePiece3D> Fractures;
+
+
+	void GenerateNewPointSets(Model& InModel);
 
 private:
 	static void GetFirstIntersection(const Vector3D& Normal, const Vector3D& Center, const Face& CurrentFace, Face& NewFace,

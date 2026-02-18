@@ -102,6 +102,11 @@ namespace Vulkan
 
 		ErrorCodes ShutDown() const;
 
+		std::string GetGPUName()
+		{
+			return DeviceName;
+		}
+
 	private:
 
 		VkPhysicalDevice GraphicsCard;
@@ -119,6 +124,9 @@ namespace Vulkan
 		VkPhysicalDeviceProperties Properties;
 
 		const Array<const char*> ValidationLayers = { "VK_LAYER_KHRONOS_validation" };
+
+		std::string DeviceName;
+
 //#if DEBUG
 //		const Array<const char*> ValidationLayers = { "VK_LAYER_KHRONOS_validation" };
 //#endif

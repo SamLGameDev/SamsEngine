@@ -8,11 +8,14 @@
 #include "Camera.h"
 #include "DataBuffers.h"
 #include "DelaunayTriangulation.h"
+#include "FileSaving.h"
+#include "HardwareDetails.h"
 #include "MathCore.h"
 #include "ObjectFactory.h"
 #include "InterfaceRenderer.h"
 #include "PlaneClipping.h"
 #include "glm/gtc/type_ptr.hpp"
+#include "PerformanceRecord.h"
 
 void Voronoi::GetFirstIntersection(const Vector3D& Normal, const Vector3D& Center, const Face& CurrentFace, Face& NewFace, size_t& FirstIntersectionIndex, Vector3D& FirstIntersection)
 {
@@ -248,33 +251,50 @@ Vector3D Voronoi::ComputePolygonNormal(const Array<Vector3D>& verts)
 void Voronoi::FracturePlaneRandom(Model& InModel, const size_t& NumPoints)
 {
 	Array<Vector3D> points;
-	GenerateRandomPointsInBounds(InModel, NumPoints, points);
 
-	Fractures.ReSize(NumPoints);
+	//DataRecord record;
+	//record.CPU = UHardwareDetails::GetCPU();
+	//record.Card = UHardwareDetails::GetGPU();
+	//record.RAM = UHardwareDetails::GetRAM_GB();
+	//record.OS = UHardwareDetails::GetOS();
+//	record.API = UHardwareDetails::API;
 
-	for (size_t i = 0; i < points.GetSize(); i++)
+	//UFileWriter::Load("/ExperimentData/SetOfTen.txt", points);
+
+	for (size_t s = 0; s < 1; s++)
 	{
-		Vector3D currentPoint = points[i];
 
-		Array<Face> Faces = InModel.BoundingBox->Faces;
+		std::cout << "wtf" << std::endl;
 
-		Vector3D normal, right, up, center;
+		std::cout << "wtf2" << std::endl;
 
-		for (size_t j = 0; j < points.GetSize(); j++)
+
+		//UFileWriter::Load("/ExperimentData/SetOfTen.txt", points, Vector2D(s, ((s + 1) * 10) - 1));
+	//	Fractures.ReSize(points.GetSize());
+		for (size_t i = 0; i < points.GetSize(); i++)
 		{
-			if (i == j)continue;
-			DefinePlane(normal, currentPoint, points[j], right, up, center);
-			PlaneClipping::ClipCellByFace(Faces, center, normal);
+			Vector3D currentPoint = points[i];
 
-			//SliceShapeByPlane(points, i, currentPoint, Faces, normal, right, up, center, j);
+			Array<Face> Faces = InModel.BoundingBox->Faces;
+
+			Vector3D normal, right, up, center;
+
+			for (size_t j = 0; j < points.GetSize(); j++)
+			{
+				if (i == j)continue;
+				DefinePlane(normal, currentPoint, points[j], right, up, center);
+				PlaneClipping::ClipCellByFace(Faces, center, normal);
+
+				//SliceShapeByPlane(points, i, currentPoint, Faces, normal, right, up, center, j);
+			}
+
+			//auto color = Vector3D::RandomRange(Vector3D(30, 30, 30), Vector3D(255, 255, 255));
+
+			FracturePiece3D frac = CreateObjectRaw<FracturePiece3D>(Faces, currentPoint);
+			//frac.color = color;
+			Fractures.Add({ frac });
+
 		}
-
-		//auto color = Vector3D::RandomRange(Vector3D(30, 30, 30), Vector3D(255, 255, 255));
-
-		FracturePiece3D frac = CreateObjectRaw<FracturePiece3D>(Faces, currentPoint);
-		//frac.color = color;
-		Fractures.Add({ frac });
-
 	}
 
 }
@@ -567,6 +587,34 @@ void Voronoi::GenerateVoronoiCellsDelaunay(const Array<Vector3D>& Points, const 
 
 }
 
+void Voronoi::GenerateNewPointSets(Model& InModel)
+{
+	Array<Vector3D> TenPoints;
+	TenPoints.ReSize(10 * 145);
+	Array<Vector3D> HundredPoints;
+	TenPoints.ReSize(100 * 145);
+	Array<Vector3D> ThousandPoints;
+	TenPoints.ReSize(1000 * 145);
+
+	for (size_t i = 0; i < 145; i++)
+	{
+		Array<Vector3D> points;
+		GenerateRandomPointsInBounds(InModel, 10, points);
+		TenPoints.Emplace(std::move(points));
+
+		GenerateRandomPointsInBounds(InModel, 100, points);
+		HundredPoints.Emplace(std::move(points));
+
+		GenerateRandomPointsInBounds(InModel, 1000, points);
+		ThousandPoints.Emplace(std::move(points));
+
+	}
+
+	UFileWriter::SaveArray("/ExperimentData/SetOfTen.txt", TenPoints);
+	UFileWriter::SaveArray("/ExperimentData/SetOfHundred.txt", HundredPoints);
+	UFileWriter::SaveArray("/ExperimentData/SetOfThousand.txt", ThousandPoints);
+}
+
 
 FracturePiece3D::~FracturePiece3D()
 {
@@ -604,7 +652,7 @@ void FracturePiece3D::TriangulateCell(const Array<Face>& cell)
 }
 
 
-FracturePiece3D::FracturePiece3D(const Array<Face>& cell, const Vector3D& Point)
+FracturePiece3D::FracturePiece3D(const Array<Face>& cell, const Vector3D& CellPoint)
 {
 	//SetupControls(Point);
 
@@ -643,6 +691,7 @@ FracturePiece3D::FracturePiece3D(const Array<Face>& cell, const Vector3D& Point)
 	{
 		return;
 	}
+	this->Point = CellPoint;
 
 	//BufferData();
 }
@@ -665,7 +714,7 @@ void FracturePiece3D::SetupControls(const Vector3D& point)
 
 	dir = (point - Vector3D::Zero).Normalised();
 
-	this->Point = point;
+
 }
 
 void FracturePiece3D::BufferData()

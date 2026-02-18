@@ -33,6 +33,9 @@ namespace OpenGL {
 
 	private:
 
+		std::string GetGPUInfo();
+
+
 		CInitialiseOpenGL* APIConstructer;
 
 		FirstWindow* Window;
@@ -50,4 +53,10 @@ namespace OpenGL {
 		CorePaths* PathManager;
 
 	};
+
+	inline std::string SubsystemInitialiser::GetGPUInfo()
+	{
+		const std::string gpu = reinterpret_cast<const char*>(glGetString(GL_RENDERER));
+		return gpu;
+	}
 }

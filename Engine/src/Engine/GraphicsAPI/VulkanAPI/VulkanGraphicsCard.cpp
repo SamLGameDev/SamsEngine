@@ -50,7 +50,7 @@ namespace Vulkan
 	{
 
 		vkGetPhysicalDeviceProperties(Device, &Properties);
-
+		DeviceName = Properties.deviceName;
 		VkPhysicalDeviceFeatures deviceFeatures;
 		vkGetPhysicalDeviceFeatures(Device, &deviceFeatures);
 

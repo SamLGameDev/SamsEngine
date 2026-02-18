@@ -9,14 +9,14 @@ constexpr std::string_view SaveLocation = "/TestData/TestData.json";
 struct DataRecord
 {
 public:
-	std::string_view Card;
-	std::string_view OS;
-	std::string_view RAM;
-	std::string_view CPU;
-	std::string_view API;
-	std::string_view TenPoints;
-	std::string_view OneHundredPoints;
-	std::string_view OneThousandPoints;
+	std::string Card;
+	std::string OS;
+	std::string RAM;
+	std::string CPU;
+	std::string API;
+	std::string TenPoints;
+	std::string OneHundredPoints;
+	std::string OneThousandPoints;
 };
 
 class DataRecorder

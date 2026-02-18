@@ -5,6 +5,7 @@
 
 #include "DataBuffers.h"
 #include "DataBuffersVulkan.h"
+#include "HardwareDetails.h"
 #include "WorldObject.h"
 #include "ObjectFactory.h"
 #include "VulkanInstance.h"
@@ -70,6 +71,9 @@ namespace Vulkan
 			std::cerr << error.what() << "\n";
 			return ERROR;
 		}
+
+		UHardwareDetails::GetGPU = [this] {return GraphicsCard->GetGPUName(); };
+		UHardwareDetails::API = "Vulkan";
 
 		try
 		{
