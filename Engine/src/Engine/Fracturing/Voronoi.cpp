@@ -248,54 +248,76 @@ Vector3D Voronoi::ComputePolygonNormal(const Array<Vector3D>& verts)
 	return normal.Normalised();
 }
 
-void Voronoi::FracturePlaneRandom(Model& InModel, const size_t& NumPoints)
+void Voronoi::FracturePlaneRandom(Model& InModel, const size_t& NumPoints, const size_t& PointSetIndex)
 {
 	Array<Vector3D> points;
 
-	//DataRecord record;
-	//record.CPU = UHardwareDetails::GetCPU();
-	//record.Card = UHardwareDetails::GetGPU();
-	//record.RAM = UHardwareDetails::GetRAM_GB();
-	//record.OS = UHardwareDetails::GetOS();
-//	record.API = UHardwareDetails::API;
+	DataRecord record;
+	record.CPU = UHardwareDetails::GetCPU();
+	record.API = UHardwareDetails::API;
+	record.Card = UHardwareDetails::GetGPU();
+	record.OS = UHardwareDetails::GetOS();
+	record.RAM = UHardwareDetails::GetRAM_GB();
 
-	//UFileWriter::Load("/ExperimentData/SetOfTen.txt", points);
+	const Vector2D range = { PointSetIndex * 10, ((PointSetIndex + 1) * 10) - 1 };
 
-	for (size_t s = 0; s < 1; s++)
+	if (NumPoints == 10)
 	{
-
-		std::cout << "wtf" << std::endl;
-
-		std::cout << "wtf2" << std::endl;
-
-
-		//UFileWriter::Load("/ExperimentData/SetOfTen.txt", points, Vector2D(s, ((s + 1) * 10) - 1));
-	//	Fractures.ReSize(points.GetSize());
-		for (size_t i = 0; i < points.GetSize(); i++)
-		{
-			Vector3D currentPoint = points[i];
-
-			Array<Face> Faces = InModel.BoundingBox->Faces;
-
-			Vector3D normal, right, up, center;
-
-			for (size_t j = 0; j < points.GetSize(); j++)
-			{
-				if (i == j)continue;
-				DefinePlane(normal, currentPoint, points[j], right, up, center);
-				PlaneClipping::ClipCellByFace(Faces, center, normal);
-
-				//SliceShapeByPlane(points, i, currentPoint, Faces, normal, right, up, center, j);
-			}
-
-			//auto color = Vector3D::RandomRange(Vector3D(30, 30, 30), Vector3D(255, 255, 255));
-
-			FracturePiece3D frac = CreateObjectRaw<FracturePiece3D>(Faces, currentPoint);
-			//frac.color = color;
-			Fractures.Add({ frac });
-
-		}
+		UFileWriter::Load("/ExperimentData/SetOfTen.txt", points, range);
 	}
+	else if ( NumPoints == 100)
+	{
+		UFileWriter::Load("/ExperimentData/SetOfHundred.txt", points, range);
+	}
+	else
+	{
+		UFileWriter::Load("/ExperimentData/SetOfThousand.txt", points, range);
+	}
+
+	const double TimeBeforeComputation = glfwGetTime();
+
+	Fractures.ReSize(points.GetSize());
+	for (size_t i = 0; i < points.GetSize(); i++)
+	{
+		Vector3D currentPoint = points[i];
+
+		Array<Face> Faces = InModel.BoundingBox->Faces;
+
+		Vector3D normal, right, up, center;
+
+		for (size_t j = 0; j < points.GetSize(); j++)
+		{
+			if (i == j)continue;
+			DefinePlane(normal, currentPoint, points[j], right, up, center);
+			PlaneClipping::ClipCellByFace(Faces, center, normal);
+
+			//SliceShapeByPlane(points, i, currentPoint, Faces, normal, right, up, center, j);
+		}
+
+		//auto color = Vector3D::RandomRange(Vector3D(30, 30, 30), Vector3D(255, 255, 255));
+
+		FracturePiece3D frac = CreateObjectRaw<FracturePiece3D>(Faces, currentPoint);
+		//frac.color = color;
+		Fractures.Add({ frac });
+
+	}
+
+	const double TimeTaken = glfwGetTime() - TimeBeforeComputation;
+	
+	if (NumPoints == 10)
+	{
+		record.TenPoints = std::to_string(TimeTaken);
+	}
+	else if (NumPoints == 100)
+	{
+		record.OneHundredPoints = std::to_string(TimeTaken);
+	}
+	else
+	{
+		record.OneThousandPoints = std::to_string(TimeTaken);
+	}
+
+	DataRecorder::SaveDataRecord(record, "/ExperimentData/CellGenerationResults.json");
 
 }
 

@@ -192,7 +192,7 @@ class Voronoi
 public:
 
 	//Fracture the model into a voronoi diagram based on random points
-	void FracturePlaneRandom(Model& InModel, const size_t& NumPoints);
+	void FracturePlaneRandom(Model& InModel, const size_t& NumPoints, const size_t& PointSetIndex);
 	Array<Vector3D> GenerateRandomPointsInBounds(Model& InModel, const size_t& NumPoints, Array<Vector3D>& Points);
 
 	void FractureDelaunayRandom(Model& InModel, const size_t& NumPoints);

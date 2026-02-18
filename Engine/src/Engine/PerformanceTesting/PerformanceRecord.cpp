@@ -9,12 +9,14 @@
 #include "CorePaths.h"
 
 
-void DataRecorder::SaveDataRecord(const DataRecord& Record)
+void DataRecorder::SaveDataRecord(const DataRecord& Record, const std::string& Name)
 {
 	
     nlohmann::ordered_json root;
 
-	std::ifstream inFile(CorePaths::Contents.Path + SaveLocation.data());
+    const std::string directory = CorePaths::Contents.Path + Name;
+
+	std::ifstream inFile(directory);
 
     CopyFileContents(root, inFile);
 
@@ -27,11 +29,11 @@ void DataRecorder::SaveDataRecord(const DataRecord& Record)
 
     if (DoesJsonContainRecord(Record, root, index))
     {
-        AppendRecordToData(Record, root, index);
+        AppendRecordToData(Record, root, index, Name);
         return;
     }
 
-    CreateNewDataEntry(Record, root);
+    CreateNewDataEntry(Record, root, Name);
 
 }
 
@@ -54,21 +56,27 @@ bool DataRecorder::DoesJsonContainRecord(const DataRecord& Record, const nlohman
     return false;
 }
 
-void DataRecorder::AppendRecordToData(const DataRecord& Record, nlohmann::ordered_json& Root, size_t& Index)
+void DataRecorder::AppendRecordToData(const DataRecord& Record, nlohmann::ordered_json& Root, size_t& Index, const std::string_view& Name)
 {
     nlohmann::ordered_json& data = Root[Index]["Data"];
+    if (!Record.TenPoints.empty())
+    {
+        MakeDataEntryArrayIfNot(data, "10");
+        data["10"].push_back(Record.TenPoints.data());
+    }
+    if (!Record.OneHundredPoints.empty()) 
+    {
+        MakeDataEntryArrayIfNot(data, "100");
+        data["100"].push_back(Record.OneHundredPoints.data());
+    }
+    if (!Record.OneThousandPoints.empty()) 
+    {
+        MakeDataEntryArrayIfNot(data, "1000");
 
-    MakeDataEntryArrayIfNot(data, "10");
+        data["1000"].push_back(Record.OneThousandPoints.data());
+    }
 
-    MakeDataEntryArrayIfNot(data, "100");
-
-	MakeDataEntryArrayIfNot(data, "1000");
-
-    data["10"].push_back(Record.TenPoints.data());
-    data["100"].push_back(Record.OneHundredPoints.data());
-    data["1000"].push_back(Record.OneThousandPoints.data());
-
-    std::ofstream file(CorePaths::Contents.Path + SaveLocation.data());
+    std::ofstream file(CorePaths::Contents.Path + Name.data());
     file << Root.dump(4);
     file.close();
 }
@@ -109,7 +117,7 @@ bool DataRecorder::CheckJsonAgainstData(const nlohmann::json Json, const DataRec
     return true;
 }
 
-void DataRecorder::CreateNewDataEntry(const DataRecord& Record, nlohmann::ordered_json& root)
+void DataRecorder::CreateNewDataEntry(const DataRecord& Record, nlohmann::ordered_json& root, const std::string_view& Name)
 {
     nlohmann::ordered_json jsonData;
 
@@ -118,16 +126,17 @@ void DataRecorder::CreateNewDataEntry(const DataRecord& Record, nlohmann::ordere
     jsonData["RAM"] = Record.RAM;
     jsonData["CPU"] = Record.CPU;
     jsonData["API"] = Record.API;
-    jsonData["10"] = Record.TenPoints;
-    jsonData["100"] = Record.OneHundredPoints;
-    jsonData["1000"] = Record.OneThousandPoints;
+
+    if (!Record.TenPoints.empty()) jsonData["10"] = Record.TenPoints;
+    if (!Record.OneHundredPoints.empty()) jsonData["100"] = Record.OneHundredPoints;
+    if (!Record.OneThousandPoints.empty()) jsonData["1000"] = Record.OneThousandPoints;
 
     nlohmann::ordered_json newRoot;
     newRoot["Data"] = jsonData;
 
     root.push_back(newRoot);
 
-    std::ofstream file(CorePaths::Contents.Path + SaveLocation.data());
+    std::ofstream file(CorePaths::Contents.Path + Name.data());
     file << root.dump(4);
     file.close();
 }

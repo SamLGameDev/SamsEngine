@@ -4,8 +4,6 @@
 
 #include "nlohmann/json_fwd.hpp"
 
-constexpr std::string_view SaveLocation = "/TestData/TestData.json";
-
 struct DataRecord
 {
 public:
@@ -22,12 +20,12 @@ public:
 class DataRecorder
 {
 public:
-	static void SaveDataRecord(const DataRecord& Record);
+	static void SaveDataRecord(const DataRecord& Record, const std::string& Name);
 
 
 	static bool DoesJsonContainRecord(const DataRecord& Record, const nlohmann::json& Root, size_t& Index);
 
-	static void AppendRecordToData(const DataRecord& Record, nlohmann::ordered_json& Root, size_t& Index);
+	static void AppendRecordToData(const DataRecord& Record, nlohmann::ordered_json& Root, size_t& Index, const std::string_view& Name);
 
 	static void MakeDataEntryArrayIfNot(nlohmann::ordered_json& Data, const std::string_view& Key);
 
@@ -35,6 +33,6 @@ public:
 
 	static bool CheckJsonAgainstData(const nlohmann::json Json, const DataRecord& Record);
 
-	static void CreateNewDataEntry(const DataRecord& Record, nlohmann::ordered_json& root);
+	static void CreateNewDataEntry(const DataRecord& Record, nlohmann::ordered_json& root, const std::string_view& Name);
 
 };

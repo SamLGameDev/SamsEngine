@@ -511,19 +511,53 @@ void RunEngine(Vulkan::RuntimeEngine& engine)
 	//Model model = Model("/Models/Bunny/Bunny.obj", Shader("ColorShape", "/Shaders/"));
 	//Model model = Model("/Models/SkyBox/SkyBox.obj", Shader("ColorShape", "/Shaders/"));
 	model.ModelTransform.Position = { 5, 0, 0 };
-	Voronoi vorn;
-	//vorn.GenerateNewPointSets(model);
-	vorn.FracturePlaneRandom(model, 100);
 
-	/*VoronoiClipping clipper;
-	clipper.ClipMeshToVoronoi(vorn, model);
-
-	while (!engine.ShouldClose())
+	for (size_t i = 0; i < 145; i++)
 	{
-		engine.Loop();
-	}*/
+		Voronoi vorn;
+		//vorn.GenerateNewPointSets(model);
+		vorn.FracturePlaneRandom(model, 10, i);
 
-	Vulkan::RuntimeEngine::WaitForFrameToFinish();
+		//VoronoiClipping clipper;
+		//clipper.ClipMeshToVoronoi(vorn, model);
+		engine.Loop();
+
+		Vulkan::RuntimeEngine::WaitForFrameToFinish();
+	}
+
+
+	for (size_t i = 0; i < 145; i++)
+	{
+		Voronoi vorn;
+		//vorn.GenerateNewPointSets(model);
+		vorn.FracturePlaneRandom(model, 100, i);
+
+		//VoronoiClipping clipper;
+		//clipper.ClipMeshToVoronoi(vorn, model);
+		engine.Loop();
+
+		Vulkan::RuntimeEngine::WaitForFrameToFinish();
+	}
+
+	//for (size_t i = 0; i < 145; i++)
+	//{
+	//	Voronoi vorn;
+	//	//vorn.GenerateNewPointSets(model);
+	//	vorn.FracturePlaneRandom(model, 1000, i);
+
+	//	VoronoiClipping clipper;
+	//	clipper.ClipMeshToVoronoi(vorn, model);
+	//	engine.Loop();
+
+	//	Vulkan::RuntimeEngine::WaitForFrameToFinish();
+	//}
+
+
+	//while (!engine.ShouldClose())
+	//{
+
+	//}
+
 }
 
 void EnginePlane()
@@ -566,7 +600,7 @@ void RunEngineOpenGL(OpenGL::RuntimeEngine engine)
 		std::cout << "ERROR::UNIFORMBUFFER::" << std::to_string(error) << std::endl;
 	}
 	Voronoi vorn;
-	vorn.FracturePlaneRandom(model, 100);
+	vorn.FracturePlaneRandom(model, 100, 0);
 	//std::cout << "Generated Voronoi Diagram with " << vorn.Fractures.GetSize() << " cells." << std::endl;
 	VoronoiClipping clipper;
 	clipper.ClipMeshToVoronoi(vorn, model);
