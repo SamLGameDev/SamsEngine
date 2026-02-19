@@ -656,5 +656,15 @@
                 "0.027690"
             ]
         }
+    },
+    {
+        "Data": {
+            "Card": "NVIDIA GeForce RTX 4080 Laptop GPU/PCIe/SSE2",
+            "OS": "Windows",
+            "RAM": "31",
+            "CPU": "Intel(R) Core(TM) i9-14900HX",
+            "API": "OpenGL",
+            "100": "0.023688"
+        }
     }
 ]

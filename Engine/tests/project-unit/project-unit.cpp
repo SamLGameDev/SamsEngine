@@ -512,18 +512,18 @@ void RunEngine(Vulkan::RuntimeEngine& engine)
 	//Model model = Model("/Models/SkyBox/SkyBox.obj", Shader("ColorShape", "/Shaders/"));
 	model.ModelTransform.Position = { 5, 0, 0 };
 
-	for (size_t i = 0; i < 145; i++)
-	{
-		Voronoi vorn;
-		//vorn.GenerateNewPointSets(model);
-		vorn.FracturePlaneRandom(model, 10, i);
+	//for (size_t i = 0; i < 145; i++)
+	//{
+	//	Voronoi vorn;
+	//	//vorn.GenerateNewPointSets(model);
+	//	vorn.FracturePlaneRandom(model, 10, i);
 
-		//VoronoiClipping clipper;
-		//clipper.ClipMeshToVoronoi(vorn, model);
-		engine.Loop();
+	//	//VoronoiClipping clipper;
+	//	//clipper.ClipMeshToVoronoi(vorn, model);
+	//	engine.Loop();
 
-		Vulkan::RuntimeEngine::WaitForFrameToFinish();
-	}
+	//	Vulkan::RuntimeEngine::WaitForFrameToFinish();
+	//}
 
 
 	for (size_t i = 0; i < 145; i++)
@@ -632,8 +632,8 @@ void EngineDelaunay()
 }
 
 TEST(Fracturing, Diagram) {
-	EnginePlane();
+	//EnginePlane();
 
 	//EngineDelaunay();
-	//OpenGLTest();
+	OpenGLTest();
 }
