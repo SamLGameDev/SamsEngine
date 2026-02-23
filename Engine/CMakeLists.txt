@@ -9,8 +9,8 @@ if(DEFINED ENV{VCPKG_ROOT} AND NOT DEFINED CMAKE_TOOLCHAIN_FILE)
       CACHE STRING "")
 endif()
 #set(CMAKE_BUILD_TYPE Debug)
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /fsanitize=address /Zi")
-set(CMAKE_LINK_FLAGS "${CMAKE_LINK_FLAGS} /fsanitize=address")
+#set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /fsanitize=address /Zi")
+#set(CMAKE_LINK_FLAGS "${CMAKE_LINK_FLAGS} /fsanitize=address")
 #set(ASAN_OPTIONS "alloc_dealloc_mismatch=1:detect_leaks=1:halt_on_error=1:print_stats=1:strict_string_checks=1")
 #set(ENV{ASAN_OPTIONS} "${ASAN_OPTIONS}")
 
@@ -42,11 +42,16 @@ add_library(EngineCore STATIC
     "src/Engine/Rendering/Textures/OpenGLTexture.cpp"
     "src/Engine/Rendering/Textures/VulkanTexture.cpp"
     "src/Engine/Rendering/Textures/BaseTexture.cpp"
+    "src/Engine/Compute/ComputeShader/UBaseComputeShader.cpp"
+    "src/Engine/Compute/ComputeShader/UComputeShader.cpp"
+    "src/Engine/Compute/ComputeShader/UVulkanComputeShader.cpp"
+    "src/Engine/Compute/ComputeShader/UOpenGLComputeShader.cpp"
     "src/Engine/DataStructures/Array.cpp"
     "src/Engine/DataStructures/LinkedList.cpp"
     "src/Engine/DataStructures/Item.cpp"
     "src/Engine/DataStructures/Vector2D.cpp"
     "src/Engine/DataStructures/Vector3D.cpp"
+    "src/Engine/DataStructures/Vector4D.cpp"
     "src/Engine/DataStructures/BaseDelegate.cpp"
     "src/Engine/DataStructures/Verticie.cpp"
     "src/Engine/DataStructures/Matrix.cpp"
@@ -157,6 +162,7 @@ target_include_directories(EngineCore
                            "$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/src/Engine/GraphicsAPI/DataBuffers>"
                            "$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/src/Engine/PerformanceTesting>"
                            "$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/src/Engine/Hardware>"
+                           "$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/src/Engine/Compute>"
                            "$<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}>")
 
 install(TARGETS EngineCore
@@ -175,12 +181,17 @@ install(FILES
     src/Engine/Rendering/Textures/VulkanTexture.h
     src/Engine/Rendering/Textures/OpenGLTexture.h
     src/Engine/Rendering/Textures/BaseTexture.h
+    src/Engine/Compute/ComputeShader/UBaseComputeShader.h
+    src/Engine/Compute/ComputeShader/UComputeShader.h
+    src/Engine/Compute/ComputeShader/UVulkanComputeShader.h
+    src/Engine/Compute/ComputeShader/UOpenGLComputeShader.h
     src/Engine/Rendering/Textures/CubeMap.h
     src/Engine/DataStructures/Array.h
     src/Engine/DataStructures/LinkedList.h
     src/Engine/DataStructures/Item.h
     src/Engine/DataStructures/Vector2D.h
     src/Engine/DataStructures/Vector3D.h
+    src/Engine/DataStructures/Vector4D.h
     src/Engine/DataStructures/BaseDelegate.h
     src/Engine/DataStructures/Matrix.h
     src/Engine/DataStructures/Verticie.h

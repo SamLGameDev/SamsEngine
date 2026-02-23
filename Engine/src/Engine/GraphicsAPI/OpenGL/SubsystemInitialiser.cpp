@@ -19,6 +19,8 @@
 #include "OpenGLTexture.h"
 
 #include "HardwareDetails.h"
+#include "ComputeShader/UComputeShader.h"
+#include "ComputeShader/UOpenGLComputeShader.h"
 
 namespace OpenGL {
 	ErrorCodes SubsystemInitialiser::Init()
@@ -65,6 +67,8 @@ namespace OpenGL {
 		::Texture::TextureCreationFunc = OpenGL::Texture::CreateOpenGLTexture;
 
 		::DataBuffers::APIBufferInstance = new OpenGL::DataBuffers();
+
+		::UComputeShader::ShaderCreationFunc = OpenGL::UOpenGLComputeShader::CreateOpenGLComputeShader;
 
 		try
 		{

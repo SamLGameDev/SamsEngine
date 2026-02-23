@@ -4,6 +4,7 @@
 
 #include "CorePaths.h"
 #include "Vector2D.h"
+#include "CGAL/basic.h"
 
 void UFileWriter::SaveArray(const std::string_view& Name, const Array<Vector3D>& Data)
 {
@@ -41,4 +42,18 @@ void UFileWriter::Load(const std::string_view& Name, Array<Vector3D>& Data, cons
     Data.Reallocate((Range.Y - Range.X) + 1);
     in.seekg(sizeof(count) + Range.X * sizeof(Vector3D), std::ios::beg);
     in.read(reinterpret_cast<char*>(Data.GetFirstPtr()), (Range.Y - Range.X) * sizeof(Vector3D));
+}
+
+
+std::string UFileWriter::ReadFileContents(const std::string_view& Location) 
+{
+	std::ifstream File;
+	File.open(Location.data());
+	std::stringstream Buffer;
+	Buffer << File.rdbuf();
+	File.close();
+	
+	std::string text = Buffer.str();
+
+	return text;
 }

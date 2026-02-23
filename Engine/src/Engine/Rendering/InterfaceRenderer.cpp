@@ -16,6 +16,11 @@ void Renderer::AddFracture(FracturePiece2D* Piece)
 	RealRenderer->AddFracture(Piece);
 }
 
+void Renderer::AddFracture(FracturePieceGPU* Piece)
+{
+	RealRenderer->AddFracture(Piece);
+}
+
 void Renderer::ReplaceFracture(const FracturePiece3D* Old, const FracturePiece3D* New)
 {
 	RealRenderer->ReplaceFracture(Old, New);

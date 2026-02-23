@@ -11,6 +11,11 @@ void BaseRenderer::AddFracture(FracturePiece2D* Piece)
 	Fracture2DToRender.Add(Piece);
 }
 
+void BaseRenderer::AddFracture(FracturePieceGPU* Piece)
+{
+	GPUFracturesToRender.Add(Piece);
+}
+
 void BaseRenderer::ReplaceFracture(const FracturePiece3D* Old, const FracturePiece3D* New)
 {
 	FracturePiece3D* oldPtr = const_cast<FracturePiece3D*>(Old);

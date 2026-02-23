@@ -11,6 +11,7 @@
 #include "DataBuffers.h"
 #include "DataBuffersOpenGL.h"
 #include "Transform.h"
+#include "Voronoi.h"
 
 namespace OpenGL {
 
@@ -93,7 +94,9 @@ namespace OpenGL {
 
 		GLuint LocalSize = sizeof(PerInstanceTransforms);
 
-		Array<GLuint> sizes = { GlobalSize, LocalSize };
+		GLuint VoronoiSize = sizeof(VoronoiCellInstanceInfo);
+
+		Array<GLuint> sizes = { GlobalSize, LocalSize, VoronoiSize };
 
 		size_t index = 0;
 		error = glGetError();

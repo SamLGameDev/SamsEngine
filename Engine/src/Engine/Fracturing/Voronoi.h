@@ -24,6 +24,29 @@ struct TetRing
 	}
 
 };
+
+struct VoronoiCellInstanceInfo
+{
+	glm::mat4 ModelMatrix[100];
+	Vector3D Color[100];
+};
+
+
+class FracturePieceGPU
+{
+public:
+	FracturePieceGPU() = default;
+
+	FracturePieceGPU(const GLuint& InVoronoiOut);
+	void Draw();
+
+	Shader shader;
+
+	VoronoiCellInstanceInfo* InstanceInfo;
+
+	GLuint VoronoiOut;
+};
+
 class FracturePiece3D : WorldObject
 {
 public:

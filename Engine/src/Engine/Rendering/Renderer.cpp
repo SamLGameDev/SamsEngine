@@ -13,6 +13,7 @@
 #include "Voronoi2D.h"
 #include "VoronoiClipping.h"
 
+
 namespace OpenGL
 {
 
@@ -78,6 +79,10 @@ namespace OpenGL
 		for (FracturedMeshPiece* shape : MeshFracturePiecesToRender)
 		{
 			shape->Draw();
+		}
+		for (FracturePieceGPU* piece : GPUFracturesToRender)
+		{
+			piece->Draw();
 		}
 
 	}

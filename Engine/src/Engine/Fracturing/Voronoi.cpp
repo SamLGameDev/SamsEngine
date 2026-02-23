@@ -638,6 +638,30 @@ void Voronoi::GenerateNewPointSets(Model& InModel)
 }
 
 
+FracturePieceGPU::FracturePieceGPU(const GLuint& InVoronoiOut)
+{
+	shader = Shader("VoronoiTest", "/Shaders/");
+	::Renderer::AddFracture(this);
+	VoronoiOut = InVoronoiOut;
+}
+
+void FracturePieceGPU::Draw()
+{
+	shader.Use();
+
+	glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 3, VoronoiOut);
+	GlobalTransforms g;
+	g.View = Camera::GetActiveCamera()->GetLook();
+
+	g.Projection = Camera::GetActiveCamera()->GetProjection();
+
+	shader.SetUniformBuffer(0, &g, sizeof(GlobalTransforms));
+
+	shader.SetUniformBuffer(2, InstanceInfo, sizeof(VoronoiCellInstanceInfo));
+
+	glDrawArraysInstanced(GL_POINTS, 0, 1, 10);
+}
+
 FracturePiece3D::~FracturePiece3D()
 {
 	::Renderer::RemoveFracture(this);

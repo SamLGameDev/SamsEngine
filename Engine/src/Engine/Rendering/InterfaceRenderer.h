@@ -1,5 +1,6 @@
 #pragma once
 
+class FracturePieceGPU;
 class FracturedMeshPiece;
 class FracturePiece2D;
 class Model;
@@ -13,6 +14,7 @@ public:
 
 	static void AddFracture(FracturePiece3D* Piece);
 	static void AddFracture(FracturePiece2D* Piece);
+	static void AddFracture(FracturePieceGPU* Piece);
 
 	static void ReplaceFracture(const FracturePiece3D* Old, const FracturePiece3D* New);
 	static void RemoveFracture(FracturePiece3D* ToRemove);

@@ -1,6 +1,7 @@
 #pragma once
 #include "Array.h"
 
+class FracturePieceGPU;
 class FracturePiece2D;
 class Model;
 class WireObject;
@@ -17,6 +18,7 @@ public:
 
 	void AddFracture(FracturePiece3D* Piece);
 	void AddFracture(FracturePiece2D* Piece);
+	void AddFracture(FracturePieceGPU* Piece);
 	void ReplaceFracture(const FracturePiece3D* Old, const FracturePiece3D* New);
 	void RemoveFracture(FracturePiece3D* ToRemove);
 
@@ -31,6 +33,7 @@ public:
 	void ReplaceMeshFracturePiece(const FracturedMeshPiece* Old, const FracturedMeshPiece* New);
 
 	Array<FracturePiece3D*> FracturesToRender;
+	Array<FracturePieceGPU*> GPUFracturesToRender;
 
 	Array<WireObject*> WireShapesToRender;
 

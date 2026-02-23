@@ -15,6 +15,10 @@
 #include "VoronoiClipping.h"
 #include <string>
 
+#include "FileSaving.h"
+#include "Vector4D.h"
+#include "ComputeShader/UComputeShader.h"
+
 int main(int argc, char** argv) {
 	::testing::InitGoogleTest(&argc, argv);
 	return RUN_ALL_TESTS();
@@ -589,21 +593,157 @@ void RunEngineDelaunay(Vulkan::RuntimeEngine& engine)
 	Vulkan::RuntimeEngine::WaitForFrameToFinish();
 }
 
+struct alignas(16) FaceTest
+{
+	Vector3D verts[30];
+	uint32_t numVerts;
+	uint32_t pad0;
+	uint32_t pad1;
+	uint32_t pad2;
+	uint32_t _pad[30];
+};
+struct alignas(16) Vec3_std430
+{
+	float x;
+	float y;
+	float z;
+	float _pad; // required padding
+};
+
+struct alignas(16) Facew
+{
+	Vector4D Verts[20];
+	uint32_t NumVerts;      
+};
+
+struct Cell
+{
+	Facew Faces[20];      // 1280 bytes
+	uint32_t NumFaces;      // 4 bytes// pad to 16-byte multiple
+};
+
+struct VoronoiSSBOIn
+{
+	Vector4D Points[10];      // 10 * 16 = 160 bytes
+	uint32_t NumPoints;          // 4 bytes
+	Facew BoundingBoxFaces[6];  
+};
+struct Tri
+{
+	Vector4D Verts[3];   // 48 bytes
+};
+
+struct FaceTri
+{
+	Tri Tris[6];           // 480 bytes
+	uint32_t NumTris;       // 4 bytes// pad to 16-byte multiple
+};
+
+struct CellTri
+{
+	FaceTri Faces[20];      // 9920 bytes
+	uint32_t NumFaces;      // 4 bytes// pad to 16-byte multiple
+};
+
+
+struct VOut
+{
+	uint32_t numPoints;
+	uint32_t debugNum;;
+	Cell cells[10];
+};
+
+
 void RunEngineOpenGL(OpenGL::RuntimeEngine engine)
 {
 	Model model = Model("/Models/Asteroid/rock.obj", Shader("BasicTexture", "/Shaders/"));
 	//Model model = Model("/Models/Bunny/Bunny.obj", Shader("ColorShape", "/Shaders/"));
+
+
+	glm::mat4 modelMat = model.ModelTransform.GetModelMatrix();
+
 	model.ModelTransform.Position = { 5, 0, 0 };
+
+	VoronoiSSBOIn buffer;
+	VOut vOut;
+	vOut.numPoints = 0;
+	vOut.debugNum = 10;
+	Array<Vector3D> points;
+	//ASSERT_EQ(sizeof(FaceTest), 496);
+	//ASSERT_EQ(sizeof(VoronoiSSBOIn), 3152);
+
+	const Vector2D range = { 0 * 10, ((0 + 1) * 10) - 1 };
+	UFileWriter::Load("/ExperimentData/SetOfTen.txt", points, range);
+
+	for (size_t i = 0; i < points.GetSize(); i++)
+	{
+		buffer.Points[i] = points[i];
+	}
+	buffer.NumPoints = points.GetSize();
+
+	for (size_t i = 0; i < model.BoundingBox->Faces.GetSize(); i++)
+	{
+		Face& face = model.BoundingBox->Faces[i];
+		for (size_t j = 0; j < face.Vertices.GetSize(); j++)
+		{
+			buffer.BoundingBoxFaces[i].Verts[j] = face.Vertices[j];
+		}
+		buffer.BoundingBoxFaces[i].NumVerts = face.Vertices.GetSize();
+	}
+
+	GLuint VoronoiIn, VoronoiOut;
+	glGenBuffers(1, &VoronoiIn);
+	glGenBuffers(1, &VoronoiOut);	
+
+	glBindBuffer(GL_SHADER_STORAGE_BUFFER, VoronoiIn);
+	glBufferData(GL_SHADER_STORAGE_BUFFER, sizeof(VoronoiSSBOIn), &buffer, GL_DYNAMIC_COPY);
+
+	glBindBuffer(GL_SHADER_STORAGE_BUFFER, VoronoiOut);
+	glBufferData(GL_SHADER_STORAGE_BUFFER, sizeof(VOut), &vOut, GL_DYNAMIC_COPY);
+
+	//GLuint block_index = 0;
+	//block_index = glGetProgramResourceIndex(program, GL_SHADER_STORAGE_BLOCK, "shader_data");
+
+	//Trianulate cell in shader gemetry stage;
+
 	GLenum error = glGetError();
 	if (error != GL_NO_ERROR)
 	{
 		std::cout << "ERROR::UNIFORMBUFFER::" << std::to_string(error) << std::endl;
 	}
-	Voronoi vorn;
-	vorn.FracturePlaneRandom(model, 100, 0);
+
+	UComputeShader voronoiCompute = UComputeShader("VoronoiClipping", "/Shaders/Voronoi/");
+
+	voronoiCompute.Use();
+	glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 1, VoronoiIn);
+	glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 3, VoronoiOut);
+	glFinish();
+	voronoiCompute.Dispatch(10, 1, 1);
+	voronoiCompute.WaitForCompletion();
+	error = glGetError();
+	if (error != GL_NO_ERROR)
+	{
+		std::cout << "ERROR::COMPUTE_SHADER::" << std::to_string(error) << std::endl;
+	}
+	glFinish();
+
+
+	FracturePieceGPU fracturePiece(VoronoiOut);
+	VoronoiCellInstanceInfo info;
+	for (size_t i = 0; i < 100; i++)
+	{
+		info.ModelMatrix[i] = modelMat;
+		info.Color[i] = Vector3D::RandomRange(Vector3D(30, 30, 30), Vector3D(255, 255, 255));
+	}
+	fracturePiece.InstanceInfo = &info;
+
+
+
+//	Voronoi vorn;
+	//vorn.FracturePlaneRandom(model, 100, 0);
 	//std::cout << "Generated Voronoi Diagram with " << vorn.Fractures.GetSize() << " cells." << std::endl;
-	VoronoiClipping clipper;
-	clipper.ClipMeshToVoronoi(vorn, model);
+	//VoronoiClipping clipper;
+	//clipper.ClipMeshToVoronoi(vorn, model);
 	while (!engine.ShouldClose())
 	{
 		engine.Loop();
