@@ -574,6 +574,6 @@ void main()
     //TriangulateRawCell(cell, index);
     
     if (ClippedCells[index].NumFaces == 0) return;
-    NumCellsCut++;
+    atomicAdd(NumCellsCut, 1);
 
 }
