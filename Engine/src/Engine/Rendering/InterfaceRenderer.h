@@ -19,6 +19,10 @@ public:
 	static void ReplaceFracture(const FracturePiece3D* Old, const FracturePiece3D* New);
 	static void RemoveFracture(FracturePiece3D* ToRemove);
 
+
+	static void ReplaceFracture(const FracturePieceGPU* Old, const FracturePieceGPU* New);
+	static void RemoveFracture(FracturePieceGPU* ToRemove);
+
 	static void ReplaceFracture(const FracturePiece2D* Old, const FracturePiece2D* New);
 
 

@@ -28,6 +28,15 @@ struct CellTri
     uint NumFaces;
 };
 
+struct RawCell
+{
+    uint Inds[500];
+    uint NumInds;
+    uint NumVerts;
+    vec3 Verts[200];
+
+};
+
 
 
 layout(std430, binding = 1) readonly buffer VoronoiSSBOIn {
@@ -36,10 +45,11 @@ layout(std430, binding = 1) readonly buffer VoronoiSSBOIn {
     Face BoundingBoxFaces[6];
 };
 
-layout(std430, binding = 3) buffer VoronoiSSBOOut {
+layout(std430, binding = 3) buffer VoronoiSSBOOut
+{ 
     uint NumCells;
     uint DebugNum;
-    CellTri CutCells[10];
+    Cell CutCells[10];
 };
 layout (local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
 
@@ -136,7 +146,7 @@ uint GetAllVertsUntillSecondIntersection(const in vec3 Normal, const in vec3 Cen
     return secondIntersectionIndex;
 }
 
-bool isNearlyZero(const in float X)
+bool isNearlyZero(const in double X)
 {
     return X < 1e-6 && X > -1e-6;
 }
@@ -145,7 +155,7 @@ bool IsPointInPolyhedra(const in vec3 Normal, const in Face OutFace, const in ve
 {
     for (uint i = 0; i < OutFace.NumVerts; i++)
     {
-        const float d = dot(OutFace.Verts[i] - Center, Normal);
+        const double d = dot(OutFace.Verts[i] - Center, Normal);
         if (d < 0 && !isNearlyZero(d)) return false;
     }
     return true;
@@ -200,8 +210,13 @@ void GetPlaneAxis(const in vec3 Normal, out vec3 T, out vec3 U)
     U = normalize(cross(Normal, Up));
     T = cross(Normal, U);
 }
-
-void OrderByAngle(inout Face InFace, const in vec3 Center, const in vec3 Normal)
+float atan2(in float y, in float x)
+{
+    float PI = 3.14159265359;
+    bool s = (abs(x) > abs(y));
+    return mix(PI/2.0 - atan(x,y), atan(y,x), s);
+}
+Face OrderByAngle(const in Face InFace, const in vec3 Center, const in vec3 Normal)
 {
     vec3 t, u;
     GetPlaneAxis(Normal, t, u);
@@ -212,7 +227,7 @@ void OrderByAngle(inout Face InFace, const in vec3 Center, const in vec3 Normal)
         const vec3 d = InFace.Verts[i] - Center;
         const float x = dot(d, u);
         const float y = dot(d, t);
-        angles[i] = atan(y, x);
+        angles[i] = atan2(y, x);
     }
     Face newFace;
     newFace.NumVerts = 0;
@@ -228,16 +243,16 @@ void OrderByAngle(inout Face InFace, const in vec3 Center, const in vec3 Normal)
                 nextAngleIndex = i;
             }
         }
-        AddFaceVert(newFace, InFace.Verts[nextAngleIndex]);
+        newFace.Verts[newFace.NumVerts] = InFace.Verts[nextAngleIndex];
+        newFace.NumVerts++;
         angles[nextAngleIndex] = 99999;
         nextAngle = 9999;
     }
-    InFace.NumVerts = newFace.NumVerts;
-    for (uint i = 0; i < InFace.NumVerts; i++)
-    InFace.Verts[i] = newFace.Verts[i];
+    
+    return newFace;
 }
 
-void ClipCellByFace(inout Cell cell, const in vec3 Center, const in vec3 Normal)
+Cell ClipCellByFace(const in Cell cell, const in vec3 Center, const in vec3 Normal)
 {
     Face intersectFace;
     Cell newCell;
@@ -252,14 +267,12 @@ void ClipCellByFace(inout Cell cell, const in vec3 Center, const in vec3 Normal)
     }
     if (intersectFace.NumVerts >= 3)
     {
-        OrderByAngle(intersectFace, Center, Normal);
-        AddCellFace(newCell, intersectFace);
+        intersectFace = OrderByAngle(intersectFace, Center, Normal);
+        newCell.Faces[newCell.NumFaces] = intersectFace;
+        newCell.NumFaces++;
     }
     
-    cell.NumFaces = newCell.NumFaces;
-    for (uint i = 0; i < newCell.NumFaces; i++){
-        cell.Faces[i] = newCell.Faces[i];
-    }
+    return newCell;
 }
 
 bool Contains(const in vec3 Item, const in Face InFace)
@@ -350,6 +363,58 @@ void TriangulateCell(const in Cell InCell, inout CellTri triangulatedCell)
     
 }
 
+//bool Contains(const uint InIndex, const in vec3 Vert, out uint index)
+//{
+  //  index = 0;
+    //for (index; index < CutCells[InIndex].NumVerts; index++)
+    //{
+     //   if (CutCells[InIndex].Verts[index] == Vert) return true;
+    //}
+   // return false;
+//}
+
+//void AddOrMakeInd(const uint InIndex, const in vec3 Vert)
+//{
+  //  uint index = 0;
+   // if (Contains(InIndex, Vert, index))
+    //{
+      //  CutCells[InIndex].Inds[ CutCells[InIndex].NumInds] = index;
+       // CutCells[InIndex].NumInds++;
+        //return;
+   // }
+    //CutCells[InIndex].Inds[ CutCells[InIndex].NumInds] =  CutCells[InIndex].NumVerts;
+    //CutCells[InIndex].NumInds++;
+    //CutCells[InIndex].Verts[ CutCells[InIndex].NumVerts] = Vert;
+    ///CutCells[InIndex].NumVerts++;
+//}
+
+//void TriangulateRawCell(const in Cell InCell, const in uint index)
+//{
+  //  CutCells[index].NumInds = 0;
+   // CutCells[index].NumVerts = 0;
+
+    //for (uint i = 0; i < InCell.NumFaces; i++)
+    //{
+      //  if (InCell.Faces[i].NumVerts < 3) continue;
+       // Face newFace;
+        //newFace.NumVerts = 0;
+        //for (uint j = 0; j < InCell.Faces[i].NumVerts; j++)
+        //{
+         //   if (Contains(InCell.Faces[i].Verts[j], newFace)) continue;
+          //  AddFaceVert(newFace, InCell.Faces[i].Verts[j]);
+        //}
+
+        //if (newFace.NumVerts < 3) continue;
+        //vec3 center = GetPlaneCenter(newFace);
+        //newFace = OrderByAngle(newFace, center, GetPlaneNormal(newFace, center));
+        //for (uint j = 1; j + 1 < newFace.NumVerts; j++)
+        //{
+          //  AddOrMakeInd(index, newFace.Verts[0]);
+           // AddOrMakeInd(index, newFace.Verts[j]);
+            //AddOrMakeInd(index, newFace.Verts[j+1]);
+        //}
+    //}
+//}
 
 
 void main()
@@ -362,33 +427,23 @@ void main()
     
     Cell cell;
     cell.NumFaces = 0;
-    for (uint i = 0; i < 20; i++)
-    {
-        Face f;
-        f.NumVerts = 0;
-        for (uint j = 0; j < 20; j++ )
-        {
-            f.Verts[j] = vec3(0, 0, 0);
-        }
-        cell.Faces[i] = f;
-    }
-    
+
     for (uint i = 0; i < 6; i++)
     {
-        AddCellFace(cell, BoundingBoxFaces[i]);
+        cell.Faces[cell.NumFaces] = BoundingBoxFaces[i];
+        cell.NumFaces++;
     }
-
-
-    for (uint i = 0; i < NumPoints; i++)
+    
+    for (uint i = 0; i < 3; i++)
     {
         if (i == index) continue;
         const vec3 ComparedPoint = Points[i];
         vec3 normal, center;
         DefinePlane(point, ComparedPoint, normal, center);
-        ClipCellByFace(cell, center, normal);
+        cell = ClipCellByFace(cell, center, normal);
     }
-    
-    TriangulateCell(cell, CutCells[index]);
+    CutCells[index] = cell;
+    //TriangulateRawCell(cell, index);
     NumCells++;
 
 }

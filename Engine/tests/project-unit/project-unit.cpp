@@ -516,11 +516,25 @@ void RunEngine(Vulkan::RuntimeEngine& engine)
 	//Model model = Model("/Models/SkyBox/SkyBox.obj", Shader("ColorShape", "/Shaders/"));
 	model.ModelTransform.Position = { 5, 0, 0 };
 
+	for (size_t i = 0; i < 1; i++)
+	{
+		Voronoi vorn;
+		//vorn.GenerateNewPointSets(model);
+		vorn.FracturePlaneRandom(model, 10, i);
+
+		//VoronoiClipping clipper;
+		//clipper.ClipMeshToVoronoi(vorn, model);
+		//engine.Loop();
+
+		//Vulkan::RuntimeEngine::WaitForFrameToFinish();
+	}
+
+
 	//for (size_t i = 0; i < 145; i++)
 	//{
 	//	Voronoi vorn;
 	//	//vorn.GenerateNewPointSets(model);
-	//	vorn.FracturePlaneRandom(model, 10, i);
+	//	vorn.FracturePlaneRandom(model, 100, i);
 
 	//	//VoronoiClipping clipper;
 	//	//clipper.ClipMeshToVoronoi(vorn, model);
@@ -528,20 +542,6 @@ void RunEngine(Vulkan::RuntimeEngine& engine)
 
 	//	Vulkan::RuntimeEngine::WaitForFrameToFinish();
 	//}
-
-
-	for (size_t i = 0; i < 145; i++)
-	{
-		Voronoi vorn;
-		//vorn.GenerateNewPointSets(model);
-		vorn.FracturePlaneRandom(model, 100, i);
-
-		//VoronoiClipping clipper;
-		//clipper.ClipMeshToVoronoi(vorn, model);
-		engine.Loop();
-
-		Vulkan::RuntimeEngine::WaitForFrameToFinish();
-	}
 
 	//for (size_t i = 0; i < 145; i++)
 	//{
@@ -557,10 +557,10 @@ void RunEngine(Vulkan::RuntimeEngine& engine)
 	//}
 
 
-	//while (!engine.ShouldClose())
-	//{
-
-	//}
+	while (!engine.ShouldClose())
+	{
+		engine.Loop();
+	}
 
 }
 
@@ -610,17 +610,6 @@ struct alignas(16) Vec3_std430
 	float _pad; // required padding
 };
 
-struct alignas(16) Facew
-{
-	Vector4D Verts[20];
-	uint32_t NumVerts;      
-};
-
-struct Cell
-{
-	Facew Faces[20];      // 1280 bytes
-	uint32_t NumFaces;      // 4 bytes// pad to 16-byte multiple
-};
 
 struct VoronoiSSBOIn
 {
@@ -646,28 +635,22 @@ struct CellTri
 };
 
 
-struct VOut
-{
-	uint32_t numPoints;
-	uint32_t debugNum;;
-	Cell cells[10];
-};
-
-
 void RunEngineOpenGL(OpenGL::RuntimeEngine engine)
 {
 	Model model = Model("/Models/Asteroid/rock.obj", Shader("BasicTexture", "/Shaders/"));
 	//Model model = Model("/Models/Bunny/Bunny.obj", Shader("ColorShape", "/Shaders/"));
 
-
-	glm::mat4 modelMat = model.ModelTransform.GetModelMatrix();
+	Voronoi vorn;
+	//vorn.GenerateNewPointSets(model);
+	vorn.FracturePlaneRandom(model, 10, 0);
+	//glm::mat4 modelMat = model.ModelTransform.GetModelMatrix();
 
 	model.ModelTransform.Position = { 5, 0, 0 };
 
 	VoronoiSSBOIn buffer;
 	VOut vOut;
-	vOut.numPoints = 0;
-	vOut.debugNum = 10;
+	vOut.NumCells = 0;
+	vOut.DebugNum = 10;
 	Array<Vector3D> points;
 	//ASSERT_EQ(sizeof(FaceTest), 496);
 	//ASSERT_EQ(sizeof(VoronoiSSBOIn), 3152);
@@ -727,17 +710,23 @@ void RunEngineOpenGL(OpenGL::RuntimeEngine engine)
 	}
 	glFinish();
 
+	Array<FracturePieceGPU> cells;
 
-	FracturePieceGPU fracturePiece(VoronoiOut);
-	VoronoiCellInstanceInfo info;
-	for (size_t i = 0; i < 100; i++)
+	glBindBuffer(GL_SHADER_STORAGE_BUFFER, VoronoiOut);
+	void* ptr = glMapBuffer(GL_SHADER_STORAGE_BUFFER, GL_READ_ONLY);
+
+	VOut* data = static_cast<VOut*>(ptr);
+
+	std::cout << "Num Cells: " << data->NumCells << std::endl;
+
+	for (size_t i = 0; i < 1; i++)
 	{
-		info.ModelMatrix[i] = modelMat;
-		info.Color[i] = Vector3D::RandomRange(Vector3D(30, 30, 30), Vector3D(255, 255, 255));
+		cells.Add(FracturePieceGPU(data->CutCells[i]));
 	}
-	fracturePiece.InstanceInfo = &info;
 
+	glUnmapBuffer(GL_SHADER_STORAGE_BUFFER);
 
+//	FracturePieceGPU fracturePiece(VoronoiOut);
 
 //	Voronoi vorn;
 	//vorn.FracturePlaneRandom(model, 100, 0);

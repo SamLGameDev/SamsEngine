@@ -285,7 +285,7 @@ void Voronoi::FracturePlaneRandom(Model& InModel, const size_t& NumPoints, const
 
 		Vector3D normal, right, up, center;
 
-		for (size_t j = 0; j < points.GetSize(); j++)
+		for (size_t j = 0; j < 3; j++)
 		{
 			if (i == j)continue;
 			DefinePlane(normal, currentPoint, points[j], right, up, center);
@@ -299,6 +299,7 @@ void Voronoi::FracturePlaneRandom(Model& InModel, const size_t& NumPoints, const
 		FracturePiece3D frac = CreateObjectRaw<FracturePiece3D>(Faces, currentPoint);
 		//frac.color = color;
 		Fractures.Add({ frac });
+		return;
 
 	}
 
@@ -636,20 +637,132 @@ void Voronoi::GenerateNewPointSets(Model& InModel)
 	UFileWriter::SaveArray("/ExperimentData/SetOfHundred.txt", HundredPoints);
 	UFileWriter::SaveArray("/ExperimentData/SetOfThousand.txt", ThousandPoints);
 }
-
-
-FracturePieceGPU::FracturePieceGPU(const GLuint& InVoronoiOut)
+void FracturePieceGPU::AddOrMakeInd(const Vector4D& Vert)
 {
-	shader = Shader("VoronoiTest", "/Shaders/");
+	//size_t index = 0;
+	//if (Verts.Contains(Vert, index))
+	//{
+	//	Inds.Add(index);
+	//}
+	//else
+	//{
+	//	Inds.Add(Verts.GetSize());
+	//	Verts.Add(Vert);
+	//}
+}
+
+void FracturePieceGPU::TriangulateCell(const Cell cell)
+{
+	for (size_t j = 0; j < cell.NumFaces; j++)
+	{
+		for (size_t i = 1; i + 1 < cell.Faces[j].NumVerts; i++)
+		{
+			AddOrMakeInd(cell.Faces[j].Verts[0]);
+
+			AddOrMakeInd(cell.Faces[j].Verts[i]);
+
+			AddOrMakeInd(cell.Faces[j].Verts[i + 1]);
+
+		}
+	}
+}
+void FracturePieceGPU::AddOrMakeInd(const Vector3D& Vert)
+{
+	size_t index = 0;
+	if (Verts.Contains(Vert, index))
+	{
+		Inds.Add(index);
+	}
+	else
+	{
+		Inds.Add(Verts.GetSize());
+		Verts.Add(Vert);
+	}
+}
+
+void FracturePieceGPU::TriangulateCell(const Array<Face>& cell)
+{
+	for (const auto& face : cell)
+	{
+		for (size_t i = 1; i + 1 < face.Vertices.GetSize(); i++)
+		{
+			AddOrMakeInd(face.Vertices[0]);
+
+			AddOrMakeInd(face.Vertices[i]);
+
+			AddOrMakeInd(face.Vertices[i + 1]);
+
+		}
+	}
+}
+
+
+FracturePieceGPU::FracturePieceGPU(Cell& InVoronoiOut)
+{
+
+	for (size_t j = 0; j <  InVoronoiOut.NumFaces; j++)
+	{
+		Facew* face = &InVoronoiOut.Faces[j];
+		if (face->NumVerts < 3)
+		{
+			continue;
+		}
+		Face newFace;
+		for (size_t i = 0; i < face->NumVerts; i++)
+		{
+			Vector3D vert = Vector3D(face->Verts[i].X, face->Verts[i].Y, face->Verts[i].Z);
+			if (newFace.Vertices.Contains(vert))
+			{
+				continue;
+			}
+			newFace.Vertices.Add(vert);
+		}
+
+		if (newFace.Vertices.GetSize() < 3)
+		{
+			continue;
+		}
+
+		CellFaces.Add(newFace);
+
+		Vector3D::OrderByAngle(CellFaces.GetLastPtr()->Vertices, newFace.GetCenter(), Vector3D::GetPlaneNormal(CellFaces.GetLastPtr()->Vertices, newFace.GetCenter()));
+
+	}
+
+	TriangulateCell(CellFaces);
+
+	::DataBuffers::GenBuffer(VAO);
+
+	DataBuffers::BindVertexInfo(VAO, 0, 0, sizeof(Vector3D), 0, Vector3);
+
+	::DataBuffers::BufferData(VAO, Verts.GetSize() * sizeof(Vector3D), Verts.GetFirstPtr(), BufferTargets::VERTEX);
+	DataBuffers::BufferDataIndex(VAO, Inds.GetSize() * sizeof(uint16_t), Inds.GetFirstPtr());
+
 	::Renderer::AddFracture(this);
-	VoronoiOut = InVoronoiOut;
+
+	shader = Shader("ColorShape", "/Shaders/");
+
+	color = Vector3D::RandomRange(Vector3D(30, 30, 30), Vector3D(255, 255, 255));
+	NumInds = Inds.GetSize();
+}
+
+FracturePieceGPU::~FracturePieceGPU()
+{
+	::Renderer::RemoveFracture(this);
 }
 
 void FracturePieceGPU::Draw()
 {
 	shader.Use();
 
-	glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 3, VoronoiOut);
+	DataBuffers::BindBuffer(VAO);
+
+	DataBuffers::DrawVertexData(VAO);
+
+	PerInstanceTransforms ubo;
+	ubo.Model = transform.GetModelMatrix();
+	ubo.Color = color;
+
 	GlobalTransforms g;
 	g.View = Camera::GetActiveCamera()->GetLook();
 
@@ -657,9 +770,19 @@ void FracturePieceGPU::Draw()
 
 	shader.SetUniformBuffer(0, &g, sizeof(GlobalTransforms));
 
-	shader.SetUniformBuffer(2, InstanceInfo, sizeof(VoronoiCellInstanceInfo));
+	shader.SetUniformBuffer(1, &ubo, sizeof(PerInstanceTransforms));
 
-	glDrawArraysInstanced(GL_POINTS, 0, 1, 10);
+	::Renderer::Draw(NumInds);
+}
+
+void FracturePieceGPU::Start()
+{
+	WorldObject::Start();
+}
+
+void FracturePieceGPU::Tick(const double& DeltaTime)
+{
+	WorldObject::Tick(DeltaTime);
 }
 
 FracturePiece3D::~FracturePiece3D()
@@ -700,7 +823,7 @@ void FracturePiece3D::TriangulateCell(const Array<Face>& cell)
 
 FracturePiece3D::FracturePiece3D(const Array<Face>& cell, const Vector3D& CellPoint)
 {
-	//SetupControls(Point);
+	SetupControls(Point);
 
 	for (const auto& face : cell)
 	{
@@ -729,7 +852,7 @@ FracturePiece3D::FracturePiece3D(const Array<Face>& cell, const Vector3D& CellPo
 
 	}
 
-	//shader = Shader("ColorShape", "/Shaders/");
+	shader = Shader("ColorShape", "/Shaders/");
 
 	TriangulateCell(cell);
 
@@ -739,7 +862,7 @@ FracturePiece3D::FracturePiece3D(const Array<Face>& cell, const Vector3D& CellPo
 	}
 	this->Point = CellPoint;
 
-	//BufferData();
+	BufferData();
 }
 
 void FracturePiece3D::SetupControls(const Vector3D& point)
@@ -773,11 +896,13 @@ void FracturePiece3D::BufferData()
 	DataBuffers::BufferDataIndex(VAO, Inds.GetSize() * sizeof(uint16_t), Inds.GetFirstPtr());
 
 	::Renderer::AddFracture(this);
+
+	transform.Position = {-5, 0, 0};
 }
 
 void FracturePiece3D::Draw()
 {
-	if (bIsHidden) return;
+	//if (bIsHidden) return;
 	shader.Use();
 
 	DataBuffers::BindBuffer(VAO);

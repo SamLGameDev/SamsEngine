@@ -31,6 +31,16 @@ void Renderer::RemoveFracture(FracturePiece3D* ToRemove)
 	RealRenderer->RemoveFracture(ToRemove);
 }
 
+void Renderer::ReplaceFracture(const FracturePieceGPU* Old, const FracturePieceGPU* New)
+{
+	RealRenderer->ReplaceFracture(Old, New);
+}
+
+void Renderer::RemoveFracture(FracturePieceGPU* ToRemove)
+{
+	RealRenderer->RemoveFracture(ToRemove);
+}
+
 void Renderer::ReplaceFracture(const FracturePiece2D* Old, const FracturePiece2D* New)
 {
 	RealRenderer->ReplaceFracture(Old, New);

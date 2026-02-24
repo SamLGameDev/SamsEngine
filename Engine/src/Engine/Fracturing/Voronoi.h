@@ -9,6 +9,7 @@
 #include "InterfaceRenderer.h"
 #include "Vector3D.h"
 #include "Model.h"
+#include "Vector4D.h"
 #include "WireShapes.h"
 #include "WorldObject.h"
 
@@ -31,21 +32,161 @@ struct VoronoiCellInstanceInfo
 	Vector3D Color[100];
 };
 
+struct alignas(16) RawCell
+{
+	uint32_t Inds[500];
+	uint32_t NumInds;
+	uint32_t NumVerts;
+	uint32_t _Padding[2];
+	Vector4D Verts[200];
 
-class FracturePieceGPU
+};
+struct alignas(16) Facew
+{
+	Vector4D Verts[20];
+	uint32_t NumVerts;
+};
+
+struct Cell
+{
+	Facew Faces[20];      // 1280 bytes
+	uint32_t NumFaces;      // 4 bytes// pad to 16-byte multiple
+};
+
+struct alignas(16) VOut
+{
+	uint32_t NumCells;
+	uint32_t DebugNum;
+	uint32_t _Padding[2];
+	Cell CutCells[10];
+
+};
+
+class FracturePieceGPU : WorldObject
 {
 public:
 	FracturePieceGPU() = default;
 
-	FracturePieceGPU(const GLuint& InVoronoiOut);
+	void AddOrMakeInd(const Vector4D& Vert);
+	void TriangulateCell(Cell cell);
+	void AddOrMakeInd(const Vector3D& Vert);
+	void TriangulateCell(const Array<Face>& cell);
+	FracturePieceGPU(Cell& InVoronoiOut);
+
+	~FracturePieceGPU() override;
 	void Draw();
+
+	void Start() override;
+
+	void Tick(const double& DeltaTime) override;
 
 	Shader shader;
 
-	VoronoiCellInstanceInfo* InstanceInfo;
+	size_t NumInds;
 
-	GLuint VoronoiOut;
+	GLuint VAO;
+
+	Transform transform;
+
+	Vector3D color;
+
+	Vector3D dir;
+
+	Vector3D Point;
+
+	Array<Vector3D> Verts;
+	Array<uint16_t> Inds;
+
+	Array<Face> CellFaces;
+
+
+	void Copy(const FracturePieceGPU& Other)
+	{
+		color = Other.color;
+
+		dir = Other.dir;
+		transform = Other.transform;
+		VAO = Other.VAO;
+		shader = Other.shader;
+		Point = Other.Point;
+		NumInds = Other.NumInds;
+		::Renderer::ReplaceFracture(&Other, this);
+
+		TickDel.BindMember(this, &FracturePieceGPU::Tick);
+
+		InputManager* inputManager = Camera::GetActiveCamera()->GetActiveInputManager();
+		//LeftArrow = std::make_unique<InputAction>(GLFW_KEY_LEFT, inputManager, Camera::GetActiveWindow());
+
+		//LeftArrow->Actions.BindMember(this, &FracturePiece3D::Seperate);
+
+		//RightArrow = std::make_unique<InputAction>(GLFW_KEY_RIGHT, inputManager, Camera::GetActiveWindow());
+
+		//RightArrow->Actions.BindMember(this, &FracturePiece3D::Converge);
+
+		//Hide = std::make_unique<InputAction>(GLFW_KEY_H, inputManager, Camera::GetActiveWindow());
+		//Hide->Actions.BindMember(this, &FracturePiece3D::ToggleRendering);
+
+	}
+
+	FracturePieceGPU(const FracturePieceGPU& Other) : WorldObject()
+	{
+		Copy(Other);
+	}
+
+
+	void Move(FracturePieceGPU& Other)
+	{
+		color = Other.color;
+
+		dir = Other.dir;
+		transform = Other.transform;
+		VAO = Other.VAO;
+		shader = Other.shader;
+		Point = Other.Point;
+		NumInds = Other.NumInds;
+
+		::Renderer::ReplaceFracture(&Other, this);
+
+		//InputManager* inputManager = Camera::GetActiveCamera()->GetActiveInputManager();
+		//LeftArrow = std::make_unique<InputAction>(GLFW_KEY_LEFT, inputManager, Camera::GetActiveWindow());
+
+		//LeftArrow->Actions.BindMember(this, &FracturePiece3D::Seperate);
+
+		//RightArrow = std::make_unique<InputAction>(GLFW_KEY_RIGHT, inputManager, Camera::GetActiveWindow());
+
+		//RightArrow->Actions.BindMember(this, &FracturePiece3D::Converge);
+
+		//Hide = std::make_unique<InputAction>(GLFW_KEY_H, inputManager, Camera::GetActiveWindow());
+		//Hide->Actions.BindMember(this, &FracturePiece3D::ToggleRendering);
+
+		TickDel.Remove(&Other, &FracturePieceGPU::Tick);
+		TickDel.BindMember(this, &FracturePieceGPU::Tick);
+	}
+
+	FracturePieceGPU& operator=(const FracturePieceGPU& Other)
+	{
+		if (this != &Other)
+		{
+			Copy(Other);
+		}
+		return *this;
+	}
+
+	FracturePieceGPU(FracturePieceGPU&& Other) noexcept
+	{
+		Move(Other);
+	}
+
+	FracturePieceGPU& operator=(FracturePieceGPU&& other) noexcept
+	{
+		if (this != &other)
+		{
+			Move(other);
+		}
+		return *this;
+	}
 };
+
 
 class FracturePiece3D : WorldObject
 {

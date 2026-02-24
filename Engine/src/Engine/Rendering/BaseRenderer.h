@@ -21,6 +21,8 @@ public:
 	void AddFracture(FracturePieceGPU* Piece);
 	void ReplaceFracture(const FracturePiece3D* Old, const FracturePiece3D* New);
 	void RemoveFracture(FracturePiece3D* ToRemove);
+	void ReplaceFracture(const FracturePieceGPU* Old, const FracturePieceGPU* New);
+	void RemoveFracture(FracturePieceGPU* ToRemove);
 
 	void ReplaceFracture(const FracturePiece2D* Old, const FracturePiece2D* New);
 	void AddWireShape(WireObject* Shape);

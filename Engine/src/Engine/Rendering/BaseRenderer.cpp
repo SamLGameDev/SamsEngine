@@ -28,6 +28,18 @@ void BaseRenderer::RemoveFracture(FracturePiece3D* ToRemove)
 	FracturesToRender.Remove(ToRemove);
 }
 
+void BaseRenderer::ReplaceFracture(const FracturePieceGPU* Old, const FracturePieceGPU* New)
+{
+	FracturePieceGPU* oldPtr = const_cast<FracturePieceGPU*>(Old);
+	FracturePieceGPU* newPtr = const_cast<FracturePieceGPU*>(New);
+	GPUFracturesToRender.Replace(oldPtr, newPtr);
+}
+
+void BaseRenderer::RemoveFracture(FracturePieceGPU* ToRemove)
+{
+	GPUFracturesToRender.Remove(ToRemove);
+}
+
 void BaseRenderer::ReplaceFracture(const FracturePiece2D* Old, const FracturePiece2D* New)
 {
 	FracturePiece2D* oldPtr = const_cast<FracturePiece2D*>(Old);
