@@ -16,6 +16,19 @@
 #include "PlaneClipping.h"
 #include "glm/gtc/type_ptr.hpp"
 #include "PerformanceRecord.h"
+#include <CGAL/Exact_predicates_inexact_constructions_kernel.h>
+#include <CGAL/Delaunay_triangulation_3.h>
+#include <CGAL/IO/polygon_mesh_io.h>
+#include <CGAL/Surface_mesh.h>
+#include <CGAL/make_conforming_constrained_Delaunay_triangulation_3.h>
+#include <CGAL/IO/write_MEDIT.h>
+
+#include "ComputeShader/UComputeShader.h"
+
+using Kernel = CGAL::Exact_predicates_inexact_constructions_kernel;
+using K = CGAL::Exact_predicates_inexact_constructions_kernel;
+using Point = Kernel::Point_3;
+using DT = CGAL::Delaunay_triangulation_3<Kernel>;
 
 void Voronoi::GetFirstIntersection(const Vector3D& Normal, const Vector3D& Center, const Face& CurrentFace, Face& NewFace, size_t& FirstIntersectionIndex, Vector3D& FirstIntersection)
 {
@@ -285,7 +298,7 @@ void Voronoi::FracturePlaneRandom(Model& InModel, const size_t& NumPoints, const
 
 		Vector3D normal, right, up, center;
 
-		for (size_t j = 0; j < 3; j++)
+		for (size_t j = 0; j < points.GetSize(); j++)
 		{
 			if (i == j)continue;
 			DefinePlane(normal, currentPoint, points[j], right, up, center);
@@ -299,7 +312,6 @@ void Voronoi::FracturePlaneRandom(Model& InModel, const size_t& NumPoints, const
 		FracturePiece3D frac = CreateObjectRaw<FracturePiece3D>(Faces, currentPoint);
 		//frac.color = color;
 		Fractures.Add({ frac });
-		return;
 
 	}
 
@@ -319,6 +331,192 @@ void Voronoi::FracturePlaneRandom(Model& InModel, const size_t& NumPoints, const
 	}
 
 	DataRecorder::SaveDataRecord(record, "/ExperimentData/CellGenerationResults.json");
+
+}
+
+void Voronoi::FracturePlaneRandomGPU(Model& InModel, const size_t& NumPoints, const size_t& PointSetIndex)
+{
+	VoronoiSSBOIn buffer;
+	VOut vOut;
+	VOutLarge* ClippedOut = new VOutLarge;
+	vOut.NumCells = 0;
+	vOut.DebugNum = 10;
+	ClippedOut->NumCells = 0;
+	ClippedOut->DebugNum = 10;
+	Array<Vector3D> points;
+	//ASSERT_EQ(sizeof(FaceTest), 496);
+	//ASSERT_EQ(sizeof(VoronoiSSBOIn), 3152);
+
+	const Vector2D range = { 0 * 10, ((0 + 1) * 10) - 1 };
+	UFileWriter::Load("/ExperimentData/SetOfTen.txt", points, range);
+
+	for (size_t i = 0; i < points.GetSize(); i++)
+	{
+		buffer.Points[i] = points[i];
+	}
+	buffer.NumPoints = points.GetSize();
+
+	for (size_t i = 0; i < InModel.BoundingBox->Faces.GetSize(); i++)
+	{
+		Face& face = InModel.BoundingBox->Faces[i];
+		for (size_t j = 0; j < face.Vertices.GetSize(); j++)
+		{
+			buffer.BoundingBoxFaces[i].Verts[j] = face.Vertices[j];
+		}
+		buffer.BoundingBoxFaces[i].NumVerts = face.Vertices.GetSize();
+	}
+
+	InTets tets;
+	tets.NumTets = 0;
+
+	for (const auto& subMesh : InModel.Meshes) {
+
+		//CGAL::Surface_mesh<K::Point_3> dtPoints;
+		std::vector<K::Point_3> dtPoints;
+		dtPoints.reserve(subMesh.Vertices.GetSize());
+
+		//if (!CGAL::IO::read_polygon_mesh("D:/Comp303-SL295211-VoronoiClipping/Engine/Contents/Models/Bunny/Bunny.obj", dtPoints)) {
+		//	std::cerr << "Error: cannot read file "  << std::endl;
+		//}
+
+		std::vector<std::vector<uint16_t>> inds;
+		inds.reserve(subMesh.Indices.GetSize() / 3);
+
+		for (size_t i = 0; i + 2 < subMesh.Indices.GetSize(); i += 3)
+		{
+			std::vector<uint16_t> tri = { subMesh.Indices[i], subMesh.Indices[i + 1], subMesh.Indices[i + 2] };
+
+			inds.push_back(tri);
+		}
+
+		for (const auto& p : subMesh.Vertices)
+		{
+			dtPoints.push_back({ p.Position.X, p.Position.Y, p.Position.Z });
+		}
+
+		auto dt = CGAL::make_conforming_constrained_Delaunay_triangulation_3(dtPoints, inds);
+
+
+		//DT dt;
+		//dt.insert(dtPoints.begin(), dtPoints.end());
+		for (auto cell = dt.triangulation().finite_cells_begin(); cell != dt.triangulation().finite_cells_end(); ++cell)
+		{
+			const Point& p0 = cell->vertex(0)->point();
+			const Point& p1 = cell->vertex(1)->point();
+			const Point& p2 = cell->vertex(2)->point();
+			const Point& p3 = cell->vertex(3)->point();
+
+			const Vector3D v0 = Vector3D(p0.x(), p0.y(), p0.z());
+			const Vector3D v1 = Vector3D(p1.x(), p1.y(), p1.z());
+			const Vector3D v2 = Vector3D(p2.x(), p2.y(), p2.z());
+			const Vector3D v3 = Vector3D(p3.x(), p3.y(), p3.z());
+
+			tets.Tets[tets.NumTets].TetFaces[0] = { v0, v1, v2 };
+			tets.Tets[tets.NumTets].TetFaces[1] = { v0, v1, v3 };
+			tets.Tets[tets.NumTets].TetFaces[2] = { v0, v2, v3 };
+			tets.Tets[tets.NumTets].TetFaces[3] = { v1, v2, v3 };
+			tets.NumTets++;
+
+		}
+	}
+
+
+
+	GLuint VoronoiIn, VoronoiOut, ClippedOutInd, InTetsInd;
+	glGenBuffers(1, &VoronoiIn);
+	glGenBuffers(1, &VoronoiOut);
+	glGenBuffers(1, &ClippedOutInd);
+	glGenBuffers(1, &InTetsInd);
+
+	glBindBuffer(GL_SHADER_STORAGE_BUFFER, VoronoiIn);
+	glBufferData(GL_SHADER_STORAGE_BUFFER, sizeof(VoronoiSSBOIn), &buffer, GL_DYNAMIC_COPY);
+
+	glBindBuffer(GL_SHADER_STORAGE_BUFFER, VoronoiOut);
+	glBufferData(GL_SHADER_STORAGE_BUFFER, sizeof(VOut), &vOut, GL_DYNAMIC_COPY);
+
+	glBindBuffer(GL_SHADER_STORAGE_BUFFER, ClippedOutInd);
+	glBufferData(GL_SHADER_STORAGE_BUFFER, sizeof(VOutLarge), nullptr, GL_DYNAMIC_COPY);
+
+	glBindBuffer(GL_SHADER_STORAGE_BUFFER, InTetsInd);
+	glBufferData(GL_SHADER_STORAGE_BUFFER, sizeof(InTets), &tets, GL_DYNAMIC_COPY);
+
+	//GLuint block_index = 0;
+	//block_index = glGetProgramResourceIndex(program, GL_SHADER_STORAGE_BLOCK, "shader_data");
+
+	//Trianulate cell in shader gemetry stage;
+
+	GLenum error = glGetError();
+	if (error != GL_NO_ERROR)
+	{
+		std::cout << "ERROR::UNIFORMBUFFER::" << std::to_string(error) << std::endl;
+	}
+
+	UComputeShader voronoiCompute = UComputeShader("VoronoiCellGeneration", "/Shaders/Voronoi/");
+
+	voronoiCompute.Use();
+	glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 1, VoronoiIn);
+	glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 3, VoronoiOut);
+	glFinish();
+	voronoiCompute.Dispatch(10, 1, 1);
+	voronoiCompute.WaitForCompletion();
+	error = glGetError();
+	if (error != GL_NO_ERROR)
+	{
+		std::cout << "ERROR::COMPUTE_SHADER::" << std::to_string(error) << std::endl;
+	}
+	glFinish();
+
+	UComputeShader clippingCompute = UComputeShader("VoronoiClipping", "/Shaders/Voronoi/");
+
+	clippingCompute.Use();
+	glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 3, VoronoiOut);
+	glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 4, InTetsInd);
+	glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 5, ClippedOutInd);
+	glFinish();
+	clippingCompute.Dispatch(10, 1, 1);
+	clippingCompute.WaitForCompletion();
+	error = glGetError();
+	if (error != GL_NO_ERROR)
+	{
+		std::cout << "ERROR::COMPUTE_SHADER::" << std::to_string(error) << std::endl;
+	}
+	glFinish();
+
+	glBindBuffer(GL_SHADER_STORAGE_BUFFER, ClippedOutInd);
+	void* ptr = glMapBuffer(GL_SHADER_STORAGE_BUFFER, GL_READ_ONLY);
+
+	VOutLarge* data = static_cast<VOutLarge*>(ptr);
+
+	std::cout << "Num Cells: " << data->NumCells << std::endl;
+
+	//ASSERT_EQ(data->NumCells, 10);
+
+	for (size_t i = 0; i < 10; i++)
+	{
+		if (data->CutCells[i].NumFaces == 0 || data->CutCells[i].NumFaces > 5000)
+		{
+			continue;
+		}
+
+		GPUFractures.Add(FracturePieceGPU(data->CutCells[i], points[i]));
+	}
+
+	glUnmapBuffer(GL_SHADER_STORAGE_BUFFER);
+
+	glBindBuffer(GL_SHADER_STORAGE_BUFFER, VoronoiOut);
+	void* ptr2 = glMapBuffer(GL_SHADER_STORAGE_BUFFER, GL_READ_ONLY);
+
+	VOut* data2 = static_cast<VOut*>(ptr2);
+
+	for (size_t i = 0; i < 1; i++)
+	{
+		if (data2->CutCells[i].NumFaces == 0 || data2->CutCells[i].NumFaces > 5000)
+		{
+			continue;
+		}
+
+//		GPUFractures.Add(FracturePieceGPU(data2->CutCells[i], points[i]));
+	}
 
 }
 
@@ -697,39 +895,57 @@ void FracturePieceGPU::TriangulateCell(const Array<Face>& cell)
 }
 
 
-FracturePieceGPU::FracturePieceGPU(Cell& InVoronoiOut)
+FracturePieceGPU::FracturePieceGPU(LargeCell& InVoronoiOut, const Vector3D& InPoint)
 {
 
 	for (size_t j = 0; j <  InVoronoiOut.NumFaces; j++)
 	{
 		Facew* face = &InVoronoiOut.Faces[j];
-		if (face->NumVerts < 3)
-		{
-			continue;
-		}
 		Face newFace;
 		for (size_t i = 0; i < face->NumVerts; i++)
 		{
 			Vector3D vert = Vector3D(face->Verts[i].X, face->Verts[i].Y, face->Verts[i].Z);
-			if (newFace.Vertices.Contains(vert))
-			{
-				continue;
-			}
 			newFace.Vertices.Add(vert);
 		}
-
-		if (newFace.Vertices.GetSize() < 3)
-		{
-			continue;
-		}
-
 		CellFaces.Add(newFace);
-
-		Vector3D::OrderByAngle(CellFaces.GetLastPtr()->Vertices, newFace.GetCenter(), Vector3D::GetPlaneNormal(CellFaces.GetLastPtr()->Vertices, newFace.GetCenter()));
-
 	}
 
 	TriangulateCell(CellFaces);
+
+	SetupControls(InPoint);
+
+	::DataBuffers::GenBuffer(VAO);
+
+	DataBuffers::BindVertexInfo(VAO, 0, 0, sizeof(Vector3D), 0, Vector3);
+
+	::DataBuffers::BufferData(VAO, Verts.GetSize() * sizeof(Vector3D), Verts.GetFirstPtr(), BufferTargets::VERTEX);
+	DataBuffers::BufferDataIndex(VAO, Inds.GetSize() * sizeof(uint16_t), Inds.GetFirstPtr());
+
+	::Renderer::AddFracture(this);
+
+	shader = Shader("ColorShape", "/Shaders/");
+
+	color = Vector3D::RandomRange(Vector3D(30, 30, 30), Vector3D(255, 255, 255));
+	NumInds = Inds.GetSize();
+}
+
+FracturePieceGPU::FracturePieceGPU(Cell& InVoronoiOut, const Vector3D& InPoint)
+{
+	for (size_t j = 0; j < InVoronoiOut.NumFaces; j++)
+	{
+		Facew* face = &InVoronoiOut.Faces[j];
+		Face newFace;
+		for (size_t i = 0; i < face->NumVerts; i++)
+		{
+			Vector3D vert = Vector3D(face->Verts[i].X, face->Verts[i].Y, face->Verts[i].Z);
+			newFace.Vertices.Add(vert);
+		}
+		CellFaces.Add(newFace);
+	}
+
+	TriangulateCell(CellFaces);
+
+	SetupControls(InPoint);
 
 	::DataBuffers::GenBuffer(VAO);
 
@@ -775,6 +991,27 @@ void FracturePieceGPU::Draw()
 	::Renderer::Draw(NumInds);
 }
 
+void FracturePieceGPU::SetupControls(const Vector3D& point)
+{
+	InputManager* inputManager = Camera::GetActiveCamera()->GetActiveInputManager();
+	LeftArrow = std::make_unique<InputAction>(GLFW_KEY_LEFT, inputManager, Camera::GetActiveWindow());
+
+	LeftArrow->Actions.BindMember(this, &FracturePieceGPU::Seperate);
+
+	RightArrow = std::make_unique<InputAction>(GLFW_KEY_RIGHT, inputManager, Camera::GetActiveWindow());
+
+	RightArrow->Actions.BindMember(this, &FracturePieceGPU::Converge);
+
+
+	//Hide = std::make_unique<InputAction>(GLFW_KEY_H, inputManager, Camera::GetActiveWindow());
+
+	//Hide->Actions.BindMember(this, &FracturePiece3D::ToggleRendering);
+
+	dir = (point - Vector3D::Zero).Normalised();
+
+
+}
+
 void FracturePieceGPU::Start()
 {
 	WorldObject::Start();
@@ -783,6 +1020,17 @@ void FracturePieceGPU::Start()
 void FracturePieceGPU::Tick(const double& DeltaTime)
 {
 	WorldObject::Tick(DeltaTime);
+}
+
+void FracturePieceGPU::Seperate()
+{
+
+	transform.Position += (dir * 5) * World->GetDeltaTime();
+}
+
+void FracturePieceGPU::Converge()
+{
+	transform.Position -= (dir * 5) * World->GetDeltaTime();
 }
 
 FracturePiece3D::~FracturePiece3D()
@@ -823,7 +1071,7 @@ void FracturePiece3D::TriangulateCell(const Array<Face>& cell)
 
 FracturePiece3D::FracturePiece3D(const Array<Face>& cell, const Vector3D& CellPoint)
 {
-	SetupControls(Point);
+	//SetupControls(Point);
 
 	for (const auto& face : cell)
 	{
@@ -897,7 +1145,9 @@ void FracturePiece3D::BufferData()
 
 	::Renderer::AddFracture(this);
 
-	transform.Position = {-5, 0, 0};
+	transform.Position = {-7, 0, 0};
+
+	color = Vector3D::RandomRange(Vector3D(30, 30, 30), Vector3D(255, 255, 255));
 }
 
 void FracturePiece3D::Draw()

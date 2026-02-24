@@ -1,20 +1,14 @@
-#include <cassert>
 #include <gtest/gtest.h>
 #include "MathCore.h"
 #include "Vector3D.h"
 #include "Array.h"
 #include "BaseDelegate.h"
-#include <functional>
 #include "Vector2D.h"
-#include "CorePaths.h"
-#include "DelaunayTriangulation.h"
-#include "HardwareDetails.h"
 #include "RuntimeEngine.h"
 #include "Voronoi2D.h"
 #include "RuntimeEngineVulkan.h"
 #include "VoronoiClipping.h"
 #include <string>
-
 #include "FileSaving.h"
 #include "Vector4D.h"
 #include "ComputeShader/UComputeShader.h"
@@ -611,12 +605,6 @@ struct alignas(16) Vec3_std430
 };
 
 
-struct VoronoiSSBOIn
-{
-	Vector4D Points[10];      // 10 * 16 = 160 bytes
-	uint32_t NumPoints;          // 4 bytes
-	Facew BoundingBoxFaces[6];  
-};
 struct Tri
 {
 	Vector4D Verts[3];   // 48 bytes
@@ -635,6 +623,7 @@ struct CellTri
 };
 
 
+
 void RunEngineOpenGL(OpenGL::RuntimeEngine engine)
 {
 	Model model = Model("/Models/Asteroid/rock.obj", Shader("BasicTexture", "/Shaders/"));
@@ -642,97 +631,19 @@ void RunEngineOpenGL(OpenGL::RuntimeEngine engine)
 
 	Voronoi vorn;
 	//vorn.GenerateNewPointSets(model);
-	vorn.FracturePlaneRandom(model, 10, 0);
+	vorn.FracturePlaneRandomGPU(model, 10, 0);
 	//glm::mat4 modelMat = model.ModelTransform.GetModelMatrix();
 
 	model.ModelTransform.Position = { 5, 0, 0 };
 
-	VoronoiSSBOIn buffer;
-	VOut vOut;
-	vOut.NumCells = 0;
-	vOut.DebugNum = 10;
-	Array<Vector3D> points;
-	//ASSERT_EQ(sizeof(FaceTest), 496);
-	//ASSERT_EQ(sizeof(VoronoiSSBOIn), 3152);
-
-	const Vector2D range = { 0 * 10, ((0 + 1) * 10) - 1 };
-	UFileWriter::Load("/ExperimentData/SetOfTen.txt", points, range);
-
-	for (size_t i = 0; i < points.GetSize(); i++)
-	{
-		buffer.Points[i] = points[i];
-	}
-	buffer.NumPoints = points.GetSize();
-
-	for (size_t i = 0; i < model.BoundingBox->Faces.GetSize(); i++)
-	{
-		Face& face = model.BoundingBox->Faces[i];
-		for (size_t j = 0; j < face.Vertices.GetSize(); j++)
-		{
-			buffer.BoundingBoxFaces[i].Verts[j] = face.Vertices[j];
-		}
-		buffer.BoundingBoxFaces[i].NumVerts = face.Vertices.GetSize();
-	}
-
-	GLuint VoronoiIn, VoronoiOut;
-	glGenBuffers(1, &VoronoiIn);
-	glGenBuffers(1, &VoronoiOut);	
-
-	glBindBuffer(GL_SHADER_STORAGE_BUFFER, VoronoiIn);
-	glBufferData(GL_SHADER_STORAGE_BUFFER, sizeof(VoronoiSSBOIn), &buffer, GL_DYNAMIC_COPY);
-
-	glBindBuffer(GL_SHADER_STORAGE_BUFFER, VoronoiOut);
-	glBufferData(GL_SHADER_STORAGE_BUFFER, sizeof(VOut), &vOut, GL_DYNAMIC_COPY);
-
-	//GLuint block_index = 0;
-	//block_index = glGetProgramResourceIndex(program, GL_SHADER_STORAGE_BLOCK, "shader_data");
-
-	//Trianulate cell in shader gemetry stage;
-
-	GLenum error = glGetError();
-	if (error != GL_NO_ERROR)
-	{
-		std::cout << "ERROR::UNIFORMBUFFER::" << std::to_string(error) << std::endl;
-	}
-
-	UComputeShader voronoiCompute = UComputeShader("VoronoiClipping", "/Shaders/Voronoi/");
-
-	voronoiCompute.Use();
-	glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 1, VoronoiIn);
-	glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 3, VoronoiOut);
-	glFinish();
-	voronoiCompute.Dispatch(10, 1, 1);
-	voronoiCompute.WaitForCompletion();
-	error = glGetError();
-	if (error != GL_NO_ERROR)
-	{
-		std::cout << "ERROR::COMPUTE_SHADER::" << std::to_string(error) << std::endl;
-	}
-	glFinish();
-
-	Array<FracturePieceGPU> cells;
-
-	glBindBuffer(GL_SHADER_STORAGE_BUFFER, VoronoiOut);
-	void* ptr = glMapBuffer(GL_SHADER_STORAGE_BUFFER, GL_READ_ONLY);
-
-	VOut* data = static_cast<VOut*>(ptr);
-
-	std::cout << "Num Cells: " << data->NumCells << std::endl;
-
-	for (size_t i = 0; i < 1; i++)
-	{
-		cells.Add(FracturePieceGPU(data->CutCells[i]));
-	}
-
-	glUnmapBuffer(GL_SHADER_STORAGE_BUFFER);
-
+	
 //	FracturePieceGPU fracturePiece(VoronoiOut);
 
-//	Voronoi vorn;
-	//vorn.FracturePlaneRandom(model, 100, 0);
+	Voronoi vorn2;
+	vorn2.FracturePlaneRandom(model, 10, 0);
 	//std::cout << "Generated Voronoi Diagram with " << vorn.Fractures.GetSize() << " cells." << std::endl;
-	//VoronoiClipping clipper;
-	//clipper.ClipMeshToVoronoi(vorn, model);
+	VoronoiClipping clipper;
+	clipper.ClipMeshToVoronoi(vorn2, model);
 	while (!engine.ShouldClose())
 	{
 		engine.Loop();

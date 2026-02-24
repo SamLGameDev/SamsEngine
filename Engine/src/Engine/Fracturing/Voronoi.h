@@ -53,12 +53,27 @@ struct Cell
 	uint32_t NumFaces;      // 4 bytes// pad to 16-byte multiple
 };
 
+struct LargeCell
+{
+	Facew Faces[5000];      // 1280 bytes
+	uint32_t NumFaces;      // 4 bytes// pad to 16-byte multiple
+};
+
 struct alignas(16) VOut
 {
 	uint32_t NumCells;
 	uint32_t DebugNum;
 	uint32_t _Padding[2];
 	Cell CutCells[10];
+
+};
+
+struct alignas(16) VOutLarge
+{
+	uint32_t NumCells;
+	uint32_t DebugNum;
+	uint32_t _Padding[2];
+	LargeCell CutCells[10];
 
 };
 
@@ -71,10 +86,12 @@ public:
 	void TriangulateCell(Cell cell);
 	void AddOrMakeInd(const Vector3D& Vert);
 	void TriangulateCell(const Array<Face>& cell);
-	FracturePieceGPU(Cell& InVoronoiOut);
+	FracturePieceGPU(LargeCell& InVoronoiOut, const Vector3D& InPoint);
+	FracturePieceGPU(Cell& InVoronoiOut, const Vector3D& InPoint);
 
 	~FracturePieceGPU() override;
 	void Draw();
+	void SetupControls(const Vector3D& point);
 
 	void Start() override;
 
@@ -99,7 +116,9 @@ public:
 
 	Array<Face> CellFaces;
 
+	void Seperate();
 
+	void Converge();
 	void Copy(const FracturePieceGPU& Other)
 	{
 		color = Other.color;
@@ -115,13 +134,13 @@ public:
 		TickDel.BindMember(this, &FracturePieceGPU::Tick);
 
 		InputManager* inputManager = Camera::GetActiveCamera()->GetActiveInputManager();
-		//LeftArrow = std::make_unique<InputAction>(GLFW_KEY_LEFT, inputManager, Camera::GetActiveWindow());
+		LeftArrow = std::make_unique<InputAction>(GLFW_KEY_LEFT, inputManager, Camera::GetActiveWindow());
 
-		//LeftArrow->Actions.BindMember(this, &FracturePiece3D::Seperate);
+		LeftArrow->Actions.BindMember(this, &FracturePieceGPU::Seperate);
 
-		//RightArrow = std::make_unique<InputAction>(GLFW_KEY_RIGHT, inputManager, Camera::GetActiveWindow());
+		RightArrow = std::make_unique<InputAction>(GLFW_KEY_RIGHT, inputManager, Camera::GetActiveWindow());
 
-		//RightArrow->Actions.BindMember(this, &FracturePiece3D::Converge);
+		RightArrow->Actions.BindMember(this, &FracturePieceGPU::Converge);
 
 		//Hide = std::make_unique<InputAction>(GLFW_KEY_H, inputManager, Camera::GetActiveWindow());
 		//Hide->Actions.BindMember(this, &FracturePiece3D::ToggleRendering);
@@ -147,14 +166,14 @@ public:
 
 		::Renderer::ReplaceFracture(&Other, this);
 
-		//InputManager* inputManager = Camera::GetActiveCamera()->GetActiveInputManager();
-		//LeftArrow = std::make_unique<InputAction>(GLFW_KEY_LEFT, inputManager, Camera::GetActiveWindow());
+		InputManager* inputManager = Camera::GetActiveCamera()->GetActiveInputManager();
+		LeftArrow = std::make_unique<InputAction>(GLFW_KEY_LEFT, inputManager, Camera::GetActiveWindow());
 
-		//LeftArrow->Actions.BindMember(this, &FracturePiece3D::Seperate);
+		LeftArrow->Actions.BindMember(this, &FracturePieceGPU::Seperate);
 
-		//RightArrow = std::make_unique<InputAction>(GLFW_KEY_RIGHT, inputManager, Camera::GetActiveWindow());
+		RightArrow = std::make_unique<InputAction>(GLFW_KEY_RIGHT, inputManager, Camera::GetActiveWindow());
 
-		//RightArrow->Actions.BindMember(this, &FracturePiece3D::Converge);
+		RightArrow->Actions.BindMember(this, &FracturePieceGPU::Converge);
 
 		//Hide = std::make_unique<InputAction>(GLFW_KEY_H, inputManager, Camera::GetActiveWindow());
 		//Hide->Actions.BindMember(this, &FracturePiece3D::ToggleRendering);
@@ -185,6 +204,10 @@ public:
 		}
 		return *this;
 	}
+private:
+
+	std::unique_ptr<InputAction> LeftArrow;
+	std::unique_ptr<InputAction> RightArrow;
 };
 
 
@@ -200,6 +223,7 @@ public:
 	FracturePiece3D(const Array<Face>& cell, const Vector3D& CellPoint);
 	void SetupControls(const Vector3D& point);
 	void BufferData();
+
 
 	void Copy(const FracturePiece3D& Other)
 	{
@@ -351,12 +375,40 @@ private:
 	void AddOrMakeInd(const Vector3D& Vert);
 };
 
+
+struct alignas(16) TetFace
+{
+	Vector4D Verts[3];
+};
+
+struct alignas(16) FTet
+{
+	TetFace TetFaces[4];   // 64 bytes
+};
+
+struct alignas(16) InTets
+{
+	uint32_t NumTets;
+	FTet Tets[1000];
+};
+
+struct VoronoiSSBOIn
+{
+	Vector4D Points[10];      // 10 * 16 = 160 bytes
+	uint32_t NumPoints;          // 4 bytes
+	Facew BoundingBoxFaces[6];
+};
+
 class Voronoi
 {
 public:
 
 	//Fracture the model into a voronoi diagram based on random points
 	void FracturePlaneRandom(Model& InModel, const size_t& NumPoints, const size_t& PointSetIndex);
+
+	//Fracture the model into a voronoi diagram based on random points
+	void FracturePlaneRandomGPU(Model& InModel, const size_t& NumPoints, const size_t& PointSetIndex);
+
 	Array<Vector3D> GenerateRandomPointsInBounds(Model& InModel, const size_t& NumPoints, Array<Vector3D>& Points);
 
 	void FractureDelaunayRandom(Model& InModel, const size_t& NumPoints);
@@ -364,6 +416,8 @@ public:
 	std::mutex VoronoiMutex;
 
 	Array<FracturePiece3D> Fractures;
+
+	Array<FracturePieceGPU> GPUFractures;
 
 
 	void GenerateNewPointSets(Model& InModel);

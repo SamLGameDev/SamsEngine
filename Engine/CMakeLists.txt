@@ -285,6 +285,9 @@ find_package(Vulkan REQUIRED)
 target_link_libraries(EngineCore PUBLIC Vulkan::Vulkan)
 find_package(nlohmann_json REQUIRED)
 target_link_libraries(EngineCore PUBLIC nlohmann_json::nlohmann_json)
+target_compile_options(EngineCore PRIVATE
+    $<$<CXX_COMPILER_ID:MSVC>:/bigobj>
+)
 
 set_source_files_properties(
     Predictates.c

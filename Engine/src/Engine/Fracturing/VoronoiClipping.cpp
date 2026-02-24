@@ -33,6 +33,8 @@ FracturedMeshPiece::~FracturedMeshPiece()
 
 FracturedMeshPiece::FracturedMeshPiece(const Array<Face>& cell, const Vector3D& Point)
 {
+	std::cout << "Creating fractured mesh piece with " << cell.GetSize() << " faces." << std::endl;
+
 	Verts.ReSize(cell.GetSize() * 10);
 	Inds.ReSize(cell.GetSize() * 10);
 
@@ -41,6 +43,8 @@ FracturedMeshPiece::FracturedMeshPiece(const Array<Face>& cell, const Vector3D& 
 	shader = Shader("ColorShape", "/Shaders/");
 
 	TriangulateCell(cell);
+
+	transform.Position = { -12, 0, 0 };
 
 	if (Inds.IsEmpty())
 	{
@@ -221,13 +225,14 @@ void VoronoiClipping::ClipCellToMesh(Array<FTetrahedron>& tets, const FracturePi
 
 void VoronoiClipping::ClipMeshToVoronoi(Voronoi& Diagram, const Model& Mesh)
 {
-	Array<FTetrahedron> tets =  TetrahredraliseMesh(Mesh);
+	Array<FTetrahedron> tets =  TetrahredraliseMeshCGAL(Mesh);
 	//Array<std::jthread> threads;
 	for (const auto& cell : Diagram.Fractures)
 	{
 		//std::jthread thread(&VoronoiClipping::ClipCellToMesh, this, std::ref(tets), std::ref(cell));
 		//threads.Emplace(std::move(thread));
 		ClipCellToMesh(tets, cell);
+		return;
 	}
 
 
