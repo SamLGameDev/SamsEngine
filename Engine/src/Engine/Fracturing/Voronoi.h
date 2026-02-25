@@ -64,7 +64,7 @@ struct alignas(16) VOut
 	uint32_t NumCells;
 	uint32_t DebugNum;
 	uint32_t _Padding[2];
-	Cell CutCells[10];
+	Cell CutCells[1000];
 
 };
 
@@ -73,7 +73,7 @@ struct alignas(16) VOutLarge
 	uint32_t NumCells;
 	uint32_t DebugNum;
 	uint32_t _Padding[2];
-	LargeCell CutCells[10];
+	LargeCell CutCells[1000];
 
 };
 
@@ -394,7 +394,7 @@ struct alignas(16) InTets
 
 struct VoronoiSSBOIn
 {
-	Vector4D Points[10];      // 10 * 16 = 160 bytes
+	Vector4D Points[1000];      // 10 * 16 = 160 bytes
 	uint32_t NumPoints;          // 4 bytes
 	Facew BoundingBoxFaces[6];
 };
@@ -405,7 +405,7 @@ public:
 
 	//Fracture the model into a voronoi diagram based on random points
 	void FracturePlaneRandom(Model& InModel, const size_t& NumPoints, const size_t& PointSetIndex);
-	void CreateMeshFractureGPU(VoronoiSSBOIn buffer, Array<Vector3D> points, InTets tets, GLuint VoronoiIn,
+	void CreateMeshFractureGPU(VoronoiSSBOIn* buffer, Array<Vector3D> points, InTets tets, GLuint VoronoiIn,
 	                           GLuint VoronoiOut, GLuint ClippedOutInd, GLuint InTetsInd);
 
 	//Fracture the model into a voronoi diagram based on random points

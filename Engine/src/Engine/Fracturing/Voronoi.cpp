@@ -334,7 +334,7 @@ void Voronoi::FracturePlaneRandom(Model& InModel, const size_t& NumPoints, const
 
 }
 
-void Voronoi::CreateMeshFractureGPU(VoronoiSSBOIn buffer, Array<Vector3D> points, InTets tets, GLuint VoronoiIn, GLuint VoronoiOut, GLuint ClippedOutInd, GLuint InTetsInd)
+void Voronoi::CreateMeshFractureGPU(VoronoiSSBOIn* buffer, Array<Vector3D> points, InTets tets, GLuint VoronoiIn, GLuint VoronoiOut, GLuint ClippedOutInd, GLuint InTetsInd)
 {
 	UComputeShader voronoiCompute = UComputeShader("VoronoiCellGeneration", "/Shaders/Voronoi/");
 
@@ -347,12 +347,13 @@ void Voronoi::CreateMeshFractureGPU(VoronoiSSBOIn buffer, Array<Vector3D> points
 
 	VoronoiSSBOIn* inData = static_cast<VoronoiSSBOIn*>(inPtr);
 
-	memcpy(inData, &buffer, sizeof(VoronoiSSBOIn));
+	memcpy(inData, buffer, sizeof(VoronoiSSBOIn));
 	::DataBuffers::UnMapBufferMemory(VoronoiIn);
 
 	voronoiCompute.Dispatch(points.GetSize(), 1, 1);
 	voronoiCompute.WaitForCompletion();
 
+	::DataBuffers::RemoveBuffer(VoronoiIn);
 
 	UComputeShader clippingCompute = UComputeShader("VoronoiClipping", "/Shaders/Voronoi/");
 
@@ -373,27 +374,6 @@ void Voronoi::CreateMeshFractureGPU(VoronoiSSBOIn buffer, Array<Vector3D> points
 	clippingCompute.Dispatch(points.GetSize(), 1, 1);
 	clippingCompute.WaitForCompletion();
 
-
-	//void* ptr = ::DataBuffers::MapBufferMemory(ClippedOutInd, sizeof(VOutLarge));
-
-	//VOutLarge* data = static_cast<VOutLarge*>(ptr);
-
-	//std::cout << "Num Cells: " << data->NumCells << std::endl;
-
-	//for (size_t i = 0; i < 10; i++)
-	//{
-	//	if (data->CutCells[i].NumFaces == 0 || data->CutCells[i].NumFaces > 5000)
-	//	{
-	//		continue;
-	//	}
-
-	//	GPUFractures.Add(FracturePieceGPU(data->CutCells[i], points[i]));
-	//}
-
-
-	//::DataBuffers::UnMapBufferMemory(ClippedOutInd);
-
-	::DataBuffers::RemoveBuffer(VoronoiIn);
 	::DataBuffers::RemoveBuffer(VoronoiOut);
 	::DataBuffers::RemoveBuffer(InTetsInd);
 	::DataBuffers::RemoveBuffer(ClippedOutInd);
@@ -453,11 +433,11 @@ void Voronoi::FracturePlaneRandomGPU(Model& InModel, const size_t& NumPoints, co
 		}
 	}
 
-	VoronoiSSBOIn buffer;
-	VOut vOut;
+	VoronoiSSBOIn* buffer = new VoronoiSSBOIn;
+	VOut* vOut = new VOut;
 	VOutLarge* ClippedOut = new VOutLarge;
-	vOut.NumCells = 0;
-	vOut.DebugNum = 10;
+	vOut->NumCells = 0;
+	vOut->DebugNum = 10;
 	ClippedOut->NumCells = 0;
 	ClippedOut->DebugNum = 10;
 
@@ -466,9 +446,9 @@ void Voronoi::FracturePlaneRandomGPU(Model& InModel, const size_t& NumPoints, co
 		Face& face = InModel.BoundingBox->Faces[i];
 		for (size_t j = 0; j < face.Vertices.GetSize(); j++)
 		{
-			buffer.BoundingBoxFaces[i].Verts[j] = face.Vertices[j];
+			buffer->BoundingBoxFaces[i].Verts[j] = face.Vertices[j];
 		}
-		buffer.BoundingBoxFaces[i].NumVerts = face.Vertices.GetSize();
+		buffer->BoundingBoxFaces[i].NumVerts = face.Vertices.GetSize();
 	}
 
 	std::string DataToLoad = "/ExperimentData/SetOfTen.txt";;
@@ -492,9 +472,9 @@ void Voronoi::FracturePlaneRandomGPU(Model& InModel, const size_t& NumPoints, co
 
 		for (size_t i = 0; i < points.GetSize(); i++)
 		{
-			buffer.Points[i] = points[i];
+			buffer->Points[i] = points[i];
 		}
-		buffer.NumPoints = points.GetSize();
+		buffer->NumPoints = points.GetSize();
 
 		CreateMeshFractureGPU(buffer, points, tets, VoronoiIn, VoronoiOut, ClippedOutInd, InTetsInd);
 	}
@@ -514,9 +494,9 @@ void Voronoi::FracturePlaneRandomGPU(Model& InModel, const size_t& NumPoints, co
 
 		for (size_t i = 0; i < points.GetSize(); i++)
 		{
-			buffer.Points[i] = points[i];
+			buffer->Points[i] = points[i];
 		}
-		buffer.NumPoints = points.GetSize();
+		buffer->NumPoints = points.GetSize();
 
 		CreateMeshFractureGPU(buffer, points, tets, VoronoiIn, VoronoiOut, ClippedOutInd, InTetsInd);
 	}
@@ -535,9 +515,9 @@ void Voronoi::FracturePlaneRandomGPU(Model& InModel, const size_t& NumPoints, co
 
 		for (size_t i = 0; i < points.GetSize(); i++)
 		{
-			buffer.Points[i] = points[i];
+			buffer->Points[i] = points[i];
 		}
-		buffer.NumPoints = points.GetSize();
+		buffer->NumPoints = points.GetSize();
 
 		CreateMeshFractureGPU(buffer, points, tets, VoronoiIn, VoronoiOut, ClippedOutInd, InTetsInd);
 	}

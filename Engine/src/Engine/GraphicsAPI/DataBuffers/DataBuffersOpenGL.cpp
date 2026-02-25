@@ -172,7 +172,8 @@ namespace OpenGL
 
 	void DataBuffers::RemoveBuffer(const uint32_t& ID)
 	{
-
+		DataBuffer& buffer = RegisteredBuffers[ID];
+		glDeleteBuffers(1, &buffer.UBO);
 	}
 
 	void DataBuffers::GenerateDepthBuffer(const uint32_t& ID, const Vector2D& Size)

@@ -7,7 +7,7 @@ struct Face
 };
 
 struct Cell {
-    Face Faces[20];
+    Face Faces[30];
     uint NumFaces;
 };
 
@@ -24,7 +24,7 @@ struct FaceTri
 
 struct CellTri
 {
-    FaceTri Faces[20];
+    FaceTri Faces[30];
     uint NumFaces;
 };
 
@@ -63,7 +63,7 @@ layout(std430, binding = 3) buffer VoronoiSSBOOut
 { 
     uint NumCells;
     uint DebugNum;
-    Cell CutCells[10];
+    Cell CutCells[1000];
 };
 
 layout(std430, binding = 4) buffer TetMeshIn
@@ -76,7 +76,7 @@ layout(std430, binding = 5) buffer ClippingSSBOOut
 {
     uint NumCellsCut;
     uint DebugNum2;
-    LargeCell ClippedCells[10];
+    LargeCell ClippedCells[1000];
 };
 
 layout (local_size_x = 1, local_size_y = 1, local_size_z = 1) in;

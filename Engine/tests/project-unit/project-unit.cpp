@@ -587,42 +587,6 @@ void RunEngineDelaunay(Vulkan::RuntimeEngine& engine)
 	Vulkan::RuntimeEngine::WaitForFrameToFinish();
 }
 
-struct alignas(16) FaceTest
-{
-	Vector3D verts[30];
-	uint32_t numVerts;
-	uint32_t pad0;
-	uint32_t pad1;
-	uint32_t pad2;
-	uint32_t _pad[30];
-};
-struct alignas(16) Vec3_std430
-{
-	float x;
-	float y;
-	float z;
-	float _pad; // required padding
-};
-
-
-struct Tri
-{
-	Vector4D Verts[3];   // 48 bytes
-};
-
-struct FaceTri
-{
-	Tri Tris[6];           // 480 bytes
-	uint32_t NumTris;       // 4 bytes// pad to 16-byte multiple
-};
-
-struct CellTri
-{
-	FaceTri Faces[20];      // 9920 bytes
-	uint32_t NumFaces;      // 4 bytes// pad to 16-byte multiple
-};
-
-
 
 void RunEngineOpenGL(OpenGL::RuntimeEngine engine)
 {
