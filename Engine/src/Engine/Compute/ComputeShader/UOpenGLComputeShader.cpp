@@ -39,14 +39,15 @@ namespace OpenGL {
 	}
 
 	void UOpenGLComputeShader::Dispatch(const size_t& NumGroupsX, const size_t& NumGroupsY,
-	                                    const size_t& NumGroupsZ) const
+	                                    const size_t& NumGroupsZ) 
 	{
 		glDispatchCompute(NumGroupsX, NumGroupsY, NumGroupsZ);
 	}
 
 	void UOpenGLComputeShader::WaitForCompletion() const
 	{
-		glMemoryBarrier(GL_SHADER_STORAGE_BARRIER_BIT);
+		GLsync fence = glFenceSync(GL_SYNC_GPU_COMMANDS_COMPLETE, 0);
+		glClientWaitSync(fence, GL_SYNC_FLUSH_COMMANDS_BIT, GL_TIMEOUT_IGNORED);
 	}
 
 	std::shared_ptr<UBaseComputeShader> UOpenGLComputeShader::CreateOpenGLComputeShader(const std::string_view& InName,
@@ -77,7 +78,7 @@ namespace OpenGL {
 	{
 		int  success = 1;
 
-		const std::string computeCodeString = UFileWriter::ReadFileContents(GetShaderLocation());
+		const std::string computeCodeString = UFileWriter::ReadFileContents(GetShaderLocation(), std::ios::in);
 
 		const char* computeCode = computeCodeString.c_str();
 

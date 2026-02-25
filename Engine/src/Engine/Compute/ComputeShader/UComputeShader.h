@@ -21,7 +21,7 @@ public:
 
 	void Use() const;
 
-	void Dispatch(const size_t& NumGroupsX, const size_t& NumGroupsY, const size_t& NumGroupsZ) const;
+	void Dispatch(const size_t& NumGroupsX, const size_t& NumGroupsY, const size_t& NumGroupsZ);
 
 	void WaitForCompletion()const;
 

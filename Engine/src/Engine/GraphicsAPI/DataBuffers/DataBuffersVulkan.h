@@ -10,6 +10,8 @@
 #include "glm/fwd.hpp"
 
 
+class UComputeShader;
+
 inline void vkCmdSetVertexInputEXT(
 	VkCommandBuffer buffer, const uint32_t bindingCount, const VkVertexInputBindingDescription2EXT* bindings, uint32_t attributeCount, const VkVertexInputAttributeDescription2EXT* attributes)
 {
@@ -88,6 +90,16 @@ namespace Vulkan
 		void CopyBuffer(const VkBuffer& SrcBuffer, VkBuffer& DstBuffer, const VkDeviceSize& Size);
 
 		void* GenerateUniformDataBuffer(const uint32_t ID, const size_t& Size) override;
+
+		void GenerateShaderStorageBuffer(const uint32_t ID, const size_t& Size, const size_t& Binding) override;
+
+		void BindShaderStorageBuffer(uint32_t ID, const size_t& Binding, const size_t& Size) override;
+
+		void* MapBufferMemory(const uint32_t& ID, const size_t& Size) override;
+
+		void UnMapBufferMemory(const uint32_t& ID) override;
+
+		void RemoveBuffer(const uint32_t& ID) override;
 
 		void GenerateDepthBuffer(const uint32_t& ID, const Vector2D& Size) override;
 

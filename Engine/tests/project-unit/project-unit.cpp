@@ -574,10 +574,10 @@ void RunEngineDelaunay(Vulkan::RuntimeEngine& engine)
 	Model model = Model("/Models/Asteroid/rock.obj", Shader("ColorShape", "/Shaders/"));
 	model.ModelTransform.Position = { 5, 0, 0 };
 	Voronoi vorn;
-	vorn.FractureDelaunayRandom(model, 10);
-	std::cout << "Generated Voronoi Diagram with " << vorn.Fractures.GetSize() << " cells." << std::endl;
-	VoronoiClipping clipper;
-	clipper.ClipMeshToVoronoi(vorn, model);
+	vorn.FracturePlaneRandomGPU(model, 10, 0);
+	//std::cout << "Generated Voronoi Diagram with " << vorn.Fractures.GetSize() << " cells." << std::endl;
+	//VoronoiClipping clipper;
+	//clipper.ClipMeshToVoronoi(vorn, model);
 
 	while (!engine.ShouldClose())
 	{
@@ -674,6 +674,6 @@ void EngineDelaunay()
 TEST(Fracturing, Diagram) {
 	//EnginePlane();
 
-	//EngineDelaunay();
-	OpenGLTest();
+	EngineDelaunay();
+	//OpenGLTest();
 }

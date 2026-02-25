@@ -46,6 +46,31 @@ void* DataBuffers::GenerateUniformDataBuffer(const uint32_t& ID, const size_t& S
 	return APIBufferInstance->GenerateUniformDataBuffer(ID, Size);
 }
 
+void DataBuffers::GenerateShaderStorageBuffer(const uint32_t& ID, const size_t& Size, const size_t& Binding)
+{
+	APIBufferInstance->GenerateShaderStorageBuffer(ID, Size, Binding);
+}
+
+void DataBuffers::BindShaderStorageBuffer(uint32_t ID, const size_t& Binding, const size_t& Size)
+{
+	APIBufferInstance->BindShaderStorageBuffer(ID, Binding, Size);
+}
+
+void* DataBuffers::MapBufferMemory(const uint32_t& ID, const size_t& Size)
+{
+	return APIBufferInstance->MapBufferMemory(ID, Size);
+}
+
+void DataBuffers::UnMapBufferMemory(const uint32_t& ID)
+{
+	APIBufferInstance->UnMapBufferMemory(ID);
+}
+
+void DataBuffers::RemoveBuffer(const uint32_t& ID)
+{
+	APIBufferInstance->RemoveBuffer(ID);
+}
+
 void DataBuffers::BufferTexture(const uint32_t& ID, const unsigned char* Pixels, const uint32_t& Width, const uint32_t& Height)
 {
 	APIBufferInstance->BufferTexture(ID, Pixels, Width, Height);

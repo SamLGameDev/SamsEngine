@@ -2,7 +2,7 @@
 
 #include <iostream>
 #include<glad/glad.h>
-
+#include "UVulkanComputeShader.h"
 #include "MathCore.h"
 #include "GLFW/glfw3.h"
 #include <limits>
@@ -10,6 +10,7 @@
 #include "VulkanInstance.h"
 #include "VulkanLogicalDevice.h"
 #include <stdexcept>
+
 
 //TODO : Cleanup this file and split into multiple files, and fixing it to use better memory management practices, such as offsets
 
@@ -32,7 +33,6 @@ namespace Vulkan
 
 		vkDestroyBuffer(*SInstance::GetInstance()->GraphicsCard->GetLogicalDevice()->GetVulkanLogicalDevice(), IndexBuffer, nullptr);
 		vkFreeMemory(*SInstance::GetInstance()->GraphicsCard->GetLogicalDevice()->GetVulkanLogicalDevice(), IndexMemory, nullptr);
-
 	}
 
 	TextureBuffer::~TextureBuffer()
@@ -302,6 +302,97 @@ namespace Vulkan
 		vkMapMemory(*SInstance::GetInstance()->GraphicsCard->GetLogicalDevice()->GetVulkanLogicalDevice(), stagingMemory, 0, Size, 0, &data);
 
 		return data;
+	}
+
+	void DataBuffers::GenerateShaderStorageBuffer(const uint32_t ID, const size_t& Size, const size_t& Binding)
+	{
+		DataBuffer& buffer = RegisteredBuffers.at(ID);
+
+		VkDeviceMemory stagingMemory;
+
+		buffer.Buffers.Add(CreateBuffer(Size, VK_BUFFER_USAGE_STORAGE_BUFFER_BIT | VK_BUFFER_USAGE_TRANSFER_DST_BIT, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT | VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT, stagingMemory));
+		buffer.BufferMemory.Add(stagingMemory);
+		VkDescriptorBufferInfo dBufferInfo{};
+		dBufferInfo.buffer = *buffer.Buffers.GetLastPtr();
+		dBufferInfo.offset = 0;
+		dBufferInfo.range = Size;
+
+		UVulkanComputeShader* computeShader = Vulkan::SInstance::GetInstance()->ActiveComputeShader;
+
+		VkWriteDescriptorSet descriptorWrite{};
+		descriptorWrite.sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
+		descriptorWrite.pBufferInfo = &dBufferInfo;
+		descriptorWrite.descriptorCount = 1;
+		descriptorWrite.descriptorType = VK_DESCRIPTOR_TYPE_STORAGE_BUFFER;
+		descriptorWrite.dstSet = computeShader->GetDescriptorSet();
+		descriptorWrite.dstBinding = Binding;
+		descriptorWrite.dstArrayElement = 0;
+		descriptorWrite.pImageInfo = nullptr;
+		descriptorWrite.pTexelBufferView = nullptr;
+
+		vkUpdateDescriptorSets(*SInstance::GetInstance()->GraphicsCard->GetLogicalDevice()->GetVulkanLogicalDevice(),
+			1, &descriptorWrite, 0, nullptr);
+		//vkUpdateDescriptorSets(*SInstance::GetInstance()->GraphicsCard->GetLogicalDevice()->GetVulkanLogicalDevice(),
+	}
+
+	void DataBuffers::BindShaderStorageBuffer(const uint32_t ID, const size_t& Binding, const size_t& Size)
+	{
+		DataBuffer& buffer = RegisteredBuffers.at(ID);
+
+		VkDescriptorBufferInfo dBufferInfo{};
+		dBufferInfo.buffer = *buffer.Buffers.GetLastPtr();
+		dBufferInfo.offset = 0;
+		dBufferInfo.range = Size;
+
+		UVulkanComputeShader* computeShader = Vulkan::SInstance::GetInstance()->ActiveComputeShader;
+
+		VkWriteDescriptorSet descriptorWrite{};
+		descriptorWrite.sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
+		descriptorWrite.pBufferInfo = &dBufferInfo;
+		descriptorWrite.descriptorCount = 1;
+		descriptorWrite.descriptorType = VK_DESCRIPTOR_TYPE_STORAGE_BUFFER;
+		descriptorWrite.dstSet = computeShader->GetDescriptorSet();
+		descriptorWrite.dstBinding = Binding;
+		descriptorWrite.dstArrayElement = 0;
+		descriptorWrite.pImageInfo = nullptr;
+		descriptorWrite.pTexelBufferView = nullptr;
+
+		vkUpdateDescriptorSets(*SInstance::GetInstance()->GraphicsCard->GetLogicalDevice()->GetVulkanLogicalDevice(),
+			1, &descriptorWrite, 0, nullptr);
+	}
+
+	void* DataBuffers::MapBufferMemory(const uint32_t& ID, const size_t& Size )
+	{
+		const DataBuffer& buffer = RegisteredBuffers.at(ID);
+
+		void* data;
+		vkMapMemory(*SInstance::GetInstance()->GraphicsCard->GetLogicalDevice()->GetVulkanLogicalDevice(), buffer.BufferMemory[0], 0, Size, 0, &data);
+		return data;
+	}
+
+	void DataBuffers::UnMapBufferMemory(const uint32_t& ID) 
+	{
+		vkUnmapMemory(*SInstance::GetInstance()->GraphicsCard->GetLogicalDevice()->GetVulkanLogicalDevice(), RegisteredBuffers.at(ID).BufferMemory[0]);
+	}
+
+	void DataBuffers::RemoveBuffer(const uint32_t& ID)
+	{
+		DataBuffer& buffer = RegisteredBuffers.at(ID);
+		for (auto& buffer : buffer.Buffers)
+		{
+			vkDestroyBuffer(*SInstance::GetInstance()->GraphicsCard->GetLogicalDevice()->GetVulkanLogicalDevice(), buffer, nullptr);
+		}
+
+		for (auto& memory : buffer.BufferMemory)
+		{
+			vkFreeMemory(*SInstance::GetInstance()->GraphicsCard->GetLogicalDevice()->GetVulkanLogicalDevice(), memory, nullptr);
+		}
+
+		vkDestroyBuffer(*SInstance::GetInstance()->GraphicsCard->GetLogicalDevice()->GetVulkanLogicalDevice(), buffer.IndexBuffer, nullptr);
+		vkFreeMemory(*SInstance::GetInstance()->GraphicsCard->GetLogicalDevice()->GetVulkanLogicalDevice(), buffer.IndexMemory, nullptr);
+
+		buffer.BufferMemory.Empty();
+		buffer.Buffers.Empty();
 	}
 
 	void DataBuffers::GenerateDepthBuffer(const uint32_t& ID, const Vector2D& Size)

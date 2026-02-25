@@ -113,6 +113,11 @@ namespace Vulkan
 			return &TransferPool;
 		}
 
+		VkCommandPool* GetComputePool()
+		{
+			return &ComputePool;
+		}
+
 		VkFence& GetCopyFence()
 		{
 			return CopyFence;
@@ -143,6 +148,8 @@ namespace Vulkan
 		Array<VkCommandBuffer> CommandBuffers;
 
 		VkCommandPool TransferPool;
+
+		VkCommandPool ComputePool;
 
 		VkDescriptorPool DescriptorPool;
 

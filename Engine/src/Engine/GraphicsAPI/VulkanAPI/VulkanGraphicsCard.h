@@ -26,12 +26,13 @@ namespace Vulkan
 	{
 		std::optional<uint32_t> GraphicsFamily;
 		std::optional<uint32_t> PresentFamily;
+		std::optional<uint32_t> GraphicsAndComputeFamily;
 
 		float QueuePriority = 1;
 
 		bool IsComplete() const
 		{
-			return GraphicsFamily.has_value() && PresentFamily.has_value();
+			return GraphicsFamily.has_value() && PresentFamily.has_value() && GraphicsAndComputeFamily.has_value();
 		}
 	};
 

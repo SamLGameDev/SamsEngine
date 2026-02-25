@@ -9,9 +9,10 @@
 #include "VulkanGraphicsCard.h"
 #include "VulkanRenderPass.h"
 
+
 namespace Vulkan
 {
-
+	class UVulkanComputeShader;
 	class SInstance
 	{
 	public:
@@ -26,6 +27,8 @@ namespace Vulkan
 		UGraphicsCard* GraphicsCard;
 
 		URenderPass* RenderPass;
+
+		UVulkanComputeShader* ActiveComputeShader;
 
 		ErrorCodes ShutDown();
 

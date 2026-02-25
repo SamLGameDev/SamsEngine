@@ -51,7 +51,27 @@ namespace Vulkan
 		ShaderStages.Add(CompileGeometry());
 		ShaderStages.Add(CompileFragment());
 
-		Pipeline = new URenderPipeline(*this);
+
+		Array<VkDescriptorSetLayoutBinding> descriptors;
+		for (size_t i = 0; i < 2; i++)
+		{
+			VkDescriptorSetLayoutBinding descriptor{};
+			descriptor.binding = i;
+			descriptor.descriptorCount = 1;
+			descriptor.pImmutableSamplers = nullptr;
+			descriptor.descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
+			descriptor.stageFlags = VK_SHADER_STAGE_VERTEX_BIT;
+			descriptors.Add(descriptor);
+		}
+		VkDescriptorSetLayoutBinding descriptor{};
+		descriptor.binding = 2;
+		descriptor.descriptorCount = 1;
+		descriptor.pImmutableSamplers = nullptr;
+		descriptor.descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
+		descriptor.stageFlags = VK_SHADER_STAGE_FRAGMENT_BIT;
+		descriptors.Add(descriptor);
+
+		Pipeline = new URenderPipeline(*this, descriptors);
 
 		for (const VkPipelineShaderStageCreateInfo& stage: ShaderStages)
 		{

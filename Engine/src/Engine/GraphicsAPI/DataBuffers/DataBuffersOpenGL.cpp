@@ -138,6 +138,43 @@ namespace OpenGL
 		return ptr;
 	}
 
+	void DataBuffers::GenerateShaderStorageBuffer(const uint32_t ID, const size_t& Size, const size_t& Binding)
+	{
+
+		DataBuffer& buffer = RegisteredBuffers[ID];
+
+		glGenBuffers(1, &buffer.UBO);
+
+		glBindBuffer(GL_SHADER_STORAGE_BUFFER, buffer.UBO);
+        glBufferData(GL_SHADER_STORAGE_BUFFER, Size, nullptr, GL_DYNAMIC_COPY);
+
+		glBindBufferBase(GL_SHADER_STORAGE_BUFFER, Binding, buffer.UBO);
+	}
+
+	void DataBuffers::BindShaderStorageBuffer(uint32_t ID, const size_t& Binding, const size_t& Size)
+	{
+		DataBuffer& buffer = RegisteredBuffers[ID];
+		glBindBufferBase(GL_SHADER_STORAGE_BUFFER, Binding, buffer.UBO);
+	}
+
+	void* DataBuffers::MapBufferMemory(const uint32_t& ID, const size_t& Size)
+	{
+		DataBuffer& buffer = RegisteredBuffers[ID];
+		glBindBuffer(GL_SHADER_STORAGE_BUFFER, buffer.UBO);
+		return glMapBuffer(GL_SHADER_STORAGE_BUFFER, GL_READ_WRITE);
+	}
+
+	void DataBuffers::UnMapBufferMemory(const uint32_t& ID)
+	{
+		DataBuffer& buffer = RegisteredBuffers[ID];
+		glUnmapBuffer(buffer.UBO);
+	}
+
+	void DataBuffers::RemoveBuffer(const uint32_t& ID)
+	{
+
+	}
+
 	void DataBuffers::GenerateDepthBuffer(const uint32_t& ID, const Vector2D& Size)
 	{
 	}

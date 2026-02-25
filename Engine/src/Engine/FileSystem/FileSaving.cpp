@@ -39,16 +39,18 @@ void UFileWriter::Load(const std::string_view& Name, Array<Vector3D>& Data, cons
     size_t count;
     in.read(reinterpret_cast<char*>(&count), sizeof(count));
 
-    Data.Reallocate((Range.Y - Range.X) + 1);
+    Data.Reallocate((Range.Y - Range.X));
     in.seekg(sizeof(count) + Range.X * sizeof(Vector3D), std::ios::beg);
     in.read(reinterpret_cast<char*>(Data.GetFirstPtr()), (Range.Y - Range.X) * sizeof(Vector3D));
 }
 
 
-std::string UFileWriter::ReadFileContents(const std::string_view& Location) 
+std::string UFileWriter::ReadFileContents(const std::string_view& Location, const std::ios::openmode& OpenMode)
 {
+
+
 	std::ifstream File;
-	File.open(Location.data());
+	File.open(Location.data(), OpenMode);
 	std::stringstream Buffer;
 	Buffer << File.rdbuf();
 	File.close();

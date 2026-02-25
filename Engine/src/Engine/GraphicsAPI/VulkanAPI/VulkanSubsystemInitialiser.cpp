@@ -16,6 +16,8 @@
 #include "Texture.h"
 #include "InterfaceRenderer.h"
 #include "Predictates.h"
+#include "UComputeShader.h"
+#include "UVulkanComputeShader.h"
 
 namespace Vulkan
 {
@@ -59,6 +61,8 @@ namespace Vulkan
 		::Texture::TextureCreationFunc = Vulkan::Texture::CreateVulkanTexture;
 
 		::DataBuffers::APIBufferInstance = new Vulkan::DataBuffers();
+
+		::UComputeShader::ShaderCreationFunc = Vulkan::UVulkanComputeShader::CreateVulkanComputeShader;
 
 		try
 		{

@@ -16,7 +16,7 @@ UComputeShader::UComputeShader(const std::string_view& InName, const std::string
 	RealComputeShader = ShaderCreationFunc(InName, InStorageLocation);
 }
 
-void UComputeShader::Dispatch(const size_t& NumGroupsX, const size_t& NumGroupsY, const size_t& NumGroupsZ) const
+void UComputeShader::Dispatch(const size_t& NumGroupsX, const size_t& NumGroupsY, const size_t& NumGroupsZ)
 {
 	RealComputeShader->Dispatch(NumGroupsX, NumGroupsY, NumGroupsZ);
 }

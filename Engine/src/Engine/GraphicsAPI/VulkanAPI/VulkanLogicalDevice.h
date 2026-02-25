@@ -42,6 +42,12 @@ namespace Vulkan
 		}
 
 
+		const VkQueue& GetComputeQueue() const
+		{
+			return  ComputeQueue;
+		}
+
+
 	private:
 
 		UGraphicsCard* OwningCard;
@@ -50,6 +56,7 @@ namespace Vulkan
 
 		VkQueue GraphicsQueue;
 		VkQueue PresentQueue;
+		VkQueue ComputeQueue;
 
 		USwapChain* SwapChain;
 

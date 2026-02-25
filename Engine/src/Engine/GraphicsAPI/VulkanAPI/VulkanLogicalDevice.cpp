@@ -57,6 +57,7 @@ namespace Vulkan
 		VkPhysicalDeviceFeatures deviceFeatures{};
 		deviceFeatures.geometryShader = VK_TRUE;
 		deviceFeatures.samplerAnisotropy = VK_TRUE;
+		deviceFeatures.shaderFloat64 = VK_TRUE;
 
 		const Array<const char*>& deviceExtensions = OwningCard->GetDeviceExtensions();
 
@@ -94,6 +95,7 @@ namespace Vulkan
 
 		vkGetDeviceQueue(LogicalDevice, indices.GraphicsFamily.value(), 0, &GraphicsQueue);
 		vkGetDeviceQueue(LogicalDevice, indices.PresentFamily.value(), 0, &PresentQueue);
+		vkGetDeviceQueue(LogicalDevice, indices.GraphicsAndComputeFamily.value(), 0, &ComputeQueue);
 		return SUCCEEDED;
 	}
 

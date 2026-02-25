@@ -49,6 +49,15 @@ public:
 
 	virtual void* GenerateUniformDataBuffer(const uint32_t ID, const size_t& Size) = 0;
 
+	virtual void GenerateShaderStorageBuffer(const uint32_t ID, const size_t& Size, const size_t& Binding) = 0;
+
+	virtual void BindShaderStorageBuffer(uint32_t ID, const size_t& Binding, const size_t& Size) = 0;
+
+	virtual void* MapBufferMemory(const uint32_t& ID, const size_t& Size) = 0;
+	virtual void UnMapBufferMemory(const uint32_t& ID) = 0;
+
+	virtual void RemoveBuffer(const uint32_t& ID) = 0;
+
 	virtual void GenerateDepthBuffer(const uint32_t& ID, const Vector2D& Size) = 0;
 
 	virtual void BufferTexture(const uint32_t& ID, const unsigned char* Pixels, const uint32_t& Width, const uint32_t& Height) = 0;

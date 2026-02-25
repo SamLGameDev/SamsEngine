@@ -4,7 +4,7 @@
 #include <iostream>
 #include "WorldObject.h"
 #include "ObjectFactory.h"
-
+#include "UVulkanComputeShader.h"
 namespace Vulkan
 {
 

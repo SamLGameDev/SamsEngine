@@ -5,11 +5,14 @@
 #include "GraphicsAPIConstructor.h"
 
 
+
+
 namespace Vulkan
 {
 	class ULogicalDevice;
 	class UImageView;
 	class Shader;
+	class UVulkanComputeShader;
 }
 
 namespace Vulkan
@@ -19,7 +22,8 @@ namespace Vulkan
 	{
 	public:
 
-		URenderPipeline(Shader& InShader);
+		URenderPipeline(Shader& InShader, const Array<VkDescriptorSetLayoutBinding>& Descriptors);
+		URenderPipeline(UVulkanComputeShader& InShader, const Array<VkDescriptorSetLayoutBinding>& Descriptors);
 		~URenderPipeline();
 
 		URenderPipeline(const URenderPipeline& Other)
@@ -44,7 +48,9 @@ namespace Vulkan
 			return *this;
 		}
 
-		ErrorCodes Init(Shader& InShader);
+		ErrorCodes Init(Shader& InShader, const Array<VkDescriptorSetLayoutBinding>& Descriptors);
+
+		ErrorCodes Init(UVulkanComputeShader& InShader, const Array<VkDescriptorSetLayoutBinding>& Descriptors);
 
 		ErrorCodes ShutDown();
 

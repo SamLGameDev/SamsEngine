@@ -59,6 +59,10 @@ namespace Vulkan
 		dPoolSize.descriptorCount = 1;
 		poolSizes.Add(dPoolSize);
 
+		dPoolSize.type = VK_DESCRIPTOR_TYPE_STORAGE_BUFFER;
+		dPoolSize.descriptorCount = 4;
+		poolSizes.Add(dPoolSize);
+
 		VkDescriptorPoolCreateInfo dPoolCreateInfo{};
 		dPoolCreateInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_POOL_CREATE_INFO;
 		dPoolCreateInfo.pPoolSizes = poolSizes.GetFirstPtr();
@@ -114,6 +118,17 @@ namespace Vulkan
 		transferCreateInfo.queueFamilyIndex = SInstance::GetInstance()->GraphicsCard->GetFoundQueueFamilies().GraphicsFamily.value();
 		vkCreateCommandPool(*SInstance::GetInstance()->GraphicsCard->GetLogicalDevice()->GetVulkanLogicalDevice(),
 			&transferCreateInfo, nullptr, &TransferPool);
+
+		VkCommandPoolCreateInfo computeCreateInfo{};
+		computeCreateInfo.sType = VK_STRUCTURE_TYPE_COMMAND_POOL_CREATE_INFO;
+		computeCreateInfo.flags = VK_COMMAND_POOL_CREATE_RESET_COMMAND_BUFFER_BIT;
+		computeCreateInfo.queueFamilyIndex = OwningCard->GetFoundQueueFamilies().GraphicsAndComputeFamily.value();
+
+		if (vkCreateCommandPool(*OwningCard->GetLogicalDevice()->GetVulkanLogicalDevice(), &computeCreateInfo, nullptr, &ComputePool) != VK_SUCCESS)
+		{
+			return ERROR;
+		}
+
 		return SUCCEEDED;
 	}
 
@@ -289,6 +304,10 @@ namespace Vulkan
 		{
 			shape->Draw();
 		}
+		for (FracturePieceGPU* piece : GPUFracturesToRender)
+		{
+			piece->Draw();
+		}
 
 		vkCmdEndRenderPass(Buffer);
 
@@ -318,6 +337,7 @@ namespace Vulkan
 		vkDestroyDescriptorPool(*OwningCard->GetLogicalDevice()->GetVulkanLogicalDevice(), DescriptorPool, nullptr);
 		vkDestroyCommandPool(*OwningCard->GetLogicalDevice()->GetVulkanLogicalDevice(), CommandPool, nullptr);
 		vkDestroyCommandPool(*OwningCard->GetLogicalDevice()->GetVulkanLogicalDevice(), TransferPool, nullptr);
+		vkDestroyCommandPool(*OwningCard->GetLogicalDevice()->GetVulkanLogicalDevice(), ComputePool, nullptr);
 
 
 		delete RenderPass;

@@ -156,9 +156,14 @@ namespace Vulkan
 
 		for (size_t i = 0; i < queueFamily.GetSize(); i++)
 		{
-			if (queueFamily[i].queueFlags & VK_QUEUE_GRAPHICS_BIT)
+			if ((queueFamily[i].queueFlags & VK_QUEUE_GRAPHICS_BIT))
 			{
 				indices.GraphicsFamily = i;
+			}
+
+			if ((queueFamily[i].queueFlags & VK_QUEUE_GRAPHICS_BIT) && (queueFamily[i].queueFlags & VK_QUEUE_COMPUTE_BIT))
+			{
+				indices.GraphicsAndComputeFamily = i;
 			}
 
 			VkBool32 bHasSurfaceSupport = false;

@@ -24,7 +24,7 @@ namespace OpenGL {
 
 		void Use() override;
 
-		void Dispatch(const size_t& NumGroupsX, const size_t& NumGroupsY, const size_t& NumGroupsZ) const override;
+		void Dispatch(const size_t& NumGroupsX, const size_t& NumGroupsY, const size_t& NumGroupsZ) override;
 
 		void WaitForCompletion()const override;
 		static std::shared_ptr<UBaseComputeShader> CreateOpenGLComputeShader(const std::string_view& InName, const std::string_view& InStorageLocation);

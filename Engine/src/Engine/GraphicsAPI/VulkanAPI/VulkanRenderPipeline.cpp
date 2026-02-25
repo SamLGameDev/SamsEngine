@@ -5,6 +5,7 @@
 #include <iostream>
 #include <GLFW/glfw3.h>
 
+#include "UVulkanComputeShader.h"
 #include "Vector2D.h"
 #include "VulkanImageView.h"
 #include "VulkanInstance.h"
@@ -15,9 +16,14 @@
 
 namespace Vulkan
 {
-	URenderPipeline::URenderPipeline(Shader& InShader)
+	URenderPipeline::URenderPipeline(Shader& InShader, const Array<VkDescriptorSetLayoutBinding>& Descriptors)
 	{
-		Init(InShader);
+		Init(InShader, Descriptors);
+	}
+
+	URenderPipeline::URenderPipeline(UVulkanComputeShader& InShader, const Array<VkDescriptorSetLayoutBinding>& Descriptors)
+	{
+		Init(InShader, Descriptors);
 	}
 
 	URenderPipeline::~URenderPipeline()
@@ -25,33 +31,13 @@ namespace Vulkan
 		ShutDown();
 	}
 
-	ErrorCodes URenderPipeline::Init(Shader& InShader)
+	ErrorCodes URenderPipeline::Init(Shader& InShader, const Array<VkDescriptorSetLayoutBinding>& Descriptors)
 	{
-		Array<VkDescriptorSetLayoutBinding> descriptors;
-		for (size_t i=  0; i < 2 ; i++)
-		{
-			VkDescriptorSetLayoutBinding descriptor{};
-			descriptor.binding = i;
-			descriptor.descriptorCount = 1;
-			descriptor.pImmutableSamplers = nullptr;
-			descriptor.descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
-			descriptor.stageFlags = VK_SHADER_STAGE_VERTEX_BIT;
-			descriptors.Add(descriptor);
-		}
-		VkDescriptorSetLayoutBinding descriptor{};
-		descriptor.binding = 2;
-		descriptor.descriptorCount = 1;
-		descriptor.pImmutableSamplers = nullptr;
-		descriptor.descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
-		descriptor.stageFlags = VK_SHADER_STAGE_FRAGMENT_BIT;
-		descriptors.Add(descriptor);
-
-	
 
 		VkDescriptorSetLayoutCreateInfo descriptorLayoutCreateInfo{};
 		descriptorLayoutCreateInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_LAYOUT_CREATE_INFO;
-		descriptorLayoutCreateInfo.bindingCount = descriptors.GetSize();
-		descriptorLayoutCreateInfo.pBindings = descriptors.GetFirstPtr();
+		descriptorLayoutCreateInfo.bindingCount = Descriptors.GetSize();
+		descriptorLayoutCreateInfo.pBindings = Descriptors.GetFirstPtr();
 
 		vkCreateDescriptorSetLayout(*SInstance::GetInstance()->GraphicsCard->GetLogicalDevice()->GetVulkanLogicalDevice(), &descriptorLayoutCreateInfo, nullptr, &DescriptorLayout);
 
@@ -192,6 +178,46 @@ namespace Vulkan
 		pipelineCreateInfo.basePipelineIndex = -1;
 
 		vkCreateGraphicsPipelines(*SInstance::GetInstance()->GraphicsCard->GetLogicalDevice()->GetVulkanLogicalDevice(), VK_NULL_HANDLE, 1, &pipelineCreateInfo, nullptr, &Pipeline);
+		return SUCCEEDED;
+	}
+
+	ErrorCodes URenderPipeline::Init(UVulkanComputeShader& InShader, const Array<VkDescriptorSetLayoutBinding>& Descriptors)
+	{
+		VkDescriptorSetLayoutCreateInfo descriptorLayoutCreateInfo{};
+		descriptorLayoutCreateInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_LAYOUT_CREATE_INFO;
+		descriptorLayoutCreateInfo.bindingCount = Descriptors.GetSize();
+		descriptorLayoutCreateInfo.pBindings = Descriptors.GetFirstPtr();
+
+		vkCreateDescriptorSetLayout(*SInstance::GetInstance()->GraphicsCard->GetLogicalDevice()->GetVulkanLogicalDevice(), &descriptorLayoutCreateInfo, nullptr, &DescriptorLayout);
+
+		VkDescriptorSetAllocateInfo dAllocInfo{};
+		dAllocInfo.descriptorPool = *SInstance::GetInstance()->GraphicsCard->GetRenderer()->GetDescriptorPool();
+		dAllocInfo.descriptorSetCount = 1;
+		dAllocInfo.pSetLayouts = &DescriptorLayout;
+		dAllocInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_ALLOCATE_INFO;
+		VkResult rs = vkAllocateDescriptorSets(*SInstance::GetInstance()->GraphicsCard->GetLogicalDevice()->GetVulkanLogicalDevice(),
+			&dAllocInfo, &DescriptorSet);
+		if (rs != VK_SUCCESS)
+		{
+			std::cout << rs << " ERROR::VULKAN::RENDERPIPELINE::FAILED TO ALLOCATE DESCRIPTOR SETS" << std::endl;
+		}
+
+		VkPipelineLayoutCreateInfo pipelineLayoutInfo{};
+		pipelineLayoutInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_LAYOUT_CREATE_INFO;
+		pipelineLayoutInfo.setLayoutCount = 1;
+		pipelineLayoutInfo.pSetLayouts = &DescriptorLayout;
+
+		if (vkCreatePipelineLayout(*SInstance::GetInstance()->GraphicsCard->GetLogicalDevice()->GetVulkanLogicalDevice(), &pipelineLayoutInfo, nullptr, &Layout) != VK_SUCCESS) {
+			throw std::runtime_error("failed to create compute pipeline layout!");
+		}
+
+		VkComputePipelineCreateInfo pipelineCreateInfo{};
+		pipelineCreateInfo.sType = VK_STRUCTURE_TYPE_COMPUTE_PIPELINE_CREATE_INFO;
+		pipelineCreateInfo.stage = InShader.GetShaderStages()[0];
+		pipelineCreateInfo.layout = Layout;
+
+		vkCreateComputePipelines(*SInstance::GetInstance()->GraphicsCard->GetLogicalDevice()->GetVulkanLogicalDevice(),
+			VK_NULL_HANDLE, 1, &pipelineCreateInfo, nullptr, &Pipeline);
 		return SUCCEEDED;
 	}
 
