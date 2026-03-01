@@ -21,7 +21,7 @@ void PlaneClipping::ClipCellByFaces(Array<Face>& ToClip, const Array<Face>& Clip
 		Vector3D normal = Vector3D::GetPlaneNormal(plane.Vertices, center);
 
 		if (!MathCore::IsNearlyZero(Vector3D::Dot(normal, center - plane.GetCenter())) &&
-			Vector3D::Dot(normal, center - plane.GetCenter()) < 0)
+			Vector3D::Dot(normal, center - plane.GetCenter()) >= 0)
 		{
 			normal = -normal;
 		}
@@ -31,11 +31,6 @@ void PlaneClipping::ClipCellByFaces(Array<Face>& ToClip, const Array<Face>& Clip
 			std::cout << "Plane normal is zero, skipping clipping for this plane." << std::endl; continue;
 		}
 		ClipCellByFace(ToClip, plane.GetCenter(), normal);
-
-		for (auto& face : ToClip)
-		{
-			Vector3D::OrderByAngle(face.Vertices, face.GetCenter(), normal);
-		}
 	}
 }
 
@@ -86,7 +81,7 @@ void PlaneClipping::ClipCellByFace(Array<Face>& ToClip, const Vector3D& Center, 
 			continue;
 		}
 
-	//	Vector3D::OrderByAngle(newFace.Vertices, newFace.GetCenter(), normal);
+		Vector3D::OrderByAngle(newFace.Vertices, newFace.GetCenter(), normal);
 
 		newFaces.Add(newFace);
 

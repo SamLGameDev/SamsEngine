@@ -598,7 +598,7 @@ void RunEngineOpenGL(OpenGL::RuntimeEngine engine)
 	//vorn.FracturePlaneRandomGPU(model, 10, 0);
 	//glm::mat4 modelMat = model.ModelTransform.GetModelMatrix();
 
-	model.ModelTransform.Position = { 0, 0, 0 };
+	model.ModelTransform.Position = { 5, 0, 0 };
 
 	
 //	FracturePieceGPU fracturePiece(VoronoiOut);
@@ -607,7 +607,7 @@ void RunEngineOpenGL(OpenGL::RuntimeEngine engine)
 	vorn2.FracturePlaneRandom(model, 10, 0);
 	//std::cout << "Generated Voronoi Diagram with " << vorn.Fractures.GetSize() << " cells." << std::endl;
 	VoronoiClipping clipper;
-	clipper.ClipTriangleMeshToVoronoi(vorn2, model);
+	clipper.ClipMeshToVoronoi(vorn2, model);
 	while (!engine.ShouldClose())
 	{
 		engine.Loop();

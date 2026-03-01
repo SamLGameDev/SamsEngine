@@ -69,7 +69,7 @@ namespace OpenGL
 
 		for (Model* model : ModelsToRender)
 		{
-			glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+			//glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
 			model->Draw();
 		}
 

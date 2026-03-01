@@ -54,6 +54,27 @@ FracturedMeshPiece::FracturedMeshPiece(const Array<Face>& cell, const Vector3D& 
 	BufferData();
 }
 
+FracturedMeshPiece::FracturedMeshPiece(const Array<Vector3D>& InVerts, const Array<uint16_t>& InInds, const Vector3D& Point)
+{
+	Verts = InVerts;
+	Inds = InInds;
+
+	SetupControls(Point);
+
+	shader = Shader("ColorShape", "/Shaders/");
+
+	//TriangulateCell(cell);
+
+	transform.Position = { 0, 0, 0 };
+
+	if (Inds.IsEmpty())
+	{
+		return;
+	}
+
+	BufferData();
+}
+
 FracturedMeshPiece::FracturedMeshPiece(const Array<FTriangle>& cell, const Vector3D& Point)
 {
 	SetupControls(Point);
@@ -158,8 +179,8 @@ void FracturedMeshPiece::BufferData()
 }
 void FracturedMeshPiece::Draw()
 {
-	if (bHidden) glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
-	else glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+	//if (bHidden) glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+	//else glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
 	shader.Use();
 
 	DataBuffers::BindBuffer(VAO);
@@ -200,6 +221,9 @@ void VoronoiClipping::ClipCellToMesh(Array<FTetrahedron>& tets, const FracturePi
 	Array<Face> newCell;
 	newCell.ReSize(tets.GetSize() / 2);
 
+	Array<Vector3D> Verts;
+	Array<uint16_t> Inds;
+
 	for (auto& tet : tets)
 	{
 
@@ -210,15 +234,25 @@ void VoronoiClipping::ClipCellToMesh(Array<FTetrahedron>& tets, const FracturePi
 
 		if (copyFaces.IsEmpty()) continue;
 
+		for (const auto& face : copyFaces)
+		{
+			for (size_t j = 1; j + 1 < face.Vertices.GetSize(); j++)
+			{
+				AddOrMakeInd(Verts, Inds, face.Vertices[0]);
+				AddOrMakeInd(Verts, Inds, face.Vertices[j]);
+				AddOrMakeInd(Verts, Inds, face.Vertices[j + 1]);
+			}
+		}
+
 		newCell.Emplace(std::move(copyFaces));
 
 	}
 
-	if (newCell.IsEmpty()) return;
+	if (Verts.IsEmpty() || newCell.IsEmpty()) return;
 
 	std::scoped_lock lock(VoronoiMutex);
 	Vector3D color = Vector3D::RandomRange(Vector3D(30, 30, 30), Vector3D(255, 255, 255));
-	FracturedMeshPiece frac = CreateObjectRaw<FracturedMeshPiece>(newCell, cell.Point);
+	FracturedMeshPiece frac = CreateObjectRaw<FracturedMeshPiece>(Verts, Inds, cell.Point);
 	frac.Color = color;
 	FracturedPieces.Emplace(std::move(frac));
 }
@@ -462,6 +496,20 @@ void VoronoiClipping::ClipTriangleMeshToVoronoi(Voronoi& Diagram, const Model& M
 		//threads.Emplace(std::move(thread));
 		ClipCellToMesh(Mesh.Meshes[0].Faces, Mesh.ModelTransform.Center, Diagram.Fractures[i]);
 		//return;
+	}
+}
+
+void VoronoiClipping::AddOrMakeInd(Array<Vector3D>& Verts, Array<uint16_t>& Inds, const Vector3D& Vert)
+{
+	size_t index = 0;
+	if (Verts.Contains(Vert, index))
+	{
+		Inds.Add(index);
+	}
+	else
+	{
+		Inds.Add(Verts.GetSize());
+		Verts.Add(Vert);
 	}
 }
 

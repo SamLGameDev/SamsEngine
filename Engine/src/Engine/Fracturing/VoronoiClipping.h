@@ -96,6 +96,7 @@ public:
 
 	~FracturedMeshPiece();
 	FracturedMeshPiece(const Array<Face>& cell, const Vector3D& Point);
+	FracturedMeshPiece(const Array<Vector3D>& InVerts, const Array<uint16_t>& InInds, const Vector3D& Point);
 	FracturedMeshPiece(const Array<FTriangle>& cell, const Vector3D& Point);
 
 
@@ -254,6 +255,8 @@ public:
 	void ClipCellToMesh(const Array<Face>& meshFaces, const Vector3D& MeshCenter, FracturePiece3D& cell);
 	void ClipMeshToVoronoi(Voronoi& Diagram, const Model& Mesh);
 	void ClipTriangleMeshToVoronoi(Voronoi& Diagram, const Model& Mesh);
+
+	void AddOrMakeInd(Array<Vector3D>& Verts, Array<uint16_t>& Inds, const Vector3D& Vert);
 
 	Array<FTetrahedron> TetrahredraliseMesh(const Model& Mesh);
 	Array<FTetrahedron> TetrahredraliseMeshCGAL(const Model& Mesh);
