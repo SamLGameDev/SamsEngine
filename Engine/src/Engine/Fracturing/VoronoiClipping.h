@@ -115,7 +115,7 @@ public:
 		EBO = Other.EBO;
 		shader = Other.shader;
 		bHidable = Other.bHidable;
-
+		bHidden = Other.bHidden;
 		::Renderer::ReplaceMeshFracturePiece(&Other, this);
 
 		TickDel.BindMember(this, &FracturedMeshPiece::Tick);
@@ -155,7 +155,7 @@ public:
 		VBO = Other.VBO;
 		EBO = Other.EBO;
 		shader = Other.shader;
-
+		bHidden = Other.bHidden;
 		bHidable = Other.bHidable;
 
 		::Renderer::ReplaceMeshFracturePiece(&Other, this);
@@ -212,6 +212,8 @@ public:
 	bool bHidden = false;
 	bool bHidable = false;
 
+	Transform transform;
+
 protected:
 
 	void SetupControls(const Vector3D& point);
@@ -227,8 +229,6 @@ protected:
 
 
 	Vector3D dir;
-
-	Transform transform;
 
 	Array<Vector3D> Verts;
 
@@ -251,7 +251,9 @@ class VoronoiClipping
 {
 public:
 	void ClipCellToMesh(Array<FTetrahedron>& tets, const FracturePiece3D& cell);
+	void ClipCellToMesh(const Array<Face>& meshFaces, const Vector3D& MeshCenter, FracturePiece3D& cell);
 	void ClipMeshToVoronoi(Voronoi& Diagram, const Model& Mesh);
+	void ClipTriangleMeshToVoronoi(Voronoi& Diagram, const Model& Mesh);
 
 	Array<FTetrahedron> TetrahredraliseMesh(const Model& Mesh);
 	Array<FTetrahedron> TetrahredraliseMeshCGAL(const Model& Mesh);

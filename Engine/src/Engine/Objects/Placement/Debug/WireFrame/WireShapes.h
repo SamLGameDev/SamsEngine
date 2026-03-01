@@ -63,7 +63,7 @@ private:
 	void SetTransformationVariables(const glm::mat4& model) const;
 };
 
-std::unique_ptr<WireObject> DrawWireCube(const Vector3D& Center, const Vector3D& HalfBounds, const Vector3D& Size,
+std::unique_ptr<WireObject> DrawWireCube(const Vector3D& Center, Vector3D& HalfBounds, const Vector3D& Size,
                                          const Vector3D& Color);
 
 std::unique_ptr<WireObject> DrawWirePlane(const Vector3D& Center, const Vector3D& Normal, const Vector3D& Size, const Vector3D& Color);

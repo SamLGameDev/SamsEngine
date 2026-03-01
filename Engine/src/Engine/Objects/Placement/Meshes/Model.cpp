@@ -38,8 +38,8 @@ Model::Model(const std::string& Path, const Shader& InShader)
 	std::cout << "NumVertices: " << NumVertices << std::endl;
 #endif
 
-	BoundingBox = DrawWireCube({ 0, 0,0 }, ModelTransform.TransHalfBounds, Vector3D(1, 1, 1),
-		Vector3D(0.2f, 0.5f, 0.2f));
+	BoundingBox = DrawWireCube((ModelTransform.HighestPoints + ModelTransform.LowestPoints)/2, ModelTransform.TransHalfBounds, Vector3D(1, 1, 1),
+	                           Vector3D(0.2f, 0.5f, 0.2f));
 
 	::Renderer::AddModel(this);
 }
@@ -111,7 +111,7 @@ void Model::LoadModel()
 {
 	Assimp::Importer import;
 
-	const aiScene* scene = import.ReadFile(StorageLocation, aiProcess_Triangulate | aiProcess_FlipUVs);
+	const aiScene* scene = import.ReadFile(StorageLocation, aiProcess_Triangulate | aiProcess_FlipUVs | aiProcess_GenBoundingBoxes);
 
 #if DEBUG
 	std::cout << glfwGetTime() - Time << std::endl;
@@ -131,9 +131,7 @@ void Model::LoadModel()
 
 	CalculateBoundPoints(scene->mRootNode, scene);
 
-	ModelTransform.HighestPoints += Vector3D(1, 1, 1);
-
-	ModelTransform.LowestPoints -= Vector3D(1, 1, 1);
+	//ModelTransform.LowestPoints -= Vector3D(1, 1, 1);
 
 	ModelTransform.CalculateBounds();
 
@@ -184,6 +182,21 @@ Mesh Model::ProcessMesh(aiMesh* InMesh, const aiScene* Scene)
 	NumVertices += InMesh->mNumVertices;
 #endif
 
+	if (InMesh->HasFaces())
+	{
+		for (size_t i = 0; i < InMesh->mNumFaces; i++)
+		{
+			Face face;
+			for (size_t j = 0; j < InMesh->mFaces[i].mNumIndices; j++)
+			{
+				face.Vertices.Add(Vector3D(InMesh->mVertices[InMesh->mFaces[i].mIndices[j]].x,
+					InMesh->mVertices[InMesh->mFaces[i].mIndices[j]].y,
+					InMesh->mVertices[InMesh->mFaces[i].mIndices[j]].z));
+			}
+
+			mesh.Faces.Add(face);
+		}
+	}
 	// saves processing time if we allocate beforehand, as we don't have to update each time
 	mesh.Vertices.Reallocate(InMesh->mNumVertices);
 
@@ -309,17 +322,15 @@ void Model::CalculateBoundPoints(const aiNode* Node, const aiScene* Scene)
 
 void Model::CalculatePointsForMesh(const aiMesh* InMesh)
 {
-	for (unsigned int i = 0; i < InMesh->mNumVertices; i++)
-	{
-		ModelTransform.HighestPoints.X = std::max(InMesh->mVertices[i].x, ModelTransform.HighestPoints.X);
-		ModelTransform.LowestPoints.X = std::min(InMesh->mVertices[i].x, ModelTransform.LowestPoints.X);
 
-		ModelTransform.HighestPoints.Y = std::max(InMesh->mVertices[i].y, ModelTransform.HighestPoints.Y);
-		ModelTransform.LowestPoints.Y = std::min(InMesh->mVertices[i].y, ModelTransform.LowestPoints.Y);
+		ModelTransform.HighestPoints.X = std::max(InMesh->mAABB.mMax.x, ModelTransform.HighestPoints.X);
+		ModelTransform.LowestPoints.X = std::min(InMesh->mAABB.mMin.x, ModelTransform.LowestPoints.X);
 
-		ModelTransform.HighestPoints.Z = std::max(InMesh->mVertices[i].z, ModelTransform.HighestPoints.Z);
-		ModelTransform.LowestPoints.Z = std::min(InMesh->mVertices[i].z, ModelTransform.LowestPoints.Z);
-	}
+		ModelTransform.HighestPoints.Y = std::max(InMesh->mAABB.mMax.y, ModelTransform.HighestPoints.Y);
+		ModelTransform.LowestPoints.Y = std::min(InMesh->mAABB.mMin.y, ModelTransform.LowestPoints.Y);
+
+		ModelTransform.HighestPoints.Z = std::max(InMesh->mAABB.mMax.z, ModelTransform.HighestPoints.Z);
+		ModelTransform.LowestPoints.Z = std::min(InMesh->mAABB.mMin.z, ModelTransform.LowestPoints.Z);
 }
 
 bool Model::IsPointInsideModel(const Vector3D& Point) const

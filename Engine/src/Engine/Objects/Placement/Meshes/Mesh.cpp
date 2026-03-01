@@ -33,6 +33,7 @@ void Mesh::Copy(const Mesh& Copy)
 	FVerts = Copy.FVerts;
 	FTexCoords = Copy.FTexCoords;
 	VAO = Copy.VAO;
+	Faces = Copy.Faces;
 	RegenerateMesh();
 }
 

@@ -45,6 +45,7 @@ struct alignas(16) Facew
 {
 	Vector4D Verts[20];
 	uint32_t NumVerts;
+	uint32_t Padding[3];
 };
 
 struct Cell
@@ -64,7 +65,7 @@ struct alignas(16) VOut
 	uint32_t NumCells;
 	uint32_t DebugNum;
 	uint32_t _Padding[2];
-	Cell CutCells[1000];
+	Cell CutCells[10];
 
 };
 
@@ -73,7 +74,7 @@ struct alignas(16) VOutLarge
 	uint32_t NumCells;
 	uint32_t DebugNum;
 	uint32_t _Padding[2];
-	LargeCell CutCells[1000];
+	Cell CutCells[10];
 
 };
 
@@ -386,16 +387,20 @@ struct alignas(16) FTet
 	TetFace TetFaces[4];   // 64 bytes
 };
 
-struct alignas(16) InTets
+struct InTets
 {
-	uint32_t NumTets;
-	FTet Tets[1000];
+	Vector3D MeshCenter;
+	uint32_t NumInds;
+	Vector3D verts[1000];
+	uint32_t Inds[1000];
+
 };
 
 struct VoronoiSSBOIn
 {
-	Vector4D Points[1000];      // 10 * 16 = 160 bytes
-	uint32_t NumPoints;          // 4 bytes
+	Vector4D Points[10];      // 10 * 16 = 160 bytes
+	uint32_t NumPoints;
+	uint32_t Padding[3];// 4 bytes
 	Facew BoundingBoxFaces[6];
 };
 

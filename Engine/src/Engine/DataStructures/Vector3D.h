@@ -19,7 +19,7 @@ public:
 
 	//constexpr Vector3D(const float InX, const float InY, const float InZ) noexcept : X(InX), Y(InY), Z(InZ) {};
 
-	constexpr Vector3D(const double InX, const double InY, const double InZ) noexcept : X(InX), Y(InY), Z(InZ){};
+	constexpr Vector3D(const double InX, const double InY, const double InZ) noexcept : X(static_cast<float>(InX)), Y(static_cast<float>(InY)), Z(static_cast<float>(InZ)){};
 
 	////Vector3D(const Vector3D& CopyVec)
 	////{
@@ -206,6 +206,13 @@ public:
 [[nodiscard]] inline Vector3D operator*(const float& Multiplier, const Vector3D& Vec)
 {
 	return Vec * Multiplier;
+}
+
+
+inline std::ostream& operator<<(std::ostream& os, const Vector3D& V)
+{
+	os << "{ " << V.X << ", " << V.Y << ", " << V.Z << " }";
+	return os;
 }
 struct AnglePointPair
 {

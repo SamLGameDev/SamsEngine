@@ -96,7 +96,7 @@ void WireObject::SetTransformationVariables(const glm::mat4& model) const
 	//WireShader->SetMatrix4fv("Model", glm::value_ptr(model));
 }
 
-std::unique_ptr<WireObject> DrawWireCube(const Vector3D& Center, const Vector3D& HalfBounds, const Vector3D& Size,
+std::unique_ptr<WireObject> DrawWireCube(const Vector3D& Center, Vector3D& HalfBounds, const Vector3D& Size,
                                          const Vector3D& Color)
 {
 	auto wireTransform = Transform(Center, Size, Vector3D(0, 0, 0));
@@ -107,14 +107,14 @@ std::unique_ptr<WireObject> DrawWireCube(const Vector3D& Center, const Vector3D&
 
 	object->Vertices =
 	{
-		Vertex(HalfBounds, Color),
-		Vertex(Vector3D(HalfBounds.X, -HalfBounds.Y, HalfBounds.Z), Color),
-		Vertex(Vector3D(-HalfBounds.X, -HalfBounds.Y, HalfBounds.Z), Color),
-		Vertex(Vector3D(-HalfBounds.X, HalfBounds.Y, HalfBounds.Z), Color),
-		Vertex(Vector3D(HalfBounds.X, HalfBounds.Y, -HalfBounds.Z), Color),
-		Vertex(Vector3D(HalfBounds.X, -HalfBounds.Y, -HalfBounds.Z), Color),
-		Vertex(Vector3D(-HalfBounds.X, -HalfBounds.Y, -HalfBounds.Z), Color),
-		Vertex(Vector3D(-HalfBounds.X, HalfBounds.Y, -HalfBounds.Z), Color)
+		Vertex(Center + HalfBounds, Color),
+		Vertex(Center + Vector3D(HalfBounds.X, -HalfBounds.Y, HalfBounds.Z), Color),
+		Vertex(Center + Vector3D(-HalfBounds.X, -HalfBounds.Y, HalfBounds.Z), Color),
+		Vertex(Center + Vector3D(-HalfBounds.X, HalfBounds.Y, HalfBounds.Z), Color),
+		Vertex(Center + Vector3D(HalfBounds.X, HalfBounds.Y, -HalfBounds.Z), Color),
+		Vertex(Center + Vector3D(HalfBounds.X, -HalfBounds.Y, -HalfBounds.Z), Color),
+		Vertex(Center + Vector3D(-HalfBounds.X, -HalfBounds.Y, -HalfBounds.Z), Color),
+		Vertex(Center + Vector3D(-HalfBounds.X, HalfBounds.Y, -HalfBounds.Z), Color)
 	};
 
 	object->Indices =

@@ -36,6 +36,7 @@ public:
 		FTexCoords = std::move(other.FTexCoords);
 		MeshShader = std::move(other.MeshShader);
 		VAO = other.VAO;
+		Faces = std::move(other.Faces);
 		other.VAO = 0;
 	}
 
@@ -68,6 +69,8 @@ public:
 
 	Array<Vector3D> FVerts;
 	Array<Vector2D> FTexCoords;
+
+	Array<Face> Faces;
 
 	Shader MeshShader;
 

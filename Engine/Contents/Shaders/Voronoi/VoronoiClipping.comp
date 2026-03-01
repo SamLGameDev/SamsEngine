@@ -7,7 +7,7 @@ struct Face
 };
 
 struct Cell {
-    Face Faces[30];
+    Face Faces[20];
     uint NumFaces;
 };
 
@@ -52,31 +52,27 @@ struct Box
     vec3 Min;
     vec3 Max;
 };
-
-struct LargeCell
-{
-    Face Faces[5000];
-    uint NumFaces;
-};
-
 layout(std430, binding = 3) buffer VoronoiSSBOOut
 { 
     uint NumCells;
     uint DebugNum;
-    Cell CutCells[1000];
+    Cell CutCells[10];
 };
 
-layout(std430, binding = 4) buffer TetMeshIn
+layout(std430, binding = 4) buffer MeshIn
 {
-    uint NumTets;
-    Tet[1000] Tets;
+    vec3 MeshCenter;
+    uint NumInds;
+    vec3 Verts[1000];
+    uint Inds[1000];
+
 };
 
 layout(std430, binding = 5) buffer ClippingSSBOOut
 {
     uint NumCellsCut;
     uint DebugNum2;
-    LargeCell ClippedCells[1000];
+    Cell ClippedCells[10];
 };
 
 layout (local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
@@ -291,6 +287,8 @@ Cell ClipCellByFace(const in Cell cell, const in vec3 Center, const in vec3 Norm
     newCell.NumFaces = 0;
     intersectFace.NumVerts = 0;
     
+    if (cell.NumFaces == 0) DebugNum2 = 98;
+    
     for (uint i = 0; i < cell.NumFaces; i++)
     {
         newCell.Faces[newCell.NumFaces].NumVerts = 0;
@@ -326,6 +324,16 @@ vec3 GetPlaneCenter(const in Face Plane)
     return center / Plane.NumVerts;
 }
 
+vec3 GetPlaneCenter(const in uint Index)
+{
+    vec3 center = vec3(0, 0, 0);
+    for (uint i = Index; i < Index+3; i++)
+    {
+        center += Verts[Inds[Index]];
+    }
+    return center / 3;
+}
+
 vec3 GetPlaneNormal(const in Face Plane, const in vec3 Center)
 {
     vec3 normal = vec3(0, 0, 0);
@@ -334,6 +342,28 @@ vec3 GetPlaneNormal(const in Face Plane, const in vec3 Center)
         const vec3 current = Plane.Verts[i];
         const vec3 next = Plane.Verts[(i+1) % Plane.NumVerts];
 
+        normal.x += (current.y - next.y) * (current.z + next.z);
+        normal.y += (current.z - next.z) * (current.x + next.x);
+        normal.z += (current.x - next.x) * (current.y + next.y);
+    }
+    return normalize(normal);
+}
+
+vec3 GetPlaneNormal(const in uint Index)
+{
+    
+    
+    vec3 normal = vec3(0, 0, 0);
+    for (uint i = Index; i < Index+3; i++)
+    {
+        const vec3 current = Verts[Inds[i]];
+        vec3 next;
+        if (i == Index+3)
+        {
+            next = Verts[Inds[Index]];
+        }
+        else next = Verts[Inds[i+1]];
+    
         normal.x += (current.y - next.y) * (current.z + next.z);
         normal.y += (current.z - next.z) * (current.x + next.x);
         normal.z += (current.x - next.x) * (current.y + next.y);
@@ -473,32 +503,16 @@ bool IsBoxIntersectingBox(const in Box InBox, const uint TetIndex)
     box.Min = vec3(1.0 / 0.0, 1.0 / 0.0, 1.0 / 0.0);
     box.Max = vec3(-1.0 / 0.0, -1.0 / 0.0, -1.0 / 0.0);
     
-    for (uint i = 0; i < 4; i++)
+
+    for (uint j = 0; j < 3; j++)
     {
-        for (uint j = 0; j < 3; j++)
-        {
-            box.Min = min(box.Min, Tets[TetIndex].Faces[i].Verts[j]);
-            box.Max = max(box.Max,  Tets[TetIndex].Faces[i].Verts[j]);
-        }
+        box.Min = min(box.Min, Verts[Inds[TetIndex + j]]);
+        box.Max = max(box.Max,  Verts[Inds[TetIndex + j]]); 
     }
+
     return all(lessThanEqual(InBox.Min, box.Max)) &&
     all(greaterThanEqual(InBox.Max, box.Min));
     
-}
-
-Cell PopulateCell(const uint TetIndex)
-{
-    Cell cell;
-    cell.NumFaces = 4;
-    for (uint i = 0; i < 4; i++)
-    {
-        cell.Faces[i].NumVerts = 3;
-        for (uint j = 0; j < 3; j++)
-        {
-            cell.Faces[i].Verts[j] = Tets[TetIndex].Faces[i].Verts[j];
-        }
-    }
-    return cell;
 }
 
 void AppendCell(const in uint CellIndex, const in Cell InCell)
@@ -510,63 +524,39 @@ void AppendCell(const in uint CellIndex, const in Cell InCell)
     }
 }
 
-void ClipCellByFaces(inout Cell ToClip, const in uint Index)
+void ClipCellByFaces(const in uint Index, const in uint CellIndex)
 {
-    vec3 center = vec3(0, 0, 0);
-    for (uint i = 0; i < CutCells[Index].NumFaces; i++)
-    {
-        center += GetPlaneCenter(CutCells[Index].Faces[i]);
-    }
-    center /= CutCells[Index].NumFaces;
-    
-    for (uint i = 0; i < CutCells[Index].NumFaces; i++)
-    {
-        if (ToClip.NumFaces == 0) return;
+        vec3 normal = GetPlaneNormal(Index);
+        vec3 planeCenter = GetPlaneCenter(Index);
+        if (!isNearlyZero(dot(normal, MeshCenter - planeCenter)) && dot(normal, MeshCenter - planeCenter) < 0) normal = -normal;
         
-        vec3 normal = GetPlaneNormal(CutCells[Index].Faces[i], center);
-        vec3 planeCenter = GetPlaneCenter(CutCells[Index].Faces[i]);
-        if (!isNearlyZero(dot(normal, center - planeCenter)) && dot(normal, center - planeCenter) < 0) normal = -normal;
+        if (isNearlyZero(normal.x) && isNearlyZero(normal.y) && isNearlyZero(normal.z)) return;
         
-        if (isNearlyZero(normal.x) && isNearlyZero(normal.y) && isNearlyZero(normal.z)) continue;
-        DebugNum2 = 55;
-        ToClip = ClipCellByFace(ToClip, planeCenter, normal, 0);
-
-        for (uint j = 0; j < ToClip.NumFaces; j++)
+        ClippedCells[CellIndex] = ClipCellByFace(ClippedCells[CellIndex], planeCenter, normal, 0);
+        for (uint j = 0; j < ClippedCells[CellIndex].NumFaces; j++)
         {
-            ToClip.Faces[j] = OrderByAngle(ToClip.Faces[j], GetPlaneCenter(ToClip.Faces[j]), normal);
+            DebugNum2 = 20;
+            ClippedCells[CellIndex].Faces[j] = OrderByAngle(ClippedCells[CellIndex].Faces[j], GetPlaneCenter(ClippedCells[CellIndex].Faces[j]), normal);
         }
-    }
-    
-    
 }
 
 void main()
 {
     uint index = gl_GlobalInvocationID.x;
 
-    if (index >= NumCells) return;
+    if (index >= 1) return;
     
     Box box = CreateBox(index);
     
-    Cell cell;
+    ClippedCells[index] = CutCells[index];
     
-    ClippedCells[index].NumFaces = 0;
-    
-    for (uint i = 0; i < NumTets; i++)
+    for (uint i = 0; i + 2 < NumInds; i+=3)
     {
-        if (!IsBoxIntersectingBox(box, i))
-        {
-            DebugNum2 = 2;
-            continue;
-        } //continue;
+        if (!IsBoxIntersectingBox(box, i)) continue;
         
-        cell = PopulateCell(i);
+        ClipCellByFaces(i, index);
         
-        ClipCellByFaces(cell, index);
-        
-        if (cell.NumFaces == 0) continue;
-        
-        AppendCell(index, cell);
+        if (ClippedCells[index].NumFaces == 0) return;
         
     }
 

@@ -6,6 +6,7 @@
 #include<iostream>
 
 #include "Array.h"
+#include "MathCore.h"
 #include "Vector2D.h"
 
 Vector3D const Vector3D::Up = Vector3D(0, 1, 0);
@@ -124,19 +125,19 @@ Vector3D Vector3D::Cross(const Vector3D& A, const Vector3D& B)
 bool Vector3D::GetIntersectionPointWithPlane(const Vector3D& Mid, const Vector3D& Normal, const Vector3D& Point,
                                     const Vector3D& LineDir, Vector3D& Out)
 {
-	const float d = -Dot(Normal, Mid);
+	const double d = -Dot(Normal, Mid);
 
-	const float dot1 = Dot(Normal, LineDir);
-	const float dot2 = Dot(Normal, Point);
+	const double dot1 = Dot(Normal, LineDir);
+	const double dot2 = Dot(Normal, Point);
 
-	if (dot1 == 0)
+	if (dot1  == 0)
 	{
 		return false;
 	}
 
-	const float t = -(dot2 + d) / dot1;
+	const double t = -(dot2 + d) / dot1;
 
-	if (t < 0.0f || t > 1.0f) {
+	if (t < 0.0f || t > 1.0) {
 		return false;
 	}
 

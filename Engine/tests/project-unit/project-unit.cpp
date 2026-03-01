@@ -592,22 +592,22 @@ void RunEngineOpenGL(OpenGL::RuntimeEngine engine)
 {
 	Model model = Model("/Models/Asteroid/rock.obj", Shader("BasicTexture", "/Shaders/"));
 	//Model model = Model("/Models/Bunny/Bunny.obj", Shader("ColorShape", "/Shaders/"));
-
+	//model.ModelTransform.Position = { 5, 0, 0 };
 	Voronoi vorn;
 	//vorn.GenerateNewPointSets(model);
-	vorn.FracturePlaneRandomGPU(model, 10, 0);
+	//vorn.FracturePlaneRandomGPU(model, 10, 0);
 	//glm::mat4 modelMat = model.ModelTransform.GetModelMatrix();
 
-	model.ModelTransform.Position = { 5, 0, 0 };
+	model.ModelTransform.Position = { 0, 0, 0 };
 
 	
 //	FracturePieceGPU fracturePiece(VoronoiOut);
 
-	//Voronoi vorn2;
-//	vorn2.FracturePlaneRandom(model, 10, 0);
+	Voronoi vorn2;
+	vorn2.FracturePlaneRandom(model, 10, 0);
 	//std::cout << "Generated Voronoi Diagram with " << vorn.Fractures.GetSize() << " cells." << std::endl;
-	//VoronoiClipping clipper;
-	//clipper.ClipMeshToVoronoi(vorn2, model);
+	VoronoiClipping clipper;
+	clipper.ClipTriangleMeshToVoronoi(vorn2, model);
 	while (!engine.ShouldClose())
 	{
 		engine.Loop();
@@ -638,6 +638,6 @@ void EngineDelaunay()
 TEST(Fracturing, Diagram) {
 	//EnginePlane();
 
-	EngineDelaunay();
-	//OpenGLTest();
+	//EngineDelaunay();
+	OpenGLTest();
 }

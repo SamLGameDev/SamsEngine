@@ -374,6 +374,18 @@ void Voronoi::CreateMeshFractureGPU(VoronoiSSBOIn* buffer, Array<Vector3D> point
 	clippingCompute.Dispatch(points.GetSize(), 1, 1);
 	clippingCompute.WaitForCompletion();
 
+	void* outPtr = ::DataBuffers::MapBufferMemory(ClippedOutInd, sizeof(VOutLarge));
+
+	VOutLarge* clippedOutData = static_cast<VOutLarge*>(outPtr);
+
+	for (size_t i = 0; i < points.GetSize(); i++)
+	{
+		if (clippedOutData->CutCells[i].NumFaces == 0 || clippedOutData->CutCells[i].NumFaces > 20) continue;
+		FracturePieceGPU frac = CreateObjectRaw<FracturePieceGPU>(clippedOutData->CutCells[i], points[i]);
+		GPUFractures.Add({ frac });
+	}
+
+
 	::DataBuffers::RemoveBuffer(VoronoiOut);
 	::DataBuffers::RemoveBuffer(InTetsInd);
 	::DataBuffers::RemoveBuffer(ClippedOutInd);
@@ -383,55 +395,26 @@ void Voronoi::FracturePlaneRandomGPU(Model& InModel, const size_t& NumPoints, co
 {
 
 	InTets tets;
-	tets.NumTets = 0;
 
-	for (const auto& subMesh : InModel.Meshes) {
-
-		//CGAL::Surface_mesh<K::Point_3> dtPoints;
-		std::vector<K::Point_3> dtPoints;
-		dtPoints.reserve(subMesh.Vertices.GetSize());
-
-		//if (!CGAL::IO::read_polygon_mesh("D:/Comp303-SL295211-VoronoiClipping/Engine/Contents/Models/Bunny/Bunny.obj", dtPoints)) {
-		//	std::cerr << "Error: cannot read file "  << std::endl;
-		//}
-
-		std::vector<std::vector<uint16_t>> inds;
-		inds.reserve(subMesh.Indices.GetSize() / 3);
-
-		for (size_t i = 0; i + 2 < subMesh.Indices.GetSize(); i += 3)
+	for (const auto& subMesh : InModel.Meshes) 
+	{
+		for (size_t i = 0; i < subMesh.Vertices.GetSize(); i++)
 		{
-			std::vector<uint16_t> tri = { subMesh.Indices[i], subMesh.Indices[i + 1], subMesh.Indices[i + 2] };
-
-			inds.push_back(tri);
+			tets.verts[i] = subMesh.Vertices[i].Position;
 		}
 
-		for (const auto& p : subMesh.Vertices)
+		//memcpy(tets.verts, subMesh.Vertices.GetFirstPtr(), subMesh.Vertices.GetSize());
+
+		for (size_t i = 0; i < subMesh.Indices.GetSize(); i++)
 		{
-			dtPoints.push_back({ p.Position.X, p.Position.Y, p.Position.Z });
+			tets.Inds[i] = subMesh.Indices[i];
 		}
 
-		auto dt = CGAL::make_conforming_constrained_Delaunay_triangulation_3(dtPoints, inds);
-
-		for (auto cell = dt.triangulation().finite_cells_begin(); cell != dt.triangulation().finite_cells_end(); ++cell)
-		{
-			const Point& p0 = cell->vertex(0)->point();
-			const Point& p1 = cell->vertex(1)->point();
-			const Point& p2 = cell->vertex(2)->point();
-			const Point& p3 = cell->vertex(3)->point();
-
-			const Vector3D v0 = Vector3D(p0.x(), p0.y(), p0.z());
-			const Vector3D v1 = Vector3D(p1.x(), p1.y(), p1.z());
-			const Vector3D v2 = Vector3D(p2.x(), p2.y(), p2.z());
-			const Vector3D v3 = Vector3D(p3.x(), p3.y(), p3.z());
-
-			tets.Tets[tets.NumTets].TetFaces[0] = { v0, v1, v2 };
-			tets.Tets[tets.NumTets].TetFaces[1] = { v0, v1, v3 };
-			tets.Tets[tets.NumTets].TetFaces[2] = { v0, v2, v3 };
-			tets.Tets[tets.NumTets].TetFaces[3] = { v1, v2, v3 };
-			tets.NumTets++;
-
-		}
+		// memcpy(tets.Inds, subMesh.Indices.GetFirstPtr(), subMesh.Indices.GetSize());
+		tets.NumInds = subMesh.Indices.GetSize();
+		break;
 	}
+	tets.MeshCenter = InModel.ModelTransform.Center;
 
 	VoronoiSSBOIn* buffer = new VoronoiSSBOIn;
 	VOut* vOut = new VOut;
@@ -451,7 +434,7 @@ void Voronoi::FracturePlaneRandomGPU(Model& InModel, const size_t& NumPoints, co
 		buffer->BoundingBoxFaces[i].NumVerts = face.Vertices.GetSize();
 	}
 
-	std::string DataToLoad = "/ExperimentData/SetOfTen.txt";;
+	std::string DataToLoad = "/ExperimentData/SetOfTen.txt";
 
 	GLuint VoronoiIn, VoronoiOut, ClippedOutInd, InTetsInd;
 
@@ -462,7 +445,9 @@ void Voronoi::FracturePlaneRandomGPU(Model& InModel, const size_t& NumPoints, co
 
 	size_t numPoints = 10;
 
-	for (size_t i = 0; i < 145; i++)
+	std::cout << sizeof(InTets) << std::endl;
+
+	for (size_t i = 0; i < 1; i++)
 	{
 		Array<Vector3D> points;
 
@@ -480,47 +465,47 @@ void Voronoi::FracturePlaneRandomGPU(Model& InModel, const size_t& NumPoints, co
 	}
 
 
-	DataToLoad = "/ExperimentData/SetOfHundred.txt";
+	//DataToLoad = "/ExperimentData/SetOfHundred.txt";
 
-	numPoints = 100;
+	//numPoints = 100;
 
-	for (size_t i = 0; i < 145; i++)
-	{
-		Array<Vector3D> points;
+	//for (size_t i = 0; i < 145; i++)
+	//{
+	//	Array<Vector3D> points;
 
-		const Vector2D range = { i * numPoints, ((i + 1) * numPoints) };
+	//	const Vector2D range = { i * numPoints, ((i + 1) * numPoints) };
 
-		UFileWriter::Load(DataToLoad, points, range);
+	//	UFileWriter::Load(DataToLoad, points, range);
 
-		for (size_t i = 0; i < points.GetSize(); i++)
-		{
-			buffer->Points[i] = points[i];
-		}
-		buffer->NumPoints = points.GetSize();
+	//	for (size_t i = 0; i < points.GetSize(); i++)
+	//	{
+	//		buffer->Points[i] = points[i];
+	//	}
+	//	buffer->NumPoints = points.GetSize();
 
-		CreateMeshFractureGPU(buffer, points, tets, VoronoiIn, VoronoiOut, ClippedOutInd, InTetsInd);
-	}
+	//	CreateMeshFractureGPU(buffer, points, tets, VoronoiIn, VoronoiOut, ClippedOutInd, InTetsInd);
+	//}
 
-	DataToLoad = "/ExperimentData/SetOfThousand.txt";
+	//DataToLoad = "/ExperimentData/SetOfThousand.txt";
 
-	numPoints = 1000;
+	//numPoints = 1000;
 
-	for (size_t i = 0; i < 145; i++)
-	{
-		Array<Vector3D> points;
+	//for (size_t i = 0; i < 145; i++)
+	//{
+	//	Array<Vector3D> points;
 
-		const Vector2D range = { i * numPoints, ((i + 1) * numPoints) };
+	//	const Vector2D range = { i * numPoints, ((i + 1) * numPoints) };
 
-		UFileWriter::Load(DataToLoad, points, range);
+	//	UFileWriter::Load(DataToLoad, points, range);
 
-		for (size_t i = 0; i < points.GetSize(); i++)
-		{
-			buffer->Points[i] = points[i];
-		}
-		buffer->NumPoints = points.GetSize();
+	//	for (size_t i = 0; i < points.GetSize(); i++)
+	//	{
+	//		buffer->Points[i] = points[i];
+	//	}
+	//	buffer->NumPoints = points.GetSize();
 
-		CreateMeshFractureGPU(buffer, points, tets, VoronoiIn, VoronoiOut, ClippedOutInd, InTetsInd);
-	}
+	//	CreateMeshFractureGPU(buffer, points, tets, VoronoiIn, VoronoiOut, ClippedOutInd, InTetsInd);
+	//}
 
 }
 
@@ -559,7 +544,7 @@ void Voronoi::FractureDelaunayRandom(Model& InModel, const size_t& NumPoints)
 
 void Voronoi::DefinePlane(Vector3D& normal, const Vector3D& CurrentPoint, const Vector3D& closestPoint, Vector3D& Right, Vector3D& Up, Vector3D& PlaneCenter)
 {
-	normal = (CurrentPoint - closestPoint).Normalised();
+	normal = (closestPoint - CurrentPoint).Normalised();
 	
 	//if normal is nearly parallel to up vector, use right vector instead
 	Vector3D arbitraryUp = Vector3D::Up;
@@ -1076,33 +1061,15 @@ void FracturePiece3D::TriangulateCell(const Array<Face>& cell)
 
 FracturePiece3D::FracturePiece3D(const Array<Face>& cell, const Vector3D& CellPoint)
 {
-	//SetupControls(Point);
+
+	transform.Position = { -7, 0, 0 };
+	SetupControls(CellPoint);
 
 	for (const auto& face : cell)
 	{
-		if (face.Vertices.GetSize() < 3)
-		{
-			continue;
-		}
-		Face newFace;
-		for (const auto& vert : face.Vertices)
-		{
-			if (newFace.Vertices.Contains(vert))
-			{
-				continue;
-			}
-			newFace.Vertices.Add(vert);
-		}
+		CellFaces.Add(face);
 
-		if (newFace.Vertices.GetSize() < 3)
-		{
-			continue;
-		}
-
-		CellFaces.Add(newFace);
-
-		Vector3D::OrderByAngle(CellFaces.GetLastPtr()->Vertices, newFace.GetCenter(), Vector3D::GetPlaneNormal(CellFaces.GetLastPtr()->Vertices, newFace.GetCenter()));
-
+		//Vector3D::OrderByAngle(CellFaces.GetLastPtr()->Vertices, newFace.GetCenter(), Vector3D::GetPlaneNormal(CellFaces.GetLastPtr()->Vertices, newFace.GetCenter()));
 	}
 
 	shader = Shader("ColorShape", "/Shaders/");
@@ -1149,8 +1116,6 @@ void FracturePiece3D::BufferData()
 	DataBuffers::BufferDataIndex(VAO, Inds.GetSize() * sizeof(uint16_t), Inds.GetFirstPtr());
 
 	::Renderer::AddFracture(this);
-
-	transform.Position = {-7, 0, 0};
 
 	color = Vector3D::RandomRange(Vector3D(30, 30, 30), Vector3D(255, 255, 255));
 }

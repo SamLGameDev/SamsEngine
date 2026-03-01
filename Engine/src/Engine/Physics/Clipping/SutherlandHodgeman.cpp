@@ -64,6 +64,9 @@ void SutherlandHodgeman::Clip3D(const Array<Face>& Bounds, const FTriangle& ToCl
 		OutClipped = newFace;
 	}
 
+
+
+
 	//Vector3D normal = Vector3D::Cross(OutClipped.Vertices[1] - OutClipped.Vertices[0], OutClipped.Vertices[2] - OutClipped.Vertices[0]).Normalised();
 
 	//if (Vector3D::Dot(normal, OutClipped.Vertices[0] - Center) < 0) normal = -normal;
@@ -80,6 +83,8 @@ void SutherlandHodgeman::Clip3D(const Array<Face>& Bounds, const FTriangle& ToCl
 	//}
 
 }
+
+
 
 void SutherlandHodgeman::Clip3D(const Array<FTriangle>& Bounds, const FTriangle& ToClip, Face& OutClipped,
 	const Vector3D& Center)
