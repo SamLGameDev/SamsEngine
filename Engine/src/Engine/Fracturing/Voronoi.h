@@ -34,13 +34,25 @@ struct VoronoiCellInstanceInfo
 
 struct alignas(16) RawCell
 {
-	uint32_t Inds[500];
+	Vector4D Verts[1000];
+	uint32_t Inds[3000];
 	uint32_t NumInds;
 	uint32_t NumVerts;
-	uint32_t _Padding[2];
-	Vector4D Verts[200];
+	uint32_t Padding[2];
+
 
 };
+
+
+struct alignas(16) VOutLarge
+{
+	uint32_t NumCells;
+	uint32_t DebugNum;
+	uint32_t _Padding[2];
+	RawCell CutCells[10];
+
+};
+
 struct alignas(16) Facew
 {
 	Vector4D Verts[20];
@@ -69,15 +81,6 @@ struct alignas(16) VOut
 
 };
 
-struct alignas(16) VOutLarge
-{
-	uint32_t NumCells;
-	uint32_t DebugNum;
-	uint32_t _Padding[2];
-	Cell CutCells[10];
-
-};
-
 class FracturePieceGPU : WorldObject
 {
 public:
@@ -89,6 +92,7 @@ public:
 	void TriangulateCell(const Array<Face>& cell);
 	FracturePieceGPU(LargeCell& InVoronoiOut, const Vector3D& InPoint);
 	FracturePieceGPU(Cell& InVoronoiOut, const Vector3D& InPoint);
+	FracturePieceGPU(RawCell& InVoronoiOut, const Vector3D& InPoint);
 
 	~FracturePieceGPU() override;
 	void Draw();
@@ -387,13 +391,10 @@ struct alignas(16) FTet
 	TetFace TetFaces[4];   // 64 bytes
 };
 
-struct InTets
+struct alignas(16) InTets
 {
-	Vector3D MeshCenter;
-	uint32_t NumInds;
-	Vector3D verts[1000];
-	uint32_t Inds[1000];
-
+	uint32_t NumTets;
+	FTet Tets[1000];
 };
 
 struct VoronoiSSBOIn
@@ -402,6 +403,7 @@ struct VoronoiSSBOIn
 	uint32_t NumPoints;
 	uint32_t Padding[3];// 4 bytes
 	Facew BoundingBoxFaces[6];
+
 };
 
 class Voronoi

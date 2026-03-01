@@ -345,17 +345,69 @@ void Voronoi::CreateMeshFractureGPU(VoronoiSSBOIn* buffer, Array<Vector3D> point
 
 	void* inPtr = ::DataBuffers::MapBufferMemory(VoronoiIn, sizeof(VoronoiSSBOIn));
 
+	std::cout << "buffer size: " << sizeof(VoronoiSSBOIn) << std::endl;
+	std::cout << "buffer size: " << sizeof(VOutLarge) << std::endl;
+
+	GLenum error = glGetError();
+	if (error != GL_NO_ERROR)
+	{
+		std::cerr << "OpenGL error before buffer generation: " << error << std::endl;
+	}
+
+
 	VoronoiSSBOIn* inData = static_cast<VoronoiSSBOIn*>(inPtr);
 
 	memcpy(inData, buffer, sizeof(VoronoiSSBOIn));
+
+
+	error = glGetError();
+	if (error != GL_NO_ERROR)
+	{
+		std::cerr << "OpenGL error before buffer generation: " << error << std::endl;
+	}
 	::DataBuffers::UnMapBufferMemory(VoronoiIn);
 
+
+	error = glGetError();
+	if (error != GL_NO_ERROR)
+	{
+		std::cerr << "OpenGL error before buffer generation: " << error << std::endl;
+	}
+
 	voronoiCompute.Dispatch(points.GetSize(), 1, 1);
+
+
+	error = glGetError();
+	if (error != GL_NO_ERROR)
+	{
+		std::cerr << "OpenGL error before buffer generation: " << error << std::endl;
+	}
 	voronoiCompute.WaitForCompletion();
+
+
+	error = glGetError();
+	if (error != GL_NO_ERROR)
+	{
+		std::cerr << "OpenGL error before buffer generation: " << error << std::endl;
+	}
 
 	::DataBuffers::RemoveBuffer(VoronoiIn);
 
+
+	error = glGetError();
+	if (error != GL_NO_ERROR)
+	{
+		std::cerr << "OpenGL error before buffer generation: " << error << std::endl;
+	}
+
 	UComputeShader clippingCompute = UComputeShader("VoronoiClipping", "/Shaders/Voronoi/");
+
+	error = glGetError();
+	if (error != GL_NO_ERROR)
+	{
+		std::cerr << "OpenGL error before buffer generation: " << error << std::endl;
+	}
+
 
 	clippingCompute.Use();
 	::DataBuffers::BindShaderStorageBuffer(VoronoiOut, 3, sizeof(VOut));
@@ -369,6 +421,13 @@ void Voronoi::CreateMeshFractureGPU(VoronoiSSBOIn* buffer, Array<Vector3D> point
 
 	memcpy(inTetsData, &tets, sizeof(InTets));
 
+	error = glGetError();
+	if (error != GL_NO_ERROR)
+	{
+		std::cerr << "OpenGL error before buffer generation: " << error << std::endl;
+	}
+
+
 	::DataBuffers::UnMapBufferMemory(InTetsInd);
 
 	clippingCompute.Dispatch(points.GetSize(), 1, 1);
@@ -378,9 +437,16 @@ void Voronoi::CreateMeshFractureGPU(VoronoiSSBOIn* buffer, Array<Vector3D> point
 
 	VOutLarge* clippedOutData = static_cast<VOutLarge*>(outPtr);
 
+	 error = glGetError();
+	if (error != GL_NO_ERROR)
+	{
+		std::cerr << "OpenGL error before buffer generation: " << error << std::endl;
+	}
+
+
 	for (size_t i = 0; i < points.GetSize(); i++)
 	{
-		if (clippedOutData->CutCells[i].NumFaces == 0 || clippedOutData->CutCells[i].NumFaces > 20) continue;
+		if (clippedOutData->CutCells[i].NumInds == 0) continue;
 		FracturePieceGPU frac = CreateObjectRaw<FracturePieceGPU>(clippedOutData->CutCells[i], points[i]);
 		GPUFractures.Add({ frac });
 	}
@@ -395,26 +461,55 @@ void Voronoi::FracturePlaneRandomGPU(Model& InModel, const size_t& NumPoints, co
 {
 
 	InTets tets;
+	tets.NumTets = 0;
 
-	for (const auto& subMesh : InModel.Meshes) 
-	{
-		for (size_t i = 0; i < subMesh.Vertices.GetSize(); i++)
+	for (const auto& subMesh : InModel.Meshes) {
+
+		//CGAL::Surface_mesh<K::Point_3> dtPoints;
+		std::vector<K::Point_3> dtPoints;
+		dtPoints.reserve(subMesh.Vertices.GetSize());
+
+		//if (!CGAL::IO::read_polygon_mesh("D:/Comp303-SL295211-VoronoiClipping/Engine/Contents/Models/Bunny/Bunny.obj", dtPoints)) {
+		//	std::cerr << "Error: cannot read file "  << std::endl;
+		//}
+
+		std::vector<std::vector<uint16_t>> inds;
+		inds.reserve(subMesh.Indices.GetSize() / 3);
+
+		for (size_t i = 0; i + 2 < subMesh.Indices.GetSize(); i += 3)
 		{
-			tets.verts[i] = subMesh.Vertices[i].Position;
+			std::vector<uint16_t> tri = { subMesh.Indices[i], subMesh.Indices[i + 1], subMesh.Indices[i + 2] };
+
+			inds.push_back(tri);
 		}
 
-		//memcpy(tets.verts, subMesh.Vertices.GetFirstPtr(), subMesh.Vertices.GetSize());
-
-		for (size_t i = 0; i < subMesh.Indices.GetSize(); i++)
+		for (const auto& p : subMesh.Vertices)
 		{
-			tets.Inds[i] = subMesh.Indices[i];
+			dtPoints.push_back({ p.Position.X, p.Position.Y, p.Position.Z });
 		}
 
-		// memcpy(tets.Inds, subMesh.Indices.GetFirstPtr(), subMesh.Indices.GetSize());
-		tets.NumInds = subMesh.Indices.GetSize();
-		break;
+		auto dt = CGAL::make_conforming_constrained_Delaunay_triangulation_3(dtPoints, inds);
+
+		for (auto cell = dt.triangulation().finite_cells_begin(); cell != dt.triangulation().finite_cells_end(); ++cell)
+		{
+			const Point& p0 = cell->vertex(0)->point();
+			const Point& p1 = cell->vertex(1)->point();
+			const Point& p2 = cell->vertex(2)->point();
+			const Point& p3 = cell->vertex(3)->point();
+
+			const Vector3D v0 = Vector3D(p0.x(), p0.y(), p0.z());
+			const Vector3D v1 = Vector3D(p1.x(), p1.y(), p1.z());
+			const Vector3D v2 = Vector3D(p2.x(), p2.y(), p2.z());
+			const Vector3D v3 = Vector3D(p3.x(), p3.y(), p3.z());
+
+			tets.Tets[tets.NumTets].TetFaces[0] = { v0, v1, v2 };
+			tets.Tets[tets.NumTets].TetFaces[1] = { v0, v1, v3 };
+			tets.Tets[tets.NumTets].TetFaces[2] = { v0, v2, v3 };
+			tets.Tets[tets.NumTets].TetFaces[3] = { v1, v2, v3 };
+			tets.NumTets++;
+
+		}
 	}
-	tets.MeshCenter = InModel.ModelTransform.Center;
 
 	VoronoiSSBOIn* buffer = new VoronoiSSBOIn;
 	VOut* vOut = new VOut;
@@ -949,6 +1044,42 @@ FracturePieceGPU::FracturePieceGPU(Cell& InVoronoiOut, const Vector3D& InPoint)
 
 	color = Vector3D::RandomRange(Vector3D(30, 30, 30), Vector3D(255, 255, 255));
 
+	NumInds = Inds.GetSize();
+}
+
+FracturePieceGPU::FracturePieceGPU(RawCell& InVoronoiOut, const Vector3D& InPoint)
+{
+	Verts.ReSize(InVoronoiOut.NumVerts);
+
+	for (size_t i = 0; i < InVoronoiOut.NumVerts; i++)
+	{
+		Verts.Add(Vector3D(InVoronoiOut.Verts[i].X, InVoronoiOut.Verts[i].Y, InVoronoiOut.Verts[i].Z));
+	}
+
+	for (size_t i = 0; i < InVoronoiOut.NumInds; i++)
+	{
+		Inds.Add(static_cast<uint16_t>(InVoronoiOut.Inds[i]));
+	}
+
+	if (Inds.GetSize() < 3)
+	{
+		return;
+	}
+
+	SetupControls(InPoint);
+
+	::DataBuffers::GenBuffer(VAO);
+
+	DataBuffers::BindVertexInfo(VAO, 0, 0, sizeof(Vector3D), 0, Vector3);
+
+	::DataBuffers::BufferData(VAO, Verts.GetSize() * sizeof(Vector3D), Verts.GetFirstPtr(), BufferTargets::VERTEX);
+	DataBuffers::BufferDataIndex(VAO, Inds.GetSize() * sizeof(uint16_t), Inds.GetFirstPtr());
+
+	::Renderer::AddFracture(this);
+
+	shader = Shader("ColorShape", "/Shaders/");
+
+	color = Vector3D::RandomRange(Vector3D(30, 30, 30), Vector3D(255, 255, 255));
 	NumInds = Inds.GetSize();
 }
 

@@ -218,8 +218,8 @@ void FracturedMeshPiece::Tick(const double& DeltaTime)
 void VoronoiClipping::ClipCellToMesh(Array<FTetrahedron>& tets, const FracturePiece3D& cell)
 {
 	FBox cellBox(cell.Verts);
-	Array<Face> newCell;
-	newCell.ReSize(tets.GetSize() / 2);
+	//Array<Face> newCell;
+	//newCell.ReSize(tets.GetSize() / 2);
 
 	Array<Vector3D> Verts;
 	Array<uint16_t> Inds;
@@ -244,11 +244,11 @@ void VoronoiClipping::ClipCellToMesh(Array<FTetrahedron>& tets, const FracturePi
 			}
 		}
 
-		newCell.Emplace(std::move(copyFaces));
+	//	newCell.Emplace(std::move(copyFaces));
 
 	}
 
-	if (Verts.IsEmpty() || newCell.IsEmpty()) return;
+	if (Verts.IsEmpty()) return;
 
 	std::scoped_lock lock(VoronoiMutex);
 	Vector3D color = Vector3D::RandomRange(Vector3D(30, 30, 30), Vector3D(255, 255, 255));

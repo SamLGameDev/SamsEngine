@@ -167,7 +167,7 @@ namespace OpenGL
 	void DataBuffers::UnMapBufferMemory(const uint32_t& ID)
 	{
 		DataBuffer& buffer = RegisteredBuffers[ID];
-		glUnmapBuffer(buffer.UBO);
+		glUnmapBuffer(GL_SHADER_STORAGE_BUFFER);
 	}
 
 	void DataBuffers::RemoveBuffer(const uint32_t& ID)
