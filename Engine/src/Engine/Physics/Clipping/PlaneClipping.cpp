@@ -186,7 +186,7 @@ void PlaneClipping::GetFirstIntersection(const Vector3D& Normal, const Vector3D&
 
 		if (bDoesLineIntersect)
 		{
-			const bool intersectionIsNextVertex = intersectionPoint == toVert;
+			const bool intersectionIsNextVertex = Vector3D::IsAlmostEqual(intersectionPoint, toVert, 0.0001f);
 
 			if (intersectionIsNextVertex)
 			{
@@ -215,6 +215,7 @@ size_t PlaneClipping::GetAllVertsUntilSecondIntersection(const Vector3D& Normal,
 	const Face& CurrentFace, Face& NewFace, const size_t& FirstIntersectionIndex, Vector3D& SecondIntersection)
 {
 	size_t secondIntersectionIndex = 0;
+	SecondIntersection = Vector3D::Zero;//= Vector3D::NumericMax;
 	for (secondIntersectionIndex = FirstIntersectionIndex; secondIntersectionIndex < CurrentFace.Vertices.GetSize(); secondIntersectionIndex++)
 	{
 		Vector3D fromVert = CurrentFace.Vertices[secondIntersectionIndex];

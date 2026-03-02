@@ -140,6 +140,11 @@ public:
 		return X <= Value.X && Y <= Value.Y && Z <= Value.Z;
 	}
 
+	[[nodiscard]] bool operator<=(const double& Value) const
+	{
+		return X <= Value && Y <= Value && Z <= Value;
+	}
+
 	[[nodiscard]] Vector3D Normalised() const;
 
 	[[nodiscard]] float GetLength() const;

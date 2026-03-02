@@ -224,8 +224,10 @@ void VoronoiClipping::ClipCellToMesh(Array<FTetrahedron>& tets, const FracturePi
 	Array<Vector3D> Verts;
 	Array<uint16_t> Inds;
 
-	for (auto& tet : tets)
+	for (size_t i = 0; i < tets.GetSize(); i++)
 	{
+
+		auto& tet = tets[i];
 
 		if (!AABB::IsBoxIntersectingBox(cellBox, FBox(tet.Verts))) continue;
 
@@ -504,6 +506,13 @@ void VoronoiClipping::AddOrMakeInd(Array<Vector3D>& Verts, Array<uint16_t>& Inds
 	size_t index = 0;
 	if (Verts.Contains(Vert, index))
 	{
+		if (!Vector3D::IsAlmostEqual(Verts[index], Vert))
+		{
+			std::cout << "Almost\n";
+			Inds.Add(Verts.GetSize());
+			Verts.Add(Vert);
+			return;
+		}
 		Inds.Add(index);
 	}
 	else

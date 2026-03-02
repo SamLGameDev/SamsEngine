@@ -159,7 +159,7 @@ Vector3D Vector3D::GetLineIntersectionPointWithPlane(const Vector3D& Normal, con
 bool Vector3D::IsAlmostEqual(const Vector3D& A, const Vector3D& B, const float& Range)
 {
 	Vector3D diff = A - B;
-	return diff < Range && diff > -Range;
+	return diff.Abs() <= Range;
 }
 
 void Vector3D::Print() const
@@ -169,7 +169,7 @@ void Vector3D::Print() const
 
 Vector3D Vector3D::Abs(const Vector3D& V)
 {
-	return {std::abs(V.X), std::abs(V.Y), std::abs(V.Z)};
+	return {std::fabs(V.X), std::fabs(V.Y), std::fabs(V.Z)};
 }
 
 Vector3D Vector3D::Abs() const

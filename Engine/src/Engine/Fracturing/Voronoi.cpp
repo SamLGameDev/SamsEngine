@@ -272,7 +272,7 @@ void Voronoi::FracturePlaneRandom(Model& InModel, const size_t& NumPoints, const
 	record.OS = UHardwareDetails::GetOS();
 	record.RAM = UHardwareDetails::GetRAM_GB();
 
-	const Vector2D range = { PointSetIndex * 10, ((PointSetIndex + 1) * 10) - 1 };
+	const Vector2D range = { PointSetIndex * 10, ((PointSetIndex + 1) * 10) };
 
 	if (NumPoints == 10)
 	{
