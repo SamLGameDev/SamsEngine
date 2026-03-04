@@ -345,69 +345,19 @@ void Voronoi::CreateMeshFractureGPU(VoronoiSSBOIn* buffer, Array<Vector3D> point
 
 	void* inPtr = ::DataBuffers::MapBufferMemory(VoronoiIn, sizeof(VoronoiSSBOIn));
 
-	std::cout << "buffer size: " << sizeof(VoronoiSSBOIn) << std::endl;
-	std::cout << "buffer size: " << sizeof(VOutLarge) << std::endl;
-
-	GLenum error = glGetError();
-	if (error != GL_NO_ERROR)
-	{
-		std::cerr << "OpenGL error before buffer generation: " << error << std::endl;
-	}
-
-
 	VoronoiSSBOIn* inData = static_cast<VoronoiSSBOIn*>(inPtr);
 
 	memcpy(inData, buffer, sizeof(VoronoiSSBOIn));
 
-
-	error = glGetError();
-	if (error != GL_NO_ERROR)
-	{
-		std::cerr << "OpenGL error before buffer generation: " << error << std::endl;
-	}
 	::DataBuffers::UnMapBufferMemory(VoronoiIn);
-
-
-	error = glGetError();
-	if (error != GL_NO_ERROR)
-	{
-		std::cerr << "OpenGL error before buffer generation: " << error << std::endl;
-	}
 
 	voronoiCompute.Dispatch(points.GetSize(), 1, 1);
 
-
-	error = glGetError();
-	if (error != GL_NO_ERROR)
-	{
-		std::cerr << "OpenGL error before buffer generation: " << error << std::endl;
-	}
 	voronoiCompute.WaitForCompletion();
-
-
-	error = glGetError();
-	if (error != GL_NO_ERROR)
-	{
-		std::cerr << "OpenGL error before buffer generation: " << error << std::endl;
-	}
 
 	::DataBuffers::RemoveBuffer(VoronoiIn);
 
-
-	error = glGetError();
-	if (error != GL_NO_ERROR)
-	{
-		std::cerr << "OpenGL error before buffer generation: " << error << std::endl;
-	}
-
 	UComputeShader clippingCompute = UComputeShader("VoronoiClipping", "/Shaders/Voronoi/");
-
-	error = glGetError();
-	if (error != GL_NO_ERROR)
-	{
-		std::cerr << "OpenGL error before buffer generation: " << error << std::endl;
-	}
-
 
 	clippingCompute.Use();
 	::DataBuffers::BindShaderStorageBuffer(VoronoiOut, 3, sizeof(VOut));
@@ -421,35 +371,21 @@ void Voronoi::CreateMeshFractureGPU(VoronoiSSBOIn* buffer, Array<Vector3D> point
 
 	memcpy(inTetsData, &tets, sizeof(InTets));
 
-	error = glGetError();
-	if (error != GL_NO_ERROR)
-	{
-		std::cerr << "OpenGL error before buffer generation: " << error << std::endl;
-	}
-
-
 	::DataBuffers::UnMapBufferMemory(InTetsInd);
 
 	clippingCompute.Dispatch(points.GetSize(), 1, 1);
 	clippingCompute.WaitForCompletion();
 
-	void* outPtr = ::DataBuffers::MapBufferMemory(ClippedOutInd, sizeof(VOutLarge));
+	//void* outPtr = ::DataBuffers::MapBufferMemory(ClippedOutInd, sizeof(VOutLarge));
 
-	VOutLarge* clippedOutData = static_cast<VOutLarge*>(outPtr);
+	//VOutLarge* clippedOutData = static_cast<VOutLarge*>(outPtr);
 
-	 error = glGetError();
-	if (error != GL_NO_ERROR)
-	{
-		std::cerr << "OpenGL error before buffer generation: " << error << std::endl;
-	}
-
-
-	for (size_t i = 0; i < points.GetSize(); i++)
-	{
-		if (clippedOutData->CutCells[i].NumInds == 0) continue;
-		FracturePieceGPU frac = CreateObjectRaw<FracturePieceGPU>(clippedOutData->CutCells[i], points[i]);
-		GPUFractures.Add({ frac });
-	}
+	//for (size_t i = 0; i < points.GetSize(); i++)
+	//{
+	//	if (clippedOutData->CutCells[i].NumInds == 0) continue;
+	//	FracturePieceGPU frac = CreateObjectRaw<FracturePieceGPU>(clippedOutData->CutCells[i], points[i]);
+	//	GPUFractures.Add({ frac });
+	//}
 
 
 	::DataBuffers::RemoveBuffer(VoronoiOut);
@@ -540,24 +476,24 @@ void Voronoi::FracturePlaneRandomGPU(Model& InModel, const size_t& NumPoints, co
 
 	size_t numPoints = 10;
 
-	std::cout << sizeof(InTets) << std::endl;
+	//std::cout << sizeof(InTets) << std::endl;
 
-	for (size_t i = 0; i < 1; i++)
-	{
-		Array<Vector3D> points;
+	//for (size_t i = 0; i < 1; i++)
+	//{
+	//	Array<Vector3D> points;
 
-		const Vector2D range = { i * numPoints, ((i + 1) * numPoints) };
+	//	const Vector2D range = { i * numPoints, ((i + 1) * numPoints) };
 
-		UFileWriter::Load(DataToLoad, points, range);
+	//	UFileWriter::Load(DataToLoad, points, range);
 
-		for (size_t i = 0; i < points.GetSize(); i++)
-		{
-			buffer->Points[i] = points[i];
-		}
-		buffer->NumPoints = points.GetSize();
+	//	for (size_t i = 0; i < points.GetSize(); i++)
+	//	{
+	//		buffer->Points[i] = points[i];
+	//	}
+	//	buffer->NumPoints = points.GetSize();
 
-		CreateMeshFractureGPU(buffer, points, tets, VoronoiIn, VoronoiOut, ClippedOutInd, InTetsInd);
-	}
+	//	CreateMeshFractureGPU(buffer, points, tets, VoronoiIn, VoronoiOut, ClippedOutInd, InTetsInd);
+	//}
 
 
 	//DataToLoad = "/ExperimentData/SetOfHundred.txt";
@@ -581,26 +517,26 @@ void Voronoi::FracturePlaneRandomGPU(Model& InModel, const size_t& NumPoints, co
 	//	CreateMeshFractureGPU(buffer, points, tets, VoronoiIn, VoronoiOut, ClippedOutInd, InTetsInd);
 	//}
 
-	//DataToLoad = "/ExperimentData/SetOfThousand.txt";
+	DataToLoad = "/ExperimentData/SetOfThousand.txt";
 
-	//numPoints = 1000;
+	numPoints = 1000;
 
-	//for (size_t i = 0; i < 145; i++)
-	//{
-	//	Array<Vector3D> points;
+	for (size_t i = 0; i < 145; i++)
+	{
+		Array<Vector3D> points;
 
-	//	const Vector2D range = { i * numPoints, ((i + 1) * numPoints) };
+		const Vector2D range = { i * numPoints, ((i + 1) * numPoints) };
 
-	//	UFileWriter::Load(DataToLoad, points, range);
+		UFileWriter::Load(DataToLoad, points, range);
 
-	//	for (size_t i = 0; i < points.GetSize(); i++)
-	//	{
-	//		buffer->Points[i] = points[i];
-	//	}
-	//	buffer->NumPoints = points.GetSize();
+		for (size_t i = 0; i < points.GetSize(); i++)
+		{
+			buffer->Points[i] = points[i];
+		}
+		buffer->NumPoints = points.GetSize();
 
-	//	CreateMeshFractureGPU(buffer, points, tets, VoronoiIn, VoronoiOut, ClippedOutInd, InTetsInd);
-	//}
+		CreateMeshFractureGPU(buffer, points, tets, VoronoiIn, VoronoiOut, ClippedOutInd, InTetsInd);
+	}
 
 }
 

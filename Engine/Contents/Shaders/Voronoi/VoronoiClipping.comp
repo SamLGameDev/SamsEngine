@@ -2,12 +2,12 @@
 
 struct Face
 {
-    vec3 Verts[20];
+    vec3 Verts[30];
     uint NumVerts;
 };
 
 struct Cell {
-    Face Faces[20];
+    Face Faces[30];
     uint NumFaces;
 };
 
@@ -31,7 +31,7 @@ struct CellTri
 struct RawCell
 {
     vec3 Verts[1000];
-    uint Inds[3000];
+    uint Inds[20000];
     uint NumInds;
     uint NumVerts;
 };
@@ -55,7 +55,7 @@ layout(std430, binding = 3) buffer VoronoiSSBOOut
 { 
     uint NumCells;
     uint DebugNum;
-    Cell CutCells[10];
+    Cell CutCells[1000];
 };
 
 layout(std430, binding = 4) buffer MeshIn
@@ -73,7 +73,7 @@ layout(std430, binding = 5) buffer ClippingSSBOOut
     uint DebugNum2;
     double DebugDoub;
     Face DebugFace;
-    RawCell ClippedCells[10];
+    RawCell ClippedCells[1000];
 };
 
 layout (local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
@@ -564,7 +564,7 @@ void main()
 {
     uint index = gl_GlobalInvocationID.x;
 
-    if (index >= 1) return;
+    if (index >= NumCells) return;
 
     Box box = CreateBox(index);
 
@@ -573,7 +573,7 @@ void main()
     ClippedCells[index].NumVerts = 0;
     ClippedCells[index].NumInds = 0;
 
-    for (uint i = 0; i < 35; i++)
+    for (uint i = 0; i < NumTets; i++)
     {
         if (!IsBoxIntersectingBox(box, i)) continue;
 

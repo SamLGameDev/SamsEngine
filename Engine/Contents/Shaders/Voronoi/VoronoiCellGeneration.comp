@@ -2,12 +2,12 @@
 
 struct Face
 {
-    vec3 Verts[20];
+    vec3 Verts[30];
     uint NumVerts;
 };
 
 struct Cell {
-    Face Faces[20];
+    Face Faces[30];
     uint NumFaces;
 };
 
@@ -40,7 +40,7 @@ struct RawCell
 
 
 layout(std430, binding = 1) readonly buffer VoronoiSSBOIn {
-    vec3 Points[10];
+    vec3 Points[1000];
     uint NumPoints;
     Face BoundingBoxFaces[6];
 };
@@ -49,7 +49,7 @@ layout(std430, binding = 3) buffer VoronoiSSBOOut
 { 
     uint NumCells;
     uint DebugNum;
-    Cell CutCells[10];
+    Cell CutCells[1000];
 };
 layout (local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
 

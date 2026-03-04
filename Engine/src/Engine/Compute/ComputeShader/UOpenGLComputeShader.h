@@ -21,6 +21,7 @@ namespace OpenGL {
 
 		UOpenGLComputeShader() = default;
 		UOpenGLComputeShader(const std::string_view& InName, const std::string_view& InStorageLocation);
+		~UOpenGLComputeShader() override;
 
 		void Use() override;
 
