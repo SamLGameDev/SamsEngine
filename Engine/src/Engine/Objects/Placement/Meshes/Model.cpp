@@ -38,7 +38,7 @@ Model::Model(const std::string& Path, const Shader& InShader)
 	std::cout << "NumVertices: " << NumVertices << std::endl;
 #endif
 
-	BoundingBox = DrawWireCube({ 0, 0,0 }, ModelTransform.TransHalfBounds, Vector3D(1, 1, 1),
+	BoundingBox = DrawWireCube((ModelTransform.HighestPoints + ModelTransform.LowestPoints) / 2, ModelTransform.TransHalfBounds, Vector3D(1, 1, 1),
 		Vector3D(0.2f, 0.5f, 0.2f));
 
 	::Renderer::AddModel(this);
@@ -130,10 +130,6 @@ void Model::LoadModel()
 #endif
 
 	CalculateBoundPoints(scene->mRootNode, scene);
-
-	ModelTransform.HighestPoints += Vector3D(1, 1, 1);
-
-	ModelTransform.LowestPoints -= Vector3D(1, 1, 1);
 
 	ModelTransform.CalculateBounds();
 

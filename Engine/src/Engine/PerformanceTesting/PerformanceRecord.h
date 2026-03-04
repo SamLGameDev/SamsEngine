@@ -12,9 +12,12 @@ public:
 	std::string RAM;
 	std::string CPU;
 	std::string API;
-	std::string TenPoints;
-	std::string OneHundredPoints;
-	std::string OneThousandPoints;
+	std::string TenPointsGeneration;
+	std::string TenPointsClipping;
+	std::string OneHundredPointsGeneration;
+	std::string OneHundredPointsClipping;
+	std::string OneThousandPointsGeneration;
+	std::string OneThousandPointsClipping;
 };
 
 class DataRecorder

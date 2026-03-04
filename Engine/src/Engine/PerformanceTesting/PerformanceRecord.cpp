@@ -59,23 +59,38 @@ bool DataRecorder::DoesJsonContainRecord(const DataRecord& Record, const nlohman
 void DataRecorder::AppendRecordToData(const DataRecord& Record, nlohmann::ordered_json& Root, size_t& Index, const std::string_view& Name)
 {
     nlohmann::ordered_json& data = Root[Index]["Data"];
-    if (!Record.TenPoints.empty())
+    if (!Record.TenPointsGeneration.empty())
     {
-        MakeDataEntryArrayIfNot(data, "10");
-        data["10"].push_back(Record.TenPoints.data());
+        MakeDataEntryArrayIfNot(data, "10Gen");
+        data["10Gen"].push_back(Record.TenPointsGeneration.data());
     }
-    if (!Record.OneHundredPoints.empty()) 
+    if (!Record.TenPointsClipping.empty())
     {
-        MakeDataEntryArrayIfNot(data, "100");
-        data["100"].push_back(Record.OneHundredPoints.data());
-    }
-    if (!Record.OneThousandPoints.empty()) 
-    {
-        MakeDataEntryArrayIfNot(data, "1000");
+        MakeDataEntryArrayIfNot(data, "10Clip");
+        data["10Clip"].push_back(Record.TenPointsClipping.data());
+	}
 
-        data["1000"].push_back(Record.OneThousandPoints.data());
+    if (!Record.OneHundredPointsGeneration.empty()) 
+    {
+        MakeDataEntryArrayIfNot(data, "100Gen");
+        data["100Gen"].push_back(Record.OneHundredPointsGeneration.data());
     }
+    if (!Record.OneHundredPointsClipping.empty()) 
+    {
+        MakeDataEntryArrayIfNot(data, "100Clip");
+        data["100Clip"].push_back(Record.OneHundredPointsClipping.data());
+	}
+    if (!Record.OneThousandPointsGeneration.empty()) 
+    {
+        MakeDataEntryArrayIfNot(data, "1000Gen");
 
+        data["1000Gen"].push_back(Record.OneThousandPointsGeneration.data());
+    }
+    if (!Record.OneThousandPointsClipping.empty())
+    {
+        MakeDataEntryArrayIfNot(data, "1000Clip");
+        data["1000Clip"].push_back(Record.OneThousandPointsClipping.data());
+    }
     std::ofstream file(CorePaths::Contents.Path + Name.data());
     file << Root.dump(4);
     file.close();
@@ -127,9 +142,12 @@ void DataRecorder::CreateNewDataEntry(const DataRecord& Record, nlohmann::ordere
     jsonData["CPU"] = Record.CPU;
     jsonData["API"] = Record.API;
 
-    if (!Record.TenPoints.empty()) jsonData["10"] = Record.TenPoints;
-    if (!Record.OneHundredPoints.empty()) jsonData["100"] = Record.OneHundredPoints;
-    if (!Record.OneThousandPoints.empty()) jsonData["1000"] = Record.OneThousandPoints;
+    if (!Record.TenPointsGeneration.empty()) jsonData["10Gen"] = Record.TenPointsGeneration;
+	if (!Record.TenPointsClipping.empty()) jsonData["10Clip"] = Record.TenPointsClipping;
+    if (!Record.OneHundredPointsGeneration.empty()) jsonData["100Gen"] = Record.OneHundredPointsGeneration;
+	if (!Record.OneHundredPointsClipping.empty()) jsonData["100Clip"] = Record.OneHundredPointsClipping;
+    if (!Record.OneThousandPointsGeneration.empty()) jsonData["1000Gen"] = Record.OneThousandPointsGeneration;
+	if (!Record.OneThousandPointsClipping.empty()) jsonData["1000Clip"] = Record.OneThousandPointsClipping;
 
     nlohmann::ordered_json newRoot;
     newRoot["Data"] = jsonData;

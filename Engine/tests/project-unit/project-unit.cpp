@@ -640,7 +640,7 @@ void RunEngineOpenGL(OpenGL::RuntimeEngine engine)
 //	FracturePieceGPU fracturePiece(VoronoiOut);
 
 	//Voronoi vorn2;
-//	vorn2.FracturePlaneRandom(model, 10, 0);
+	//vorn2.FracturePlaneRandom(model, 1000, 1);
 	//std::cout << "Generated Voronoi Diagram with " << vorn.Fractures.GetSize() << " cells." << std::endl;
 	//VoronoiClipping clipper;
 	//clipper.ClipMeshToVoronoi(vorn2, model);
@@ -674,6 +674,6 @@ void EngineDelaunay()
 TEST(Fracturing, Diagram) {
 	//EnginePlane();
 
-	EngineDelaunay();
-	//OpenGLTest();
+	//EngineDelaunay();
+	OpenGLTest();
 }

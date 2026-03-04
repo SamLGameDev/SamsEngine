@@ -9,6 +9,10 @@
 #include "FileSaving.h"
 #include "glad/glad.h"
 namespace OpenGL {
+	UOpenGLComputeShader::~UOpenGLComputeShader()
+	{
+		glDeleteProgram(ID);
+	}
 
 	UOpenGLComputeShader::UOpenGLComputeShader(const std::string_view& InName, const std::string_view& InStorageLocation)
 	{

@@ -2,12 +2,12 @@
 
 struct Face
 {
-    vec3 Verts[20];
+    vec3 Verts[25];
     uint NumVerts;
 };
 
 struct Cell {
-    Face Faces[20];
+    Face Faces[31];
     uint NumFaces;
 };
 
@@ -30,11 +30,10 @@ struct CellTri
 
 struct RawCell
 {
-    uint Inds[500];
+    vec3 Verts[1000];
+    uint Inds[20000];
     uint NumInds;
     uint NumVerts;
-    vec3 Verts[200];
-
 };
 
 struct TetFace
@@ -63,24 +62,29 @@ layout(std430, binding = 3) buffer VoronoiSSBOOut
 { 
     uint NumCells;
     uint DebugNum;
-    Cell CutCells[10];
+    Cell CutCells[1000];
 };
 
 layout(std430, binding = 4) buffer TetMeshIn
 {
     uint NumTets;
-    Tet[1000] Tets;
+    Tet[2000] Tets;
 };
 
 layout(std430, binding = 5) buffer ClippingSSBOOut
 {
     uint NumCellsCut;
     uint DebugNum2;
-    LargeCell ClippedCells[10];
+    RawCell ClippedCells[1000];
 };
 
 layout (local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
 
+
+bool AlmostEqual(vec3 a, vec3 b, float epsilon)
+{
+    return all(lessThanEqual(abs(a - b), vec3(epsilon)));
+}
 void DefinePlane(const in vec3 CurrentPoint, const in vec3 ComparedPoint, out vec3 Normal, out vec3 Center)
 {
     Normal = normalize(CurrentPoint - ComparedPoint);
@@ -131,7 +135,7 @@ inout uint FirstIntersectionIndex, out vec3 FirstIntersection)
         const bool bDoesLineIntersect = GetIntersectionPoint(Center, Normal, fromVert, lineDir, intersectionPoint);
         if (bDoesLineIntersect)
         {
-            const bool bIsIntersectionNextVertex = intersectionPoint == toVert;
+            const bool bIsIntersectionNextVertex = AlmostEqual(intersectionPoint, toVert, 0.00001);
             if (bIsIntersectionNextVertex)
             {
                 AddFaceVert(NewFace, toVert);
@@ -315,6 +319,21 @@ bool Contains(const in vec3 Item, const in Face InFace)
     }
     return false;
 }
+
+bool Contains(const in vec3 Item, const in uint CellIndex, inout uint Index)
+{
+
+    for (uint i = 0; i < ClippedCells[CellIndex].NumVerts; i++)
+    {
+        if (AlmostEqual(ClippedCells[CellIndex].Verts[i], Item, 0.00001))
+        {
+            Index = i;
+            return true;
+        }
+    }
+    return false;
+}
+
 
 vec3 GetPlaneCenter(const in Face Plane)
 {
@@ -501,15 +520,36 @@ Cell PopulateCell(const uint TetIndex)
     return cell;
 }
 
+void AddOrMakeInd(const in vec3 Vert, const uint CellIndex)
+{
+
+    uint index;
+    if (Contains(Vert, CellIndex, index))
+    {
+        ClippedCells[CellIndex].Inds[ClippedCells[CellIndex].NumInds] = index;
+        ClippedCells[CellIndex].NumInds++;
+    }
+    else
+    {
+        ClippedCells[CellIndex].Inds[ClippedCells[CellIndex].NumInds] = ClippedCells[CellIndex].NumVerts;
+        ClippedCells[CellIndex].NumInds++;
+        ClippedCells[CellIndex].Verts[ClippedCells[CellIndex].NumVerts] = Vert;
+        ClippedCells[CellIndex].NumVerts++;
+    }
+}
+
 void AppendCell(const in uint CellIndex, const in Cell InCell)
 {
     for (uint i = 0; i < InCell.NumFaces; i++)
     {
-        ClippedCells[CellIndex].Faces[ClippedCells[CellIndex].NumFaces] = InCell.Faces[i];
-        ClippedCells[CellIndex].NumFaces++;
+        for (uint j = 1; j + 1< InCell.Faces[i].NumVerts; j++)
+        {
+            AddOrMakeInd(InCell.Faces[i].Verts[0], CellIndex);
+            AddOrMakeInd(InCell.Faces[i].Verts[j], CellIndex);
+            AddOrMakeInd(InCell.Faces[i].Verts[j+1], CellIndex);
+        }
     }
 }
-
 void ClipCellByFaces(inout Cell ToClip, const in uint Index)
 {
     vec3 center = vec3(0, 0, 0);
@@ -550,7 +590,8 @@ void main()
     
     Cell cell;
     
-    ClippedCells[index].NumFaces = 0;
+    ClippedCells[index].NumVerts = 0;
+    ClippedCells[index].NumInds = 0;
     
     for (uint i = 0; i < NumTets; i++)
     {
@@ -573,7 +614,7 @@ void main()
    // CutCells[index] = cell;
     //TriangulateRawCell(cell, index);
     
-    if (ClippedCells[index].NumFaces == 0) return;
+    if (ClippedCells[index].NumInds == 0) return;
     atomicAdd(NumCellsCut, 1);
 
 }

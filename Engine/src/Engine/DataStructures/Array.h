@@ -42,6 +42,7 @@ public:
 	~Array()
 	{
 		delete[] DynamicArray;
+		DynamicArray = nullptr;
 	}
 
 	Array(const Array<T>& CopyArray)
@@ -572,6 +573,7 @@ private:
 			delete[] DynamicArray;
 			NumItems = 0;
 			ArraySize = 0;
+			DynamicArray = nullptr;
 			return;
 		}
 

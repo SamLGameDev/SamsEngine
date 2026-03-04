@@ -107,14 +107,14 @@ std::unique_ptr<WireObject> DrawWireCube(const Vector3D& Center, const Vector3D&
 
 	object->Vertices =
 	{
-		Vertex(HalfBounds, Color),
-		Vertex(Vector3D(HalfBounds.X, -HalfBounds.Y, HalfBounds.Z), Color),
-		Vertex(Vector3D(-HalfBounds.X, -HalfBounds.Y, HalfBounds.Z), Color),
-		Vertex(Vector3D(-HalfBounds.X, HalfBounds.Y, HalfBounds.Z), Color),
-		Vertex(Vector3D(HalfBounds.X, HalfBounds.Y, -HalfBounds.Z), Color),
-		Vertex(Vector3D(HalfBounds.X, -HalfBounds.Y, -HalfBounds.Z), Color),
-		Vertex(Vector3D(-HalfBounds.X, -HalfBounds.Y, -HalfBounds.Z), Color),
-		Vertex(Vector3D(-HalfBounds.X, HalfBounds.Y, -HalfBounds.Z), Color)
+		Vertex(Center + HalfBounds, Color),
+		Vertex(Center + Vector3D(HalfBounds.X, -HalfBounds.Y, HalfBounds.Z), Color),
+		Vertex(Center + Vector3D(-HalfBounds.X, -HalfBounds.Y, HalfBounds.Z), Color),
+		Vertex(Center + Vector3D(-HalfBounds.X, HalfBounds.Y, HalfBounds.Z), Color),
+		Vertex(Center + Vector3D(HalfBounds.X, HalfBounds.Y, -HalfBounds.Z), Color),
+		Vertex(Center + Vector3D(HalfBounds.X, -HalfBounds.Y, -HalfBounds.Z), Color),
+		Vertex(Center + Vector3D(-HalfBounds.X, -HalfBounds.Y, -HalfBounds.Z), Color),
+		Vertex(Center + Vector3D(-HalfBounds.X, HalfBounds.Y, -HalfBounds.Z), Color)
 	};
 
 	object->Indices =

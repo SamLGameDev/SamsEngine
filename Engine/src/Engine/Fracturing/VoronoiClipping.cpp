@@ -232,7 +232,6 @@ void VoronoiClipping::ClipMeshToVoronoi(Voronoi& Diagram, const Model& Mesh)
 		//std::jthread thread(&VoronoiClipping::ClipCellToMesh, this, std::ref(tets), std::ref(cell));
 		//threads.Emplace(std::move(thread));
 		ClipCellToMesh(tets, cell);
-		return;
 	}
 
 
