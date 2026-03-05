@@ -13,7 +13,11 @@ namespace Vulkan
 {
 	UVulkanComputeShader::~UVulkanComputeShader()
 	{
+		vkDeviceWaitIdle(*SInstance::GetInstance()->GraphicsCard->GetLogicalDevice()->GetVulkanLogicalDevice());
+		vkQueueWaitIdle(SInstance::GetInstance()->GraphicsCard->GetLogicalDevice()->GetComputeQueue());
 		vkDestroyFence(*SInstance::GetInstance()->GraphicsCard->GetLogicalDevice()->GetVulkanLogicalDevice(), ComputeFence, nullptr);
+		vkFreeCommandBuffers(*SInstance::GetInstance()->GraphicsCard->GetLogicalDevice()->GetVulkanLogicalDevice(),
+			*SInstance::GetInstance()->GraphicsCard->GetRenderer()->GetComputePool(), 1, &CommandBuffer);
 	}
 
 	UVulkanComputeShader::UVulkanComputeShader(const std::string_view& InName,
@@ -40,7 +44,7 @@ namespace Vulkan
 		descriptor.stageFlags = VK_SHADER_STAGE_COMPUTE_BIT;
 		descriptors.Add(descriptor);
 
-		for (size_t i = 3; i < 6; i++)
+		for (size_t i = 3; i < 7; i++)
 		{
 			VkDescriptorSetLayoutBinding descriptor{};
 			descriptor.binding = i;
@@ -65,6 +69,10 @@ namespace Vulkan
 		allocateInfo.level = VK_COMMAND_BUFFER_LEVEL_PRIMARY;
 		vkAllocateCommandBuffers(*SInstance::GetInstance()->GraphicsCard->GetLogicalDevice()->GetVulkanLogicalDevice(), &allocateInfo, &CommandBuffer);
 
+		VkFenceCreateInfo fenceInfo{};
+		fenceInfo.sType = VK_STRUCTURE_TYPE_FENCE_CREATE_INFO;
+		fenceInfo.flags = VK_FENCE_CREATE_SIGNALED_BIT;
+		vkCreateFence(*SInstance::GetInstance()->GraphicsCard->GetLogicalDevice()->GetVulkanLogicalDevice(), &fenceInfo, nullptr, &ComputeFence);
 
 	}
 
@@ -116,7 +124,10 @@ namespace Vulkan
 	void UVulkanComputeShader::Dispatch(const size_t& NumGroupsX, const size_t& NumGroupsY,
 	                                    const size_t& NumGroupsZ)
 	{
-		vkDestroyFence(*SInstance::GetInstance()->GraphicsCard->GetLogicalDevice()->GetVulkanLogicalDevice(), ComputeFence, nullptr);
+		vkDeviceWaitIdle(*SInstance::GetInstance()->GraphicsCard->GetLogicalDevice()->GetVulkanLogicalDevice());
+		vkWaitForFences(*SInstance::GetInstance()->GraphicsCard->GetLogicalDevice()->GetVulkanLogicalDevice(), 1, &ComputeFence, VK_TRUE, UINT64_MAX);
+		vkResetFences(*SInstance::GetInstance()->GraphicsCard->GetLogicalDevice()->GetVulkanLogicalDevice(), 1, &ComputeFence);
+		vkResetCommandBuffer(CommandBuffer, 0);
 		VkCommandBufferBeginInfo beginInfo{};
 		beginInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO;
 		
@@ -140,16 +151,12 @@ namespace Vulkan
 		submitInfo.commandBufferCount = 1;
 		submitInfo.pCommandBuffers = &CommandBuffer;
 
-		VkFenceCreateInfo fenceInfo{};
-		fenceInfo.sType = VK_STRUCTURE_TYPE_FENCE_CREATE_INFO;
-		vkCreateFence(*SInstance::GetInstance()->GraphicsCard->GetLogicalDevice()->GetVulkanLogicalDevice(), &fenceInfo, nullptr, &ComputeFence);
-
 		submitInfo.signalSemaphoreCount = 0;
 		submitInfo.pSignalSemaphores = nullptr;
-
-		if (vkQueueSubmit(SInstance::GetInstance()->GraphicsCard->GetLogicalDevice()->GetComputeQueue(), 1, &submitInfo, ComputeFence) != VK_SUCCESS)
+		VkResult result = vkQueueSubmit(SInstance::GetInstance()->GraphicsCard->GetLogicalDevice()->GetComputeQueue(), 1, &submitInfo, ComputeFence);
+		if (result != VK_SUCCESS)
 		{
-			std::cerr << "Failed to submit compute command buffer" << '\n';
+			std::cerr << "Failed to submit compute command buffer" << result <<'\n';
 		}
 	}
 

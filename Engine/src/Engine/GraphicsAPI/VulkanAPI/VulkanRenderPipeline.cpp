@@ -215,9 +215,12 @@ namespace Vulkan
 		pipelineCreateInfo.sType = VK_STRUCTURE_TYPE_COMPUTE_PIPELINE_CREATE_INFO;
 		pipelineCreateInfo.stage = InShader.GetShaderStages()[0];
 		pipelineCreateInfo.layout = Layout;
-
-		vkCreateComputePipelines(*SInstance::GetInstance()->GraphicsCard->GetLogicalDevice()->GetVulkanLogicalDevice(),
+		VkResult result = vkCreateComputePipelines(*SInstance::GetInstance()->GraphicsCard->GetLogicalDevice()->GetVulkanLogicalDevice(),
 			VK_NULL_HANDLE, 1, &pipelineCreateInfo, nullptr, &Pipeline);
+		if (result != VK_SUCCESS)
+		{
+			std::cout << "Failed to create pipeline" << result << std::endl;
+		};
 		return SUCCEEDED;
 	}
 

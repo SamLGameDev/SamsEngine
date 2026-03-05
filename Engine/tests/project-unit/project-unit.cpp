@@ -579,11 +579,6 @@ void RunEngineDelaunay(Vulkan::RuntimeEngine& engine)
 	//VoronoiClipping clipper;
 	//clipper.ClipMeshToVoronoi(vorn, model);
 
-	while (!engine.ShouldClose())
-	{
-		engine.Loop();
-	}
-
 	Vulkan::RuntimeEngine::WaitForFrameToFinish();
 }
 
@@ -644,6 +639,7 @@ void RunEngineOpenGL(OpenGL::RuntimeEngine engine)
 	//std::cout << "Generated Voronoi Diagram with " << vorn.Fractures.GetSize() << " cells." << std::endl;
 	//VoronoiClipping clipper;
 	//clipper.ClipMeshToVoronoi(vorn2, model);
+
 	while (!engine.ShouldClose())
 	{
 		engine.Loop();
@@ -674,6 +670,6 @@ void EngineDelaunay()
 TEST(Fracturing, Diagram) {
 	//EnginePlane();
 
-	//EngineDelaunay();
+	EngineDelaunay();
 	OpenGLTest();
 }

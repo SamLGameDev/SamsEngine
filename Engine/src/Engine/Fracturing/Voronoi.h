@@ -44,20 +44,26 @@ struct alignas(16) RawCell
 
 struct alignas(16) Facew
 {
-	Vector4D Verts[25];
+	Vector4D Verts[30];
 	uint32_t NumVerts;
 };
 
-struct Cell
+struct alignas (16) Cell
 {
-	Facew Faces[31];      // 1280 bytes
-	uint32_t NumFaces;      // 4 bytes// pad to 16-byte multiple
+	Facew Faces[30];      // 1280 bytes
+	uint32_t NumFaces;
+	uint32_t padding[3];// 4 bytes// pad to 16-byte multiple
 };
 
 struct LargeCell
 {
 	Facew Faces[5000];      // 1280 bytes
 	uint32_t NumFaces;      // 4 bytes// pad to 16-byte multiple
+};
+
+struct alignas(16) WorkingBuffer
+{
+	Cell cells[100];
 };
 
 struct alignas(16) VOut
@@ -403,7 +409,7 @@ struct alignas(16) InTets
 
 struct VoronoiSSBOIn
 {
-	Vector4D Points[1000];      // 10 * 16 = 160 bytes
+	Vector4D Points[100];      // 10 * 16 = 160 bytes
 	uint32_t NumPoints;          // 4 bytes
 	Facew BoundingBoxFaces[6];
 };
@@ -415,7 +421,7 @@ public:
 	//Fracture the model into a voronoi diagram based on random points
 	void FracturePlaneRandom(Model& InModel, const size_t& NumPoints, const size_t& PointSetIndex);
 	void CreateMeshFractureGPU(VoronoiSSBOIn* buffer, Array<Vector3D> points, InTets tets, GLuint VoronoiIn,
-	                           GLuint VoronoiOut, GLuint ClippedOutInd, GLuint InTetsInd, VOutUnTried* OutUnTried);
+	                           GLuint VoronoiOut, GLuint ClippedOutInd, GLuint InTetsInd, GLuint WBuffer);
 
 	//Fracture the model into a voronoi diagram based on random points
 	void FracturePlaneRandomGPU(Model& InModel, const size_t& NumPoints, const size_t& PointSetIndex);

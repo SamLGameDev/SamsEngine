@@ -43,6 +43,5 @@ namespace OpenGL {
 
 		void CreateProgram(const GLuint& Compute);
 
-
 	};
 }

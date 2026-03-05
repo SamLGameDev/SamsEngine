@@ -2,12 +2,12 @@
 
 struct Face
 {
-    vec3 Verts[25];
+    vec3 Verts[30];
     uint NumVerts;
 };
 
 struct Cell {
-    Face Faces[31];
+    Face Faces[30];
     uint NumFaces;
 };
 
@@ -62,20 +62,26 @@ layout(std430, binding = 3) buffer VoronoiSSBOOut
 { 
     uint NumCells;
     uint DebugNum;
-    Cell CutCells[1000];
+    Cell CutCells[100];
 };
 
 layout(std430, binding = 4) buffer TetMeshIn
 {
     uint NumTets;
-    Tet[2000] Tets;
+    Tet[1000] Tets;
 };
 
 layout(std430, binding = 5) buffer ClippingSSBOOut
 {
     uint NumCellsCut;
     uint DebugNum2;
-    RawCell ClippedCells[1000];
+    RawCell ClippedCells[100];
+};
+
+
+layout(std430, binding = 6) buffer VoronoiWorkingBuffer
+{
+    Cell WorkingCells[100];
 };
 
 layout (local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
@@ -288,17 +294,17 @@ Face OrderByAngle(const in Face InFace, const in vec3 Center, const in vec3 Norm
     return newFace;
 }
 
-Cell ClipCellByFace(const in Cell cell, const in vec3 Center, const in vec3 Normal, const in uint CutTime)
+void ClipCellByFace(const in uint Index, const in vec3 Center, const in vec3 Normal, const in uint CutTime)
 {
     Face intersectFace;
     Cell newCell;
     newCell.NumFaces = 0;
     intersectFace.NumVerts = 0;
     
-    for (uint i = 0; i < cell.NumFaces; i++)
+    for (uint i = 0; i < WorkingCells[Index].NumFaces; i++)
     {
         newCell.Faces[newCell.NumFaces].NumVerts = 0;
-        ClipFacebyFace(cell.Faces[i], Center, newCell.Faces[newCell.NumFaces], Normal, intersectFace, CutTime, newCell.NumFaces);
+        ClipFacebyFace(WorkingCells[Index].Faces[i], Center, newCell.Faces[newCell.NumFaces], Normal, intersectFace, CutTime, newCell.NumFaces);
         if (newCell.Faces[newCell.NumFaces].NumVerts != 0) newCell.NumFaces++;
     }
     if (intersectFace.NumVerts >= 3)
@@ -307,8 +313,8 @@ Cell ClipCellByFace(const in Cell cell, const in vec3 Center, const in vec3 Norm
         newCell.Faces[newCell.NumFaces] = intersectFace;
         newCell.NumFaces++;
     }
-    
-    return newCell;
+
+    WorkingCells[Index] = newCell;
 }
 
 bool Contains(const in vec3 Item, const in Face InFace)
@@ -538,19 +544,19 @@ void AddOrMakeInd(const in vec3 Vert, const uint CellIndex)
     }
 }
 
-void AppendCell(const in uint CellIndex, const in Cell InCell)
+void AppendCell(const in uint CellIndex)
 {
-    for (uint i = 0; i < InCell.NumFaces; i++)
+    for (uint i = 0; i < WorkingCells[CellIndex].NumFaces; i++)
     {
-        for (uint j = 1; j + 1< InCell.Faces[i].NumVerts; j++)
+        for (uint j = 1; j + 1< WorkingCells[CellIndex].Faces[i].NumVerts; j++)
         {
-            AddOrMakeInd(InCell.Faces[i].Verts[0], CellIndex);
-            AddOrMakeInd(InCell.Faces[i].Verts[j], CellIndex);
-            AddOrMakeInd(InCell.Faces[i].Verts[j+1], CellIndex);
+            AddOrMakeInd(WorkingCells[CellIndex].Faces[i].Verts[0], CellIndex);
+            AddOrMakeInd(WorkingCells[CellIndex].Faces[i].Verts[j], CellIndex);
+            AddOrMakeInd(WorkingCells[CellIndex].Faces[i].Verts[j+1], CellIndex);
         }
     }
 }
-void ClipCellByFaces(inout Cell ToClip, const in uint Index)
+void ClipCellByFaces(const in uint Index)
 {
     vec3 center = vec3(0, 0, 0);
     for (uint i = 0; i < CutCells[Index].NumFaces; i++)
@@ -561,7 +567,7 @@ void ClipCellByFaces(inout Cell ToClip, const in uint Index)
     
     for (uint i = 0; i < CutCells[Index].NumFaces; i++)
     {
-        if (ToClip.NumFaces == 0) return;
+        if(WorkingCells[Index].NumFaces == 0) return;
         
         vec3 normal = GetPlaneNormal(CutCells[Index].Faces[i], center);
         vec3 planeCenter = GetPlaneCenter(CutCells[Index].Faces[i]);
@@ -569,11 +575,11 @@ void ClipCellByFaces(inout Cell ToClip, const in uint Index)
         
         if (isNearlyZero(normal.x) && isNearlyZero(normal.y) && isNearlyZero(normal.z)) continue;
         DebugNum2 = 55;
-        ToClip = ClipCellByFace(ToClip, planeCenter, normal, 0);
+        ClipCellByFace(Index, planeCenter, normal, 0);
 
-        for (uint j = 0; j < ToClip.NumFaces; j++)
+        for (uint j = 0; j < WorkingCells[Index].NumFaces; j++)
         {
-            ToClip.Faces[j] = OrderByAngle(ToClip.Faces[j], GetPlaneCenter(ToClip.Faces[j]), normal);
+            WorkingCells[Index].Faces[j] = OrderByAngle(WorkingCells[Index].Faces[j], GetPlaneCenter(WorkingCells[Index].Faces[j]), normal);
         }
     }
     
@@ -588,8 +594,6 @@ void main()
     
     Box box = CreateBox(index);
     
-    Cell cell;
-    
     ClippedCells[index].NumVerts = 0;
     ClippedCells[index].NumInds = 0;
     
@@ -601,13 +605,13 @@ void main()
             continue;
         } //continue;
         
-        cell = PopulateCell(i);
+        WorkingCells[index] = PopulateCell(i);
         
-        ClipCellByFaces(cell, index);
+        ClipCellByFaces(index);
         
-        if (cell.NumFaces == 0) continue;
+        if (WorkingCells[index].NumFaces == 0) continue;
         
-        AppendCell(index, cell);
+        AppendCell(index);
         
     }
 

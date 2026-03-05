@@ -7,6 +7,7 @@
 #include <iostream>
 
 #include "FileSaving.h"
+#include "../../../../out/build/windows-debug/vcpkg_installed/vcpkg/blds/glfw3/src/3.4-2448ff4533.clean/include/GLFW/glfw3.h"
 #include "glad/glad.h"
 namespace OpenGL {
 	UOpenGLComputeShader::~UOpenGLComputeShader()
@@ -46,12 +47,17 @@ namespace OpenGL {
 	                                    const size_t& NumGroupsZ) 
 	{
 		glDispatchCompute(NumGroupsX, NumGroupsY, NumGroupsZ);
+		glMemoryBarrier(GL_SHADER_STORAGE_BARRIER_BIT);
 	}
 
 	void UOpenGLComputeShader::WaitForCompletion() const
 	{
+
 		GLsync fence = glFenceSync(GL_SYNC_GPU_COMMANDS_COMPLETE, 0);
+
 		glClientWaitSync(fence, GL_SYNC_FLUSH_COMMANDS_BIT, GL_TIMEOUT_IGNORED);
+
+		glDeleteSync(fence);
 	}
 
 	std::shared_ptr<UBaseComputeShader> UOpenGLComputeShader::CreateOpenGLComputeShader(const std::string_view& InName,

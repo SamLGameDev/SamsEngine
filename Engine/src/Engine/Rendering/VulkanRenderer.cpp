@@ -60,7 +60,7 @@ namespace Vulkan
 		poolSizes.Add(dPoolSize);
 
 		dPoolSize.type = VK_DESCRIPTOR_TYPE_STORAGE_BUFFER;
-		dPoolSize.descriptorCount = 4;
+		dPoolSize.descriptorCount = 5;
 		poolSizes.Add(dPoolSize);
 
 		VkDescriptorPoolCreateInfo dPoolCreateInfo{};

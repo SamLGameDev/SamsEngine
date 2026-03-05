@@ -340,7 +340,7 @@ void Voronoi::FracturePlaneRandom(Model& InModel, const size_t& NumPoints, const
 }
 
 void Voronoi::CreateMeshFractureGPU(VoronoiSSBOIn* buffer, Array<Vector3D> points, InTets tets, GLuint VoronoiIn, GLuint VoronoiOut,
-                                    GLuint ClippedOutInd, GLuint InTetsInd, VOutUnTried* OutUnTried)
+                                    GLuint ClippedOutInd, GLuint InTetsInd, GLuint WBuffer)
 {
 
 
@@ -357,6 +357,7 @@ void Voronoi::CreateMeshFractureGPU(VoronoiSSBOIn* buffer, Array<Vector3D> point
 
 	::DataBuffers::GenerateShaderStorageBuffer(VoronoiIn, sizeof(VoronoiSSBOIn), 1);
 	::DataBuffers::GenerateShaderStorageBuffer(VoronoiOut, sizeof(VOut), 3);
+	::DataBuffers::GenerateShaderStorageBuffer(WBuffer, sizeof(WorkingBuffer), 6);
 
 	void* inPtr = ::DataBuffers::MapBufferMemory(VoronoiIn, sizeof(VoronoiSSBOIn));
 
@@ -390,6 +391,8 @@ void Voronoi::CreateMeshFractureGPU(VoronoiSSBOIn* buffer, Array<Vector3D> point
 	//UComputeShader clippingCompute = UComputeShader("VoronoiClippingUnTriangulated", "/Shaders/Voronoi/");
 	clippingCompute.Use();
 	::DataBuffers::BindShaderStorageBuffer(VoronoiOut, 3, sizeof(VOut));
+
+	::DataBuffers::BindShaderStorageBuffer(WBuffer, 6, sizeof(WorkingBuffer));
 
 	::DataBuffers::GenerateShaderStorageBuffer(InTetsInd, sizeof(InTets), 4);
 	::DataBuffers::GenerateShaderStorageBuffer(ClippedOutInd, sizeof(VOutLarge), 5);
@@ -426,31 +429,32 @@ void Voronoi::CreateMeshFractureGPU(VoronoiSSBOIn* buffer, Array<Vector3D> point
 
 	DataRecorder::SaveDataRecord(record, "/ExperimentData/CellGenerationResults.json");
 
-	void* ptr = ::DataBuffers::MapBufferMemory(ClippedOutInd, sizeof(VOutLarge));
-	//void* ptr = ::DataBuffers::MapBufferMemory(ClippedOutInd, sizeof(VOutUnTried));
+	//void* ptr = ::DataBuffers::MapBufferMemory(ClippedOutInd, sizeof(VOutLarge));
+	////void* ptr = ::DataBuffers::MapBufferMemory(ClippedOutInd, sizeof(VOutUnTried));
 
-	VOutLarge* data = static_cast<VOutLarge*>(ptr);
-	//VOutUnTried* data = static_cast<VOutUnTried*>(ptr);
+	//VOutLarge* data = static_cast<VOutLarge*>(ptr);
+	////VOutUnTried* data = static_cast<VOutUnTried*>(ptr);
 
-	std::cout << "Num Cells: " << data->NumCells << std::endl;
+	//std::cout << "Num Cells: " << data->NumCells << std::endl;
 
-	for (size_t i = 0; i < points.GetSize(); i++)
-	{
-		if (data->CutCells[i].NumInds == 0 || data->CutCells[i].NumVerts > 5000)
-		{
-			continue;
-		}
+	//for (size_t i = 0; i < points.GetSize(); i++)
+	//{
+	//	if (data->CutCells[i].NumInds == 0 || data->CutCells[i].NumVerts > 5000)
+	//	{
+	//		continue;
+	//	}
 
-		GPUFractures.Add(FracturePieceGPU(data->CutCells[i], points[i]));
-	}
+	//	GPUFractures.Add(FracturePieceGPU(data->CutCells[i], points[i]));
+	//}
 
 
-	::DataBuffers::UnMapBufferMemory(ClippedOutInd);
+	//::DataBuffers::UnMapBufferMemory(ClippedOutInd);
 
 	::DataBuffers::RemoveBuffer(VoronoiIn);
 	::DataBuffers::RemoveBuffer(VoronoiOut);
 	::DataBuffers::RemoveBuffer(InTetsInd);
 	::DataBuffers::RemoveBuffer(ClippedOutInd);
+	::DataBuffers::RemoveBuffer(WBuffer);
 }
 
 void Voronoi::FracturePlaneRandomGPU(Model& InModel, const size_t& NumPoints, const size_t& PointSetIndex)
@@ -511,6 +515,7 @@ void Voronoi::FracturePlaneRandomGPU(Model& InModel, const size_t& NumPoints, co
 	VOut* vOut = new VOut;
 	VOutLarge* ClippedOut = new VOutLarge;
 	VOutUnTried* OutUnTried = new VOutUnTried;
+
 	vOut->NumCells = 0;
 	vOut->DebugNum = 10;
 	ClippedOut->NumCells = 0;
@@ -528,59 +533,17 @@ void Voronoi::FracturePlaneRandomGPU(Model& InModel, const size_t& NumPoints, co
 
 	std::string DataToLoad = "/ExperimentData/SetOfTen.txt";;
 
-	GLuint VoronoiIn, VoronoiOut, ClippedOutInd, InTetsInd;
+	GLuint VoronoiIn, VoronoiOut, ClippedOutInd, InTetsInd, wBuffer;
 
 	::DataBuffers::GenBuffer(VoronoiIn);
 	::DataBuffers::GenBuffer(VoronoiOut);
 	::DataBuffers::GenBuffer(ClippedOutInd);
 	::DataBuffers::GenBuffer(InTetsInd);
+	::DataBuffers::GenBuffer(wBuffer);
 
 	size_t numPoints = 10;
 
-	//for (size_t i = 0; i < 145; i++)
-	//{
-	//	Array<Vector3D> points;
-
-	//	const Vector2D range = { i * numPoints, ((i + 1) * numPoints) };
-
-	//	UFileWriter::Load(DataToLoad, points, range);
-
-	//	for (size_t i = 0; i < points.GetSize(); i++)
-	//	{
-	//		buffer->Points[i] = points[i];
-	//	}
-	//	buffer->NumPoints = points.GetSize();
-
-	//	CreateMeshFractureGPU(buffer, points, tets, VoronoiIn, VoronoiOut, ClippedOutInd, InTetsInd, OutUnTried);
-	//}
-
-
-	//DataToLoad = "/ExperimentData/SetOfHundred.txt";
-
-	//numPoints = 100;
-
-	//for (size_t i = 0; i < 145; i++)
-	//{
-	//	Array<Vector3D> points;
-
-	//	const Vector2D range = { i * numPoints, ((i + 1) * numPoints) };
-
-	//	UFileWriter::Load(DataToLoad, points, range);
-
-	//	for (size_t i = 0; i < points.GetSize(); i++)
-	//	{
-	//		buffer->Points[i] = points[i];
-	//	}
-	//	buffer->NumPoints = points.GetSize();
-
-	//	CreateMeshFractureGPU(buffer, points, tets, VoronoiIn, VoronoiOut, ClippedOutInd, InTetsInd, OutUnTried);
-	//}
-
-	DataToLoad = "/ExperimentData/SetOfThousand.txt";
-
-	numPoints = 1000;
-
-	for (size_t i = 1; i < 2; i++)
+	for (size_t i = 0; i < 145; i++)
 	{
 		Array<Vector3D> points;
 
@@ -594,8 +557,56 @@ void Voronoi::FracturePlaneRandomGPU(Model& InModel, const size_t& NumPoints, co
 		}
 		buffer->NumPoints = points.GetSize();
 
-		CreateMeshFractureGPU(buffer, points, tets, VoronoiIn, VoronoiOut, ClippedOutInd, InTetsInd, OutUnTried);
+		CreateMeshFractureGPU(buffer, points, tets, VoronoiIn, VoronoiOut, ClippedOutInd, InTetsInd, wBuffer);
 	}
+
+
+	DataToLoad = "/ExperimentData/SetOfHundred.txt";
+
+	numPoints = 100;
+
+	for (size_t i = 0; i < 145; i++)
+	{
+		Array<Vector3D> points;
+
+		const Vector2D range = { i * numPoints, ((i + 1) * numPoints) };
+
+		UFileWriter::Load(DataToLoad, points, range);
+
+		for (size_t i = 0; i < points.GetSize(); i++)
+		{
+			buffer->Points[i] = points[i];
+		}
+		buffer->NumPoints = points.GetSize();
+
+		CreateMeshFractureGPU(buffer, points, tets, VoronoiIn, VoronoiOut, ClippedOutInd, InTetsInd,wBuffer);
+	}
+
+	//DataToLoad = "/ExperimentData/SetOfThousand.txt";
+
+	//numPoints = 1000;
+
+	//for (size_t i = 1; i < 2; i++)
+	//{
+	//	Array<Vector3D> points;
+
+	//	const Vector2D range = { i * numPoints, ((i + 1) * numPoints) };
+
+	//	UFileWriter::Load(DataToLoad, points, range);
+
+	//	for (size_t i = 0; i < points.GetSize(); i++)
+	//	{
+	//		buffer->Points[i] = points[i];
+	//	}
+	//	buffer->NumPoints = points.GetSize();
+
+	//	CreateMeshFractureGPU(buffer, points, tets, VoronoiIn, VoronoiOut, ClippedOutInd, InTetsInd, OutUnTried);
+	//}
+
+	delete buffer;
+	delete vOut;
+	delete OutUnTried;
+	delete ClippedOut;
 
 }
 
