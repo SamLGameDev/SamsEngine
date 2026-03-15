@@ -621,7 +621,7 @@ Array<Vector3D> Voronoi::GenerateRandomPointsInBounds(Model& InModel, const size
 		do
 		{
 			point1 = InModel.ModelTransform.GetRandomPointInBounds();
-		} while (Points.Contains(point1) && IsPointTooClose(point1, Points));
+		} while (Points.Contains(point1) || IsPointTooClose(point1, Points));
 
 		Points[i] = point1;
 	}

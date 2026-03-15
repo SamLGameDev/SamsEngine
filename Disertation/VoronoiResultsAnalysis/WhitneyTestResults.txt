@@ -1,4 +1,8 @@
-
-Set: 10 ,statistic: 126.0 , p_value: 0.532690480327402
-Set: 10 ,statistic: 126.0 , p_value: 0.532690480327402
-Set: 100 ,statistic: 8.0 , p_value: 1.0
+Computer: NVIDIA GeForce RTX 4080 Laptop GPU, Operation: Gen, Set: 10, statistic: 7416.0, p_value: 1.4517647575184308e-05, Significance: True
+Computer: NVIDIA GeForce RTX 4080 Laptop GPU, Operation: Gen, Set: 100, statistic: 0.0, p_value: 4.668909805372986e-49, Significance: True
+Computer: NVIDIA GeForce RTX 5070, Operation: Gen, Set: 10, statistic: 2611.0, p_value: 1.850895481832218e-28, Significance: True
+Computer: NVIDIA GeForce RTX 5070, Operation: Gen, Set: 100, statistic: 21025.0, p_value: 4.669034848101793e-49, Significance: True
+Computer: NVIDIA GeForce RTX 4080 Laptop GPU, Operation: Clip, Set: 10, statistic: 3541.0, p_value: 1.6271751265314099e-22, Significance: True
+Computer: NVIDIA GeForce RTX 4080 Laptop GPU, Operation: Clip, Set: 100, statistic: 0.0, p_value: 4.669284943422018e-49, Significance: True
+Computer: NVIDIA GeForce RTX 5070, Operation: Clip, Set: 10, statistic: 20975.0, p_value: 1.3120260955084197e-48, Significance: True
+Computer: NVIDIA GeForce RTX 5070, Operation: Clip, Set: 100, statistic: 20974.0, p_value: 1.339351881883588e-48, Significance: True
