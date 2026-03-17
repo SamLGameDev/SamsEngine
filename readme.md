@@ -198,7 +198,7 @@ This algorithm works by iterating through each tetrahedron of the mesh, performi
 
 ## Documentation
 
-Find the docygen generated documentation below
+Find the doxygen generated documentation below
 
 https://samlgamedev.github.io/samsenginedocs.github.io/
 
@@ -248,6 +248,10 @@ Another option is to use CLion, you can get free Educational licences while you 
 ##What to open
 You should open the Game folder with cmake. This wll contain the worksheets runable code, as all engine contains are unit tests. To run unit tests open engine and run project-unit.exe
 Please close the application using the red X first, as the second application containing the imporved version will then run.
+
+## How to run the Build
+First, download the build from the releases section. The one to download it Release.zip
+Then, unzip it, and go to Release->Windows-Release->src and run SamsEngine.exe. 
 
 ## Controls
 
