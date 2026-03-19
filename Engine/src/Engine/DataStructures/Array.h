@@ -41,7 +41,8 @@ public:
 	}
 	~Array()
 	{
-		if (DynamicArray != nullptr) delete[] DynamicArray;
+		delete[] DynamicArray;
+		DynamicArray = nullptr;
 	}
 
 	Array(const Array<T>& CopyArray)

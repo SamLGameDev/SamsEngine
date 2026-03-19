@@ -40,37 +40,30 @@ struct alignas(16) RawCell
 	uint32_t NumVerts;
 	uint32_t Padding[2];
 
-
 };
 
 struct alignas(16) Facew
 {
 	Vector4D Verts[30];
 	uint32_t NumVerts;
-	uint32_t Padding[3];
-};
-struct alignas(16) VOutLarge
-{
-	uint32_t NumCells;
-	uint32_t DebugNum;
-	uint32_t _Padding[2];
-	Facew DebugFace;
-	RawCell CutCells[1000];
-
 };
 
-
-
-struct Cell
+struct alignas (16) Cell
 {
 	Facew Faces[30];      // 1280 bytes
-	uint32_t NumFaces;      // 4 bytes// pad to 16-byte multiple
+	uint32_t NumFaces;
+	uint32_t padding[3];// 4 bytes// pad to 16-byte multiple
 };
 
 struct LargeCell
 {
 	Facew Faces[5000];      // 1280 bytes
 	uint32_t NumFaces;      // 4 bytes// pad to 16-byte multiple
+};
+
+struct alignas(16) WorkingBuffer
+{
+	Cell cells[100];
 };
 
 struct alignas(16) VOut
@@ -80,6 +73,23 @@ struct alignas(16) VOut
 	uint32_t _Padding[2];
 	Cell CutCells[1000];
 
+};
+
+struct alignas(16) VOutLarge
+{
+	uint32_t NumCells;
+	uint32_t DebugNum;
+	uint32_t _Padding[2];
+	RawCell CutCells[1000];
+
+};
+
+struct alignas(16) VOutUnTried
+{
+	uint32_t NumCells;
+	uint32_t DebugNum;
+	uint32_t _Padding[2];
+	LargeCell CutCells[10];
 };
 
 class FracturePieceGPU : WorldObject
@@ -94,7 +104,6 @@ public:
 	FracturePieceGPU(LargeCell& InVoronoiOut, const Vector3D& InPoint);
 	FracturePieceGPU(Cell& InVoronoiOut, const Vector3D& InPoint);
 	FracturePieceGPU(RawCell& InVoronoiOut, const Vector3D& InPoint);
-
 	~FracturePieceGPU() override;
 	void Draw();
 	void SetupControls(const Vector3D& point);
@@ -400,11 +409,9 @@ struct alignas(16) InTets
 
 struct VoronoiSSBOIn
 {
-	Vector4D Points[1000];      // 10 * 16 = 160 bytes
-	uint32_t NumPoints;
-	uint32_t Padding[3];// 4 bytes
+	Vector4D Points[100];      // 10 * 16 = 160 bytes
+	uint32_t NumPoints;          // 4 bytes
 	Facew BoundingBoxFaces[6];
-
 };
 
 class Voronoi
@@ -414,7 +421,7 @@ public:
 	//Fracture the model into a voronoi diagram based on random points
 	void FracturePlaneRandom(Model& InModel, const size_t& NumPoints, const size_t& PointSetIndex);
 	void CreateMeshFractureGPU(VoronoiSSBOIn* buffer, Array<Vector3D> points, InTets tets, GLuint VoronoiIn,
-	                           GLuint VoronoiOut, GLuint ClippedOutInd, GLuint InTetsInd);
+	                           GLuint VoronoiOut, GLuint ClippedOutInd, GLuint InTetsInd, GLuint WBuffer);
 
 	//Fracture the model into a voronoi diagram based on random points
 	void FracturePlaneRandomGPU(Model& InModel, const size_t& NumPoints, const size_t& PointSetIndex);

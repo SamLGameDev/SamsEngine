@@ -188,10 +188,7 @@ namespace Vulkan
 		descriptorLayoutCreateInfo.bindingCount = Descriptors.GetSize();
 		descriptorLayoutCreateInfo.pBindings = Descriptors.GetFirstPtr();
 
-		if (vkCreateDescriptorSetLayout(*SInstance::GetInstance()->GraphicsCard->GetLogicalDevice()->GetVulkanLogicalDevice(), &descriptorLayoutCreateInfo, nullptr, &DescriptorLayout) != VK_SUCCESS)
-		{
-			std::cerr << "ERROR::VULKAN::RENDERPIPELINE::FAILED TO CREATE DESCRIPTOR SET LAYOUT" << std::endl;
-		};
+		vkCreateDescriptorSetLayout(*SInstance::GetInstance()->GraphicsCard->GetLogicalDevice()->GetVulkanLogicalDevice(), &descriptorLayoutCreateInfo, nullptr, &DescriptorLayout);
 
 		VkDescriptorSetAllocateInfo dAllocInfo{};
 		dAllocInfo.descriptorPool = *SInstance::GetInstance()->GraphicsCard->GetRenderer()->GetDescriptorPool();
@@ -220,10 +217,9 @@ namespace Vulkan
 		pipelineCreateInfo.layout = Layout;
 		VkResult result = vkCreateComputePipelines(*SInstance::GetInstance()->GraphicsCard->GetLogicalDevice()->GetVulkanLogicalDevice(),
 			VK_NULL_HANDLE, 1, &pipelineCreateInfo, nullptr, &Pipeline);
-
 		if (result != VK_SUCCESS)
 		{
-			std::cerr << "ERROR::VULKAN::RENDERPIPELINE::FAILED TO CREATE COMPUTE PIPELINE" << std::endl;
+			std::cout << "Failed to create pipeline" << result << std::endl;
 		};
 		return SUCCEEDED;
 	}

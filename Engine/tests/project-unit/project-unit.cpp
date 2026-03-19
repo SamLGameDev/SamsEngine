@@ -574,25 +574,56 @@ void RunEngineDelaunay(Vulkan::RuntimeEngine& engine)
 	Model model = Model("/Models/Asteroid/rock.obj", Shader("ColorShape", "/Shaders/"));
 	model.ModelTransform.Position = { 5, 0, 0 };
 	Voronoi vorn;
-	//vorn.FracturePlaneRandomGPU(model, 10, 0);
+	vorn.FracturePlaneRandomGPU(model, 10, 0);
 	//std::cout << "Generated Voronoi Diagram with " << vorn.Fractures.GetSize() << " cells." << std::endl;
 	//VoronoiClipping clipper;
 	//clipper.ClipMeshToVoronoi(vorn, model);
 
-	while (!engine.ShouldClose())
-	{
-		engine.Loop();
-	}
-
 	Vulkan::RuntimeEngine::WaitForFrameToFinish();
 }
+
+struct alignas(16) FaceTest
+{
+	Vector3D verts[30];
+	uint32_t numVerts;
+	uint32_t pad0;
+	uint32_t pad1;
+	uint32_t pad2;
+	uint32_t _pad[30];
+};
+struct alignas(16) Vec3_std430
+{
+	float x;
+	float y;
+	float z;
+	float _pad; // required padding
+};
+
+
+struct Tri
+{
+	Vector4D Verts[3];   // 48 bytes
+};
+
+struct FaceTri
+{
+	Tri Tris[6];           // 480 bytes
+	uint32_t NumTris;       // 4 bytes// pad to 16-byte multiple
+};
+
+struct CellTri
+{
+	FaceTri Faces[20];      // 9920 bytes
+	uint32_t NumFaces;      // 4 bytes// pad to 16-byte multiple
+};
+
 
 
 void RunEngineOpenGL(OpenGL::RuntimeEngine engine)
 {
 	Model model = Model("/Models/Asteroid/rock.obj", Shader("BasicTexture", "/Shaders/"));
 	//Model model = Model("/Models/Bunny/Bunny.obj", Shader("ColorShape", "/Shaders/"));
-	//model.ModelTransform.Position = { 5, 0, 0 };
+
 	Voronoi vorn;
 	//vorn.GenerateNewPointSets(model);
 	vorn.FracturePlaneRandomGPU(model, 10, 0);
@@ -604,10 +635,11 @@ void RunEngineOpenGL(OpenGL::RuntimeEngine engine)
 //	FracturePieceGPU fracturePiece(VoronoiOut);
 
 	//Voronoi vorn2;
-	//vorn2.FracturePlaneRandom(model, 10, 0);
+	//vorn2.FracturePlaneRandom(model, 1000, 1);
 	//std::cout << "Generated Voronoi Diagram with " << vorn.Fractures.GetSize() << " cells." << std::endl;
 	//VoronoiClipping clipper;
 	//clipper.ClipMeshToVoronoi(vorn2, model);
+
 	while (!engine.ShouldClose())
 	{
 		engine.Loop();
@@ -638,6 +670,6 @@ void EngineDelaunay()
 TEST(Fracturing, Diagram) {
 	//EnginePlane();
 
-	//EngineDelaunay();
+	EngineDelaunay();
 	OpenGLTest();
 }

@@ -20,6 +20,7 @@ namespace OpenGL {
 	public:
 
 		UOpenGLComputeShader() = default;
+		~UOpenGLComputeShader();
 		UOpenGLComputeShader(const std::string_view& InName, const std::string_view& InStorageLocation);
 		~UOpenGLComputeShader() override;
 
@@ -42,7 +43,6 @@ namespace OpenGL {
 		GLint CompileCompute() const;
 
 		void CreateProgram(const GLuint& Compute);
-
 
 	};
 }
