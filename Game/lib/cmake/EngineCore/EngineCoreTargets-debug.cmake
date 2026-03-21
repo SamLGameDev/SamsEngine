@@ -1,19 +1,3 @@
-#----------------------------------------------------------------
-# Generated CMake target import file for configuration "Debug".
-#----------------------------------------------------------------
-
-# Commands may need to know the format version.
-set(CMAKE_IMPORT_FILE_VERSION 1)
-
-# Import target "EngineCore::EngineCore" for configuration "Debug"
-set_property(TARGET EngineCore::EngineCore APPEND PROPERTY IMPORTED_CONFIGURATIONS DEBUG)
-set_target_properties(EngineCore::EngineCore PROPERTIES
-  IMPORTED_LINK_INTERFACE_LANGUAGES_DEBUG "C;CXX"
-  IMPORTED_LOCATION_DEBUG "${_IMPORT_PREFIX}/lib/EngineCore.lib"
-  )
-
-list(APPEND _cmake_import_check_targets EngineCore::EngineCore )
-list(APPEND _cmake_import_check_files_for_EngineCore::EngineCore "${_IMPORT_PREFIX}/lib/EngineCore.lib" )
-
-# Commands beyond this point should not need to know the version.
-set(CMAKE_IMPORT_FILE_VERSION)
+version https://git-lfs.github.com/spec/v1
+oid sha256:7702f60cfd02f3aa020ff7a991a5f6e99cc5fc715d2a0d5287c25f51f2c6ff95
+size 900
