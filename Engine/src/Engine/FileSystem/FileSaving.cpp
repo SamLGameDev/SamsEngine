@@ -12,7 +12,7 @@ void UFileWriter::SaveArray(const std::string_view& Name, const Array<Vector3D>&
 
 	std::ofstream Save(directory, std::ios::binary);
 
-	size_t count = Data.GetSize();
+	const size_t count = Data.GetSize();
 	Save.write(reinterpret_cast<const char*>(&count), sizeof(count));
 	Save.write(reinterpret_cast<const char*>(Data.GetFirstPtr()), count * sizeof(Vector3D));
 

@@ -1,11 +1,11 @@
 
-// DO NOT MARK.
-//This is because it has been submitted for my dissertation. Link to Original: https://github.falmouth.ac.uk/GA-Undergrad-Student-Work-25-26/Dissertation-SL295211.git
 
 #pragma once
 #include <string>
 #include <map>
 #include <cstdint>
+#include <memory>
+
 #include "BaseTexture.h"
 
 #include "glad/glad.h"
@@ -69,6 +69,9 @@ namespace OpenGL {
 		{
 			return Type;
 		}
+
+
+		static std::shared_ptr<BaseTexture> CreateOpenGLTexture(const std::string_view& InTextureLocation, const TextureType& InType);
 
 	private:
 

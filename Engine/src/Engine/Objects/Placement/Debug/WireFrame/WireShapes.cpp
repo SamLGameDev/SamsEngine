@@ -1,7 +1,3 @@
-// DO NOT MARK except lines 139 - 190 as marked by the DO MARK comments.
-//This is because it has been submitted for my dissertation. Link to Original: https://github.falmouth.ac.uk/GA-Undergrad-Student-Work-25-26/Dissertation-SL295211.git
-
-
 
 #include "WireShapes.h"
 #include "Array.h"
@@ -96,7 +92,7 @@ void WireObject::SetTransformationVariables(const glm::mat4& model) const
 	//WireShader->SetMatrix4fv("Model", glm::value_ptr(model));
 }
 
-std::unique_ptr<WireObject> DrawWireCube(const Vector3D& Center, const Vector3D& HalfBounds, const Vector3D& Size,
+std::unique_ptr<WireObject> DrawWireCube(const Vector3D& Center, Vector3D& HalfBounds, const Vector3D& Size,
                                          const Vector3D& Color)
 {
 	auto wireTransform = Transform(Center, Size, Vector3D(0, 0, 0));
@@ -136,7 +132,6 @@ std::unique_ptr<WireObject> DrawWireCube(const Vector3D& Center, const Vector3D&
 		3, 7, 6,
 	};
 
-	//DO MARK
 	Face face;
 
 
@@ -192,8 +187,6 @@ std::unique_ptr<WireObject> DrawWireCube(const Vector3D& Center, const Vector3D&
 	face.Vertices.Add(object->Vertices[2].Position);
 	face.Vertices.Add(object->Vertices[1].Position);
 	object->Faces.Add(face);
-
-	//END OF DO MARK
 
 	object->Initialise();
 

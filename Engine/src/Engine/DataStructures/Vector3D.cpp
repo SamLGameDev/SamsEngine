@@ -1,4 +1,5 @@
-
+// DO NOT MARK except for NumericMin and NumericMax, GetLineIntersectionPointWithPlane, Min, Max, GetSingedDistance, OrderByAngle, GetPlaneAxis, GetPlaneNormal
+//This is because it has been submitted for my COMP305. Link to Original: https://github.falmouth.ac.uk/GA-Undergrad-Student-Work-25-26/Comp305-Engine-SL295211.git
 #include "Vector3D.h"
 
 
@@ -6,6 +7,7 @@
 #include<iostream>
 
 #include "Array.h"
+#include "MathCore.h"
 #include "Vector2D.h"
 
 Vector3D const Vector3D::Up = Vector3D(0, 1, 0);
@@ -124,19 +126,19 @@ Vector3D Vector3D::Cross(const Vector3D& A, const Vector3D& B)
 bool Vector3D::GetIntersectionPointWithPlane(const Vector3D& Mid, const Vector3D& Normal, const Vector3D& Point,
                                     const Vector3D& LineDir, Vector3D& Out)
 {
-	const float d = -Dot(Normal, Mid);
+	const double d = -Dot(Normal, Mid);
 
-	const float dot1 = Dot(Normal, LineDir);
-	const float dot2 = Dot(Normal, Point);
+	const double dot1 = Dot(Normal, LineDir);
+	const double dot2 = Dot(Normal, Point);
 
-	if (dot1 == 0)
+	if (dot1  == 0)
 	{
 		return false;
 	}
 
-	const float t = -(dot2 + d) / dot1;
+	const double t = -(dot2 + d) / dot1;
 
-	if (t < 0.0f || t > 1.0f) {
+	if (t < 0.0f || t > 1.0) {
 		return false;
 	}
 
@@ -158,7 +160,7 @@ Vector3D Vector3D::GetLineIntersectionPointWithPlane(const Vector3D& Normal, con
 bool Vector3D::IsAlmostEqual(const Vector3D& A, const Vector3D& B, const float& Range)
 {
 	Vector3D diff = A - B;
-	return diff < Range && diff > -Range;
+	return diff.Abs() <= Range;
 }
 
 void Vector3D::Print() const
@@ -168,7 +170,7 @@ void Vector3D::Print() const
 
 Vector3D Vector3D::Abs(const Vector3D& V)
 {
-	return {std::abs(V.X), std::abs(V.Y), std::abs(V.Z)};
+	return {std::fabs(V.X), std::fabs(V.Y), std::fabs(V.Z)};
 }
 
 Vector3D Vector3D::Abs() const

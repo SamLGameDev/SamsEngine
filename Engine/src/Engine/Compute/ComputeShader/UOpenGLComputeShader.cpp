@@ -1,8 +1,8 @@
-// DO NOT MARK CreateDefaultShaderFile, CreateDefaultFragmentFile, CreateDefaultGeometryFile.
-//This is because it has been submitted for my dissertation. Link to Original: https://github.falmouth.ac.uk/GA-Undergrad-Student-Work-25-26/Dissertation-SL295211.git
+
 
 #include "UOpenGLComputeShader.h"
 
+#include <cassert>
 #include <functional>
 #include <iostream>
 
@@ -21,21 +21,19 @@ namespace OpenGL {
 
 		Name = InName;
 
-		if (!DoesComputeShaderExist())
-		{
-
-			std::cerr << "ERROR::SHADER::VERTEX::SHADER NOT CREATED" << '\n';
-
-			return;
-		}
+		assert(DoesComputeShaderExist());
 
 		GLint compute = CompileCompute();
-		if (compute == -1)
-		{
-			return;
-		}
+
+		assert(compute != -1);
+
 		CreateProgram(compute);
 
+	}
+
+	UOpenGLComputeShader::~UOpenGLComputeShader()
+	{
+		glDeleteProgram(ID);
 	}
 
 	void UOpenGLComputeShader::Use()

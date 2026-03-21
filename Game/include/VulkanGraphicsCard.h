@@ -1,4 +1,5 @@
-
+// DO NOT MARK
+//This is because it has been submitted for my COMP305. Link to Original: https://github.falmouth.ac.uk/GA-Undergrad-Student-Work-25-26/Comp305-Engine-SL295211.git
 #pragma once
 
 #include "ErrorCodes.h"
@@ -26,12 +27,13 @@ namespace Vulkan
 	{
 		std::optional<uint32_t> GraphicsFamily;
 		std::optional<uint32_t> PresentFamily;
+		std::optional<uint32_t> GraphicsAndComputeFamily;
 
 		float QueuePriority = 1;
 
 		bool IsComplete() const
 		{
-			return GraphicsFamily.has_value() && PresentFamily.has_value();
+			return GraphicsFamily.has_value() && PresentFamily.has_value() && GraphicsAndComputeFamily.has_value();
 		}
 	};
 
@@ -102,6 +104,11 @@ namespace Vulkan
 
 		ErrorCodes ShutDown() const;
 
+		std::string GetGPUName()
+		{
+			return DeviceName;
+		}
+
 	private:
 
 		VkPhysicalDevice GraphicsCard;
@@ -119,6 +126,9 @@ namespace Vulkan
 		VkPhysicalDeviceProperties Properties;
 
 		const Array<const char*> ValidationLayers = { "VK_LAYER_KHRONOS_validation" };
+
+		std::string DeviceName;
+
 //#if DEBUG
 //		const Array<const char*> ValidationLayers = { "VK_LAYER_KHRONOS_validation" };
 //#endif

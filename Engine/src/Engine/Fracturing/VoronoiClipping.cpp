@@ -7,7 +7,7 @@
 #include "DataBuffers.h"
 #include "MathCore.h"
 #include "ObjectFactory.h"
-#include "SutherlandHodegman.h"
+#include "SutherlandHodgeman.h"
 #include <CGAL/Exact_predicates_inexact_constructions_kernel.h>
 #include <CGAL/Delaunay_triangulation_3.h>
 #include <CGAL/Exact_predicates_inexact_constructions_kernel.h>
@@ -44,7 +44,28 @@ FracturedMeshPiece::FracturedMeshPiece(const Array<Face>& cell, const Vector3D& 
 
 	TriangulateCell(cell);
 
-	transform.Position = { -12, 0, 0 };
+	transform.Position = { 0, 0, 0 };
+
+	if (Inds.IsEmpty())
+	{
+		return;
+	}
+
+	BufferData();
+}
+
+FracturedMeshPiece::FracturedMeshPiece(const Array<Vector3D>& InVerts, const Array<uint16_t>& InInds, const Vector3D& Point)
+{
+	Verts = InVerts;
+	Inds = InInds;
+
+	SetupControls(Point);
+
+	shader = Shader("ColorShape", "/Shaders/");
+
+	//TriangulateCell(cell);
+
+	transform.Position = { 0, 0, 0 };
 
 	if (Inds.IsEmpty())
 	{
@@ -158,8 +179,8 @@ void FracturedMeshPiece::BufferData()
 }
 void FracturedMeshPiece::Draw()
 {
-	//if (bHidden) return;
-
+	//if (bHidden) glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+	//else glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
 	shader.Use();
 
 	DataBuffers::BindBuffer(VAO);
@@ -197,11 +218,16 @@ void FracturedMeshPiece::Tick(const double& DeltaTime)
 void VoronoiClipping::ClipCellToMesh(Array<FTetrahedron>& tets, const FracturePiece3D& cell)
 {
 	FBox cellBox(cell.Verts);
-	Array<Face> newCell;
-	newCell.ReSize(tets.GetSize() / 2);
+	//Array<Face> newCell;
+	//newCell.ReSize(tets.GetSize() / 2);
 
-	for (auto& tet : tets)
+	Array<Vector3D> Verts;
+	Array<uint16_t> Inds;
+
+	for (size_t i = 0; i < tets.GetSize(); i++)
 	{
+
+		auto& tet = tets[i];
 
 		if (!AABB::IsBoxIntersectingBox(cellBox, FBox(tet.Verts))) continue;
 
@@ -210,17 +236,232 @@ void VoronoiClipping::ClipCellToMesh(Array<FTetrahedron>& tets, const FracturePi
 
 		if (copyFaces.IsEmpty()) continue;
 
-		newCell.Emplace(std::move(copyFaces));
+		for (const auto& face : copyFaces)
+		{
+			for (size_t j = 1; j + 1 < face.Vertices.GetSize(); j++)
+			{
+				AddOrMakeInd(Verts, Inds, face.Vertices[0]);
+				AddOrMakeInd(Verts, Inds, face.Vertices[j]);
+				AddOrMakeInd(Verts, Inds, face.Vertices[j + 1]);
+			}
+		}
+
+	//	newCell.Emplace(std::move(copyFaces));
 
 	}
 
-	if (newCell.IsEmpty()) return;
+	if (Verts.IsEmpty()) return;
+
+	std::scoped_lock lock(VoronoiMutex);
+	Vector3D color = Vector3D::RandomRange(Vector3D(30, 30, 30), Vector3D(255, 255, 255));
+	FracturedMeshPiece frac = CreateObjectRaw<FracturedMeshPiece>(Verts, Inds, cell.Point);
+	frac.Color = color;
+	FracturedPieces.Emplace(std::move(frac));
+}
+
+void VoronoiClipping::ClipCellToMesh(const Array<Face>& meshFaces, const Vector3D& MeshCenter, FracturePiece3D& cell)
+{
+	FBox cellBox(cell.Verts);
+	Array<Face> newCell = cell.CellFaces;
+
+	Array<Vector3D> normals;
+	Array<Vector3D> centers;
+
+	Array<Array<Face>> cellStages; //=  {cell.CellFaces};
+
+	bool bNoClip = true;
+
+	for (size_t i = 0; i < meshFaces.GetSize(); i++)
+	{
+
+		if (!AABB::IsBoxIntersectingBox(cellBox, FBox(meshFaces[i].Vertices))) continue;
+
+		Face test = meshFaces[i];
+		Face intersectFace;
+		Vector3D cellCenter = Vector3D::Zero;
+		for (const auto& plane : newCell)
+		{
+			cellCenter += plane.GetCenter();
+		}
+		cellCenter = cellCenter / newCell.GetSize();
+
+		for (const auto& plane : newCell)
+		{
+
+			Vector3D normal = Vector3D::GetPlaneNormal(plane.Vertices, Vector3D::Zero);
+
+
+			Vector3D center = plane.GetCenter();
+
+			if (!MathCore::IsNearlyZero(Vector3D::Dot(normal,  cellCenter - center)) &&
+				Vector3D::Dot(normal, cellCenter - center) >= 0)
+			{
+				normal = -normal;
+			}
+
+			if (Vector3D::IsAlmostEqual(normal, Vector3D::Zero))
+			{
+				std::cout << "Plane normal is zero, skipping clipping for this plane." << std::endl; continue;
+			}
+
+			Face f;
+
+			PlaneClipping::ClipFaceByFace(test, center, f, normal, intersectFace);
+
+			test = f;
+
+			if (i == 7)
+			{
+
+				Vector3D right = Vector3D::Cross(normal, Vector3D(0, 1, 0));
+				Vector3D up = Vector3D::Cross(right, normal);
+
+				Array<Face> copyFaces = { {{center + ((right + up) ), center + ((right + -up) ), center - ((right + up) ), center + ((-right + up) ), center + normal, center + normal * 3}} };
+				cellStages.Add(copyFaces);
+			}
+
+			if (test.Vertices.IsEmpty())
+			{
+				break;
+			}
+			intersectFace.Vertices.Empty();
+		}
+		
+		if (test.Vertices.IsEmpty()) continue;
+
+		bNoClip = false;
+
+		Vector3D normal = Vector3D::GetPlaneNormal(meshFaces[i].Vertices, Vector3D::Zero);
+
+		Vector3D center = meshFaces[i].GetCenter();
+
+		if (!MathCore::IsNearlyZero(Vector3D::Dot(normal, MeshCenter - center)) &&
+			Vector3D::Dot(normal, MeshCenter - center) >= 0)
+		{
+			normal = -normal;
+		}
+
+		if (Vector3D::IsAlmostEqual(normal, Vector3D::Zero))
+		{
+			std::cout << "Plane normal is zero, skipping clipping for this plane." << std::endl; continue;
+		}
+		normals.Add(normal);
+		centers.Add(center);
+
+		cellStages.Add({ test });
+
+		//Array<Face> copyFaces = tet.Faces;
+		PlaneClipping::ClipCellByFace(newCell, center, normal);
+
+		for (const auto& plane : newCell)
+		{
+			if (plane.Vertices.Contains(Vector3D::Zero))
+			{
+				std::cout << "Cell already contains the plane, skipping." << std::endl;
+				continue;
+			}
+		}
+
+	
+
+		if (newCell.IsEmpty())
+		{
+
+			Vector3D right = Vector3D::Cross(normal, Vector3D(0, 1, 0));
+			Vector3D up = Vector3D::Cross(right, normal);
+
+			Array<Face> copyFaces = {{{center, center + ((right + up) * 10), center - ((right + up) * 10), center + ((right + -up) * 10), center + ((-right + up) * 10), center + normal * 10, center + normal * 100}}};
+			cellStages.Add(copyFaces);
+			break;
+		}
+
+		for (auto& face : newCell)
+		{
+		//	Vector3D::OrderByAngle(face.Vertices, face.GetCenter(), normal);
+		}
+	//	cellStages.Add(newCell);
+
+		Vector3D right = Vector3D::Cross(normal, Vector3D(0, 1, 0));
+		Vector3D up = Vector3D::Cross(right, normal);
+
+		Array<Face> copyFaces = { {{center + ((right + up) * 10), center + ((right + -up) * 10), center - ((right + up) * 10), center + ((-right + up) * 10), center + normal * 10, center + normal * 100}} };
+		cellStages.Add(copyFaces);
+		//break;
+		//if (newCell.IsEmpty())
+		//{
+
+		//	for (size_t j = 0; j < normals.GetSize(); j++)
+		//	{
+		//		std::cout << "Normal: " << normals[j] << " Center: " << centers[j] << std::endl;
+		//		for (const auto& stage : cellStages[j])
+		//		{
+		//			std::cout << "Stage Face: " << std::endl;
+		//			for (const auto& vert : stage.Vertices)
+		//			{
+		//				std::cout << vert << std::endl;
+		//			}
+
+		//		}
+		//	}
+		//	std::cout << "ended" << "\n";
+		//}
+
+	}
+
+	//if (newCell == cell.CellFaces) return;
+
+	//for (size_t i = 0; i < cellStages.GetSize(); i++)
+	//{
+	//	std::scoped_lock lock(VoronoiMutex);
+	//	Vector3D color = Vector3D::RandomRange(Vector3D(30, 30, 30), Vector3D(255, 255, 255));
+	//	FracturedMeshPiece frac = CreateObjectRaw<FracturedMeshPiece>(cellStages[i], cell.Point);
+	//	frac.Color = color;
+	//	//frac.transform.Position = MeshCenter;
+	//	FracturedPieces.Emplace(std::move(frac));
+	//}
+
+	if (bNoClip)
+	{
+		for (const auto& plane : meshFaces)
+		{
+			Vector3D normal = Vector3D::GetPlaneNormal(plane.Vertices, Vector3D::Zero);
+
+			Vector3D center = plane.GetCenter();
+
+			if (!MathCore::IsNearlyZero(Vector3D::Dot(normal, MeshCenter - center)) &&
+				Vector3D::Dot(normal, MeshCenter - center) >= 0)
+			{
+				normal = -normal;
+			}
+
+			if (Vector3D::IsAlmostEqual(normal, Vector3D::Zero))
+			{
+				std::cout << "Plane normal is zero, skipping clipping for this plane." << std::endl; continue;
+			}
+
+			if (Vector3D::Dot(normal, cell.Point - center) > 0)
+			{
+				std::cout << "Cell is outside the mesh, skipping." << std::endl;
+				return;
+			}
+
+		}
+	}
 
 	std::scoped_lock lock(VoronoiMutex);
 	Vector3D color = Vector3D::RandomRange(Vector3D(30, 30, 30), Vector3D(255, 255, 255));
 	FracturedMeshPiece frac = CreateObjectRaw<FracturedMeshPiece>(newCell, cell.Point);
-	frac.Color = color;
+	frac.Color = cell.color;
+	frac.bHidden= true;
 	FracturedPieces.Emplace(std::move(frac));
+
+	Vector3D color2 = Vector3D::RandomRange(Vector3D(30, 30, 30), Vector3D(255, 255, 255));
+	FracturedMeshPiece frac2 = CreateObjectRaw<FracturedMeshPiece>(cell.CellFaces, cell.Point);
+	frac2.Color = cell.color;
+	//frac2.transform.Position = Vector3D(3, 0, 0);
+	frac2.bHidden = false;
+	FracturedPieces.Emplace(std::move(frac2));
+
 }
 
 void VoronoiClipping::ClipMeshToVoronoi(Voronoi& Diagram, const Model& Mesh)
@@ -233,9 +474,52 @@ void VoronoiClipping::ClipMeshToVoronoi(Voronoi& Diagram, const Model& Mesh)
 		//threads.Emplace(std::move(thread));
 		ClipCellToMesh(tets, cell);
 	}
+}
 
+void VoronoiClipping::ClipTriangleMeshToVoronoi(Voronoi& Diagram, const Model& Mesh)
+{
+	//Array<std::jthread> threads;
 
+	Array<Vector3D> verts;
+	Array<uint16_t> inds;
+	for (const auto& subMesh : Mesh.Meshes)
+	{
+		verts.ReSize(subMesh.Vertices.GetSize());
+		for (size_t i = 0; i < subMesh.Vertices.GetSize(); i++)
+		{
+			verts[i] = subMesh.Vertices[i].Position;
+		}
+		inds.Reallocate(inds.GetSize() + subMesh.Indices.GetSize());
+		memcpy(inds.GetFirstPtr(), subMesh.Indices.GetFirstPtr(), subMesh.Indices.GetSize() * sizeof(uint16_t));
+	}
+	for (size_t i = 6; i < 7; i++)
+	{
+		//std::jthread thread(&VoronoiClipping::ClipCellToMesh, this, std::ref(tets), std::ref(cell));
+		//threads.Emplace(std::move(thread));
+		ClipCellToMesh(Mesh.Meshes[0].Faces, Mesh.ModelTransform.Center, Diagram.Fractures[i]);
+		//return;
+	}
+}
 
+void VoronoiClipping::AddOrMakeInd(Array<Vector3D>& Verts, Array<uint16_t>& Inds, const Vector3D& Vert)
+{
+	size_t index = 0;
+	if (Verts.Contains(Vert, index))
+	{
+		if (!Vector3D::IsAlmostEqual(Verts[index], Vert))
+		{
+			std::cout << "Almost\n";
+			Inds.Add(Verts.GetSize());
+			Verts.Add(Vert);
+			return;
+		}
+		Inds.Add(index);
+	}
+	else
+	{
+		Inds.Add(Verts.GetSize());
+		Verts.Add(Vert);
+	}
 }
 
 Array<FTetrahedron> VoronoiClipping::TetrahredraliseMesh(const Model& Mesh)

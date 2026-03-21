@@ -9,7 +9,10 @@
 #include "RuntimeEngineVulkan.h"
 #include "VoronoiClipping.h"
 #include <string>
+
+#include "AABB.h"
 #include "FileSaving.h"
+#include "PlaneClipping.h"
 #include "Vector4D.h"
 #include "ComputeShader/UComputeShader.h"
 
@@ -27,315 +30,501 @@ TEST(Test1, Math)
 
 
 
-TEST(Array, Allocation)
+TEST(Array, EmptyConstuct)
 {
-	Array<int> test;
+	Array<int> arr;
 
-	test.Add(5);
-
-	test.Add(3);
-
-	test.Remove(0);
-
-	test.Remove(5);
-
-	ASSERT_EQ(3, test[0]);
+	EXPECT_TRUE(arr.IsEmpty());
+	EXPECT_EQ(arr.GetSize(), 0);
+	EXPECT_EQ(arr.begin(), arr.end());
 }
 
-TEST(Array, Searching)
+TEST(Array, EmptyAfterClear)
 {
-	Array<int> test;
+	Array<int> arr = { 1,2,3 };
 
-	test.Add(5);
+	arr.Empty();
 
-	test.Add(3);
-
-	size_t index;
-	bool btest = test.Contains(5, index);
-
-	ASSERT_EQ(btest, true);
-	ASSERT_EQ(0, index);
-
-	test.Contains(3, index);
-	ASSERT_EQ(1, index);
-
-	btest = test.Contains(-1, index);
-
-	ASSERT_EQ(btest, false);
-	ASSERT_EQ(1, index);
+	EXPECT_TRUE(arr.IsEmpty());
+	EXPECT_EQ(arr.GetSize(), 0);
 }
 
-TEST(Array, Move)
+TEST(Array, Add)
 {
-	// Arrange two faces, each with a small vertex list
-	Face fa;
-	Face fb;
-	Face fc;
+	Array<int> arr = { 1,2,3 };
 
-	fa.Vertices = Array<Vector3D>{ Vector3D(1,0,0), Vector3D(0,1,0) };
-	fb.Vertices = Array<Vector3D>{ Vector3D(0,0,1), Vector3D(-1,0,0) };
-	fc.Vertices = Array<Vector3D>{ Vector3D(0,0,0), Vector3D(-1,0,0), Vector3D(2, 53, 43) };
+	arr.Empty();
 
-	const size_t aBefore = fa.Vertices.GetSize();
-	const size_t bBefore = fb.Vertices.GetSize();
-	const size_t cBefore = fc.Vertices.GetSize();
-
-	// Act: append fb's vertices into fa
-	fa.Vertices.Emplace(std::move(fb.Vertices));
-
-	// Assert combined contents and size (order preserved)
-	ASSERT_EQ(fa.Vertices.GetSize(), aBefore + bBefore);
-	ASSERT_EQ(fa.Vertices[0], Vector3D(1, 0, 0));
-	ASSERT_EQ(fa.Vertices[1], Vector3D(0, 1, 0));
-	ASSERT_EQ(fa.Vertices[2], Vector3D(0, 0, 1));
-	ASSERT_EQ(fa.Vertices[3], Vector3D(-1, 0, 0));
-
-	fa.Vertices.Emplace(std::move(fc.Vertices));
-
-	ASSERT_EQ(fa.Vertices.GetSize(), aBefore + bBefore + cBefore);
-	ASSERT_EQ(fa.Vertices[0], Vector3D(1, 0, 0));
-	ASSERT_EQ(fa.Vertices[1], Vector3D(0, 1, 0));
-	ASSERT_EQ(fa.Vertices[2], Vector3D(0, 0, 1));
-	ASSERT_EQ(fa.Vertices[3], Vector3D(-1, 0, 0));
-	ASSERT_EQ(fa.Vertices[4], Vector3D(0, 0, 0));
-	ASSERT_EQ(fa.Vertices[5], Vector3D(-1, 0, 0));
-	ASSERT_EQ(fa.Vertices[6], Vector3D(2, 53, 43));
-	ASSERT_EQ(bBefore, 2);
+	EXPECT_TRUE(arr.IsEmpty());
+	EXPECT_EQ(arr.GetSize(), 0);
 }
 
 
-TEST(LinkedList, Allocation)
+TEST(Array, AddMultiple)
 {
-	LinkedList<int> test;
+	Array<int> arr;
 
-	test.Add(5);
+	for (int i = 0; i < 100; i++)
+		arr.Add(i);
 
-	test.Add(3);
+	EXPECT_EQ(arr.GetSize(), 100);
 
-	test.Remove(0);
-
-	test.Remove(5);
-
-	ASSERT_EQ(3, test[0]);
+	for (int i = 0; i < 100; i++)
+		EXPECT_EQ(arr[i], i);
 
 }
 
-TEST(LinkedList, Searching)
+TEST(Array, Insert)
 {
-	LinkedList<int> test;
+	Array<int> arr = { 2,3 };
 
-	test.Add(5);
+	arr.Insert(1, 0);
 
-	test.Add(3);
-
-	unsigned int index;
-	bool btest = test.Contains(5, index);
-
-	ASSERT_EQ(btest, true);
-	ASSERT_EQ(0, index);
-
-	test.Contains(3, index);
-	ASSERT_EQ(1, index);
-
-	btest = test.Contains(-1, index);
-
-	ASSERT_EQ(btest, false);
-	ASSERT_EQ(1, index);
+	EXPECT_EQ(arr.GetSize(), 3);
+	EXPECT_EQ(arr[0], 1);
 }
 
-TEST(LinkedList, Copying)
+TEST(Array, IsertBeyondSize)
 {
-	LinkedList<int> test;
+	Array<int> arr = { 1,2 };
 
-	test.Add(5);
+	arr.Insert(3, 10);
 
-	test.Add(3);
-
-	LinkedList<int> copy = test;
-
-	bool btest = copy == test;
-
-	ASSERT_EQ(btest, true);
-
-	copy.Remove(3);
-	btest = copy == test;
-
-	ASSERT_EQ(btest, false);
-
-	copy.Add(5);
-	btest = copy == test;
-
-	ASSERT_EQ(btest, false);
-
+	EXPECT_EQ(arr.GetSize(), 3);
+	EXPECT_EQ(arr[2], 3);
 }
 
-TEST(Vector2D, Creation)
+TEST(Array, Remove)
 {
-	Vector2D test;
+	Array<int> arr = { 1,2,3 };
 
-	ASSERT_EQ(test, Vector2D::Zero);
+	arr.Remove(2);
 
-	test = Vector2D(1, 6);
-
-	ASSERT_EQ(test.X, 1);
-	ASSERT_EQ(test.Y, 6);
-
+	EXPECT_EQ(arr.GetSize(), 2);
+	EXPECT_FALSE(arr.Contains(2));
 }
 
-TEST(Vector2D, copying)
+TEST(Array, RemoveNonExisting)
 {
-	const Vector2D test = Vector2D(1, 6);
+	Array<int> arr = { 1,2,3 };
 
-	const Vector2D copy = test;
+	arr.Remove(10);
 
-	ASSERT_EQ(test, copy);
+	EXPECT_EQ(arr.GetSize(), 3);
 
 }
 
 
-TEST(Vector3D, Creation)
+TEST(Array, Replace)
 {
-	Vector3D test;
+	Array<int> arr = { 1,2,3 };
 
-	ASSERT_EQ(test, Vector3D::Zero);
+	bool result = arr.Replace(2, 10);
 
-	test = Vector3D(1, 6, 9);
-
-	ASSERT_EQ(test.X, 1);
-	ASSERT_EQ(test.Y, 6);
-	ASSERT_EQ(test.Z, 9);
+	EXPECT_TRUE(result);
+	EXPECT_TRUE(arr.Contains(10));
 
 }
 
 
-TEST(Vector3D, copying)
+TEST(Array, ReplaceNonExisting)
 {
-	const Vector3D test = Vector3D(1, 6, 9);
+	Array<int> arr = { 1,2,3 };
 
-	const Vector3D copy = test;
+	bool result = arr.Replace(9, 10);
 
-	ASSERT_EQ(test, copy);
+	EXPECT_FALSE(result);
 
 }
 
 
-TEST(Vector3D, Operators)
+TEST(Array, ReSize)
 {
-	Vector3D test = Vector3D(5, 5, 5);
+	Array<int> arr = { 1,2,3 };
 
-	ASSERT_EQ(test / 5, Vector3D::One);
+	bool result = arr.ReSize(10);
 
-	ASSERT_EQ(test / Vector3D(2, 3, 1), Vector3D(2.5f, 1.666666667f, 5));
+	EXPECT_TRUE(result);
+	EXPECT_EQ(arr.GetSize(), 3);
+}
 
-	Vector3D negTest = Vector3D(-5, -5, -5);
+TEST(Array, ResizeSmaller)
+{
+	Array<int> arr = { 1,2,3 };
 
-	ASSERT_EQ(-test, negTest);
+	bool result = arr.ReSize(1);
 
-	ASSERT_EQ(test - Vector3D(1.3f, 8, 5), Vector3D(3.7f, -3, 0));
+	EXPECT_FALSE(result);
+}
 
-	ASSERT_EQ(test * 2, Vector3D(10, 10, 10));
-	ASSERT_EQ(test * Vector3D(1.3f, 8, -5), Vector3D(6.5f, 40, -25));
+TEST(Array, MoveConstruct)
+{
+	Array<int> original = { 1,2,3 };
 
-	ASSERT_EQ(test + 3, Vector3D(8, 8, 8));
-	ASSERT_EQ(test + Vector3D(1.3f, 8, -5), Vector3D(6.3f, 13, 0));
+	Array<int> moved(std::move(original));
 
-	test += 8;
+	EXPECT_EQ(moved.GetSize(), 3);
+	EXPECT_EQ(original.GetSize(), 0);
 
-	ASSERT_EQ(test, Vector3D(13, 13, 13));
+}
+TEST(Array, MoveAssignment)
+{
+	Array<int> a = { 1,2,3 };
+	Array<int> b;
 
-	test -= 8;
+	b = std::move(a);
 
-	ASSERT_EQ(test, Vector3D(5, 5, 5));
-
-	ASSERT_EQ(test < 6, true);
-
-	ASSERT_EQ(test < Vector3D::One, false);
-
-	ASSERT_EQ(test > 9, false);
-
-	ASSERT_EQ(test > Vector3D::One, true);
-
+	EXPECT_EQ(b.GetSize(), 3);
+	EXPECT_EQ(a.GetSize(), 0);
 
 }
 
-TEST(Vector3D, Cross)
+
+
+TEST(Array, Iterator)
 {
-	Vector3D num = Vector3D(5, 5, 5);
+	Array<int> arr = { 1,2,3 };
 
-	Vector3D::Clamp(num, Vector3D(0, 0, 0), Vector3D(1, 1, 1));
+	int sum = 0;
 
-	const Vector3D expected = Vector3D(1, 0, 0);
-
-	const Vector3D right = Vector3D::Cross(Vector3D(0, -1, 0), Vector3D(1, 0, 0));
-
-	const Vector3D Up = Vector3D::Cross(right, Vector3D(0, -1, 0));
-
-	ASSERT_EQ(Up, expected);
+	for (int v : arr) 
+	{
+		sum += v;
+	}
+	EXPECT_EQ(sum, 6);
 }
 
-TEST(Vector3D, Normalisation)
+TEST(Array, FirstAndLast)
 {
-	const Vector3D test = Vector3D(5, 5, 5).Normalised();
+	Array<int> arr = { 10,20,30 };
 
-	ASSERT_EQ(test, Vector3D(0.57735026f, 0.57735026f, 0.57735026f));
+	EXPECT_EQ(*arr.GetFirstPtr(), 10);
+	EXPECT_EQ(*arr.GetLastPtr(), 30);
+}
+
+TEST(Vector3D, NumericMax)
+{
+	EXPECT_EQ(Vector3D::NumericMax.X, std::numeric_limits<float>::max());
+	EXPECT_EQ(Vector3D::NumericMax.Y, std::numeric_limits<float>::max());
+	EXPECT_EQ(Vector3D::NumericMax.Z, std::numeric_limits<float>::max());
+}
+
+TEST(Vector3D, NumericMin)
+{
+	EXPECT_EQ(Vector3D::NumericMin.X, std::numeric_limits<float>::lowest());
+	EXPECT_EQ(Vector3D::NumericMin.Y, std::numeric_limits<float>::lowest());
+	EXPECT_EQ(Vector3D::NumericMin.Z, std::numeric_limits<float>::lowest());
+}
+
+TEST(Vector3D, Min)
+{
+	Vector3D a(5, 2, 8);
+	Vector3D b(3, 7, 1);
+
+	Vector3D result = Vector3D::min(a, b);
+
+	EXPECT_FLOAT_EQ(result.X, 3);
+	EXPECT_FLOAT_EQ(result.Y, 2);
+	EXPECT_FLOAT_EQ(result.Z, 1);
+}
+
+TEST(Vector3D, Max)
+{
+	Vector3D a(5, 2, 8);
+	Vector3D b(3, 7, 1);
+
+	Vector3D result = Vector3D::max(a, b);
+
+	EXPECT_FLOAT_EQ(result.X, 5);
+	EXPECT_FLOAT_EQ(result.Y, 7);
+	EXPECT_FLOAT_EQ(result.Z, 8);
+}
+
+TEST(Vector3D, SignedDistanceOnPlane)
+{
+	Vector3D normal(0, 1, 0);
+	Vector3D pointOnPlane(0, 5, 0);
+	Vector3D testPoint(2, 5, 3);
+
+	double dist = Vector3D::GetSignedDistance(testPoint, normal, pointOnPlane);
+
+	EXPECT_NEAR(dist, 0.0, 1e-6);
+}
+
+TEST(Vector3D, SignedDistanceAbove)
+{
+	Vector3D normal(0, 1, 0);
+	Vector3D pointOnPlane(0, 0, 0);
+	Vector3D testPoint(0, 5, 0);
+
+	double dist = Vector3D::GetSignedDistance(testPoint, normal, pointOnPlane);
+
+	EXPECT_GT(dist, 0);
+}
+TEST(Vector3D, SignedDistanceBelow)
+{
+	Vector3D normal(0, 1, 0);
+	Vector3D pointOnPlane(0, 0, 0);
+	Vector3D testPoint(0, -3, 0);
+
+	double dist = Vector3D::GetSignedDistance(testPoint, normal, pointOnPlane);
+
+	EXPECT_LT(dist, 0);
+}
+
+TEST(Vector3D, LineIntersection)
+{
+	Vector3D normal(0, 1, 0);
+	double d = 0;
+
+	Vector3D start(0, -1, 0);
+	Vector3D end(0, 1, 0);
+
+	Vector3D intersection = Vector3D::GetLineIntersectionPointWithPlane(normal, d, start, end);
+
+	EXPECT_NEAR(intersection.X, 0, 1e-6);
+	EXPECT_NEAR(intersection.Y, 0, 1e-6);
+	EXPECT_NEAR(intersection.Z, 0, 1e-6);
+}
+
+TEST(Vector3D, PlaneAxis)
+{
+	Vector3D normal(0, 1, 0);
+	Vector3D t, u;
+
+	Vector3D::GetPlaneAxis(normal, t, u);
+
+	EXPECT_NEAR(Vector3D::Dot(normal, t), 0, 1e-6);
+	EXPECT_NEAR(Vector3D::Dot(normal, u), 0, 1e-6);
+}
+
+TEST(Vector3D, PlaneNormal)
+{
+	Array<Vector3D> square =
+	{
+		Vector3D(-1,0,-1),
+		Vector3D(1,0,-1),
+		Vector3D(1,0,1),
+		Vector3D(-1,0,1)
+	};
+
+	Vector3D center(0, 0, 0);
+
+	Vector3D normal = Vector3D::GetPlaneNormal(square, center);
+
+	EXPECT_NEAR(std::abs(normal.Y), 1, 1e-6);
+}
+
+TEST(Vector3D, OrderByAngle)
+{
+	Array<Vector3D> points =
+	{
+		Vector3D(1,0,0),
+		Vector3D(0,0,1),
+		Vector3D(-1,0,0),
+		Vector3D(0,0,-1)
+	};
+
+	Vector3D center(0, 0, 0);
+	Vector3D normal(0, 1, 0);
+
+	Vector3D::OrderByAngle(points, center, normal);
+
+	for (size_t i = 0; i < points.GetSize(); i++)
+	{
+		EXPECT_TRUE(points.Contains(points[i]));
+	}
+}
+
+
+TEST(AnglePointPair, LessThan)
+{
+	AnglePointPair a{ Vector3D(1,0,0),1.0 };
+	AnglePointPair b{ Vector3D(0,1,0),2.0 };
+
+	EXPECT_TRUE(a < b);
+}
+TEST(AnglePointPair, Equallity)
+{
+	AnglePointPair a{ Vector3D(1,2,3),0.1 };
+	AnglePointPair b{ Vector3D(1,2,3),2.0 };
+
+	EXPECT_TRUE(a == b);
+}
+
+TEST(Vector4D, From3D)
+{
+	Vector3D a = { 1, 2, 4 };
+
+	Vector4D b = { 1, 2, 4, 5 };
+
+	EXPECT_EQ(b, Vector4D(a, 5));
+}
+
+TEST(AABB, BoundsCorrect)
+{
+	Array<Vector3D> points =
+	{
+		Vector3D(-1, 2, 3),
+		Vector3D(4, -5, 6),
+		Vector3D(2, 3, -7)
+	};
+
+	FBox box(points);
+
+	EXPECT_FLOAT_EQ(box.min.X, -1);
+	EXPECT_FLOAT_EQ(box.min.Y, -5);
+	EXPECT_FLOAT_EQ(box.min.Z, -7);
+
+	EXPECT_FLOAT_EQ(box.max.X, 4);
+	EXPECT_FLOAT_EQ(box.max.Y, 3);
+	EXPECT_FLOAT_EQ(box.max.Z, 6);
+}
+TEST(AABB, FacesCorrect)
+{
+	FBox box;
+	box.min = Vector3D(0, 0, 0);
+	box.max = Vector3D(1, 1, 1);
+
+	Array<Face> faces = box.GetFaces();
+
+	EXPECT_EQ(faces.GetSize(), 6);
+
+	for (const auto& face : faces)
+	{
+		EXPECT_EQ(face.Vertices.GetSize(), 4);
+		for (const auto& v : face.Vertices)
+		{
+			EXPECT_TRUE(v >= box.min);
+			EXPECT_TRUE(v <= box.max);
+		}
+	}
 
 }
 
-TEST(Vector3D, Length)
+TEST(AABB, PointTests)
 {
-	const Vector3D test = Vector3D(5, 5, 5);
+	FBox box;
+	box.min = Vector3D(0, 0, 0);
+	box.max = Vector3D(10, 10, 10);
 
-	ASSERT_EQ(test.GetLength(), 8.660254038f);
+	Vector3D point(5, 5, 5);
 
-	ASSERT_EQ(test.GetSquaredLength(), 75);
+	EXPECT_TRUE(AABB::IsPointInsideBox(box, point));
+
+	point = {15, 5, 5};
+	EXPECT_FALSE(AABB::IsPointInsideBox(box, point));
+	point = { 0, 5, 5 };
+	EXPECT_TRUE(AABB::IsPointInsideBox(box, point));
 }
 
-TEST(Vector3D, Random)
+TEST(AABB, BoxIntersection)
 {
-	const Vector3D test = Vector3D::RandomRange(Vector3D::One, Vector3D(9, 9, 9));
+	FBox box1;
+	box1.min = Vector3D(0, 0, 0);
+	box1.max = Vector3D(5, 5, 5);
 
-	const bool bWithin = Vector3D::WithinRange(test, Vector3D::One, Vector3D(9, 9, 9));
+	FBox box2;
+	box2.min = Vector3D(4, 4, 4);
+	box2.max = Vector3D(10, 10, 10);
 
-	ASSERT_EQ(bWithin, true);
+	EXPECT_TRUE(AABB::IsBoxIntersectingBox(box1, box2));
+}
+TEST(AABB, NoBoxIntersection)
+{
+	FBox box1;
+	box1.min = Vector3D(0, 0, 0);
+	box1.max = Vector3D(5, 5, 5);
+
+	FBox box2;
+	box2.min = Vector3D(6, 6, 6);
+	box2.max = Vector3D(10, 10, 10);
+
+	EXPECT_FALSE(AABB::IsBoxIntersectingBox(box1, box2));
+}
+TEST(AABB, BoxEdgesIntersecting)
+{
+	FBox box1;
+	box1.min = Vector3D(0, 0, 0);
+	box1.max = Vector3D(5, 5, 5);
+
+	FBox box2;
+	box2.min = Vector3D(5, 5, 5);
+	box2.max = Vector3D(10, 10, 10);
+
+	EXPECT_TRUE(AABB::IsBoxIntersectingBox(box1, box2));
 }
 
-TEST(Vector3D, Dot)
+TEST(PlaneClipping, ClipFace)
 {
-	const Vector3D test = Vector3D(3, 9, 1);
+	Face square;
+	square.Vertices = {
+		Vector3D(-1,-1,0),
+		Vector3D(1,-1,0),
+		Vector3D(1,1,0),
+		Vector3D(-1,1,0)
+	};
 
-	const float Dot = Vector3D::Dot(test, Vector3D(5, 3, 2));
+	Vector3D planeCenter(0, 0, 0);
+	Vector3D normal(1, 0, 0);
 
-	ASSERT_EQ(Dot, 44);
+	Face outFace;
+	Face intersectFace;
+
+	PlaneClipping::ClipFaceByFace(
+		square,
+		planeCenter,
+		outFace,
+		normal,
+		intersectFace
+	);
+
+	EXPECT_FALSE(outFace.Vertices.IsEmpty());
 }
 
-TEST(Vector3D, Absolute)
+TEST(PlaneClipping, ClipCellByFace)
 {
-	const Vector3D test = Vector3D(-3, 9, -1);
+	Array<Face> cell;
 
-	ASSERT_EQ(test.Abs(), Vector3D(3, 9, 1));
+	Face face;
+	face.Vertices = {
+		Vector3D(-1,-1,0),
+		Vector3D(1,-1,0),
+		Vector3D(1,1,0),
+		Vector3D(-1,1,0)
+	};
+
+	cell.Add(face);
+
+	Vector3D planeCenter(0, 0, 0);
+	Vector3D normal(1, 0, 0);
+
+	PlaneClipping::ClipCellByFace(cell, planeCenter, normal);
+
+	EXPECT_FALSE(cell.IsEmpty());
 }
 
-TEST(Vector3D, AlmostEqual)
+TEST(PlaneClipping, ClipCellByFaces)
 {
-	const Vector3D test = Vector3D(-3, 9, -1);
+	Array<Face> cell;
 
-	ASSERT_EQ(Vector3D::IsAlmostEqual(test, Vector3D(-3.00000003f, 9.00000002f, -1.00000000006f)), true);
+	Face face;
+	face.Vertices = {
+		Vector3D(-1,-1,0),
+		Vector3D(1,-1,0),
+		Vector3D(1,1,0),
+		Vector3D(-1,1,0)
+	};
+
+	cell.Add(face);
+
+	Array<Face> clippingPlanes;
+	clippingPlanes.Add(face);
+
+	PlaneClipping::ClipCellByFaces(cell, clippingPlanes);
+
+	EXPECT_FALSE(cell.IsEmpty());
 }
-
-
-TEST(Vector3D, PlaneLineIntersection)
-{
-	const Vector3D test = Vector3D(-3, 9, 1);
-
-	Vector3D out;
-
-	const bool bHit = Vector3D::GetIntersectionPointWithPlane(Vector3D::Zero, Vector3D(0, 0, 1), test, Vector3D(0, 0, -1), out);
-
-	ASSERT_EQ(bHit, true);
-
-	ASSERT_EQ(out, Vector3D(-3, 9, 0));
-}
-
 
 char* itoa(int Value, int Base)
 {
@@ -582,43 +771,6 @@ void RunEngineDelaunay(Vulkan::RuntimeEngine& engine)
 	Vulkan::RuntimeEngine::WaitForFrameToFinish();
 }
 
-struct alignas(16) FaceTest
-{
-	Vector3D verts[30];
-	uint32_t numVerts;
-	uint32_t pad0;
-	uint32_t pad1;
-	uint32_t pad2;
-	uint32_t _pad[30];
-};
-struct alignas(16) Vec3_std430
-{
-	float x;
-	float y;
-	float z;
-	float _pad; // required padding
-};
-
-
-struct Tri
-{
-	Vector4D Verts[3];   // 48 bytes
-};
-
-struct FaceTri
-{
-	Tri Tris[6];           // 480 bytes
-	uint32_t NumTris;       // 4 bytes// pad to 16-byte multiple
-};
-
-struct CellTri
-{
-	FaceTri Faces[20];      // 9920 bytes
-	uint32_t NumFaces;      // 4 bytes// pad to 16-byte multiple
-};
-
-
-
 void RunEngineOpenGL(OpenGL::RuntimeEngine engine)
 {
 	Model model = Model("/Models/Asteroid/rock.obj", Shader("BasicTexture", "/Shaders/"));
@@ -626,7 +778,7 @@ void RunEngineOpenGL(OpenGL::RuntimeEngine engine)
 
 	Voronoi vorn;
 	//vorn.GenerateNewPointSets(model);
-	vorn.FracturePlaneRandomGPU(model, 10, 0);
+	vorn.FracturePlaneRandomGPU(model, 10, 0, true);
 	//glm::mat4 modelMat = model.ModelTransform.GetModelMatrix();
 
 	model.ModelTransform.Position = { 5, 0, 0 };
@@ -670,6 +822,6 @@ void EngineDelaunay()
 TEST(Fracturing, Diagram) {
 	//EnginePlane();
 
-	EngineDelaunay();
+	//EngineDelaunay();
 	OpenGLTest();
 }

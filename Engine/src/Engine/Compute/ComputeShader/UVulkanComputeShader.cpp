@@ -13,6 +13,7 @@ namespace Vulkan
 {
 	UVulkanComputeShader::~UVulkanComputeShader()
 	{
+		//Wait for gpu to finish
 		vkDeviceWaitIdle(*SInstance::GetInstance()->GraphicsCard->GetLogicalDevice()->GetVulkanLogicalDevice());
 		vkQueueWaitIdle(SInstance::GetInstance()->GraphicsCard->GetLogicalDevice()->GetComputeQueue());
 		vkDestroyFence(*SInstance::GetInstance()->GraphicsCard->GetLogicalDevice()->GetVulkanLogicalDevice(), ComputeFence, nullptr);
@@ -44,14 +45,15 @@ namespace Vulkan
 		descriptor.stageFlags = VK_SHADER_STAGE_COMPUTE_BIT;
 		descriptors.Add(descriptor);
 
+		//Starts at 3 as 2 is taken by global transforms
+
 		for (size_t i = 3; i < 7; i++)
 		{
-			VkDescriptorSetLayoutBinding descriptor{};
 			descriptor.binding = i;
 			descriptor.descriptorCount = 1;
 			descriptor.pImmutableSamplers = nullptr;
 			descriptor.descriptorType = VK_DESCRIPTOR_TYPE_STORAGE_BUFFER;
-			descriptor.stageFlags = VK_SHADER_STAGE_COMPUTE_BIT;
+			descriptor.stageFlags = VK_SHADER_STAGE_COMPUTE_BIT; 
 			descriptors.Add(descriptor);
 		}
 

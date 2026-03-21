@@ -16,11 +16,17 @@
 void RunEngine(Vulkan::RuntimeEngine engine)
 {
 
-	Model model = Model("/Models/BackPack/backpack.obj", Shader("BasicTexture", "/Shaders/"));
+	Model model = Model("/Models/Asteroid/rock.obj", Shader("BasicTexture", "/Shaders/"));
 	model.ModelTransform.Position = { 5, 0, 0 };
 	Voronoi vorn;
-	vorn.FracturePlaneRandom(model, 100);
-	while (!RuntimeEngine::ShouldClose())
+	vorn.FracturePositions.Position = { 0, 0, 0 };
+	vorn.FracturePlaneRandomGPU(model, 10, 0, true);
+
+	Voronoi vorn100;
+	vorn100.FracturePositions.Position = { 10, 0 ,0 };
+	vorn100.FracturePlaneRandomGPU(model, 100, 0, true);
+
+	while (!engine.ShouldClose())
 	{
 		engine.Loop();
 	}
@@ -39,37 +45,9 @@ void EnginePlane()
 }
 
 
-void RunEngineDelaunay(Vulkan::RuntimeEngine engine)
-{
-	Model model = Model("/Models/BackPack/backpack.obj", Shader("BasicTexture", "/Shaders/"));
-	model.ModelTransform.Position = { 5, 0, 0 };
-	Voronoi vorn;
-	vorn.FractureDelaunayRandom( model, 100);
-
-	while (!RuntimeEngine::ShouldClose())
-	{
-		engine.Loop();
-	}
-
-	Vulkan::RuntimeEngine::WaitForFrameToFinish();
-}
-
-
-void EngineDelaunay()
-{
-	Vulkan::RuntimeEngine engine;
-	engine.Init();
-
-	RunEngineDelaunay(engine);
-
-	engine.ShutDown();
-}
-
 int main(int argc, char* argv[])
 {
 	EnginePlane();
-	//
-	EngineDelaunay();
 
 	return EXIT_SUCCESS;
 }

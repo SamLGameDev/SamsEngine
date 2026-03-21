@@ -21,7 +21,7 @@ void PlaneClipping::ClipCellByFaces(Array<Face>& ToClip, const Array<Face>& Clip
 		Vector3D normal = Vector3D::GetPlaneNormal(plane.Vertices, center);
 
 		if (!MathCore::IsNearlyZero(Vector3D::Dot(normal, center - plane.GetCenter())) &&
-			Vector3D::Dot(normal, center - plane.GetCenter()) < 0)
+			Vector3D::Dot(normal, center - plane.GetCenter()) >= 0)
 		{
 			normal = -normal;
 		}
@@ -31,11 +31,6 @@ void PlaneClipping::ClipCellByFaces(Array<Face>& ToClip, const Array<Face>& Clip
 			std::cout << "Plane normal is zero, skipping clipping for this plane." << std::endl; continue;
 		}
 		ClipCellByFace(ToClip, plane.GetCenter(), normal);
-
-		for (auto& face : ToClip)
-		{
-			Vector3D::OrderByAngle(face.Vertices, face.GetCenter(), normal);
-		}
 	}
 }
 
@@ -52,17 +47,75 @@ void PlaneClipping::ClipCellByFace(Array<Face>& ToClip, const Vector3D& Center, 
 		Face outFace;
 		outFace.Vertices.ReSize(face.Vertices.GetSize() + 2);
 		ClipFaceByFace(face, Center, outFace, normal, intersectFace);
-		if (!outFace.Vertices.IsEmpty())
+
+		if (outFace.Vertices.GetSize() < 3)
 		{
-			newFaces.Add(outFace);
+			continue;
 		}
+		Face newFace;
+		for (const auto& vert : outFace.Vertices)
+		{
+			if (newFace.Vertices.Contains(vert))
+			{
+				continue;
+			}
+			newFace.Vertices.Add(vert);
+		}
+
+		if (newFace.Vertices.GetSize() < 3)
+		{
+			continue;
+		}
+
+		for (size_t i = 0; i < newFace.Vertices.GetSize(); i++)
+		{
+			if (Vector3D::IsAlmostEqual(newFace.Vertices[i] - newFace.Vertices[(i + 1) % newFace.Vertices.GetSize()], Vector3D::Zero))
+			{
+				newFace.Vertices.RemoveAt(i);
+				i--;
+			}
+		}
+
+		if (newFace.Vertices.GetSize() < 3)
+		{
+			continue;
+		}
+
+		Vector3D::OrderByAngle(newFace.Vertices, newFace.GetCenter(), normal);
+
+		newFaces.Add(newFace);
+
 	}
 
 	if (intersectFace.Vertices.GetSize() >= 3)
 	{
-		Vector3D::OrderByAngle(intersectFace.Vertices, Center, normal);
 
-		newFaces.Add(intersectFace);
+		Vector3D::OrderByAngle(intersectFace.Vertices, intersectFace.GetCenter(), normal);
+		Face newFace;
+		for (const auto& vert : intersectFace.Vertices)
+		{
+			if (newFace.Vertices.Contains(vert))
+			{
+				continue;
+			}
+			newFace.Vertices.Add(vert);
+		}
+
+		for (size_t i = 0; i < newFace.Vertices.GetSize(); i++)
+		{
+			if (Vector3D::IsAlmostEqual(newFace.Vertices[i] - newFace.Vertices[(i + 1) % newFace.Vertices.GetSize()], Vector3D::Zero))
+			{
+				newFace.Vertices.RemoveAt(i);
+				i--;
+			}
+		}
+
+		if (newFace.Vertices.GetSize() >= 3)
+		{
+
+			newFaces.Add(newFace);
+		}
+
 	}
 
 	ToClip = newFaces;
@@ -74,12 +127,18 @@ void PlaneClipping::ClipFaceByFace(const Face& ToClip, const Vector3D& Center, F
 
 	GetFirstIntersection(Normal, Center, ToClip, OutFace, firstIntersectionIndex, firstIntersection);
 
+
 	if (OutFace.Vertices.IsEmpty())
 	{
-		if (Vector3D::Dot(Normal, ToClip.Vertices[0] - Center) > 0)
+		for (const auto& vert : ToClip.Vertices)
 		{
-			OutFace = ToClip;
+			if (Vector3D::Dot(Normal, vert - Center) < 0)
+			{
+				OutFace = ToClip;
+				return;
+			}
 		}
+
 		return;
 	}
 
@@ -107,6 +166,7 @@ void PlaneClipping::ClipFaceByFace(const Face& ToClip, const Vector3D& Center, F
 			secondIntersectionIndex
 		);
 	}
+
 	IntersectFace.Vertices.Add(firstIntersection);
 	IntersectFace.Vertices.Add(secondIntersection);
 
@@ -126,13 +186,13 @@ void PlaneClipping::GetFirstIntersection(const Vector3D& Normal, const Vector3D&
 
 		if (bDoesLineIntersect)
 		{
-			const bool intersectionIsNextVertex = intersectionPoint == toVert;
+			const bool intersectionIsNextVertex = Vector3D::IsAlmostEqual(intersectionPoint, toVert, 0.0001f);
 
 			if (intersectionIsNextVertex)
 			{
 				NewFace.Vertices.Add(toVert);
 				NewFace.Vertices.Add(CurrentFace.Vertices[(FirstIntersectionIndex + 2) % CurrentFace.Vertices.GetSize()]);
-				FirstIntersectionIndex = (FirstIntersectionIndex + 2) % CurrentFace.Vertices.GetSize();
+				FirstIntersectionIndex = (FirstIntersectionIndex +2) % CurrentFace.Vertices.GetSize();
 
 			}
 			else
@@ -155,7 +215,7 @@ size_t PlaneClipping::GetAllVertsUntilSecondIntersection(const Vector3D& Normal,
 	const Face& CurrentFace, Face& NewFace, const size_t& FirstIntersectionIndex, Vector3D& SecondIntersection)
 {
 	size_t secondIntersectionIndex = 0;
-
+	SecondIntersection = Vector3D::Zero;//= Vector3D::NumericMax;
 	for (secondIntersectionIndex = FirstIntersectionIndex; secondIntersectionIndex < CurrentFace.Vertices.GetSize(); secondIntersectionIndex++)
 	{
 		Vector3D fromVert = CurrentFace.Vertices[secondIntersectionIndex];
@@ -186,7 +246,7 @@ bool PlaneClipping::IsPointInPolygon(const Vector3D& Normal, const Face& OutFace
 	{
 		const double d = Vector3D::Dot(vert - Center, Normal);
 
-		if (d < 0 && !MathCore::IsNearlyZero(d)) return false;
+		if (d > 0 && !MathCore::IsNearlyZero(d)) return false;
 	}
 	return true;
 

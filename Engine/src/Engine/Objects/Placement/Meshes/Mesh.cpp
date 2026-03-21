@@ -1,3 +1,5 @@
+// DO NOT MARK except SetUpMesh
+//This is because it has been submitted for my COMP305. Link to Original: https://github.falmouth.ac.uk/GA-Undergrad-Student-Work-25-26/Comp305-Engine-SL295211.git
 #include "Mesh.h"
 #include "Model.h"
 #include <glm/glm.hpp>
@@ -33,6 +35,7 @@ void Mesh::Copy(const Mesh& Copy)
 	FVerts = Copy.FVerts;
 	FTexCoords = Copy.FTexCoords;
 	VAO = Copy.VAO;
+	Faces = Copy.Faces;
 	RegenerateMesh();
 }
 

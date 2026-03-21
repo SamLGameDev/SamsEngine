@@ -1,6 +1,4 @@
 
-// DO NOT MARK.
-//This is because it has been submitted for my dissertation. Link to Original: https://github.falmouth.ac.uk/GA-Undergrad-Student-Work-25-26/Dissertation-SL295211.git
 
 #include "Renderer.h"
 
@@ -69,6 +67,7 @@ namespace OpenGL
 
 		for (Model* model : ModelsToRender)
 		{
+			//glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
 			model->Draw();
 		}
 

@@ -1,4 +1,5 @@
-
+// DO NOT MARK except ActiveComputeShader
+//This is because it has been submitted for my COMP305. Link to Original: https://github.falmouth.ac.uk/GA-Undergrad-Student-Work-25-26/Comp305-Engine-SL295211.git
 #pragma once
 
 #include "ErrorCodes.h"
@@ -9,9 +10,10 @@
 #include "VulkanGraphicsCard.h"
 #include "VulkanRenderPass.h"
 
+
 namespace Vulkan
 {
-
+	class UVulkanComputeShader;
 	class SInstance
 	{
 	public:
@@ -26,6 +28,8 @@ namespace Vulkan
 		UGraphicsCard* GraphicsCard;
 
 		URenderPass* RenderPass;
+
+		UVulkanComputeShader* ActiveComputeShader;
 
 		ErrorCodes ShutDown();
 

@@ -1,5 +1,3 @@
-// DO NOT MARK.
-//This is because it has been submitted for my dissertation. Link to Original: https://github.falmouth.ac.uk/GA-Undergrad-Student-Work-25-26/Dissertation-SL295211.git
 
 
 #pragma once
@@ -38,6 +36,8 @@ struct Face
 public:
 
 	Array<Vector3D> Vertices;
+
+	Vector3D Normal;
 
 	bool operator==(const Face& other) const {
 		if (other.Vertices.GetSize() == Vertices.GetSize())
@@ -79,6 +79,16 @@ public:
 		}
 
 		return true; 
+	}
+
+	Vector3D GetCenter() const
+	{
+		Vector3D center = Vector3D::Zero;
+		for (const auto& vert : Vertices)
+		{
+			center += vert;
+		}
+		return center / Vertices.GetSize();
 	}
 };
 struct Edge

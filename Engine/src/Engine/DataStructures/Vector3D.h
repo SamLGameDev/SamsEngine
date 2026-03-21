@@ -1,3 +1,5 @@
+// DO NOT MARK except for NumericMin and NumericMax, GetLineIntersectionPointWithPlane, Min, Max, GetSingedDistance, OrderByAngle, GetPlaneAxis, GetPlaneNormal, AnglePointPair
+//This is because it has been submitted for my COMP305. Link to Original: https://github.falmouth.ac.uk/GA-Undergrad-Student-Work-25-26/Comp305-Engine-SL295211.git
 #pragma once
 #include <array>
 
@@ -17,30 +19,7 @@ public:
 	static void GetPlaneAxis(const Vector3D& Normal, Vector3D& T, Vector3D& U);
 	static Vector3D GetPlaneNormal(const Array<Vector3D>& ClippingPlane, const Vector3D& Center);
 
-	//constexpr Vector3D(const float InX, const float InY, const float InZ) noexcept : X(InX), Y(InY), Z(InZ) {};
-
 	constexpr Vector3D(const double InX, const double InY, const double InZ) noexcept : X(InX), Y(InY), Z(InZ){};
-
-	////Vector3D(const Vector3D& CopyVec)
-	////{
-	////	Copy(CopyVec);
-	////}
-
-	////Vector3D& operator=(const Vector3D& CopyVec)
-	////{
-	////	if (this != &CopyVec)
-	////	{
-	////		Copy(CopyVec);
-	////	}
-	////	return *this;
-	////}
-
-	////void Copy(const Vector3D& CopyVec)
-	////{
-	////	X = CopyVec.X;
-	////	Y = CopyVec.Y;
-	////	Z = CopyVec.Z;
-	////}
 
 	[[nodiscard]] bool operator==(const Vector3D& Other) const {
 		return	IsAlmostEqual(*this, Other);
@@ -140,6 +119,11 @@ public:
 		return X <= Value.X && Y <= Value.Y && Z <= Value.Z;
 	}
 
+	[[nodiscard]] bool operator<=(const double& Value) const
+	{
+		return X <= Value && Y <= Value && Z <= Value;
+	}
+
 	[[nodiscard]] Vector3D Normalised() const;
 
 	[[nodiscard]] float GetLength() const;
@@ -206,6 +190,13 @@ public:
 [[nodiscard]] inline Vector3D operator*(const float& Multiplier, const Vector3D& Vec)
 {
 	return Vec * Multiplier;
+}
+
+
+inline std::ostream& operator<<(std::ostream& os, const Vector3D& V)
+{
+	os << "{ " << V.X << ", " << V.Y << ", " << V.Z << " }";
+	return os;
 }
 struct AnglePointPair
 {

@@ -1,3 +1,5 @@
+// DO NOT MARK
+//This is because it has been submitted for my COMP305. Link to Original: https://github.falmouth.ac.uk/GA-Undergrad-Student-Work-25-26/Comp305-Engine-SL295211.git
 #pragma once
 
 #include <cstdint>
@@ -16,6 +18,8 @@ public:
 
 	constexpr Vector2D(const float InX, const float InY)noexcept : X(InX), Y(InY) {};
 	constexpr Vector2D(const double InX, const double InY)noexcept : X(InX), Y(InY) {};
+	constexpr Vector2D(const size_t InX, const size_t InY)noexcept : X(InX), Y(InY) {};
+	constexpr Vector2D(const size_t InX, const int InY)noexcept : X(InX), Y(InY) {};
 
 	Vector2D(const Vector3D& Other);
 

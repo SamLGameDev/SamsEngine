@@ -1,9 +1,13 @@
+// DO NOT MARK the except not equally comparable, Add, emplace, Reallocate, ReSize, Copy and MakeNewArray.
+//This is because it has been submitted for my COMP305. Link to Original: https://github.falmouth.ac.uk/GA-Undergrad-Student-Work-25-26/Comp305-Engine-SL295211.git
+
 #pragma once
 #include <initializer_list>
 #include <utility>
 #include <stdexcept>
 
 #include "vulkan/vulkan_core.h"
+#include <iostream>
 #include <memory>
 
 template<typename T>
@@ -11,6 +15,13 @@ concept EqualityComparable =
 	requires(const T & a, const T & b)
 {
 	{ a == b } -> std::convertible_to<bool>;
+};
+
+template<typename T>
+concept NotEqualityComparable =
+	requires(const T & a, const T & b)
+{
+	{ a != b } -> std::convertible_to<bool>;
 };
 
 template<typename T>
@@ -30,11 +41,11 @@ public:
 		// TODO Need to separate numItems and ArraySize, but problem is vulkan stuff accesses the array directly, so size won't be updated
 		NumItems = 0;
 		ArraySize = 0;
-		DynamicArray = new T[1];
 	}
 	~Array()
 	{
 		delete[] DynamicArray;
+		DynamicArray = nullptr;
 	}
 
 	Array(const Array<T>& CopyArray)
@@ -98,6 +109,7 @@ public:
 		DynamicArray = other.DynamicArray;
 		NumItems = other.NumItems;
 		ArraySize = other.ArraySize;
+
 		other.DynamicArray = nullptr;
 		other.NumItems = 0;
 		other.ArraySize = 0;
@@ -114,7 +126,7 @@ public:
 
 
 
-	bool operator==(const Array& other) const
+	bool operator==(const Array& other) const requires NotEqualityComparable<T>
 	{
 		if (other.GetSize() != NumItems)
 		{
@@ -169,85 +181,126 @@ public:
 
 	void Add(const T& Item)
 	{
-		//Depreciated for now, as arraySize needs to be seperated from NumItems properly
 		if (NumItems + 1 < ArraySize)
 		{
-			NumItems++;
 			DynamicArray[NumItems] = Item;
+			NumItems++;
 			return;
 		}
 
-		T* NewArray = new T[NumItems + 1];
+		T* NewArray = MakeNewArray(NumItems + 1);
 
-		for (size_t i = 0; i < NumItems; i++)
-		{
-			NewArray[i] = std::move(DynamicArray[i]);
-		}
+		std::move(DynamicArray, DynamicArray + NumItems, NewArray);
+
 		NewArray[NumItems] = Item;
 		NumItems++;
 
 		delete[] DynamicArray;
 		DynamicArray = NewArray;
 
-		ArraySize = NumItems;
 	}
 
-	void Add(T& Item) requires is_unique_ptr<T>::value
+	void Emplace(T&& Item)
 	{
-		//Depreciated for now, as arraySize needs to be seperated from NumItems properly
 		if (NumItems + 1 < ArraySize)
 		{
-			NumItems++;
 			DynamicArray[NumItems] = std::move(Item);
+			NumItems++;
 			return;
 		}
 
-		T* NewArray = new T[NumItems + 1];
+		T* NewArray = MakeNewArray(NumItems + 1);
 
-		for (size_t i = 0; i < NumItems; i++)
-		{
-			NewArray[i] = std::move(GetItemAt(i));
-		}
+
+		std::move(DynamicArray, DynamicArray + NumItems, NewArray);
+
 		NewArray[NumItems] = std::move(Item);
 		NumItems++;
 
 		delete[] DynamicArray;
 		DynamicArray = NewArray;
-
-		ArraySize = NumItems;
 	}
 
-	void Add(const Array& Item)
+	void Emplace(Array&& Item)
 	{
-		//Depreciated for now, as arraySize needs to be seperated from NumItems properly
 		if (ArraySize > NumItems + Item.GetSize())
 		{
-			for (size_t i = 0; i < Item.GetSize(); i++)
+			if constexpr (std::is_trivially_copyable_v<T>)
 			{
-				DynamicArray[i + NumItems] = std::move(Item.GetItemAt(i));;
+				std::memcpy(DynamicArray + NumItems,Item.GetArray(),Item.GetSize() * sizeof(T));
+			}
+			else
+			{
+				std::move(Item.GetArray(), Item.DynamicArray + Item.NumItems ,DynamicArray + NumItems);
 			}
 			NumItems += Item.GetSize();
 			return;
 		}
 
-		T* NewArray = new T[NumItems + Item.GetSize()];
+		T* NewArray = MakeNewArray(NumItems + Item.GetSize());
 
-		for (size_t i = 0; i < NumItems; i++)
+		if constexpr (std::is_trivially_copyable_v<T>)
 		{
-			NewArray[i] = std::move(GetItemAt(i));
+			if (DynamicArray != nullptr) std::memcpy(NewArray, DynamicArray, NumItems * sizeof(T));
+			std::memcpy(NewArray + NumItems, Item.GetArray(), Item.GetSize() * sizeof(T));
 		}
+		else
+		{
+			if (DynamicArray != nullptr) std::move(DynamicArray, DynamicArray + NumItems, NewArray);
+			std::move(Item.GetArray(), Item.DynamicArray + Item.NumItems, NewArray + NumItems);
+		}
+
+		NumItems += Item.GetSize();
+
+		delete[] DynamicArray;
+		DynamicArray = NewArray;
+	}
+
+	void Add(T& Item) requires is_unique_ptr<T>::value
+	{
+		if (NumItems + 1 < ArraySize)
+		{
+			DynamicArray[NumItems] = std::move(Item);
+			NumItems++;
+			return;
+		}
+
+		T* NewArray = MakeNewArray(NumItems+ 1);
+
+		std::move(DynamicArray, DynamicArray + NumItems, NewArray);
+
+		NewArray[NumItems] = std::move(Item);
+		NumItems++;
+
+		delete[] DynamicArray;
+		DynamicArray = NewArray;
+	}
+
+	void Add(const Array& Item)
+	{
+		if (ArraySize > NumItems + Item.GetSize())
+		{
+			for (size_t i = 0; i < Item.GetSize(); i++)
+			{
+				DynamicArray[i + NumItems] = std::move(Item.GetItemAt(i));
+			}
+			NumItems += Item.GetSize();
+			return;
+		}
+
+		T* NewArray = MakeNewArray(NumItems + Item.GetSize());
+		
+		std::move(DynamicArray, DynamicArray + NumItems, NewArray);
 
 		for (size_t i = 0; i < Item.GetSize(); i++)
 		{
 			NewArray[i + NumItems] = std::move(Item.GetItemAt(i));
 		}
 
-		NumItems += Item.GetSize();;
+		NumItems += Item.GetSize();
 
 		delete[] DynamicArray;
 		DynamicArray = NewArray;
-
-		ArraySize = NumItems;
 	}
 
 	void Insert(const T& Item, const size_t& Index)
@@ -298,7 +351,38 @@ public:
 		return DynamicArray;
 	}
 
+	/// <summary>
+	/// Resizes th array and number of items
+	/// </summary>
+	/// <param name="Size"></param>
+	/// <returns></returns>
 	bool Reallocate(const size_t& Size)
+	{
+		if (Size < NumItems)
+		{
+			return false;
+		}
+
+		T* NewArray = new T[Size];
+
+		std::move(DynamicArray, DynamicArray + NumItems, NewArray);
+
+		ArraySize = Size;
+		NumItems = Size;
+
+		delete[] DynamicArray;
+		DynamicArray = NewArray;
+
+		return true;
+	}
+
+	
+	/// <summary>
+	/// Resizes the array, but does not change the number of items, so new items will be default initialised
+	/// </summary>
+	/// <param name="Size"></param>
+	/// <returns></returns>
+	bool ReSize(const size_t& Size)
 	{
 		if (Size < ArraySize)
 		{
@@ -307,13 +391,9 @@ public:
 
 		T* NewArray = new T[Size];
 
-		for (size_t i = 0; i < NumItems; i++)
-		{
-			NewArray[i] = GetItemAt(i);
-		}
+		std::move(DynamicArray, DynamicArray + NumItems, NewArray);
 
 		ArraySize = Size;
-		NumItems = Size;
 
 		delete[] DynamicArray;
 		DynamicArray = NewArray;
@@ -466,7 +546,7 @@ public:
 
 		ArraySize = 0;
 		NumItems = 0;
-		DynamicArray = new T[1];
+		DynamicArray = nullptr;
 	}
 
 	[[nodiscard]] bool IsEmpty() const
@@ -483,7 +563,7 @@ public:
 
 
 	T* begin() { return DynamicArray; }
-	T* end() { return DynamicArray + NumItems; }
+	T* end() {return DynamicArray + NumItems;}
 	const T* begin() const { return DynamicArray; }
 	const T* end() const { return DynamicArray + NumItems; }
 
@@ -491,28 +571,43 @@ private:
 
 	void Copy(const Array& other)
 	{
-		if (other.GetSize() == 0)
+		if (other.ArraySize == 0)
 		{
 			delete[] DynamicArray;
-			DynamicArray = new T[1];
 			NumItems = 0;
 			ArraySize = 0;
+			DynamicArray = nullptr;
 			return;
 		}
 
 		delete[] DynamicArray;
-		DynamicArray = new T[other.GetSize()];
-		for (size_t i = 0; i < other.GetSize(); i++)
+		DynamicArray = new T[other.ArraySize];
+
+		if constexpr (std::is_trivially_copyable_v<T>)
 		{
-			DynamicArray[i] = std::move(other.GetItemAt(i));
+			std::memcpy(DynamicArray, other.DynamicArray, sizeof(T) * other.NumItems);
 		}
+		else
+		{
+			for (size_t i = 0; i < other.GetSize(); i++)
+			{
+				DynamicArray[i] = other.GetItemAt(i);
+			}
+		}
+
 		NumItems = other.GetSize();
 		ArraySize = other.ArraySize;
 	}
 
+	T* MakeNewArray(const size_t newSize)
+	{
+		ArraySize = newSize * 2;
+		return new T[newSize * 2];
+	}
+
 	T* DynamicArray = nullptr;
 
-	size_t NumItems;
+	size_t NumItems = 0;
 
-	size_t ArraySize;
+	size_t ArraySize= 0;
 };
