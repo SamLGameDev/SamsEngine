@@ -25,6 +25,12 @@ target_link_libraries(SamsEngine PRIVATE assimp::assimp)
 find_package(Vulkan REQUIRED)
 target_link_libraries(SamsEngine PRIVATE Vulkan::Vulkan)
 
+find_package(CGAL REQUIRED)
+target_link_libraries(SamsEngine PRIVATE CGAL::CGAL)
+
+find_package(nlohmann_json REQUIRED)
+target_link_libraries(SamsEngine PRIVATE nlohmann_json::nlohmann_json)
+
 set(CMAKE_FIND_DEBUG_MODE 1)
 find_package(EngineCore REQUIRED)
 target_link_libraries(SamsEngine PRIVATE EngineCore::EngineCore)

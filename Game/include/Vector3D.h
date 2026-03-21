@@ -1,6 +1,9 @@
+// DO NOT MARK except for NumericMin and NumericMax, GetLineIntersectionPointWithPlane, Min, Max, GetSingedDistance, OrderByAngle, GetPlaneAxis, GetPlaneNormal, AnglePointPair
+//This is because it has been submitted for my COMP305. Link to Original: https://github.falmouth.ac.uk/GA-Undergrad-Student-Work-25-26/Comp305-Engine-SL295211.git
 #pragma once
 #include <array>
 
+#include "Array.h"
 
 
 struct Vector2D;
@@ -12,31 +15,11 @@ public:
 	constexpr Vector3D() noexcept : X(0), Y(0), Z(0){};
 
 	Vector3D(const Vector2D& Other);
-
-	//constexpr Vector3D(const float InX, const float InY, const float InZ) noexcept : X(InX), Y(InY), Z(InZ) {};
+	static void OrderByAngle(Array<Vector3D>& Vertices, const Vector3D& Center, const Vector3D& Normal);
+	static void GetPlaneAxis(const Vector3D& Normal, Vector3D& T, Vector3D& U);
+	static Vector3D GetPlaneNormal(const Array<Vector3D>& ClippingPlane, const Vector3D& Center);
 
 	constexpr Vector3D(const double InX, const double InY, const double InZ) noexcept : X(InX), Y(InY), Z(InZ){};
-
-	////Vector3D(const Vector3D& CopyVec)
-	////{
-	////	Copy(CopyVec);
-	////}
-
-	////Vector3D& operator=(const Vector3D& CopyVec)
-	////{
-	////	if (this != &CopyVec)
-	////	{
-	////		Copy(CopyVec);
-	////	}
-	////	return *this;
-	////}
-
-	////void Copy(const Vector3D& CopyVec)
-	////{
-	////	X = CopyVec.X;
-	////	Y = CopyVec.Y;
-	////	Z = CopyVec.Z;
-	////}
 
 	[[nodiscard]] bool operator==(const Vector3D& Other) const {
 		return	IsAlmostEqual(*this, Other);
@@ -57,7 +40,7 @@ public:
 		return {X - Other.X, Y - Other.Y, Z - Other.Z};
 	}
 
-	[[nodiscard]] Vector3D operator*(const float& Multiplier)const
+	[[nodiscard]] Vector3D operator*(const double& Multiplier)const
 	{
 		return {X * Multiplier, Y * Multiplier, Z * Multiplier};
 	}
@@ -131,6 +114,11 @@ public:
 		return X >= Value.X && Y >= Value.Y && Z >= Value.Z;
 	}
 
+	[[nodiscard]] bool operator<=(const Vector3D& Value) const
+	{
+		return X <= Value.X && Y <= Value.Y && Z <= Value.Z;
+	}
+
 	[[nodiscard]] Vector3D Normalised() const;
 
 	[[nodiscard]] float GetLength() const;
@@ -144,7 +132,7 @@ public:
 
 	static void Clamp(Vector3D& Value, const Vector3D& MinRange, const Vector3D& MaxRange);
 
-	[[nodiscard]] static float Dot(const Vector3D& A, const Vector3D& B);
+	[[nodiscard]] static double Dot(const Vector3D& A, const Vector3D& B);
 
 	[[nodiscard]] static Vector3D Cross(const Vector3D& A, const Vector3D& B);
 
@@ -170,6 +158,12 @@ public:
 	[[nodiscard]] static Vector3D Abs(const Vector3D& V);
 	[[nodiscard]] Vector3D Abs() const;
 
+	[[nodiscard]] static Vector3D min(const Vector3D& A, const Vector3D B);
+	[[nodiscard]] static Vector3D max(const Vector3D& A, const Vector3D B);
+
+
+	[[nodiscard]] static double GetSignedDistance(const Vector3D& Point, const Vector3D& Normal, const Vector3D& PointOnPlane);
+
 	std::array<double, 3> GetAsDoubleArray() const
 	{
 		return { X, Y, Z };
@@ -182,6 +176,8 @@ public:
 	static const Vector3D Up;
 	static const Vector3D Zero;
 	static const Vector3D One;
+	static const Vector3D NumericMax;
+	static const Vector3D NumericMin;
 };
 
 
@@ -190,3 +186,18 @@ public:
 {
 	return Vec * Multiplier;
 }
+struct AnglePointPair
+{
+	Vector3D point;
+	double angle;
+
+	bool operator<(const AnglePointPair& Other)const
+	{
+		return angle < Other.angle;
+	}
+
+	bool operator==(const AnglePointPair& Other) const
+	{
+		return point == Other.point;
+	}
+};

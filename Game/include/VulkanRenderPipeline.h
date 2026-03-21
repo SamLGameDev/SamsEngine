@@ -1,8 +1,11 @@
-
+// DO NOT MARK except ErrorCodes URenderPipeline::Init(UVulkanComputeShader& InShader, const Array<VkDescriptorSetLayoutBinding>& Descriptors)
+//This is because it has been submitted for my COMP305. Link to Original: https://github.falmouth.ac.uk/GA-Undergrad-Student-Work-25-26/Comp305-Engine-SL295211.git
 #pragma once
 
 #include "ErrorCodes.h"
 #include "GraphicsAPIConstructor.h"
+
+
 
 
 namespace Vulkan
@@ -10,6 +13,7 @@ namespace Vulkan
 	class ULogicalDevice;
 	class UImageView;
 	class Shader;
+	class UVulkanComputeShader;
 }
 
 namespace Vulkan
@@ -19,7 +23,8 @@ namespace Vulkan
 	{
 	public:
 
-		URenderPipeline(Shader& InShader);
+		URenderPipeline(Shader& InShader, const Array<VkDescriptorSetLayoutBinding>& Descriptors);
+		URenderPipeline(UVulkanComputeShader& InShader, const Array<VkDescriptorSetLayoutBinding>& Descriptors);
 		~URenderPipeline();
 
 		URenderPipeline(const URenderPipeline& Other)
@@ -44,7 +49,9 @@ namespace Vulkan
 			return *this;
 		}
 
-		ErrorCodes Init(Shader& InShader);
+		ErrorCodes Init(Shader& InShader, const Array<VkDescriptorSetLayoutBinding>& Descriptors);
+
+		ErrorCodes Init(UVulkanComputeShader& InShader, const Array<VkDescriptorSetLayoutBinding>& Descriptors);
 
 		ErrorCodes ShutDown();
 

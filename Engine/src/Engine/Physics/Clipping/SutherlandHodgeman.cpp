@@ -3,7 +3,7 @@
 
 #include "AABB.h"
 #include "MathCore.h"
-#include "SutherlandHodegman.h"
+#include "SutherlandHodgeman.h"
 #include "Verticie.h"
 #include "VoronoiClipping.h"
 

@@ -1,4 +1,5 @@
-
+// DO NOT MARK except GenerateShaderStorageBuffer, BindShaderStorageBuffer, MapBufferMemory, UnMapBufferMemory, RemoveBuffer
+//This is because it has been submitted for my COMP305. Link to Original: https://github.falmouth.ac.uk/GA-Undergrad-Student-Work-25-26/Comp305-Engine-SL295211.git
 #pragma once
 #include "ErrorCodes.h"
 #include "InitialiseVulkan.h"
@@ -48,6 +49,15 @@ public:
 	virtual void BufferDataIndex(const uint32_t ID, const size_t& Size, void* Data) = 0;
 
 	virtual void* GenerateUniformDataBuffer(const uint32_t ID, const size_t& Size) = 0;
+
+	virtual void GenerateShaderStorageBuffer(const uint32_t ID, const size_t& Size, const size_t& Binding) = 0;
+
+	virtual void BindShaderStorageBuffer(uint32_t ID, const size_t& Binding, const size_t& Size) = 0;
+
+	virtual void* MapBufferMemory(const uint32_t& ID, const size_t& Size) = 0;
+	virtual void UnMapBufferMemory(const uint32_t& ID) = 0;
+
+	virtual void RemoveBuffer(const uint32_t& ID) = 0;
 
 	virtual void GenerateDepthBuffer(const uint32_t& ID, const Vector2D& Size) = 0;
 

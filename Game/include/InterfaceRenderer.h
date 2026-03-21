@@ -1,5 +1,9 @@
+// DO NOT MARK except AddFracture(GracturePeiceGPU*)
+//This is because it has been submitted for my COMP305. Link to Original: https://github.falmouth.ac.uk/GA-Undergrad-Student-Work-25-26/Comp305-Engine-SL295211.git
 #pragma once
 
+class FracturePieceGPU;
+class FracturedMeshPiece;
 class FracturePiece2D;
 class Model;
 class WireObject;
@@ -12,9 +16,14 @@ public:
 
 	static void AddFracture(FracturePiece3D* Piece);
 	static void AddFracture(FracturePiece2D* Piece);
+	static void AddFracture(FracturePieceGPU* Piece);
 
 	static void ReplaceFracture(const FracturePiece3D* Old, const FracturePiece3D* New);
 	static void RemoveFracture(FracturePiece3D* ToRemove);
+
+
+	static void ReplaceFracture(const FracturePieceGPU* Old, const FracturePieceGPU* New);
+	static void RemoveFracture(FracturePieceGPU* ToRemove);
 
 	static void ReplaceFracture(const FracturePiece2D* Old, const FracturePiece2D* New);
 
@@ -25,6 +34,10 @@ public:
 	static void RemoveModel(Model* InModel);
 
 	static void Draw(const size_t& Size);
+
+	static void AddMeshFracturePiece(FracturedMeshPiece* Piece);
+	static void RemoveMeshFracturePiece(FracturedMeshPiece* Piece);
+	static void ReplaceMeshFracturePiece(const FracturedMeshPiece* Old, const FracturedMeshPiece* New);
 
 	static BaseRenderer* RealRenderer;
 };

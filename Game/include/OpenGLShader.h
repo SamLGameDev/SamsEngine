@@ -1,5 +1,4 @@
-// DO NOT MARK.
-//This is because it has been submitted for my dissertation. Link to Original: https://github.falmouth.ac.uk/GA-Undergrad-Student-Work-25-26/Dissertation-SL295211.git
+
 
 
 #pragma once
@@ -8,6 +7,7 @@
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
 #include "Array.h"
+#include "BaseShader.h"
 #include "LinkedList.h"
 #include "Texture.h"
 #include "Vector3D.h"
@@ -16,7 +16,7 @@
 namespace OpenGL
 {
 
-	class Shader
+	class Shader : public BaseShader
 	{
 	public:
 
@@ -29,6 +29,7 @@ namespace OpenGL
 		 * @param InStorageLocation starts from where the main file is located. i.e. Contents/Shader/
 		 */
 		Shader(const std::string_view& InName, const std::string_view& InStorageLocation);
+		void ApplyTextures() const;
 
 		Shader(const Shader& Other)
 		{
@@ -37,6 +38,8 @@ namespace OpenGL
 			ID = Other.GetID();
 			Textures = Other.Textures;
 			Map = Other.Map;
+			UniformMappedData = Other.UniformMappedData;
+			UniformBufferID = Other.UniformBufferID;
 		}
 
 		Shader& operator=(const Shader& Other) {
@@ -46,36 +49,59 @@ namespace OpenGL
 				ID = Other.ID;
 				Textures = Other.Textures;
 				Map = Other.Map;
+				UniformMappedData = Other.UniformMappedData;
+				UniformBufferID = Other.UniformBufferID;
+			}
+			return *this;
+		}
+
+		Shader(Shader&& Other) noexcept
+		{
+			StorageLocation = Other.GetRawStorageLocation();
+			Name = Other.GetName();
+			ID = Other.GetID();
+			Textures = Other.Textures;
+			Map = Other.Map;
+			UniformMappedData = Other.UniformMappedData;
+			UniformBufferID = Other.UniformBufferID;
+		}
+
+		Shader& operator=(Shader&& Other) noexcept {
+			if (this != &Other) { // prevent self-assignment
+				StorageLocation = Other.StorageLocation;
+				Name = Other.Name;
+				ID = Other.ID;
+				Textures = Other.Textures;
+				Map = Other.Map;
+				UniformMappedData = Other.UniformMappedData;
+				UniformBufferID = Other.UniformBufferID;
 			}
 			return *this;
 		}
 
 
+
 		/**
 		 * Activates the shader to be applied to draw calls
 		 */
-		void Use() const;
+		void Use() override;
 
 
-	
-		/**
-		 * Apply all the textures for the next set of rendered objects
-		 */
-		void ApplyTextures() const;
+		void SetUniformBuffer(const size_t& Location, const void* Data, const size_t& Size) override;
 
-		void AddTexture(const Texture InTexture);
-		void AddTexture(const Array<Texture>& InTexture);
+		void AddTexture(const Texture InTexture) override;
+		void AddTexture(const Array<Texture>& InTexture) override;
 
 
 		/**
 		 * @return The folder containing the shaders
 		 */
-		[[nodiscard]] std::string GetRawStorageLocation() const
+		[[nodiscard]] std::string GetRawStorageLocation() const override
 		{
 			return StorageLocation;
 		}
 
-		[[nodiscard]] std::string GetName() const
+		[[nodiscard]] std::string GetName() const override
 		{
 			return Name;
 		}
@@ -83,17 +109,20 @@ namespace OpenGL
 		/**
 		 * @return The assigned buffer of the shader program
 		 */
-		[[nodiscard]] unsigned int GetID() const
+		[[nodiscard]] unsigned int GetID() const override
 		{
 			return ID;
 		}
 
-		[[nodiscard]] Array<Texture> GetTextures() const
+		[[nodiscard]] Array<Texture> GetTextures() const override
 		{
 			return Textures;
 		}
 
-		void AddCubeMap(const CubeMap& InMap);
+		void AddCubeMap(const CubeMap& InMap) override;
+		void SetInt(const std::string_view& InName, const int& Value) const;
+
+		static std::shared_ptr<BaseShader> CreateOpenGLShader(const std::string_view& InName, const std::string_view& InStorageLocation);
 
 	private:
 
@@ -102,55 +131,53 @@ namespace OpenGL
 		 * Creates a default vertex file for rendering an object
 		 * @return true if file successfully created
 		 */
-		bool CreateDefaultShaderFile() const;
+		bool CreateDefaultShaderFile() const override;
 
 		/**
 		 * Creates a default geometry file for rendering an object
 		 * @return true if file successfully created
 		 */
-		bool CreateDefaultGeometryFile() const;
+		bool CreateDefaultGeometryFile() const override;
 
 		/**
 		 * Creates a default fragment file for rendering an object
 		 * @return true if file successfully created
 		 */
-		bool CreateDefaultFragmentFile() const;
+		bool CreateDefaultFragmentFile() const override;
 
 
 		/**
 		 * @return true if the vertex file exists
 		 */
-		[[nodiscard]] bool DoesVertexShaderExist() const;
+		[[nodiscard]] bool DoesVertexShaderExist() const override;
 
 		/**
 		 * @return true if the geometry file exists
 		 */
-		[[nodiscard]] bool DoesGeometryShaderExist() const;
+		[[nodiscard]] bool DoesGeometryShaderExist() const override;
 
 		/**
 		 * @return true if the fragment file exists
 		 */
-		[[nodiscard]] bool DoesFragmentShaderExist() const;
+		[[nodiscard]] bool DoesFragmentShaderExist() const override;
 
-		std::string GetPathUntyped() const;
+		std::string GetPathUntyped() const override;
 
 
 		/**
 		 * @return The full path to the vertex shader
 		 */
-		[[nodiscard]] std::string GetShaderLocation() const;
+		[[nodiscard]] std::string GetShaderLocation() const override;
 
 		/**
 		 * @return The full path to the geometry shader
 		 */
-		[[nodiscard]] std::string GetGeometryLocation() const;
+		[[nodiscard]] std::string GetGeometryLocation() const override;
 
 		/**
 		 * @return The full path to the fragment shader
 		 */
-		[[nodiscard]] std::string GetFragmentLocation() const;
-
-
+		[[nodiscard]] std::string GetFragmentLocation() const override;
 
 		/**
 		 * @return The buffer of the vertex shader, if -1 means it failed
@@ -169,7 +196,7 @@ namespace OpenGL
 
 		void CreateProgram(const unsigned int& vertex, const unsigned int& fragment, const unsigned int& geometry);
 
-		[[nodiscard]] std::string ReadFileContents(const std::string_view& Location) const;
+		[[nodiscard]] std::string ReadFileContents(const std::string_view& Location) const override;
 
 		std::string StorageLocation;
 
@@ -180,5 +207,9 @@ namespace OpenGL
 		Array<Texture> Textures;
 
 		CubeMap Map;
+
+		Array<size_t> UniformBufferID;
+
+		Array<void*> UniformMappedData;
 	};
 }

@@ -1,4 +1,5 @@
-
+// DO NOT MARK except GetComputeQueue, ComputeQueue
+//This is because it has been submitted for my COMP305. Link to Original: https://github.falmouth.ac.uk/GA-Undergrad-Student-Work-25-26/Comp305-Engine-SL295211.git
 #pragma once
 
 #include "ErrorCodes.h"
@@ -42,6 +43,12 @@ namespace Vulkan
 		}
 
 
+		const VkQueue& GetComputeQueue() const
+		{
+			return  ComputeQueue;
+		}
+
+
 	private:
 
 		UGraphicsCard* OwningCard;
@@ -50,6 +57,7 @@ namespace Vulkan
 
 		VkQueue GraphicsQueue;
 		VkQueue PresentQueue;
+		VkQueue ComputeQueue;
 
 		USwapChain* SwapChain;
 

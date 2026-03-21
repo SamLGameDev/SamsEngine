@@ -10,38 +10,52 @@
 #include "Renderer.h"
 #include "LightManager.h"
 #include "CorePaths.h"
-// DO NOT MARK.
-//This is because it has been submitted for my dissertation. Link to Original: https://github.falmouth.ac.uk/GA-Undergrad-Student-Work-25-26/Dissertation-SL295211.git
+
 
 
 #include "GraphicsAPIConstructor.h"
 
 #include <memory>
 
-class SubsystemInitialiser
-{
-public:
+namespace OpenGL {
+	class CInitialiseOpenGL;
 
-	SubsystemInitialiser(){};
+	class SubsystemInitialiser
+	{
+	public:
 
-	ErrorCodes Init();
+		SubsystemInitialiser() {};
 
-	ErrorCodes ShutDown();
+		ErrorCodes Init();
 
-private:
+		ErrorCodes ShutDown();
 
-	FirstWindow* Window;
+	private:
 
-	InputManager* inputManager;
+		std::string GetGPUInfo();
 
-	World* world;
 
-	Camera* camera;
+		CInitialiseOpenGL* APIConstructer;
 
-	OpenGL::Renderer* renderer;
+		FirstWindow* Window;
 
-	LightManager* lightManager;
+		::InputManager* inputManager;
 
-	CorePaths* PathManager;
+		World* world;
 
-};
+		Camera* camera;
+
+		OpenGL::Renderer* renderer;
+
+		LightManager* lightManager;
+
+		CorePaths* PathManager;
+
+	};
+
+	inline std::string SubsystemInitialiser::GetGPUInfo()
+	{
+		const std::string gpu = reinterpret_cast<const char*>(glGetString(GL_RENDERER));
+		return gpu;
+	}
+}

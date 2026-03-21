@@ -1,3 +1,6 @@
+// DO NOT MARK except for the start function.
+//This is because it has been submitted for my COMP305. Link to Original: https://github.falmouth.ac.uk/GA-Undergrad-Student-Work-25-26/Comp305-Engine-SL295211.git
+
 #pragma once
 
 #include <glm/glm.hpp>
@@ -93,6 +96,7 @@ public:
 
 	Transform transform;
 
+	static std::int8_t ProjectonDir;
 private:
 
 	double Yaw = -90;
@@ -102,7 +106,7 @@ private:
 
 	double LastX, LastY;
 
-	constexpr static float Speed = 10.0f;
+	constexpr static float Speed = 5.0f;
 
 	constexpr static float LookSpeed = 0.1f;
 
@@ -131,4 +135,6 @@ private:
 	uint32_t GlobalTransformsID;
 
 	InputManager* AInputManger;
+
+
 };

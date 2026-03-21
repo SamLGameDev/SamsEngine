@@ -37,6 +37,13 @@
     {
       "name": "assimp",
       "version>=": "6.0.2#1"
+    },
+    {
+      "name": "cgal",
+      "version>=": "6.1.1"
+    },
+    {
+      "name": "nlohmann-json"
     }
   ] 
 }

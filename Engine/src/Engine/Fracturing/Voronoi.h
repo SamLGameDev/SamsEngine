@@ -1,4 +1,6 @@
-
+// DO NOT MARK except FracturePlaneRandom, CreateMeshFractureGPU, FracturePlaneRandomGPU, GenerateRandomPointsInBounds, GenerateNewPointSets, FracturePeiceGPU, RawCell, FixedSizeFace, Cell,
+// WorkingBuffer, VOut, VOutRaw TetFace, FTet, InTets, VoronoiSSBOIn, TetrahedraliseMesh
+//This is because it has been submitted for my COMP305. Link to Original: https://github.falmouth.ac.uk/GA-Undergrad-Student-Work-25-26/Comp305-Engine-SL295211.git
 #pragma once
 
 #include <mutex>
@@ -26,12 +28,6 @@ struct TetRing
 
 };
 
-struct VoronoiCellInstanceInfo
-{
-	glm::mat4 ModelMatrix[100];
-	Vector3D Color[100];
-};
-
 struct alignas(16) RawCell
 {
 	Vector4D Verts[1000];
@@ -42,7 +38,7 @@ struct alignas(16) RawCell
 
 };
 
-struct alignas(16) Facew
+struct alignas(16) FixedSizeFace
 {
 	Vector4D Verts[30];
 	uint32_t NumVerts;
@@ -50,15 +46,9 @@ struct alignas(16) Facew
 
 struct alignas (16) Cell
 {
-	Facew Faces[30];      // 1280 bytes
+	FixedSizeFace Faces[30];
 	uint32_t NumFaces;
-	uint32_t padding[3];// 4 bytes// pad to 16-byte multiple
-};
-
-struct LargeCell
-{
-	Facew Faces[5000];      // 1280 bytes
-	uint32_t NumFaces;      // 4 bytes// pad to 16-byte multiple
+	uint32_t padding[3];
 };
 
 struct alignas(16) WorkingBuffer
@@ -75,7 +65,7 @@ struct alignas(16) VOut
 
 };
 
-struct alignas(16) VOutLarge
+struct alignas(16) VOutRaw
 {
 	uint32_t NumCells;
 	uint32_t DebugNum;
@@ -84,24 +74,13 @@ struct alignas(16) VOutLarge
 
 };
 
-struct alignas(16) VOutUnTried
-{
-	uint32_t NumCells;
-	uint32_t DebugNum;
-	uint32_t _Padding[2];
-	LargeCell CutCells[10];
-};
-
 class FracturePieceGPU : WorldObject
 {
 public:
 	FracturePieceGPU() = default;
 
-	void AddOrMakeInd(const Vector4D& Vert);
-	void TriangulateCell(Cell cell);
 	void AddOrMakeInd(const Vector3D& Vert);
 	void TriangulateCell(const Array<Face>& cell);
-	FracturePieceGPU(LargeCell& InVoronoiOut, const Vector3D& InPoint);
 	FracturePieceGPU(Cell& InVoronoiOut, const Vector3D& InPoint);
 	FracturePieceGPU(RawCell& InVoronoiOut, const Vector3D& InPoint);
 	~FracturePieceGPU() override;
@@ -398,7 +377,7 @@ struct alignas(16) TetFace
 
 struct alignas(16) FTet
 {
-	TetFace TetFaces[4];   // 64 bytes
+	TetFace TetFaces[4];
 };
 
 struct alignas(16) InTets
@@ -409,9 +388,9 @@ struct alignas(16) InTets
 
 struct VoronoiSSBOIn
 {
-	Vector4D Points[100];      // 10 * 16 = 160 bytes
-	uint32_t NumPoints;          // 4 bytes
-	Facew BoundingBoxFaces[6];
+	Vector4D Points[100];
+	uint32_t NumPoints;
+	FixedSizeFace BoundingBoxFaces[6];
 };
 
 class Voronoi
@@ -421,12 +400,18 @@ public:
 	//Fracture the model into a voronoi diagram based on random points
 	void FracturePlaneRandom(Model& InModel, const size_t& NumPoints, const size_t& PointSetIndex);
 	void CreateMeshFractureGPU(VoronoiSSBOIn* buffer, Array<Vector3D> points, InTets tets, GLuint VoronoiIn,
-	                           GLuint VoronoiOut, GLuint ClippedOutInd, GLuint InTetsInd, GLuint WBuffer);
+	                           GLuint VoronoiOut, GLuint ClippedOutInd, GLuint InTetsInd, GLuint WBuffer, const bool& bShouldDraw, const bool&
+	                           bShouldRecord);
+	static void TetrahedraliseMesh(const Model& InModel, InTets& tets);
 
 	//Fracture the model into a voronoi diagram based on random points
 	void FracturePlaneRandomGPU(Model& InModel, const size_t& NumPoints, const size_t& PointSetIndex);
 
-	Array<Vector3D> GenerateRandomPointsInBounds(Model& InModel, const size_t& NumPoints, Array<Vector3D>& Points);
+
+	//Fracture the model into a voronoi diagram based on random points
+	void FracturePlaneRandomGPU(Model& InModel, const size_t& NumPoints, const size_t& PointSetIndex, const bool& bShouldDraw);
+
+	static Array<Vector3D> GenerateRandomPointsInBounds(const Model& InModel, const size_t& NumPoints, Array<Vector3D>& Points);
 
 	void FractureDelaunayRandom(Model& InModel, const size_t& NumPoints);
 
@@ -436,26 +421,12 @@ public:
 
 	Array<FracturePieceGPU> GPUFractures;
 
+	Transform FracturePositions;
 
-	void GenerateNewPointSets(Model& InModel);
+
+	static void GenerateNewPointSets(const Model& InModel);
 
 private:
-	static void GetFirstIntersection(const Vector3D& Normal, const Vector3D& Center, const Face& CurrentFace, Face& NewFace,
-	                                 size_t& FirstIntersectionIndex, Vector3D& FirstIntersection);
-
-	static size_t GetAllVertsUntilSecondIntersection(const Vector3D& Normal, const Vector3D& Center, const Face& CurrentFace, Face& NewFace,
-	                                          const size_t& FirstIntersectionIndex, Vector3D& SecondIntersection);
-
-	static void GetFaceReveresed(Face& IntersectFace, const Face& CurrentFace, Face& NewFace, const size_t& FirstIntersectionIndex,
-	                      const Vector3D& FirstIntersection, const Vector3D& SecondIntersection, const size_t& SecondIntersectionIndex);
-
-	void SliceFaceByPlane(const Array<Face>& Faces, const Vector3D& Normal, const Vector3D& Center, Array<Face>& NewFaces,
-	                      Face& IntersectFace, const size_t& FaceIndex);
-
-	void SliceShapeByPlane(const Array<Vector3D>& Points, const size_t& Index, Vector3D& CurrentPoint, Array<Face>& Faces, Vector3D& Normal,
-		Vector3D& Right, Vector3D& Up, Vector3D& Center, const size_t& J);
-	Vector3D ComputePolygonNormal(const Array<Vector3D>& verts);
-
 	static void DefinePlane(Vector3D& normal, const Vector3D& CurrentPoint, const Vector3D& closestPoint, Vector3D& Right, Vector3D& Up, Vector3D& PlaneCenter);
 	static bool IsPointInPolygon(const Vector3D& Normal, const Array<Vector3D>& Polygon, const Vector3D& center);
 	static bool IsPointTooClose(const Vector3D& Point, const Array<Vector3D>& Points);

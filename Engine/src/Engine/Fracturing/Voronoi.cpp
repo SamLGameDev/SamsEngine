@@ -1,4 +1,5 @@
-
+// DO NOT MARK except FracturePlaneRandom, CreateMeshFractureGPU, FracturePlaneRandomGPU, GenerateRandomPointsInBounds, GenerateNewPointSets, FracturePeiceGPU, TetrahedraliseMesh
+//This is because it has been submitted for my COMP305. Link to Original: https://github.falmouth.ac.uk/GA-Undergrad-Student-Work-25-26/Comp305-Engine-SL295211.git
 #include "Voronoi.h"
 #include "transform.h"
 #include <algorithm>
@@ -30,247 +31,10 @@ using K = CGAL::Exact_predicates_inexact_constructions_kernel;
 using Point = Kernel::Point_3;
 using DT = CGAL::Delaunay_triangulation_3<Kernel>;
 
-void Voronoi::GetFirstIntersection(const Vector3D& Normal, const Vector3D& Center, const Face& CurrentFace, Face& NewFace, size_t& FirstIntersectionIndex, Vector3D& FirstIntersection)
-{
-	for (FirstIntersectionIndex; FirstIntersectionIndex < CurrentFace.Vertices.GetSize(); FirstIntersectionIndex++)
-	{
-		Vector3D fromVert = CurrentFace.Vertices[FirstIntersectionIndex];
-		Vector3D toVert = CurrentFace.Vertices[(FirstIntersectionIndex + 1) % CurrentFace.Vertices.GetSize()];
-
-		Vector3D lineDir = toVert - fromVert;
-		Vector3D intersectionPoint;
-		const bool bDoesLineIntersect = Vector3D::GetIntersectionPointWithPlane(Center, Normal, fromVert, lineDir, intersectionPoint);
-
-		if (bDoesLineIntersect)
-		{
-			const bool intersectionIsNextVertex = intersectionPoint == toVert;
-
-			if (intersectionIsNextVertex)
-			{
-				NewFace.Vertices.Add(toVert);
-				NewFace.Vertices.Add(CurrentFace.Vertices[(FirstIntersectionIndex + 2) % CurrentFace.Vertices.GetSize()]);
-				FirstIntersectionIndex = (FirstIntersectionIndex + 2) % CurrentFace.Vertices.GetSize();
-
-			}
-			else
-			{
-				NewFace.Vertices.Add(intersectionPoint);
-				NewFace.Vertices.Add(toVert);
-				FirstIntersectionIndex = (FirstIntersectionIndex + 1) % CurrentFace.Vertices.GetSize();
-			}
-
-			FirstIntersection = intersectionPoint;
-
-			break;
-						
-		}
-
-	}
-}
-
-size_t Voronoi::GetAllVertsUntilSecondIntersection(const Vector3D& Normal, const Vector3D& Center, const Face& CurrentFace, Face& NewFace, const size_t&
-                                                   FirstIntersectionIndex, Vector3D& SecondIntersection)
-{
-	size_t secondIntersectionIndex = 0;
-
-	for (secondIntersectionIndex = FirstIntersectionIndex; secondIntersectionIndex < CurrentFace.Vertices.GetSize(); secondIntersectionIndex++)
-	{
-		Vector3D fromVert = CurrentFace.Vertices[secondIntersectionIndex];
-		Vector3D toVert = CurrentFace.Vertices[(secondIntersectionIndex + 1) % CurrentFace.Vertices.GetSize()];
-
-		Vector3D lineDir = toVert - fromVert;
-		Vector3D intersectionPoint;
-		const bool bDoesLineIntersect = Vector3D::GetIntersectionPointWithPlane(Center, Normal, fromVert, lineDir, intersectionPoint);
-
-		if (bDoesLineIntersect)
-		{
-			NewFace.Vertices.Add(intersectionPoint);
-			SecondIntersection = intersectionPoint;
-			secondIntersectionIndex++;
-			break;
-
-		}
-		NewFace.Vertices.Add(toVert);
-	}
-
-	return secondIntersectionIndex;
-}
-
-void Voronoi::GetFaceReveresed(Face& IntersectFace, const Face& CurrentFace, Face& NewFace, const size_t& FirstIntersectionIndex, const Vector3D&
-                               FirstIntersection, const Vector3D& SecondIntersection, const size_t& SecondIntersectionIndex)
-{
-	NewFace.Vertices.Empty();
-
-	if (SecondIntersection != CurrentFace.Vertices[SecondIntersectionIndex % CurrentFace.Vertices.GetSize()]) NewFace.Vertices.Add(SecondIntersection);
-
-	Vector3D from;
-
-	for (size_t a = SecondIntersectionIndex; a % CurrentFace.Vertices.GetSize() != FirstIntersectionIndex; a++)
-	{
-		from = CurrentFace.Vertices[a % CurrentFace.Vertices.GetSize()];
-		Vector3D to = CurrentFace.Vertices[(a + 1) % CurrentFace.Vertices.GetSize()];
-		if (from == to) continue;
-
-		NewFace.Vertices.Add(from);
-	}
-
-	if (from != FirstIntersection) NewFace.Vertices.Add(FirstIntersection);
-
-	bool bAddFirst = true, bAddSecond = true;
-	for (const auto& vert : IntersectFace.Vertices)
-	{
-		if (vert == FirstIntersection) bAddFirst = false;
-
-		if (vert == SecondIntersection) bAddSecond = false;
-	}
-
-
-
-	if (bAddSecond) IntersectFace.Vertices.Add(SecondIntersection);
-	if (bAddFirst) IntersectFace.Vertices.Add(FirstIntersection);
-
-
-}
-
-void Voronoi::SliceFaceByPlane(const Array<Face>& Faces, const Vector3D& Normal, const Vector3D& Center, Array<Face>& NewFaces,
-                               Face& IntersectFace, const size_t& FaceIndex)
-{
-	const Face& currentFace = Faces[FaceIndex];
-	Face newFace;
-
-	size_t firstIntersectionIndex = 0;
-	Vector3D firstIntersection;
-
-	GetFirstIntersection(Normal, Center, currentFace, newFace, firstIntersectionIndex, firstIntersection);
-		
-	//Check if there is a first intersection, if not, 
-	//check if face is on the current points side of the plane, and if so, keep it
-
-	if (newFace.Vertices.IsEmpty())
-	{
-		if (Vector3D::Dot(Normal, currentFace.Vertices[0] - Center) > 0)
-		{
-			NewFaces.Add(currentFace);
-		}
-		return;
-	}
-
-	//Get all verts up to and including the second intersection
-
-	Vector3D secondIntersection;
-	size_t secondIntersectionIndex = GetAllVertsUntilSecondIntersection
-	(
-		Normal,
-		Center,
-		currentFace,
-		newFace,
-		firstIntersectionIndex,
-		secondIntersection
-	);
-
-	//Is the point inside the polygon formed by the new face? if not, reverse it by
-	//starting from the second intersection and continuing until the first intersection
-
-	if (!IsPointInPolygon(Normal, newFace.Vertices, Center))
-	{
-		GetFaceReveresed
-		(
-			IntersectFace,
-			currentFace,
-			newFace,
-			firstIntersectionIndex,
-			firstIntersection,
-			secondIntersection,
-			secondIntersectionIndex
-		);
-	}
-	else
-	{
-
-		// if the intersections arent already in the intersect face, add them
-
-		bool bAddFirst = true, bAddSecond = true;
-		for (const auto& vert : IntersectFace.Vertices)
-		{
-			if (vert == firstIntersection) bAddFirst = false;
-
-			if (vert == secondIntersection) bAddSecond = false;
-		}
-
-		if (bAddFirst) IntersectFace.Vertices.Add(firstIntersection);
-
-		if (bAddSecond) IntersectFace.Vertices.Add(secondIntersection);
-
-
-
-
-	}
-
-	NewFaces.Add(newFace);
-}
-
-void Voronoi::SliceShapeByPlane(const Array<Vector3D>& Points, const size_t& Index, Vector3D& CurrentPoint, Array<Face>& Faces,
-                                Vector3D& Normal, Vector3D& Right, Vector3D& Up, Vector3D& Center, const size_t& J)
-{
-	if (J == Index)return;
-
-	Vector3D comparedPoint = Points[J];
-
-	Array<Face> newFaces;
-
-	Face intersectFace;
-
-	DefinePlane(Normal, CurrentPoint, comparedPoint, Right, Up, Center);
-
-	//Slice each face by plane
-	for (size_t f = 0; f < Faces.GetSize(); f++)
-	{
-		SliceFaceByPlane(Faces, Normal, Center, newFaces, intersectFace, f);
-	}
-
-	Vector3D center = intersectFace.GetCenter();
-
-	//As plane is box, we can assume [1] and [2] from zero would cove x and y
-	Vector3D normal = Vector3D::Cross(intersectFace.Vertices[1] - intersectFace.Vertices[0], intersectFace.Vertices[2] - intersectFace.Vertices[0]).Normalised();
-
-	//If its not facing outwards
-	if (Vector3D::Dot(normal, intersectFace.Vertices[0] - Vector3D::Zero) < 0) normal = -normal;
-
-	Vector3D::OrderByAngle(intersectFace.Vertices, center, normal);
-
-	if (intersectFace.Vertices.GetSize() >= 3)	newFaces.Add(intersectFace);
-
-	Faces = newFaces;
-}
-
-Vector3D Voronoi::ComputePolygonNormal(const Array<Vector3D>& verts)
-{
-	Vector3D normal(0, 0, 0);
-
-	size_t count = verts.GetSize();
-	for (size_t i = 0; i < count; i++)
-	{
-		const Vector3D& current = verts[i];
-		const Vector3D& next = verts[(i + 1) % count];
-
-		normal.X += (current.Y - next.Y) * (current.Z - next.Z);
-		normal.Y += (current.Z - next.Z) * (current.X - next.X);
-		normal.Z += (current.X - next.X) * (current.Y - next.Y);
-	}
-
-	return normal.Normalised();
-}
 
 void Voronoi::FracturePlaneRandom(Model& InModel, const size_t& NumPoints, const size_t& PointSetIndex)
 {
 	Array<Vector3D> points;
-
-	DataRecord record;
-	record.CPU = UHardwareDetails::GetCPU();
-	record.API = UHardwareDetails::API;
-	record.Card = UHardwareDetails::GetGPU();
-	record.OS = UHardwareDetails::GetOS();
-	record.RAM = UHardwareDetails::GetRAM_GB();
 
 	const Vector2D range = { PointSetIndex * NumPoints, ((PointSetIndex + 1) * NumPoints) };
 
@@ -286,8 +50,6 @@ void Voronoi::FracturePlaneRandom(Model& InModel, const size_t& NumPoints, const
 	{
 		UFileWriter::Load("/ExperimentData/SetOfThousand.txt", points, range);
 	}
-
-	const double TimeBeforeComputation = glfwGetTime();
 
 	Fractures.ReSize(points.GetSize());
 
@@ -307,49 +69,31 @@ void Voronoi::FracturePlaneRandom(Model& InModel, const size_t& NumPoints, const
 			DefinePlane(normal, currentPoint, points[j], right, up, center);
 			PlaneClipping::ClipCellByFace(Faces, center, normal);
 
-			//SliceShapeByPlane(points, i, currentPoint, Faces, normal, right, up, center, j);
 		}
 
-		//auto color = Vector3D::RandomRange(Vector3D(30, 30, 30), Vector3D(255, 255, 255));
+		auto color = Vector3D::RandomRange(Vector3D(30, 30, 30), Vector3D(255, 255, 255));
 		highestFaceAmount = std::max(highestFaceAmount, Faces.GetSize());
 		FracturePiece3D frac = CreateObjectRaw<FracturePiece3D>(Faces, currentPoint);
-		//frac.color = color;
+		frac.color = color;
 		Fractures.Add({ frac });
 
 	}
 
-	std::cout << "Highest Face Amount: " << highestFaceAmount << std::endl;
-
-	const double TimeTaken = glfwGetTime() - TimeBeforeComputation;
-	
-	//if (NumPoints == 10)
-	//{
-	//	record.TenPoints = std::to_string(TimeTaken);
-	//}
-	//else if (NumPoints == 100)
-	//{
-	//	record.OneHundredPoints = std::to_string(TimeTaken);
-	//}
-	//else
-	//{
-	//	record.OneThousandPoints = std::to_string(TimeTaken);
-	//}
-
-	//DataRecorder::SaveDataRecord(record, "/ExperimentData/CellGenerationResults.json");
-
 }
 
 void Voronoi::CreateMeshFractureGPU(VoronoiSSBOIn* buffer, Array<Vector3D> points, InTets tets, GLuint VoronoiIn, GLuint VoronoiOut,
-                                    GLuint ClippedOutInd, GLuint InTetsInd, GLuint WBuffer)
+	GLuint ClippedOutInd, GLuint InTetsInd, GLuint WBuffer, const bool& bShouldDraw, const bool& bShouldRecord)
 {
-
-
 	DataRecord record;
-	record.CPU = UHardwareDetails::GetCPU();
-	record.API = UHardwareDetails::API;
-	record.Card = UHardwareDetails::GetGPU();
-	record.OS = UHardwareDetails::GetOS();
-	record.RAM = UHardwareDetails::GetRAM_GB();
+	if (bShouldRecord)
+	{
+
+		record.CPU = UHardwareDetails::GetCPU();
+		record.API = UHardwareDetails::API;
+		record.Card = UHardwareDetails::GetGPU();
+		record.OS = UHardwareDetails::GetOS();
+		record.RAM = UHardwareDetails::GetRAM_GB();
+	}
 
 	UComputeShader voronoiCompute = UComputeShader("VoronoiCellGeneration", "/Shaders/Voronoi/");
 
@@ -364,6 +108,7 @@ void Voronoi::CreateMeshFractureGPU(VoronoiSSBOIn* buffer, Array<Vector3D> point
 	VoronoiSSBOIn* inData = static_cast<VoronoiSSBOIn*>(inPtr);
 
 	memcpy(inData, buffer, sizeof(VoronoiSSBOIn));
+
 	::DataBuffers::UnMapBufferMemory(VoronoiIn);
 
 	double TimeBeforeComputation = glfwGetTime();
@@ -374,29 +119,31 @@ void Voronoi::CreateMeshFractureGPU(VoronoiSSBOIn* buffer, Array<Vector3D> point
 
 	TimeBeforeComputation = glfwGetTime() - TimeBeforeComputation;
 
-	if (points.GetSize() == 10)
+	if (bShouldRecord)
 	{
-		record.TenPointsGeneration = std::to_string(TimeBeforeComputation);
-	}
-	else if (points.GetSize() == 100)
-	{
-		record.OneHundredPointsGeneration = std::to_string(TimeBeforeComputation);
-	}
-	else
-	{
-		record.OneThousandPointsGeneration = std::to_string(TimeBeforeComputation);
-	}
 
+		if (points.GetSize() == 10)
+		{
+			record.TenPointsGeneration = std::to_string(TimeBeforeComputation);
+		}
+		else if (points.GetSize() == 100)
+		{
+			record.OneHundredPointsGeneration = std::to_string(TimeBeforeComputation);
+		}
+		else
+		{
+			record.OneThousandPointsGeneration = std::to_string(TimeBeforeComputation);
+		}
+	}
 	UComputeShader clippingCompute = UComputeShader("VoronoiClipping", "/Shaders/Voronoi/");
-	//UComputeShader clippingCompute = UComputeShader("VoronoiClippingUnTriangulated", "/Shaders/Voronoi/");
+
 	clippingCompute.Use();
 	::DataBuffers::BindShaderStorageBuffer(VoronoiOut, 3, sizeof(VOut));
 
 	::DataBuffers::BindShaderStorageBuffer(WBuffer, 6, sizeof(WorkingBuffer));
 
 	::DataBuffers::GenerateShaderStorageBuffer(InTetsInd, sizeof(InTets), 4);
-	::DataBuffers::GenerateShaderStorageBuffer(ClippedOutInd, sizeof(VOutLarge), 5);
-	//::DataBuffers::GenerateShaderStorageBuffer(ClippedOutInd, sizeof(VOutUnTried), 5);
+	::DataBuffers::GenerateShaderStorageBuffer(ClippedOutInd, sizeof(VOutRaw), 5);
 
 	void* inTetPtr = ::DataBuffers::MapBufferMemory(InTetsInd, sizeof(InTets));
 
@@ -412,44 +159,46 @@ void Voronoi::CreateMeshFractureGPU(VoronoiSSBOIn* buffer, Array<Vector3D> point
 	clippingCompute.WaitForCompletion();
 
 	TimeBeforeComputation = glfwGetTime() - TimeBeforeComputation;
-
-	if (points.GetSize() == 10)
+	
+	if (bShouldRecord)
 	{
-		record.TenPointsClipping = std::to_string(TimeBeforeComputation);
+		if (points.GetSize() == 10)
+		{
+			record.TenPointsClipping = std::to_string(TimeBeforeComputation);
+		}
+		else if (points.GetSize() == 100)
+		{
+			record.OneHundredPointsClipping = std::to_string(TimeBeforeComputation);
+		}
+		else
+		{
+			record.OneThousandPointsClipping = std::to_string(TimeBeforeComputation);
+		}
+
+
+		DataRecorder::SaveDataRecord(record, "/ExperimentData/CellGenerationResults.json");
 	}
-	else if (points.GetSize() == 100)
-	{
-		record.OneHundredPointsClipping = std::to_string(TimeBeforeComputation);
+
+	if (bShouldDraw) {
+
+		void* ptr = ::DataBuffers::MapBufferMemory(ClippedOutInd, sizeof(VOutRaw));
+
+		VOutRaw* data = static_cast<VOutRaw*>(ptr);
+
+		for (size_t i = 0; i < points.GetSize(); i++)
+		{
+			if (data->CutCells[i].NumInds == 0)
+			{
+				continue;
+			}
+
+			GPUFractures.Add(FracturePieceGPU(data->CutCells[i], points[i]));
+			GPUFractures.GetLastPtr()->transform = FracturePositions;
+		}
+
+
+		::DataBuffers::UnMapBufferMemory(ClippedOutInd);
 	}
-	else
-	{
-		record.OneThousandPointsClipping = std::to_string(TimeBeforeComputation);
-	}
-
-
-	DataRecorder::SaveDataRecord(record, "/ExperimentData/CellGenerationResults.json");
-
-	//void* ptr = ::DataBuffers::MapBufferMemory(ClippedOutInd, sizeof(VOutLarge));
-	////void* ptr = ::DataBuffers::MapBufferMemory(ClippedOutInd, sizeof(VOutUnTried));
-
-	//VOutLarge* data = static_cast<VOutLarge*>(ptr);
-	////VOutUnTried* data = static_cast<VOutUnTried*>(ptr);
-
-	//std::cout << "Num Cells: " << data->NumCells << std::endl;
-
-	//for (size_t i = 0; i < points.GetSize(); i++)
-	//{
-	//	if (data->CutCells[i].NumInds == 0 || data->CutCells[i].NumVerts > 5000)
-	//	{
-	//		continue;
-	//	}
-
-	//	GPUFractures.Add(FracturePieceGPU(data->CutCells[i], points[i]));
-	//}
-
-
-	//::DataBuffers::UnMapBufferMemory(ClippedOutInd);
-
 	::DataBuffers::RemoveBuffer(VoronoiIn);
 	::DataBuffers::RemoveBuffer(VoronoiOut);
 	::DataBuffers::RemoveBuffer(InTetsInd);
@@ -457,21 +206,12 @@ void Voronoi::CreateMeshFractureGPU(VoronoiSSBOIn* buffer, Array<Vector3D> point
 	::DataBuffers::RemoveBuffer(WBuffer);
 }
 
-void Voronoi::FracturePlaneRandomGPU(Model& InModel, const size_t& NumPoints, const size_t& PointSetIndex)
+void Voronoi::TetrahedraliseMesh(const Model& InModel, InTets& tets)
 {
-
-	InTets tets;
-	tets.NumTets = 0;
-
 	for (const auto& subMesh : InModel.Meshes) {
 
-		//CGAL::Surface_mesh<K::Point_3> dtPoints;
 		std::vector<K::Point_3> dtPoints;
 		dtPoints.reserve(subMesh.Vertices.GetSize());
-
-		//if (!CGAL::IO::read_polygon_mesh("D:/Comp303-SL295211-VoronoiClipping/Engine/Contents/Models/Bunny/Bunny.obj", dtPoints)) {
-		//	std::cerr << "Error: cannot read file "  << std::endl;
-		//}
 
 		std::vector<std::vector<uint16_t>> inds;
 		inds.reserve(subMesh.Indices.GetSize() / 3);
@@ -485,7 +225,7 @@ void Voronoi::FracturePlaneRandomGPU(Model& InModel, const size_t& NumPoints, co
 
 		for (const auto& p : subMesh.Vertices)
 		{
-			dtPoints.push_back({ p.Position.X, p.Position.Y, p.Position.Z });
+			dtPoints.emplace_back(p.Position.X, p.Position.Y, p.Position.Z);
 		}
 
 		auto dt = CGAL::make_conforming_constrained_Delaunay_triangulation_3(dtPoints, inds);
@@ -510,16 +250,26 @@ void Voronoi::FracturePlaneRandomGPU(Model& InModel, const size_t& NumPoints, co
 
 		}
 	}
+}
+
+void Voronoi::FracturePlaneRandomGPU(Model& InModel, const size_t& NumPoints, const size_t& PointSetIndex)
+{
+
+	InTets tets;
+	tets.NumTets = 0;
+
+	TetrahedraliseMesh(InModel, tets);
 
 	VoronoiSSBOIn* buffer = new VoronoiSSBOIn;
 	VOut* vOut = new VOut;
-	VOutLarge* ClippedOut = new VOutLarge;
-	VOutUnTried* OutUnTried = new VOutUnTried;
+	VOutRaw* ClippedOut = new VOutRaw;
 
 	vOut->NumCells = 0;
 	vOut->DebugNum = 10;
 	ClippedOut->NumCells = 0;
 	ClippedOut->DebugNum = 10;
+
+	// Add mesh bounding box faces to buffer
 
 	for (size_t i = 0; i < InModel.BoundingBox->Faces.GetSize(); i++)
 	{
@@ -531,7 +281,7 @@ void Voronoi::FracturePlaneRandomGPU(Model& InModel, const size_t& NumPoints, co
 		buffer->BoundingBoxFaces[i].NumVerts = face.Vertices.GetSize();
 	}
 
-	std::string DataToLoad = "/ExperimentData/SetOfTen.txt";;
+	std::string DataToLoad = "/ExperimentData/SetOfTen.txt";
 
 	GLuint VoronoiIn, VoronoiOut, ClippedOutInd, InTetsInd, wBuffer;
 
@@ -557,7 +307,7 @@ void Voronoi::FracturePlaneRandomGPU(Model& InModel, const size_t& NumPoints, co
 		}
 		buffer->NumPoints = points.GetSize();
 
-		CreateMeshFractureGPU(buffer, points, tets, VoronoiIn, VoronoiOut, ClippedOutInd, InTetsInd, wBuffer);
+		CreateMeshFractureGPU(buffer, points, tets, VoronoiIn, VoronoiOut, ClippedOutInd, InTetsInd, wBuffer, false, true);
 	}
 
 
@@ -579,38 +329,103 @@ void Voronoi::FracturePlaneRandomGPU(Model& InModel, const size_t& NumPoints, co
 		}
 		buffer->NumPoints = points.GetSize();
 
-		CreateMeshFractureGPU(buffer, points, tets, VoronoiIn, VoronoiOut, ClippedOutInd, InTetsInd,wBuffer);
+		CreateMeshFractureGPU(buffer, points, tets, VoronoiIn, VoronoiOut, ClippedOutInd, InTetsInd,wBuffer, false, true);
 	}
-
-	//DataToLoad = "/ExperimentData/SetOfThousand.txt";
-
-	//numPoints = 1000;
-
-	//for (size_t i = 1; i < 2; i++)
-	//{
-	//	Array<Vector3D> points;
-
-	//	const Vector2D range = { i * numPoints, ((i + 1) * numPoints) };
-
-	//	UFileWriter::Load(DataToLoad, points, range);
-
-	//	for (size_t i = 0; i < points.GetSize(); i++)
-	//	{
-	//		buffer->Points[i] = points[i];
-	//	}
-	//	buffer->NumPoints = points.GetSize();
-
-	//	CreateMeshFractureGPU(buffer, points, tets, VoronoiIn, VoronoiOut, ClippedOutInd, InTetsInd, OutUnTried);
-	//}
 
 	delete buffer;
 	delete vOut;
-	delete OutUnTried;
 	delete ClippedOut;
 
 }
 
-Array<Vector3D> Voronoi::GenerateRandomPointsInBounds(Model& InModel, const size_t& NumPoints, Array<Vector3D>& Points)
+void Voronoi::FracturePlaneRandomGPU(Model& InModel, const size_t& NumPoints, const size_t& PointSetIndex,
+                                     const bool& bShouldDraw)
+{
+
+	InTets tets;
+	tets.NumTets = 0;
+
+	TetrahedraliseMesh(InModel, tets);
+
+	VoronoiSSBOIn* buffer = new VoronoiSSBOIn;
+	VOut* vOut = new VOut;
+	VOutRaw* ClippedOut = new VOutRaw;
+
+	vOut->NumCells = 0;
+	vOut->DebugNum = 10;
+	ClippedOut->NumCells = 0;
+	ClippedOut->DebugNum = 10;
+
+	// Add mesh bounding box faces to buffer
+
+	for (size_t i = 0; i < InModel.BoundingBox->Faces.GetSize(); i++)
+	{
+		Face& face = InModel.BoundingBox->Faces[i];
+		for (size_t j = 0; j < face.Vertices.GetSize(); j++)
+		{
+			buffer->BoundingBoxFaces[i].Verts[j] = face.Vertices[j];
+		}
+		buffer->BoundingBoxFaces[i].NumVerts = face.Vertices.GetSize();
+	}
+
+
+
+	GLuint VoronoiIn, VoronoiOut, ClippedOutInd, InTetsInd, wBuffer;
+
+	::DataBuffers::GenBuffer(VoronoiIn);
+	::DataBuffers::GenBuffer(VoronoiOut);
+	::DataBuffers::GenBuffer(ClippedOutInd);
+	::DataBuffers::GenBuffer(InTetsInd);
+	::DataBuffers::GenBuffer(wBuffer);
+
+	
+	if (NumPoints == 10)
+	{
+		std::string DataToLoad = "/ExperimentData/SetOfTen.txt";
+
+		Array<Vector3D> points;
+
+		const Vector2D range = { PointSetIndex * NumPoints, ((PointSetIndex + 1) * NumPoints) };
+
+		UFileWriter::Load(DataToLoad, points, range);
+
+		for (size_t i = 0; i < points.GetSize(); i++)
+		{
+			buffer->Points[i] = points[i];
+		}
+		buffer->NumPoints = points.GetSize();
+
+		CreateMeshFractureGPU(buffer, points, tets, VoronoiIn, VoronoiOut, ClippedOutInd, InTetsInd, wBuffer, bShouldDraw, false);
+	}
+	else
+	{
+		std::string DataToLoad = "/ExperimentData/SetOfHundred.txt";
+
+		Array<Vector3D> points;
+
+		const Vector2D range = { PointSetIndex * NumPoints, ((PointSetIndex + 1) * NumPoints) };
+
+		UFileWriter::Load(DataToLoad, points, range);
+
+		for (size_t i = 0; i < points.GetSize(); i++)
+		{
+			buffer->Points[i] = points[i];
+		}
+		buffer->NumPoints = points.GetSize();
+
+		CreateMeshFractureGPU(buffer, points, tets, VoronoiIn, VoronoiOut, ClippedOutInd, InTetsInd, wBuffer, bShouldDraw, false);
+		
+	}
+
+
+	
+
+	delete buffer;
+	delete vOut;
+	delete ClippedOut;
+}
+
+Array<Vector3D> Voronoi::GenerateRandomPointsInBounds(const Model& InModel, const size_t& NumPoints, Array<Vector3D>& Points)
 {
 	Points.Reallocate(NumPoints);
 
@@ -898,7 +713,7 @@ void Voronoi::GenerateVoronoiCellsDelaunay(const Array<Vector3D>& Points, const 
 
 }
 
-void Voronoi::GenerateNewPointSets(Model& InModel)
+void Voronoi::GenerateNewPointSets(const Model& InModel)
 {
 	Array<Vector3D> TenPoints;
 	TenPoints.ReSize(10 * 145);
@@ -925,35 +740,7 @@ void Voronoi::GenerateNewPointSets(Model& InModel)
 	UFileWriter::SaveArray("/ExperimentData/SetOfHundred.txt", HundredPoints);
 	UFileWriter::SaveArray("/ExperimentData/SetOfThousand.txt", ThousandPoints);
 }
-void FracturePieceGPU::AddOrMakeInd(const Vector4D& Vert)
-{
-	//size_t index = 0;
-	//if (Verts.Contains(Vert, index))
-	//{
-	//	Inds.Add(index);
-	//}
-	//else
-	//{
-	//	Inds.Add(Verts.GetSize());
-	//	Verts.Add(Vert);
-	//}
-}
 
-void FracturePieceGPU::TriangulateCell(const Cell cell)
-{
-	for (size_t j = 0; j < cell.NumFaces; j++)
-	{
-		for (size_t i = 1; i + 1 < cell.Faces[j].NumVerts; i++)
-		{
-			AddOrMakeInd(cell.Faces[j].Verts[0]);
-
-			AddOrMakeInd(cell.Faces[j].Verts[i]);
-
-			AddOrMakeInd(cell.Faces[j].Verts[i + 1]);
-
-		}
-	}
-}
 void FracturePieceGPU::AddOrMakeInd(const Vector3D& Vert)
 {
 	size_t index = 0;
@@ -984,46 +771,11 @@ void FracturePieceGPU::TriangulateCell(const Array<Face>& cell)
 	}
 }
 
-
-FracturePieceGPU::FracturePieceGPU(LargeCell& InVoronoiOut, const Vector3D& InPoint)
-{
-
-	for (size_t j = 0; j <  InVoronoiOut.NumFaces; j++)
-	{
-		Facew* face = &InVoronoiOut.Faces[j];
-		Face newFace;
-		for (size_t i = 0; i < face->NumVerts; i++)
-		{
-			Vector3D vert = Vector3D(face->Verts[i].X, face->Verts[i].Y, face->Verts[i].Z);
-			newFace.Vertices.Add(vert);
-		}
-		CellFaces.Add(newFace);
-	}
-
-	TriangulateCell(CellFaces);
-
-	SetupControls(InPoint);
-
-	::DataBuffers::GenBuffer(VAO);
-
-	DataBuffers::BindVertexInfo(VAO, 0, 0, sizeof(Vector3D), 0, Vector3);
-
-	::DataBuffers::BufferData(VAO, Verts.GetSize() * sizeof(Vector3D), Verts.GetFirstPtr(), BufferTargets::VERTEX);
-	DataBuffers::BufferDataIndex(VAO, Inds.GetSize() * sizeof(uint16_t), Inds.GetFirstPtr());
-
-	::Renderer::AddFracture(this);
-
-	shader = Shader("ColorShape", "/Shaders/");
-
-	color = Vector3D::RandomRange(Vector3D(30, 30, 30), Vector3D(255, 255, 255));
-	NumInds = Inds.GetSize();
-}
-
 FracturePieceGPU::FracturePieceGPU(Cell& InVoronoiOut, const Vector3D& InPoint)
 {
 	for (size_t j = 0; j < InVoronoiOut.NumFaces; j++)
 	{
-		Facew* face = &InVoronoiOut.Faces[j];
+		FixedSizeFace* face = &InVoronoiOut.Faces[j];
 		Face newFace;
 		for (size_t i = 0; i < face->NumVerts; i++)
 		{

@@ -1,5 +1,4 @@
-// DO NOT MARK.
-//This is because it has been submitted for my dissertation. Link to Original: https://github.falmouth.ac.uk/GA-Undergrad-Student-Work-25-26/Dissertation-SL295211.git
+
 
 
 #pragma once
@@ -45,10 +44,7 @@ namespace OpenGL {
 
 		const unsigned int vertex = CompileVertex();
 
-		if (vertex == -1)
-		{
-			return;
-		}
+		assert(vertex != -1);
 
 		if (!DoesGeometryShaderExist())
 		{
@@ -64,10 +60,7 @@ namespace OpenGL {
 
 		const unsigned int geometry = CompileGeometry();
 
-		if (geometry == -1)
-		{
-			return;
-		}
+		assert(geometry != -1);
 
 		if (!DoesFragmentShaderExist())
 		{
@@ -83,10 +76,7 @@ namespace OpenGL {
 
 		const unsigned int fragment = CompileFragment();
 
-		if (fragment == -1)
-		{
-			return;
-		}
+		assert(fragment != -1);
 
 		CreateProgram(vertex, fragment, geometry);
 
@@ -94,16 +84,9 @@ namespace OpenGL {
 
 		GLuint LocalSize = sizeof(PerInstanceTransforms);
 
-		GLuint VoronoiSize = sizeof(VoronoiCellInstanceInfo);
-
-		Array<GLuint> sizes = { GlobalSize, LocalSize, VoronoiSize };
+		Array<GLuint> sizes = { GlobalSize, LocalSize };
 
 		size_t index = 0;
-		error = glGetError();
-		if (error != GL_NO_ERROR)
-		{
-			std::cout << "ERROR::UNIFORMBUFFER::" << std::to_string(error) << std::endl;
-		}
 
 		for (const auto& size : sizes)
 		{

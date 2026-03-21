@@ -7,7 +7,7 @@
 #include "DataBuffers.h"
 #include "MathCore.h"
 #include "ObjectFactory.h"
-#include "SutherlandHodegman.h"
+#include "SutherlandHodgeman.h"
 #include <CGAL/Exact_predicates_inexact_constructions_kernel.h>
 #include <CGAL/Delaunay_triangulation_3.h>
 #include <CGAL/Exact_predicates_inexact_constructions_kernel.h>

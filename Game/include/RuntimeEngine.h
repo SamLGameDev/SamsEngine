@@ -1,31 +1,33 @@
-// DO NOT MARK.
-//This is because it has been submitted for my dissertation. Link to Original: https://github.falmouth.ac.uk/GA-Undergrad-Student-Work-25-26/Dissertation-SL295211.git
+
 
 #pragma once
 
 #include "ErrorCodes.h"
 #include "SubsystemInitialiser.h"
 
-class RuntimeEngine
-{
-public:
+namespace OpenGL {
 
-	RuntimeEngine() = default;
+	class RuntimeEngine
+	{
+	public:
 
-	ErrorCodes Init();
+		RuntimeEngine() = default;
 
-	ErrorCodes Loop();
+		ErrorCodes Init();
 
-	ErrorCodes ShutDown();
+		ErrorCodes Loop();
 
-	static bool ShouldClose();
+		ErrorCodes ShutDown();
 
-private:
+		static bool ShouldClose();
 
-	SubsystemInitialiser* SubsystemManager;
+	private:
 
-	double TimeLastFrame;
+		SubsystemInitialiser* SubsystemManager;
 
-	GLsync Gsync;
+		double TimeLastFrame;
 
-};
+		GLsync Gsync;
+
+	};
+}

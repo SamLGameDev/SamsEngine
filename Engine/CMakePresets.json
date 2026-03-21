@@ -9,7 +9,7 @@
         "CMAKE_BUILD_TYPE": "Debug",
         "CMAKE_TOOLCHAIN_FILE": "$env{VCPKG_ROOT}/scripts/buildsystems/vcpkg.cmake"
       },
-      "installDir": "D:\\Comp305-Engine-SL295211\\Game"
+      "installDir": "D:\\Comp303-SL295211-VoronoiClipping\\Game"
     },
     {
       "name": "windows-release",
@@ -18,7 +18,8 @@
       "cacheVariables": {
         "CMAKE_BUILD_TYPE": "Release",
         "CMAKE_TOOLCHAIN_FILE": "$env{VCPKG_ROOT}/scripts/buildsystems/vcpkg.cmake"
-      }
+      },
+      "installDir": "D:\\Comp303-SL295211-VoronoiClipping\\Game"
     }
   ]
 }

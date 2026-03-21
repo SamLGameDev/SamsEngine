@@ -1,3 +1,5 @@
+// DO NOT MARK 
+//This is because it has been submitted for my COMP305. Link to Original: https://github.falmouth.ac.uk/GA-Undergrad-Student-Work-25-26/Comp305-Engine-SL295211.git
 #pragma once
 
 #include "Vector3D.h"
@@ -98,7 +100,8 @@ public:
 	[[nodiscard]] Vector3D GetRandomPointInBounds() const;
 
 	//TODO make it so these arent reliant in being set in the model
-	Vector3D HighestPoints, LowestPoints = Vector3D::Zero;
+	Vector3D HighestPoints = Vector3D::NumericMin;
+	Vector3D LowestPoints = Vector3D::NumericMax;
 
 	[[nodiscard]] glm::mat4 GetModelMatrix() const;
 
