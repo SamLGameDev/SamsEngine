@@ -11,13 +11,6 @@
         <li>
         <a href="#methodology">Methodology</a>
     </li>
-        <li>
-        <a href="#optimisation">Optimisation</a>
-           <ul>
-        <li><a href="#cpu">CPU</a></li>
-        <li><a href="#memory">Memory</a></li>
-        <li><a href="#gpu">GPU</a></li>
-      </ul>
     </li>
          <li>
         <a href="#references">References</a>
@@ -27,6 +20,9 @@
     </li>
     <li>
         <a href="#video">Video</a>
+    </li>
+    <li>
+        <a href="#design-rational">Design Rational</a>
     </li>
     <li><a href="#building-this-project">Building this project</a></li>
         <li><a href="#controls">Controls</a></li>
@@ -207,7 +203,16 @@ https://samlgamedev.github.io/samsenginedocs.github.io/
 
 https://github.falmouth.ac.uk/user-attachments/assets/d35caa09-7ed5-4391-865a-00898ac367f4
 
+## Design Rational
 
+### Bridge interface
+For this project, as I am testing both OpenGL and Vulkan, I decided to use a bridge interaface between API's. This was to follow DRY principles, and reduce code duplication. It was also to increase maintainability as it would reduce the workload if furture API's such as Direct X were to be added. Anothr beneift was that is restricted me to only use functions that both API's could use, ensuring implimentations were similar which was important for my experiment. The alternatives were to impliment seperate versions of the API, but that would not have been as scalable, though it would have allowed me to make full use of the API. 
+
+### Voronoi cell generation
+I went with half plane clipping for my cell generation. This was due to the ease of implimentation, and limitations of the GPU. More complex methods would have been unsuitable for GPU archetexture, and would have increased the difficulty of implimentation, whilst not neccessarily increasing performance. Alternative methods are those such as fortunes algorithm, though this would need adaption for 3D, and extraction from a deluanay triangulation.
+
+### Clipping
+I went with half plane clipping again for the clipping process, this was due to the ease of implimentation, and its suitaility for GPU archetexture. Tetrahedrons were neccessary to clip against instead of triangles due to artefacting when using triangles. This occurs becuase triangles can clip part of the cell that is inside the mesh, due to how the mesh is structured. For example, if part of the mesh is sticking out like a spike, it would only clip the spike, not the rest of the mesh.
 
 ## References
 
