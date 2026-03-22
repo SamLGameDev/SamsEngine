@@ -119,6 +119,11 @@ public:
 		return X <= Value.X && Y <= Value.Y && Z <= Value.Z;
 	}
 
+	[[nodiscard]] bool operator<=(const double& Value) const
+	{
+		return X <= Value && Y <= Value && Z <= Value;
+	}
+
 	[[nodiscard]] Vector3D Normalised() const;
 
 	[[nodiscard]] float GetLength() const;
@@ -185,6 +190,13 @@ public:
 [[nodiscard]] inline Vector3D operator*(const float& Multiplier, const Vector3D& Vec)
 {
 	return Vec * Multiplier;
+}
+
+
+inline std::ostream& operator<<(std::ostream& os, const Vector3D& V)
+{
+	os << "{ " << V.X << ", " << V.Y << ", " << V.Z << " }";
+	return os;
 }
 struct AnglePointPair
 {

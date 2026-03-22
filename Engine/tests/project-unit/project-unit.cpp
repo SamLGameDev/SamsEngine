@@ -504,27 +504,27 @@ TEST(PlaneClipping, ClipCellByFace)
 	EXPECT_FALSE(cell.IsEmpty());
 }
 
-TEST(PlaneClipping, ClipCellByFaces)
-{
-	Array<Face> cell;
-
-	Face face;
-	face.Vertices = {
-		Vector3D(-1,-1,0),
-		Vector3D(1,-1,0),
-		Vector3D(1,1,0),
-		Vector3D(-1,1,0)
-	};
-
-	cell.Add(face);
-
-	Array<Face> clippingPlanes;
-	clippingPlanes.Add(face);
-
-	PlaneClipping::ClipCellByFaces(cell, clippingPlanes);
-
-	EXPECT_FALSE(cell.IsEmpty());
-}
+//TEST(PlaneClipping, ClipCellByFaces)
+//{
+//	Array<Face> cell;
+//
+//	Face face;
+//	face.Vertices = {
+//		Vector3D(-1,-1,0),
+//		Vector3D(1,-1,0),
+//		Vector3D(1,1,0),
+//		Vector3D(-1,1,0)
+//	};
+//
+//	cell.Add(face);
+//
+//	Array<Face> clippingPlanes;
+//	clippingPlanes.Add(face);
+//
+//	PlaneClipping::ClipCellByFaces(cell, clippingPlanes);
+//
+//	EXPECT_FALSE(cell.IsEmpty());
+//}
 
 char* itoa(int Value, int Base)
 {

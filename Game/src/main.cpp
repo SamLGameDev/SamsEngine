@@ -15,7 +15,6 @@
 
 void RunEngine(Vulkan::RuntimeEngine engine)
 {
-
 	Model model = Model("/Models/Asteroid/rock.obj", Shader("BasicTexture", "/Shaders/"));
 	model.ModelTransform.Position = { 5, 0, 0 };
 	Voronoi vorn;

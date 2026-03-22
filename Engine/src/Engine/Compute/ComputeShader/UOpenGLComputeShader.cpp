@@ -31,11 +31,6 @@ namespace OpenGL {
 
 	}
 
-	UOpenGLComputeShader::~UOpenGLComputeShader()
-	{
-		glDeleteProgram(ID);
-	}
-
 	void UOpenGLComputeShader::Use()
 	{
 		glUseProgram(ID);
