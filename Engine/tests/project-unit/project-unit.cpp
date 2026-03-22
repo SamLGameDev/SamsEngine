@@ -774,28 +774,21 @@ void RunEngineDelaunay(Vulkan::RuntimeEngine& engine)
 void RunEngineOpenGL(OpenGL::RuntimeEngine engine)
 {
 	Model model = Model("/Models/Asteroid/rock.obj", Shader("BasicTexture", "/Shaders/"));
-	//Model model = Model("/Models/Bunny/Bunny.obj", Shader("ColorShape", "/Shaders/"));
-
-	Voronoi vorn;
-	//vorn.GenerateNewPointSets(model);
-	vorn.FracturePlaneRandomGPU(model, 10, 0, true);
-	//glm::mat4 modelMat = model.ModelTransform.GetModelMatrix();
-
 	model.ModelTransform.Position = { 5, 0, 0 };
+	Voronoi vorn;
+	vorn.FracturePositions.Position = { 0, 0, 0 };
+	vorn.FracturePlaneRandomGPU(model, 10, 0, true);
 
-	
-//	FracturePieceGPU fracturePiece(VoronoiOut);
-
-	//Voronoi vorn2;
-	//vorn2.FracturePlaneRandom(model, 1000, 1);
-	//std::cout << "Generated Voronoi Diagram with " << vorn.Fractures.GetSize() << " cells." << std::endl;
-	//VoronoiClipping clipper;
-	//clipper.ClipMeshToVoronoi(vorn2, model);
+	Voronoi vorn100;
+	vorn100.FracturePositions.Position = { 10, 0 ,0 };
+	vorn100.FracturePlaneRandomGPU(model, 100, 0, true);
 
 	while (!engine.ShouldClose())
 	{
 		engine.Loop();
 	}
+
+	Vulkan::RuntimeEngine::WaitForFrameToFinish();
 }
 
 void OpenGLTest()

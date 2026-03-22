@@ -29,8 +29,6 @@ void RunEngine(OpenGL::RuntimeEngine engine)
 	{
 		engine.Loop();
 	}
-
-	Vulkan::RuntimeEngine::WaitForFrameToFinish();
 }
 
 void EnginePlane()
