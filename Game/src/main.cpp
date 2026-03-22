@@ -13,7 +13,7 @@
 #include <Voronoi2D.h>
 #include <RuntimeEngineVulkan.h>
 
-void RunEngine(Vulkan::RuntimeEngine engine)
+void RunEngine(OpenGL::RuntimeEngine engine)
 {
 	Model model = Model("/Models/Asteroid/rock.obj", Shader("BasicTexture", "/Shaders/"));
 	model.ModelTransform.Position = { 5, 0, 0 };
@@ -35,7 +35,7 @@ void RunEngine(Vulkan::RuntimeEngine engine)
 
 void EnginePlane()
 {
-	Vulkan::RuntimeEngine engine;
+	OpenGL::RuntimeEngine engine;
 	engine.Init();
 
 	RunEngine(engine);
