@@ -693,58 +693,17 @@ TEST(Tringulation, Delauney)
 void RunEngine(Vulkan::RuntimeEngine& engine)
 {
 
-	//Model model = Model("/Models/BackPack/backpack.obj", Shader("BasicTexture", "/Shaders/"));
 	Model model = Model("/Models/Asteroid/rock.obj", Shader("ColorShape", "/Shaders/"));
-	//Model model = Model("/Models/Bunny/Bunny.obj", Shader("ColorShape", "/Shaders/"));
-	//Model model = Model("/Models/SkyBox/SkyBox.obj", Shader("ColorShape", "/Shaders/"));
 	model.ModelTransform.Position = { 5, 0, 0 };
 
-	for (size_t i = 0; i < 1; i++)
-	{
-		Voronoi vorn;
-		//vorn.GenerateNewPointSets(model);
-		vorn.FracturePlaneRandom(model, 10, i);
-
-		//VoronoiClipping clipper;
-		//clipper.ClipMeshToVoronoi(vorn, model);
-		//engine.Loop();
-
-		//Vulkan::RuntimeEngine::WaitForFrameToFinish();
-	}
-
-
-	//for (size_t i = 0; i < 145; i++)
-	//{
-	//	Voronoi vorn;
-	//	//vorn.GenerateNewPointSets(model);
-	//	vorn.FracturePlaneRandom(model, 100, i);
-
-	//	//VoronoiClipping clipper;
-	//	//clipper.ClipMeshToVoronoi(vorn, model);
-	//	engine.Loop();
-
-	//	Vulkan::RuntimeEngine::WaitForFrameToFinish();
-	//}
-
-	//for (size_t i = 0; i < 145; i++)
-	//{
-	//	Voronoi vorn;
-	//	//vorn.GenerateNewPointSets(model);
-	//	vorn.FracturePlaneRandom(model, 1000, i);
-
-	//	VoronoiClipping clipper;
-	//	clipper.ClipMeshToVoronoi(vorn, model);
-	//	engine.Loop();
-
-	//	Vulkan::RuntimeEngine::WaitForFrameToFinish();
-	//}
-
+	Voronoi vorn;
+	vorn.FracturePlaneRandomGPU(model);
 
 	while (!engine.ShouldClose())
 	{
 		engine.Loop();
 	}
-
+	Vulkan::RuntimeEngine::WaitForFrameToFinish();
 }
 
 void EnginePlane()
@@ -763,7 +722,7 @@ void RunEngineDelaunay(Vulkan::RuntimeEngine& engine)
 	Model model = Model("/Models/Asteroid/rock.obj", Shader("ColorShape", "/Shaders/"));
 	model.ModelTransform.Position = { 5, 0, 0 };
 	Voronoi vorn;
-	vorn.FracturePlaneRandomGPU(model, 10, 0);
+	vorn.FracturePlaneRandomGPU(model);
 	//std::cout << "Generated Voronoi Diagram with " << vorn.Fractures.GetSize() << " cells." << std::endl;
 	//VoronoiClipping clipper;
 	//clipper.ClipMeshToVoronoi(vorn, model);
@@ -778,19 +737,9 @@ void RunEngineOpenGL(OpenGL::RuntimeEngine engine)
 
 	Voronoi vorn;
 	//vorn.GenerateNewPointSets(model);
-	vorn.FracturePlaneRandomGPU(model, 10, 0, true);
-	//glm::mat4 modelMat = model.ModelTransform.GetModelMatrix();
+	vorn.FracturePlaneRandomGPU(model);
 
 	model.ModelTransform.Position = { 5, 0, 0 };
-
-	
-//	FracturePieceGPU fracturePiece(VoronoiOut);
-
-	//Voronoi vorn2;
-	//vorn2.FracturePlaneRandom(model, 1000, 1);
-	//std::cout << "Generated Voronoi Diagram with " << vorn.Fractures.GetSize() << " cells." << std::endl;
-	//VoronoiClipping clipper;
-	//clipper.ClipMeshToVoronoi(vorn2, model);
 
 	while (!engine.ShouldClose())
 	{
@@ -820,7 +769,7 @@ void EngineDelaunay()
 }
 
 TEST(Fracturing, Diagram) {
-	//EnginePlane();
+	EnginePlane();
 
 	//EngineDelaunay();
 	OpenGLTest();

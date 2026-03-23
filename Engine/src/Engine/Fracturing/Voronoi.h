@@ -11,6 +11,8 @@
 #include "InterfaceRenderer.h"
 #include "Vector3D.h"
 #include "Model.h"
+#include "PerformanceRecord.h"
+#include "UComputeShader.h"
 #include "Vector4D.h"
 #include "WireShapes.h"
 #include "WorldObject.h"
@@ -399,13 +401,23 @@ public:
 
 	//Fracture the model into a voronoi diagram based on random points
 	void FracturePlaneRandom(Model& InModel, const size_t& NumPoints, const size_t& PointSetIndex);
-	void CreateMeshFractureGPU(VoronoiSSBOIn* buffer, Array<Vector3D> points, InTets tets, GLuint VoronoiIn,
-	                           GLuint VoronoiOut, GLuint ClippedOutInd, GLuint InTetsInd, GLuint WBuffer, const bool& bShouldDraw, const bool&
-	                           bShouldRecord);
+	void GenerateCellGPU(VoronoiSSBOIn* Buffer, const Array<Vector3D>& Points, const GLuint& VoronoiIn, const GLuint& VoronoiOut,
+	                     const GLuint& WBuffer,
+	                     double& TimeBeforeComputation);
+	void GenerateClippedCellGPU(const Array<Vector3D>& Points, const InTets& Tets, const GLuint& VoronoiOut, const GLuint& ClippedOutInd,
+	                            const GLuint& InTetsInd, const GLuint& WBuffer, double& TimeBeforeComputation);
+	void CleanUpBuffers(const GLuint& VoronoiIn, const GLuint& VoronoiOut, const GLuint& ClippedOutInd, const GLuint& InTetsInd, const GLuint&
+	                    WBuffer);
+	void DrawFractures(const Array<Vector3D>& points, const GLuint& ClippedOutInd);
+	void CreateMeshFractureGPU(VoronoiSSBOIn* Buffer, const Array<Vector3D>& Points, const InTets& Tets, const GLuint& VoronoiIn,
+	                           const GLuint& VoronoiOut, const GLuint& ClippedOutInd, const GLuint& InTetsInd, const GLuint& WBuffer);
+	void CreateMeshFractureGPU(VoronoiSSBOIn* Buffer, const Array<Vector3D>& Points,
+	                           const InTets& Tets, const GLuint& VoronoiIn, const GLuint& VoronoiOut, const GLuint& ClippedOutInd,
+	                           const GLuint& InTetsInd, const GLuint& WBuffer, PointEntry& Entry);
 	static void TetrahedraliseMesh(const Model& InModel, InTets& tets);
 
 	//Fracture the model into a voronoi diagram based on random points
-	void FracturePlaneRandomGPU(Model& InModel, const size_t& NumPoints, const size_t& PointSetIndex);
+	void FracturePlaneRandomGPU(Model& InModel);
 
 
 	//Fracture the model into a voronoi diagram based on random points
