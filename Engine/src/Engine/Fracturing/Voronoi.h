@@ -42,13 +42,13 @@ struct alignas(16) RawCell
 
 struct alignas(16) FixedSizeFace
 {
-	Vector4D Verts[30];
+	Vector4D Verts[40];
 	uint32_t NumVerts;
 };
 
 struct alignas (16) Cell
 {
-	FixedSizeFace Faces[30];
+	FixedSizeFace Faces[40];
 	uint32_t NumFaces;
 	uint32_t padding[3];
 };
@@ -56,6 +56,8 @@ struct alignas (16) Cell
 struct alignas(16) WorkingBuffer
 {
 	Cell cells[100];
+	Cell Tempcells[100];
+	FixedSizeFace IntersectFaces[100];
 };
 
 struct alignas(16) VOut
@@ -63,7 +65,7 @@ struct alignas(16) VOut
 	uint32_t NumCells;
 	uint32_t DebugNum;
 	uint32_t _Padding[2];
-	Cell CutCells[1000];
+	Cell CutCells[100];
 
 };
 
@@ -72,7 +74,7 @@ struct alignas(16) VOutRaw
 	uint32_t NumCells;
 	uint32_t DebugNum;
 	uint32_t _Padding[2];
-	RawCell CutCells[1000];
+	RawCell CutCells[100];
 
 };
 
@@ -403,17 +405,19 @@ public:
 	void FracturePlaneRandom(Model& InModel, const size_t& NumPoints, const size_t& PointSetIndex);
 	void GenerateCellGPU(VoronoiSSBOIn* Buffer, const Array<Vector3D>& Points, const GLuint& VoronoiIn, const GLuint& VoronoiOut,
 	                     const GLuint& WBuffer,
-	                     double& TimeBeforeComputation);
+	                     double& TimeBeforeComputation, UComputeShader& VoronoiCompute);
 	void GenerateClippedCellGPU(const Array<Vector3D>& Points, const InTets& Tets, const GLuint& VoronoiOut, const GLuint& ClippedOutInd,
-	                            const GLuint& InTetsInd, const GLuint& WBuffer, double& TimeBeforeComputation);
+	                            const GLuint& InTetsInd, const GLuint& WBuffer, double& TimeBeforeComputation, UComputeShader& ClippingCompute);
 	void CleanUpBuffers(const GLuint& VoronoiIn, const GLuint& VoronoiOut, const GLuint& ClippedOutInd, const GLuint& InTetsInd, const GLuint&
 	                    WBuffer);
 	void DrawFractures(const Array<Vector3D>& points, const GLuint& ClippedOutInd);
 	void CreateMeshFractureGPU(VoronoiSSBOIn* Buffer, const Array<Vector3D>& Points, const InTets& Tets, const GLuint& VoronoiIn,
-	                           const GLuint& VoronoiOut, const GLuint& ClippedOutInd, const GLuint& InTetsInd, const GLuint& WBuffer);
+	                           const GLuint& VoronoiOut, const GLuint& ClippedOutInd, const GLuint& InTetsInd, const GLuint& WBuffer, UComputeShader&
+	                           VoronoiCompute, UComputeShader& ClippingCompute);
 	void CreateMeshFractureGPU(VoronoiSSBOIn* Buffer, const Array<Vector3D>& Points,
 	                           const InTets& Tets, const GLuint& VoronoiIn, const GLuint& VoronoiOut, const GLuint& ClippedOutInd,
-	                           const GLuint& InTetsInd, const GLuint& WBuffer, PointEntry& Entry);
+	                           const GLuint& InTetsInd, const GLuint& WBuffer, PointEntry& Entry, UComputeShader& VoronoiCompute, UComputeShader&
+	                           ClippingCompute);
 	static void TetrahedraliseMesh(const Model& InModel, InTets& tets);
 
 	//Fracture the model into a voronoi diagram based on random points
@@ -421,7 +425,7 @@ public:
 
 
 	//Fracture the model into a voronoi diagram based on random points
-	void FracturePlaneRandomGPU(Model& InModel, const size_t& NumPoints, const size_t& PointSetIndex, const bool& bShouldDraw);
+	void FracturePlaneRandomGPU(Model& InModel, const size_t& NumPoints, const size_t& PointSetIndex);
 
 	static Array<Vector3D> GenerateRandomPointsInBounds(const Model& InModel, const size_t& NumPoints, Array<Vector3D>& Points);
 

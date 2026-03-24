@@ -1,5 +1,6 @@
 #include "UVulkanComputeShader.h"
 
+#include <cassert>
 #include <iostream>
 
 #include "CorePaths.h"
@@ -126,9 +127,11 @@ namespace Vulkan
 	void UVulkanComputeShader::Dispatch(const size_t& NumGroupsX, const size_t& NumGroupsY,
 	                                    const size_t& NumGroupsZ)
 	{
-		vkDeviceWaitIdle(*SInstance::GetInstance()->GraphicsCard->GetLogicalDevice()->GetVulkanLogicalDevice());
 		vkWaitForFences(*SInstance::GetInstance()->GraphicsCard->GetLogicalDevice()->GetVulkanLogicalDevice(), 1, &ComputeFence, VK_TRUE, UINT64_MAX);
+		//VkResult res = vkGetFenceStatus(*SInstance::GetInstance()->GraphicsCard->GetLogicalDevice()->GetVulkanLogicalDevice(), ComputeFence);
+		//assert(res == VK_SUCCESS);
 		vkResetFences(*SInstance::GetInstance()->GraphicsCard->GetLogicalDevice()->GetVulkanLogicalDevice(), 1, &ComputeFence);
+
 		vkResetCommandBuffer(CommandBuffer, 0);
 		VkCommandBufferBeginInfo beginInfo{};
 		beginInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO;
@@ -166,6 +169,12 @@ namespace Vulkan
 	{
 		vkWaitForFences(*SInstance::GetInstance()->GraphicsCard->GetLogicalDevice()->GetVulkanLogicalDevice(),
 			1, &ComputeFence, VK_TRUE, UINT64_MAX);
+		VkResult res = vkGetFenceStatus(*SInstance::GetInstance()->GraphicsCard->GetLogicalDevice()->GetVulkanLogicalDevice(), ComputeFence);
+		if (res != VK_SUCCESS)
+		{
+			std::cerr << "GPU has crashed" << '\n';
+		}
+
 	}
 
 	std::shared_ptr<UBaseComputeShader> UVulkanComputeShader::CreateVulkanComputeShader(const std::string_view& InName,

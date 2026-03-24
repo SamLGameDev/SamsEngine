@@ -82,15 +82,18 @@ void Voronoi::FracturePlaneRandom(Model& InModel, const size_t& NumPoints, const
 }
 
 void Voronoi::GenerateCellGPU(VoronoiSSBOIn* Buffer, const Array<Vector3D>& Points, const GLuint& VoronoiIn, const GLuint& VoronoiOut, const GLuint&
-                              WBuffer, double& TimeBeforeComputation)
+                              WBuffer, double& TimeBeforeComputation, UComputeShader& VoronoiCompute)
 {
-	UComputeShader voronoiCompute = UComputeShader("VoronoiCellGeneration", "/Shaders/Voronoi/");
 
-	voronoiCompute.Use();
 
-	::DataBuffers::GenerateShaderStorageBuffer(VoronoiIn, sizeof(VoronoiSSBOIn), 1);
-	::DataBuffers::GenerateShaderStorageBuffer(VoronoiOut, sizeof(VOut), 3);
-	::DataBuffers::GenerateShaderStorageBuffer(WBuffer, sizeof(WorkingBuffer), 6);
+	VoronoiCompute.Use();
+
+	::DataBuffers::BindShaderStorageBuffer(VoronoiIn, 1, sizeof(VoronoiSSBOIn));
+
+
+	::DataBuffers::BindShaderStorageBuffer(VoronoiOut, 3, sizeof(VOut));
+
+	::DataBuffers::BindShaderStorageBuffer(WBuffer, 6, sizeof(WorkingBuffer));
 
 	void* inPtr = ::DataBuffers::MapBufferMemory(VoronoiIn, sizeof(VoronoiSSBOIn));
 
@@ -100,38 +103,46 @@ void Voronoi::GenerateCellGPU(VoronoiSSBOIn* Buffer, const Array<Vector3D>& Poin
 
 	::DataBuffers::UnMapBufferMemory(VoronoiIn);
 
+	void* outPtr = ::DataBuffers::MapBufferMemory(VoronoiOut, sizeof(VOut));
+
+	VOut* outData = static_cast<VOut*>(outPtr);
+
+	outData->NumCells = 0;
+
+	::DataBuffers::UnMapBufferMemory(VoronoiOut);
+
 	TimeBeforeComputation = glfwGetTime();
 
-	voronoiCompute.Dispatch(Points.GetSize(), 1, 1);
-	voronoiCompute.WaitForCompletion();
+	VoronoiCompute.Dispatch(Points.GetSize(), 1, 1);
+	VoronoiCompute.WaitForCompletion();
 
 	TimeBeforeComputation = glfwGetTime() - TimeBeforeComputation;
 }
 
 void Voronoi::GenerateClippedCellGPU(const Array<Vector3D>& Points, const InTets& Tets, const GLuint& VoronoiOut, const GLuint& ClippedOutInd, const GLuint&
-                                     InTetsInd, const GLuint& WBuffer, double& TimeBeforeComputation)
+                                     InTetsInd, const GLuint& WBuffer, double& TimeBeforeComputation, UComputeShader& ClippingCompute)
 {
-	UComputeShader clippingCompute = UComputeShader("VoronoiClipping", "/Shaders/Voronoi/");
-	clippingCompute.Use();
+	ClippingCompute.Use();
 	::DataBuffers::BindShaderStorageBuffer(VoronoiOut, 3, sizeof(VOut));
 
 	::DataBuffers::BindShaderStorageBuffer(WBuffer, 6, sizeof(WorkingBuffer));
 
-	::DataBuffers::GenerateShaderStorageBuffer(InTetsInd, sizeof(InTets), 4);
-	::DataBuffers::GenerateShaderStorageBuffer(ClippedOutInd, sizeof(VOutRaw), 5);
+	::DataBuffers::BindShaderStorageBuffer(InTetsInd, 4, sizeof(InTets));
 
-	void* inTetPtr = ::DataBuffers::MapBufferMemory(InTetsInd, sizeof(InTets));
+	::DataBuffers::BindShaderStorageBuffer(ClippedOutInd, 5, sizeof(VOutRaw));
 
-	InTets* inTetsData = static_cast<InTets*>(inTetPtr);
+	void* outPtr = ::DataBuffers::MapBufferMemory(ClippedOutInd, sizeof(VOutRaw));
 
-	memcpy(inTetsData, &Tets, sizeof(InTets));
+	VOutRaw* outData = static_cast<VOutRaw*>(outPtr);
 
-	::DataBuffers::UnMapBufferMemory(InTetsInd);
+	outData->NumCells = 0;
+
+	::DataBuffers::UnMapBufferMemory(ClippedOutInd);
 
 	TimeBeforeComputation = glfwGetTime();
 
-	clippingCompute.Dispatch(Points.GetSize(), 1, 1);
-	clippingCompute.WaitForCompletion();
+	ClippingCompute.Dispatch(Points.GetSize(), 1, 1);
+	ClippingCompute.WaitForCompletion();
 
 	TimeBeforeComputation = glfwGetTime() - TimeBeforeComputation;
 }
@@ -167,36 +178,34 @@ void Voronoi::DrawFractures(const Array<Vector3D>& points, const GLuint& Clipped
 
 void Voronoi::CreateMeshFractureGPU(VoronoiSSBOIn* Buffer, const Array<Vector3D>& Points, const InTets& Tets, const GLuint& VoronoiIn, const GLuint&
                                     VoronoiOut,
-                                    const GLuint& ClippedOutInd, const GLuint& InTetsInd, const GLuint& WBuffer)
+                                    const GLuint& ClippedOutInd, const GLuint& InTetsInd, const GLuint& WBuffer,  UComputeShader& VoronoiCompute, UComputeShader& ClippingCompute)
 {
 
 	double TimeBeforeComputation;
 
-	GenerateCellGPU(Buffer, Points, VoronoiIn, VoronoiOut, WBuffer, TimeBeforeComputation);
+	GenerateCellGPU(Buffer, Points, VoronoiIn, VoronoiOut, WBuffer, TimeBeforeComputation, VoronoiCompute);
 
-	GenerateClippedCellGPU(Points, Tets, VoronoiOut, ClippedOutInd, InTetsInd, WBuffer, TimeBeforeComputation);
+	GenerateClippedCellGPU(Points, Tets, VoronoiOut, ClippedOutInd, InTetsInd, WBuffer, TimeBeforeComputation, ClippingCompute);
 
 	DrawFractures(Points, ClippedOutInd);
 
-	CleanUpBuffers(VoronoiIn, VoronoiOut, ClippedOutInd, InTetsInd, WBuffer);
 }
 
 void Voronoi::CreateMeshFractureGPU(VoronoiSSBOIn* Buffer, const Array<Vector3D>& Points, const InTets& Tets, const GLuint& VoronoiIn, const GLuint&
-									VoronoiOut,
-									const GLuint& ClippedOutInd, const GLuint& InTetsInd, const GLuint& WBuffer, PointEntry& Entry)
+                                    VoronoiOut,
+                                    const GLuint& ClippedOutInd, const GLuint& InTetsInd, const GLuint& WBuffer, PointEntry& Entry, UComputeShader&
+                                    VoronoiCompute, UComputeShader& ClippingCompute)
 {
 
 	double TimeBeforeComputation;
 
-	GenerateCellGPU(Buffer, Points, VoronoiIn, VoronoiOut, WBuffer, TimeBeforeComputation);
+	GenerateCellGPU(Buffer, Points, VoronoiIn, VoronoiOut, WBuffer, TimeBeforeComputation, VoronoiCompute);
 
 	Entry.Generation = std::to_string(TimeBeforeComputation);
 
-	GenerateClippedCellGPU(Points, Tets, VoronoiOut, ClippedOutInd, InTetsInd, WBuffer, TimeBeforeComputation);
+	GenerateClippedCellGPU(Points, Tets, VoronoiOut, ClippedOutInd, InTetsInd, WBuffer, TimeBeforeComputation, ClippingCompute);
 
 	Entry.Clipping = std::to_string(TimeBeforeComputation);
-
-	CleanUpBuffers(VoronoiIn, VoronoiOut, ClippedOutInd, InTetsInd, WBuffer);
 }
 
 void Voronoi::TetrahedraliseMesh(const Model& InModel, InTets& tets)
@@ -290,27 +299,51 @@ void Voronoi::FracturePlaneRandomGPU(Model& InModel)
 	record.OS = UHardwareDetails::GetOS();
 	record.RAM = UHardwareDetails::GetRAM_GB();
 	record.PointInfo.ReSize(100 * 145);
+
+	UComputeShader voronoiCompute = UComputeShader("VoronoiCellGeneration", "/Shaders/Voronoi/");
+	UComputeShader clippingCompute = UComputeShader("VoronoiClipping", "/Shaders/Voronoi/");
+
+	voronoiCompute.Use();
+	::DataBuffers::GenerateShaderStorageBuffer(VoronoiIn, sizeof(VoronoiSSBOIn), 1);
+	::DataBuffers::GenerateShaderStorageBuffer(VoronoiOut, sizeof(VOut), 3);
+	::DataBuffers::GenerateShaderStorageBuffer(wBuffer, sizeof(WorkingBuffer), 6);
+	clippingCompute.Use();
+	::DataBuffers::GenerateShaderStorageBuffer(InTetsInd, sizeof(InTets), 4);
+	::DataBuffers::GenerateShaderStorageBuffer(ClippedOutInd, sizeof(VOutRaw), 5);
+	void* inTetPtr = ::DataBuffers::MapBufferMemory(InTetsInd, sizeof(InTets));
+
+	InTets* inTetsData = static_cast<InTets*>(inTetPtr);
+
+	memcpy(inTetsData, &tets, sizeof(InTets));
+
+	::DataBuffers::UnMapBufferMemory(InTetsInd);
+
+	Array<Vector3D> points;
 	for (size_t i = 2; i < 101; i++)
 	{
 		std::string DataToLoad = "/ExperimentData/SetOf" + std::to_string(i) + ".txt";
 		PointEntry entry;
 		entry.NumPoints = std::to_string(i);
-		Array<Vector3D> points;
-		points.ReSize(i);
+
+		points.Reallocate(i);
 		for (size_t j = 0; j < 145; j++)
 		{
 			const Vector2D range = { j * i, ((j + 1) * i) };
 
 			UFileWriter::Load(DataToLoad, points, range);
-			memcpy(buffer->Points, points.GetFirstPtr(), sizeof(Vector3D) * i);
+			for (size_t i = 0; i < points.GetSize(); i++)
+			{
+				buffer->Points[i] = points[i];
+			}
 			buffer->NumPoints = points.GetSize();
 
-			CreateMeshFractureGPU(buffer, points, tets, VoronoiIn, VoronoiOut, ClippedOutInd, InTetsInd, wBuffer, entry);
+			CreateMeshFractureGPU(buffer, points, tets, VoronoiIn, VoronoiOut, ClippedOutInd, InTetsInd, wBuffer, entry, voronoiCompute, clippingCompute);
 
 			record.PointInfo.Add(entry);
 
 		}
 	}
+	CleanUpBuffers(VoronoiIn, VoronoiOut, ClippedOutInd, InTetsInd, wBuffer);
 	DataRecorder::SaveDataRecord(record, "/ExperimentData/TestData.txt");
 	delete buffer;
 	delete vOut;
@@ -318,8 +351,7 @@ void Voronoi::FracturePlaneRandomGPU(Model& InModel)
 
 }
 
-void Voronoi::FracturePlaneRandomGPU(Model& InModel, const size_t& NumPoints, const size_t& PointSetIndex,
-                                     const bool& bShouldDraw)
+void Voronoi::FracturePlaneRandomGPU(Model& InModel, const size_t& NumPoints, const size_t& PointSetIndex)
 {
 
 	InTets tets;
@@ -358,10 +390,31 @@ void Voronoi::FracturePlaneRandomGPU(Model& InModel, const size_t& NumPoints, co
 	::DataBuffers::GenBuffer(InTetsInd);
 	::DataBuffers::GenBuffer(wBuffer);
 
+	UComputeShader voronoiCompute = UComputeShader("VoronoiCellGeneration", "/Shaders/Voronoi/");
+	UComputeShader clippingCompute = UComputeShader("VoronoiClipping", "/Shaders/Voronoi/");
+
+	voronoiCompute.Use();
+	::DataBuffers::GenerateShaderStorageBuffer(VoronoiIn, sizeof(VoronoiSSBOIn), 1);
+	::DataBuffers::GenerateShaderStorageBuffer(VoronoiOut, sizeof(VOut), 3);
+	::DataBuffers::GenerateShaderStorageBuffer(wBuffer, sizeof(WorkingBuffer), 6);
+
+	clippingCompute.Use();
+	::DataBuffers::GenerateShaderStorageBuffer(InTetsInd, sizeof(InTets), 4);
+	::DataBuffers::GenerateShaderStorageBuffer(ClippedOutInd, sizeof(VOutRaw), 5);
+	void* inTetPtr = ::DataBuffers::MapBufferMemory(InTetsInd, sizeof(InTets));
+
+	InTets* inTetsData = static_cast<InTets*>(inTetPtr);
+
+	memcpy(inTetsData, &tets, sizeof(InTets));
+
+	::DataBuffers::UnMapBufferMemory(InTetsInd);
+
+
+
 	std::string DataToLoad = "/ExperimentData/SetOf" + std::to_string(NumPoints) + ".txt";
 
 	Array<Vector3D> points;
-
+	points.Reallocate(NumPoints);
 	const Vector2D range = { PointSetIndex * NumPoints, ((PointSetIndex + 1) * NumPoints) };
 
 	UFileWriter::Load(DataToLoad, points, range);
@@ -372,8 +425,8 @@ void Voronoi::FracturePlaneRandomGPU(Model& InModel, const size_t& NumPoints, co
 	}
 	buffer->NumPoints = points.GetSize();
 
-	CreateMeshFractureGPU(buffer, points, tets, VoronoiIn, VoronoiOut, ClippedOutInd, InTetsInd, wBuffer);
-
+	CreateMeshFractureGPU(buffer, points, tets, VoronoiIn, VoronoiOut, ClippedOutInd, InTetsInd, wBuffer, voronoiCompute, clippingCompute);
+	CleanUpBuffers(VoronoiIn, VoronoiOut, ClippedOutInd, InTetsInd, wBuffer);
 	delete buffer;
 	delete vOut;
 	delete ClippedOut;

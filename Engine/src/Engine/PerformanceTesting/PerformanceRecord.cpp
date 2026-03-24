@@ -63,10 +63,12 @@ void DataRecorder::AppendRecordToData(const DataRecord& Record, nlohmann::ordere
     for (const auto& set : Record.PointInfo)
     {
         MakeDataEntryArrayIfNot(data, set.NumPoints);
-        MakeDataEntryArrayIfNot(data[set.NumPoints], "Gen");
-        MakeDataEntryArrayIfNot(data[set.NumPoints], "Clip");
-        data[set.NumPoints]["Gen"].push_back(set.Generation.data());
-        data[set.NumPoints]["Clip"].push_back(set.Clipping.data());
+
+        nlohmann::ordered_json jsonData;
+
+        jsonData["Gen"].push_back(set.Generation);
+        jsonData["Clip"].push_back(set.Clipping);
+        data[set.NumPoints].push_back(jsonData);
     }
 
     std::ofstream file(CorePaths::Contents.Path + Name.data());

@@ -697,7 +697,7 @@ void RunEngine(Vulkan::RuntimeEngine& engine)
 	model.ModelTransform.Position = { 5, 0, 0 };
 
 	Voronoi vorn;
-	vorn.FracturePlaneRandomGPU(model);
+	vorn.FracturePlaneRandomGPU(model, 4, 144);
 
 	while (!engine.ShouldClose())
 	{
@@ -737,7 +737,7 @@ void RunEngineOpenGL(OpenGL::RuntimeEngine engine)
 
 	Voronoi vorn;
 	//vorn.GenerateNewPointSets(model);
-	vorn.FracturePlaneRandomGPU(model);
+	vorn.FracturePlaneRandomGPU(model, 4, 50);
 
 	model.ModelTransform.Position = { 5, 0, 0 };
 
@@ -772,5 +772,5 @@ TEST(Fracturing, Diagram) {
 	EnginePlane();
 
 	//EngineDelaunay();
-	OpenGLTest();
+	//OpenGLTest();
 }
