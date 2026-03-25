@@ -72,7 +72,7 @@ bool AlmostEqual(vec3 a, vec3 b, float epsilon)
 }
 void DefinePlane(const in vec3 CurrentPoint, const in vec3 ComparedPoint, out vec3 Normal, out vec3 Center)
 {
-    Normal = normalize(CurrentPoint - ComparedPoint);
+    Normal = normalize(ComparedPoint - CurrentPoint);
     
     Center = (CurrentPoint + ComparedPoint) / 2;
 }
@@ -120,7 +120,7 @@ inout uint FirstIntersectionIndex, out vec3 FirstIntersection, const in uint Ind
         const bool bDoesLineIntersect = GetIntersectionPoint(Center, Normal, fromVert, lineDir, intersectionPoint);
         if (bDoesLineIntersect)
         {
-            const bool bIsIntersectionNextVertex = AlmostEqual(intersectionPoint, toVert, 0.00001);
+            const bool bIsIntersectionNextVertex = AlmostEqual(intersectionPoint, toVert, 0.0001);
             if (bIsIntersectionNextVertex)
             {
                 TempCells[Index].Faces[TempCells[Index].NumFaces].Verts[TempCells[Index].Faces[TempCells[Index].NumFaces].NumVerts] = toVert;
@@ -178,7 +178,7 @@ bool IsPointInPolyhedra(const in vec3 Normal, const in uint Index, const in vec3
     for (uint i = 0; i < TempCells[Index].Faces[TempCells[Index].NumFaces].NumVerts; i++)
     {
         const float d = dot(TempCells[Index].Faces[TempCells[Index].NumFaces].Verts[i] - Center, Normal);
-        if (d < 0 && !isNearlyZero(d))
+        if (d > 0 && !isNearlyZero(d))
         {
             return false;
         }
@@ -200,11 +200,11 @@ const in vec3 FirstIntersection, const in vec3 SecondIntersection, const in uint
     {
         from =  WorkingCells[Index].Faces[ToClip].Verts[i %  WorkingCells[Index].Faces[ToClip].NumVerts];
         const vec3 to =  WorkingCells[Index].Faces[ToClip].Verts[(i+1) %  WorkingCells[Index].Faces[ToClip].NumVerts];
-        if (from == to) continue;
+        if (AlmostEqual(from, to, 0.0001)) continue;
         TempCells[Index].Faces[TempCells[Index].NumFaces].Verts[TempCells[Index].Faces[TempCells[Index].NumFaces].NumVerts] = from;
         TempCells[Index].Faces[TempCells[Index].NumFaces].NumVerts++;
     }
-    if (from != FirstIntersection)
+    if (!AlmostEqual(from, FirstIntersection, 0.00001))
     {
         TempCells[Index].Faces[TempCells[Index].NumFaces].Verts[TempCells[Index].Faces[TempCells[Index].NumFaces].NumVerts] = FirstIntersection;
         TempCells[Index].Faces[TempCells[Index].NumFaces].NumVerts++;
@@ -220,7 +220,14 @@ void ClipFacebyFace(const in uint ToClip, const in vec3 Center,const in uint Ind
 
     if (TempCells[Index].Faces[TempCells[Index].NumFaces].NumVerts == 0)
     {
-        if (dot(Normal, WorkingCells[Index].Faces[ToClip].Verts[0] - Center) > 0) TempCells[Index].Faces[TempCells[Index].NumFaces] =  WorkingCells[Index].Faces[ToClip];
+        for (uint i = 0; i < WorkingCells[Index].Faces[ToClip].NumVerts; i++)
+        {
+            if (dot(Normal, WorkingCells[Index].Faces[ToClip].Verts[i] - Center) < 0)
+            {
+                TempCells[Index].Faces[TempCells[Index].NumFaces] =  WorkingCells[Index].Faces[ToClip];
+                return;
+            }
+        }
         return;
     }
     vec3 secondIntersection;
@@ -245,12 +252,12 @@ void GetPlaneAxis(const in vec3 Normal, out vec3 T, out vec3 U)
     T = cross(Normal, U);
 }
 
-Face OrderByAngle(const in Face InFace, const in vec3 Center, const in vec3 Normal)
+void OrderByAngle(inout Face InFace, const in vec3 Center, const in vec3 Normal)
 {
     vec3 t, u;
     GetPlaneAxis(Normal, t, u);
-    
-    float angles[30];
+
+    float angles[40];
     for (uint i = 0; i < InFace.NumVerts; i++)
     {
         const vec3 d = InFace.Verts[i] - Center;
@@ -277,8 +284,107 @@ Face OrderByAngle(const in Face InFace, const in vec3 Center, const in vec3 Norm
         angles[nextAngleIndex] = 99999;
         nextAngle = 9999;
     }
-    
-    return newFace;
+
+    InFace = newFace;
+}
+bool Contains(const in vec3 Item, const in Face InFace)
+{
+    for (uint i = 0; i < InFace.NumVerts; i++)
+    {
+        if (AlmostEqual(InFace.Verts[i], Item, 0.00001)) return true;
+    }
+    return false;
+}
+
+void RemoveDuplicates(const in uint Index)
+{
+    Face newFace;
+    newFace.NumVerts = 0;
+    for (uint i = 0; i < TempCells[Index].Faces[TempCells[Index].NumFaces].NumVerts; i++)
+    {
+        if (Contains(TempCells[Index].Faces[TempCells[Index].NumFaces].Verts[i], newFace)) continue;
+
+        newFace.Verts[newFace.NumVerts] =TempCells[Index].Faces[TempCells[Index].NumFaces].Verts[i];
+        newFace.NumVerts++;
+    }
+    TempCells[Index].Faces[TempCells[Index].NumFaces] = newFace;
+
+}
+
+void RemoveIntersectDuplicates(const in uint Index)
+{
+    Face newFace;
+    newFace.NumVerts = 0;
+    for (uint i = 0; i < IntersectFaces[Index].NumVerts; i++)
+    {
+        if (Contains(IntersectFaces[Index].Verts[i], newFace)) continue;
+
+        newFace.Verts[newFace.NumVerts] = IntersectFaces[Index].Verts[i];
+        newFace.NumVerts++;
+    }
+    IntersectFaces[Index] = newFace;
+
+}
+
+void RemoveAt(const in uint FaceIndex, const in uint Index)
+{
+    TempCells[FaceIndex].Faces[TempCells[FaceIndex].NumFaces].NumVerts--;
+    for (uint i = Index; i < TempCells[FaceIndex].Faces[TempCells[FaceIndex].NumFaces].NumVerts; i++)
+    {
+        TempCells[FaceIndex].Faces[TempCells[FaceIndex].NumFaces].Verts[i] = TempCells[FaceIndex].Faces[TempCells[FaceIndex].NumFaces].Verts[(i+1)];
+    }
+}
+
+bool IsAlmostEqual(const in vec3 A, const in vec3 B)
+{
+    vec3 dif= A - B;
+
+    bool less = dif.x < 1e-6 && dif.y < 1e-6 && dif.z < 1e-6;
+    bool more = dif.x > -1e-6 && dif.y > -1e-6 && dif.z > -1e-6;
+
+    return less && more;
+}
+
+void RemovePointsTooNear(const in uint Index)
+{
+    for (uint i = 0; i < TempCells[Index].Faces[TempCells[Index].NumFaces].NumVerts; i++)
+    {
+        if (IsAlmostEqual(TempCells[Index].Faces[TempCells[Index].NumFaces].Verts[i], TempCells[Index].Faces[TempCells[Index].NumFaces].Verts[(i+1) % TempCells[Index].Faces[TempCells[Index].NumFaces].NumVerts]))
+        {
+            RemoveAt(Index, i);
+        }
+    }
+}
+
+void IntersectRemoveAt(const in uint FaceIndex, const in uint Index)
+{
+    IntersectFaces[FaceIndex].NumVerts--;
+    for (uint i = Index; i < IntersectFaces[FaceIndex].NumVerts; i++)
+    {
+        IntersectFaces[FaceIndex].Verts[i] = IntersectFaces[FaceIndex].Verts[(i+1)];
+    }
+}
+
+
+void RemoveIntersectPointsTooNear(const in uint Index)
+{
+    for (uint i = 0; i < IntersectFaces[Index].NumVerts; i++)
+    {
+        if (IsAlmostEqual(IntersectFaces[Index].Verts[i], IntersectFaces[Index].Verts[(i+1) % IntersectFaces[Index].NumVerts]))
+        {
+            IntersectRemoveAt(Index, i);
+        }
+    }
+}
+
+vec3 GetPlaneCenter(const in Face Plane)
+{
+    vec3 center = vec3(0, 0, 0);
+    for (uint i = 0; i < Plane.NumVerts; i++)
+    {
+        center += Plane.Verts[i];
+    }
+    return center / Plane.NumVerts;
 }
 
 void ClipCellByFace(const in uint Index, const in vec3 Center, const in vec3 Normal, const in uint CutTime)
@@ -290,27 +396,38 @@ void ClipCellByFace(const in uint Index, const in vec3 Center, const in vec3 Nor
     {
         TempCells[Index].Faces[TempCells[Index].NumFaces].NumVerts = 0;
         ClipFacebyFace(i, Center, Index, Normal, CutTime, TempCells[Index].NumFaces);
-        if (TempCells[Index].Faces[TempCells[Index].NumFaces].NumVerts != 0) TempCells[Index].NumFaces++;
+
+        if (TempCells[Index].Faces[TempCells[Index].NumFaces].NumVerts < 3) continue;
+
+        RemoveDuplicates(Index);
+
+        if (TempCells[Index].Faces[TempCells[Index].NumFaces].NumVerts < 3) continue;
+
+        RemovePointsTooNear(Index);
+
+        if (TempCells[Index].Faces[TempCells[Index].NumFaces].NumVerts < 3) continue;
+
+        OrderByAngle(TempCells[Index].Faces[TempCells[Index].NumFaces], GetPlaneCenter(TempCells[Index].Faces[TempCells[Index].NumFaces]), Normal);
+
+        TempCells[Index].NumFaces++;
     }
     if (IntersectFaces[Index].NumVerts >= 3)
     {
         OrderByAngle(IntersectFaces[Index], Center, Normal);
-        TempCells[Index].Faces[TempCells[Index].NumFaces] = IntersectFaces[Index];
-        TempCells[Index].NumFaces++;
+
+        RemoveIntersectDuplicates(Index);
+
+        RemoveIntersectPointsTooNear(Index);
+
+        if (IntersectFaces[Index].NumVerts >= 3)
+        {
+            TempCells[Index].Faces[TempCells[Index].NumFaces] = IntersectFaces[Index];
+            TempCells[Index].NumFaces++;
+        }
     }
 
     WorkingCells[Index] = TempCells[Index];
 }
-
-bool Contains(const in vec3 Item, const in Face InFace)
-{
-    for (uint i = 0; i < InFace.NumVerts; i++)
-    {
-        if (InFace.Verts[i] == Item) return true;
-    }
-    return false;
-}
-
 bool Contains(const in vec3 Item, const in uint CellIndex, inout uint Index)
 {
 
@@ -326,15 +443,7 @@ bool Contains(const in vec3 Item, const in uint CellIndex, inout uint Index)
 }
 
 
-vec3 GetPlaneCenter(const in Face Plane)
-{
-    vec3 center = vec3(0, 0, 0);
-    for (uint i = 0; i < Plane.NumVerts; i++)
-    {
-        center += Plane.Verts[i];
-    }
-    return center / Plane.NumVerts;
-}
+
 
 vec3 GetPlaneNormal(const in Face Plane, const in vec3 Center)
 {
@@ -446,16 +555,16 @@ void ClipCellByFaces(const in uint Index)
         
         vec3 normal = GetPlaneNormal(CutCells[Index].Faces[i], center);
         vec3 planeCenter = GetPlaneCenter(CutCells[Index].Faces[i]);
-        if (!isNearlyZero(dot(normal, center - planeCenter)) && dot(normal, center - planeCenter) < 0) normal = -normal;
+        if (!isNearlyZero(dot(normal, center - planeCenter)) && dot(normal, center - planeCenter) >= 0) normal = -normal;
         
         if (isNearlyZero(normal.x) && isNearlyZero(normal.y) && isNearlyZero(normal.z)) continue;
         
         ClipCellByFace(Index, planeCenter, normal, 0);
 
-        for (uint j = 0; j < WorkingCells[Index].NumFaces; j++)
-        {
-            WorkingCells[Index].Faces[j] = OrderByAngle(WorkingCells[Index].Faces[j], GetPlaneCenter(WorkingCells[Index].Faces[j]), normal);
-        }
+      //  for (uint j = 0; j < WorkingCells[Index].NumFaces; j++)
+      //  {
+      //      WorkingCells[Index].Faces[j] = OrderByAngle(WorkingCells[Index].Faces[j], GetPlaneCenter(WorkingCells[Index].Faces[j]), normal);
+      //  }
     }
 }
 

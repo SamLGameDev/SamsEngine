@@ -324,6 +324,7 @@ void Voronoi::FracturePlaneRandomGPU(Model& InModel)
 		std::string DataToLoad = "/ExperimentData/SetOf" + std::to_string(i) + ".txt";
 		PointEntry entry;
 		entry.NumPoints = std::to_string(i);
+		std::cout << "Point Set: " << i << "\n";
 
 		points.Reallocate(i);
 		for (size_t j = 0; j < 145; j++)

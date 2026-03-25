@@ -169,12 +169,6 @@ namespace Vulkan
 	{
 		vkWaitForFences(*SInstance::GetInstance()->GraphicsCard->GetLogicalDevice()->GetVulkanLogicalDevice(),
 			1, &ComputeFence, VK_TRUE, UINT64_MAX);
-		VkResult res = vkGetFenceStatus(*SInstance::GetInstance()->GraphicsCard->GetLogicalDevice()->GetVulkanLogicalDevice(), ComputeFence);
-		if (res != VK_SUCCESS)
-		{
-			std::cerr << "GPU has crashed" << '\n';
-		}
-
 	}
 
 	std::shared_ptr<UBaseComputeShader> UVulkanComputeShader::CreateVulkanComputeShader(const std::string_view& InName,
