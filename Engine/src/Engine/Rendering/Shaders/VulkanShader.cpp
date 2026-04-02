@@ -55,7 +55,7 @@ namespace Vulkan
 		for (size_t i = 0; i < 2; i++)
 		{
 			VkDescriptorSetLayoutBinding descriptor{};
-			descriptor.binding = i;
+			descriptor.binding = static_cast<uint32_t>(i);
 			descriptor.descriptorCount = 1;
 			descriptor.pImmutableSamplers = nullptr;
 			descriptor.descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
@@ -106,7 +106,7 @@ namespace Vulkan
 			descriptorWrite.descriptorCount = 1;
 			descriptorWrite.descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
 			descriptorWrite.dstSet = Pipeline->GetDescriptorSet();
-			descriptorWrite.dstBinding = index;
+			descriptorWrite.dstBinding = static_cast<uint32_t>(index);
 			descriptorWrite.dstArrayElement = 0;
 			descriptorWrite.pImageInfo = nullptr;
 			descriptorWrite.pTexelBufferView = nullptr;

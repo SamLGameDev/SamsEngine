@@ -38,7 +38,7 @@ namespace Vulkan
 
 		VkDescriptorSetLayoutCreateInfo descriptorLayoutCreateInfo{};
 		descriptorLayoutCreateInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_LAYOUT_CREATE_INFO;
-		descriptorLayoutCreateInfo.bindingCount = Descriptors.GetSize();
+		descriptorLayoutCreateInfo.bindingCount = static_cast<uint32_t>(Descriptors.GetSize());
 		descriptorLayoutCreateInfo.pBindings = Descriptors.GetFirstPtr();
 
 		vkCreateDescriptorSetLayout(*SInstance::GetInstance()->GraphicsCard->GetLogicalDevice()->GetVulkanLogicalDevice(), &descriptorLayoutCreateInfo, nullptr, &DescriptorLayout);
@@ -59,7 +59,7 @@ namespace Vulkan
 
 		VkPipelineDynamicStateCreateInfo dynamicStatesCreateInfo{};
 		dynamicStatesCreateInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_DYNAMIC_STATE_CREATE_INFO;
-		dynamicStatesCreateInfo.dynamicStateCount = dynamicStates.GetSize();
+		dynamicStatesCreateInfo.dynamicStateCount = static_cast<uint32_t>(dynamicStates.GetSize());
 		dynamicStatesCreateInfo.pDynamicStates = dynamicStates.GetFirstPtr();
 
 		VkPipelineVertexInputStateCreateInfo vertexInputStateCreateInfo{};
@@ -77,8 +77,8 @@ namespace Vulkan
 		VkViewport viewport{};
 		viewport.x = 0;
 		viewport.y = 0;
-		viewport.width = SInstance::GetInstance()->GraphicsCard->GetLogicalDevice()->GetSwapChain()->GetSwapChainExtent().width;
-		viewport.height = SInstance::GetInstance()->GraphicsCard->GetLogicalDevice()->GetSwapChain()->GetSwapChainExtent().height;
+		viewport.width = static_cast<float>(SInstance::GetInstance()->GraphicsCard->GetLogicalDevice()->GetSwapChain()->GetSwapChainExtent().width);
+		viewport.height = static_cast<float>(SInstance::GetInstance()->GraphicsCard->GetLogicalDevice()->GetSwapChain()->GetSwapChainExtent().height);
 		viewport.minDepth = 0;
 		viewport.maxDepth = 1;
 
@@ -163,7 +163,7 @@ namespace Vulkan
 
 		VkGraphicsPipelineCreateInfo pipelineCreateInfo{};
 		pipelineCreateInfo.sType = VK_STRUCTURE_TYPE_GRAPHICS_PIPELINE_CREATE_INFO;
-		pipelineCreateInfo.stageCount = InShader.GetShaderStages().GetSize();
+		pipelineCreateInfo.stageCount = static_cast<uint32_t>(InShader.GetShaderStages().GetSize());
 		pipelineCreateInfo.pStages = InShader.GetShaderStages().GetFirstPtr();
 		pipelineCreateInfo.pInputAssemblyState = &inputAssemblyCreateInfo;
 		pipelineCreateInfo.pVertexInputState = &vertexInputStateCreateInfo;
@@ -187,7 +187,7 @@ namespace Vulkan
 	{
 		VkDescriptorSetLayoutCreateInfo descriptorLayoutCreateInfo{};
 		descriptorLayoutCreateInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_LAYOUT_CREATE_INFO;
-		descriptorLayoutCreateInfo.bindingCount = Descriptors.GetSize();
+		descriptorLayoutCreateInfo.bindingCount = static_cast<uint32_t>(Descriptors.GetSize());
 		descriptorLayoutCreateInfo.pBindings = Descriptors.GetFirstPtr();
 
 		vkCreateDescriptorSetLayout(*SInstance::GetInstance()->GraphicsCard->GetLogicalDevice()->GetVulkanLogicalDevice(), &descriptorLayoutCreateInfo, nullptr, &DescriptorLayout);
@@ -201,7 +201,7 @@ namespace Vulkan
 			&dAllocInfo, &DescriptorSet);
 		if (rs != VK_SUCCESS)
 		{
-			std::cout << rs << " ERROR::VULKAN::RENDERPIPELINE::FAILED TO ALLOCATE DESCRIPTOR SETS" << std::endl;
+			std::cout << rs << " ERROR::VULKAN::RENDERPIPELINE::FAILED TO ALLOCATE DESCRIPTOR SETS" << '\n';
 		}
 
 		VkPipelineLayoutCreateInfo pipelineLayoutInfo{};

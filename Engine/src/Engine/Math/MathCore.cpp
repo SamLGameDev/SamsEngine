@@ -17,7 +17,7 @@ float MathCore::Determinant(const Vector3D& C0, const Vector3D& C1, const Vector
 	return d00 - d01 + d02;
 }
 
-bool MathCore::IsNearlyEqual(const float& A, const float& B, const float& Range)
+bool MathCore::IsNearlyEqual(const double& A, const double& B, const double& Range)
 {
 	return std::abs(A - B) < Range;
 }

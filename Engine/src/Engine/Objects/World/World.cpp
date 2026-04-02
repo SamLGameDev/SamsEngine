@@ -8,7 +8,7 @@ void World::Tick(const double& InDeltaTime)
 {
 	Object::Tick(DeltaTime);
 
-	DeltaTime = InDeltaTime;
+	DeltaTime = static_cast<float>(InDeltaTime);
 }
 
 void World::Start()

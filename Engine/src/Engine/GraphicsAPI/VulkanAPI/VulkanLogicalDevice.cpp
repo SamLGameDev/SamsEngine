@@ -71,10 +71,10 @@ namespace Vulkan
 		VkDeviceCreateInfo deviceCreateInfo{};
 		deviceCreateInfo.sType = VK_STRUCTURE_TYPE_DEVICE_CREATE_INFO;
 		deviceCreateInfo.pQueueCreateInfos = uniqueQueues.GetFirstPtr();
-		deviceCreateInfo.queueCreateInfoCount = uniqueQueues.GetSize();
+		deviceCreateInfo.queueCreateInfoCount = static_cast<uint32_t>(uniqueQueues.GetSize());
 		deviceCreateInfo.pNext = &vertexInputDynamicStateFeatures;
 		deviceCreateInfo.pEnabledFeatures = &deviceFeatures;
-		deviceCreateInfo.enabledExtensionCount = deviceExtensions.GetSize();
+		deviceCreateInfo.enabledExtensionCount = static_cast<uint32_t>(deviceExtensions.GetSize());
 		deviceCreateInfo.ppEnabledExtensionNames = deviceExtensions.GetFirstPtr();
 
 		deviceCreateInfo.enabledLayerCount = 0;
@@ -84,7 +84,7 @@ namespace Vulkan
 		const Array<const char*>& validationLayers = OwningCard->GetValidationLayers();
 
 
-		deviceCreateInfo.enabledLayerCount = validationLayers.GetSize();
+		deviceCreateInfo.enabledLayerCount = static_cast<uint32_t>(validationLayers.GetSize());
 		deviceCreateInfo.ppEnabledLayerNames = validationLayers.GetFirstPtr();
 #endif
 

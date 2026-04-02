@@ -91,9 +91,9 @@ void DelaunayTriangulation::RemoveSuperTriangleAndIndex(const Array<Vector2D>& V
 			if (Vertices[i] == triangle.point2) index2 = i;
 			if (Vertices[i] == triangle.point3) index3 = i;
 		}
-		Indicies.Add(index1);
-		Indicies.Add(index2);
-		Indicies.Add(index3);
+		Indicies.Add(static_cast<uint16_t>(index1));
+		Indicies.Add(static_cast<uint16_t>(index2));
+		Indicies.Add(static_cast<uint16_t>(index3));
 	}
 }
 

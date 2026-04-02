@@ -71,7 +71,7 @@ namespace Vulkan
 		if (graphicsIndices.GraphicsFamily != graphicsIndices.PresentFamily)
 		{
 			createInfo.imageSharingMode = VK_SHARING_MODE_CONCURRENT;
-			createInfo.queueFamilyIndexCount = indices.GetSize();
+			createInfo.queueFamilyIndexCount = static_cast<uint32_t>(indices.GetSize());
 			createInfo.pQueueFamilyIndices = indices.GetFirstPtr();
 		}
 		else
@@ -190,7 +190,7 @@ namespace Vulkan
 			VkFramebufferCreateInfo framebufferCreateInfo{};
 			framebufferCreateInfo.sType = VK_STRUCTURE_TYPE_FRAMEBUFFER_CREATE_INFO;
 			framebufferCreateInfo.renderPass = SInstance::GetInstance()->RenderPass->GetVulkanRenderPass();
-			framebufferCreateInfo.attachmentCount = attachments.GetSize();
+			framebufferCreateInfo.attachmentCount = static_cast<uint32_t>(attachments.GetSize());
 			framebufferCreateInfo.pAttachments = attachments.GetFirstPtr();
 			framebufferCreateInfo.width = SwapChainExtent.width;
 			framebufferCreateInfo.height = SwapChainExtent.height;

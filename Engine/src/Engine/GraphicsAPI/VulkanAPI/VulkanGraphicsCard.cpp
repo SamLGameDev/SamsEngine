@@ -140,7 +140,7 @@ namespace Vulkan
 		{
 			if (TypeFilter & (1 << i) && (properties.memoryTypes[i].propertyFlags & Properties) == Properties)
 			{
-				return i;
+				return static_cast<uint32_t>(i);
 			}
 		}
 		throw std::runtime_error("Cant find a suitable memory type");
@@ -160,20 +160,20 @@ namespace Vulkan
 		{
 			if ((queueFamily[i].queueFlags & VK_QUEUE_GRAPHICS_BIT))
 			{
-				indices.GraphicsFamily = i;
+				indices.GraphicsFamily = static_cast<uint32_t>(i);
 			}
 
-			if ((queueFamily[i].queueFlags & VK_QUEUE_GRAPHICS_BIT) && (queueFamily[i].queueFlags & VK_QUEUE_COMPUTE_BIT))
+			if ((queueFamily[static_cast<uint32_t>(i)].queueFlags & VK_QUEUE_GRAPHICS_BIT) && (queueFamily[static_cast<uint32_t>(i)].queueFlags & VK_QUEUE_COMPUTE_BIT))
 			{
-				indices.GraphicsAndComputeFamily = i;
+				indices.GraphicsAndComputeFamily = static_cast<uint32_t>(i);
 			}
 
 			VkBool32 bHasSurfaceSupport = false;
-			vkGetPhysicalDeviceSurfaceSupportKHR(Device, i, Surface, &bHasSurfaceSupport);
+			vkGetPhysicalDeviceSurfaceSupportKHR(Device, static_cast<uint32_t>(i), Surface, &bHasSurfaceSupport);
 
 			if (bHasSurfaceSupport)
 			{
-				indices.PresentFamily = i;
+				indices.PresentFamily = static_cast<uint32_t>(i);
 			}
 
 			if (indices.IsComplete()) break;

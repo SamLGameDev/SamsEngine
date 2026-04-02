@@ -16,7 +16,7 @@ public:
 	Vector4D(const Vector2D& Other);
 	Vector4D(const Vector3D& Other, const float& InW = 0);
 
-	constexpr Vector4D(const double InX, const double InY, const double InZ, const double InW) noexcept : X(InX), Y(InY), Z(InZ), W(InW){};
+	constexpr Vector4D(const double InX, const double InY, const double InZ, const double InW) noexcept : X(static_cast<float>(InX)), Y(static_cast<float>(InY)), Z(static_cast<float>(InZ)), W(static_cast<float>(InW)){};
 
 
 	[[nodiscard]] bool operator==(const Vector4D& Other) const {

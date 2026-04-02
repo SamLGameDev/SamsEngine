@@ -10,7 +10,7 @@ BaseDataBuffers* DataBuffers::APIBufferInstance;
 void DataBuffers::BindVertexInfo(const size_t& ID, const size_t& Location, const size_t& Size, const size_t& Stride,
 	const size_t& Offset, const BufferFormat& Format)
 {
-	APIBufferInstance->BindVertexInfo(ID, Location, Size, Stride, Offset, Format);
+	APIBufferInstance->BindVertexInfo(static_cast<uint32_t>(ID), Location, Size, Stride, Offset, Format);
 }
 
 void DataBuffers::GenBuffer(const size_t& Number, Array<uint32_t>& IDs)

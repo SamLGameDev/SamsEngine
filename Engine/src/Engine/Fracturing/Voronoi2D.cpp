@@ -1,16 +1,9 @@
 // DO NOT MARK 
 //This is because it has been submitted for my COMP305. Link to Original: https://github.falmouth.ac.uk/GA-Undergrad-Student-Work-25-26/Comp305-Engine-SL295211.git
 #include "Voronoi2D.h"
-
-#include <iostream>
-
 #include "DataBuffers.h"
-#include "LinkedList.h"
 #include "MathCore.h"
-
 #include "Renderer.h"
-
-#include "WireShapes.h";
 
 Shader FracturePiece2D::PointShader;
 
@@ -42,8 +35,8 @@ bool Voronoi2D::GetIntersection(const float& A, const float& B, const float& c, 
 	const bool IsEndpointX = MathCore::IsNearlyEqual(Intersection.X, From.X, std::pow(2, -23)) 
 	|| MathCore::IsNearlyEqual(Intersection.X, To.X, std::pow(2, -23));
 
-	const bool IsBetweenXAxis = Intersection.X < From.X != Intersection.X < To.X;
-	const bool IsBetweenYAxis = Intersection.Y < From.Y != Intersection.Y < To.Y;
+	const bool IsBetweenXAxis = (Intersection.X < From.X) != (Intersection.X < To.X);
+	const bool IsBetweenYAxis = (Intersection.Y < From.Y) != (Intersection.Y < To.Y);
 
 	const bool IsBetweenAB = IsBetweenXAxis && IsBetweenYAxis;
 
@@ -242,8 +235,8 @@ FracturePiece2D::FracturePiece2D(const Array<Vector2D>& cell, const Vector2D& Po
 	for (size_t i = 1; i + 1 < cell.GetSize(); i++)
 	{
 		Inds.Add(0);
-		Inds.Add(i);
-		Inds.Add(i + 1);
+		Inds.Add(static_cast<uint16_t>(i));
+		Inds.Add(static_cast<uint16_t>(i) + 1);
 	}
 
 	::DataBuffers::GenBuffer(VAO);

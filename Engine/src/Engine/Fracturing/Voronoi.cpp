@@ -413,12 +413,6 @@ void Voronoi::FractureDelaunayRandom(Model& InModel, const size_t& NumPoints)
 
 	GenerateVoronoiCellsDelaunay(points, InModel);
 
-	InputManager* inputManager = Camera::GetActiveCamera()->GetActiveInputManager();
-	Next = std::make_unique<InputAction>(GLFW_KEY_I, inputManager, Camera::GetActiveWindow());
-	Next->Actions.BindMember(this, &Voronoi::NextCell);
-
-	Fractures[0].ToggleRendering();
-
 }
 
 void Voronoi::DefinePlane(Vector3D& normal, const Vector3D& CurrentPoint, const Vector3D& closestPoint, Vector3D& Right, Vector3D& Up, Vector3D& PlaneCenter)
@@ -653,15 +647,6 @@ void Voronoi::GenerateVoronoiCellDelaunay(const Model& InModel, const Array<Tetr
 	Fractures.Emplace( std::move(frac) );
 }
 
-void Voronoi::NextCell()
-{
-	Fractures[current].bIsHidden = true;
-
-	current = (current + 1) % Fractures.GetSize();
-
-	Fractures[current].bIsHidden = false;
-
-}
 
 void Voronoi::GenerateVoronoiCellsDelaunay(const Array<Vector3D>& Points, const Model& InModel)
 {
@@ -954,11 +939,6 @@ void FracturePiece3D::SetupControls(const Vector3D& point)
 
 	RightArrow->Actions.BindMember(this, &FracturePiece3D::Converge);
 
-
-	Hide = std::make_unique<InputAction>(GLFW_KEY_H, inputManager, Camera::GetActiveWindow());
-
-	Hide->Actions.BindMember(this, &FracturePiece3D::ToggleRendering);
-
 	dir = (point - Vector3D::Zero).Normalised();
 
 
@@ -1024,9 +1004,3 @@ void FracturePiece3D::Converge()
 {
 	transform.Position -= (dir * 5) * World->GetDeltaTime();
 }
-
-void FracturePiece3D::ToggleRendering()
-{
-	bIsHidden = !bIsHidden;
-}
-

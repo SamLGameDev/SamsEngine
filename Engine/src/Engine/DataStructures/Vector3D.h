@@ -19,13 +19,13 @@ public:
 	static void GetPlaneAxis(const Vector3D& Normal, Vector3D& T, Vector3D& U);
 	static Vector3D GetPlaneNormal(const Array<Vector3D>& ClippingPlane, const Vector3D& Center);
 
-	constexpr Vector3D(const double InX, const double InY, const double InZ) noexcept : X(InX), Y(InY), Z(InZ){};
+	constexpr Vector3D(const double InX, const double InY, const double InZ) noexcept : X(static_cast<float>(InX)), Y(static_cast<float>(InY)), Z(static_cast<float>(InZ)){};
 
 	[[nodiscard]] bool operator==(const Vector3D& Other) const {
 		return	IsAlmostEqual(*this, Other);
 	}
 
-	[[nodiscard]] Vector3D operator/(const float& Other)const
+	[[nodiscard]] Vector3D operator/(const float& Other)const noexcept
 	{
 		return {X / Other, Y / Other, Z / Other};
 	}
@@ -54,7 +54,7 @@ public:
 		return {X + Other.X, Y + Other.Y, Z + Other.Z};
 	}
 
-	[[nodiscard]] Vector3D operator+(const float& Other)const
+	[[nodiscard]] Vector3D operator+(const double& Other)const
 	{
 		return {X + Other, Y + Other, Z + Other};
 	}
@@ -156,7 +156,7 @@ public:
 	static Vector3D GetLineIntersectionPointWithPlane(const Vector3D& Normal, const double& D,
 	                                                  const Vector3D& LineStart, const Vector3D& LineEnd);
 
-	[[nodiscard]] static bool IsAlmostEqual(const Vector3D& A, const Vector3D& B, const float& Range = 1e-6);
+	[[nodiscard]] static bool IsAlmostEqual(const Vector3D& A, const Vector3D& B, const float& Range = 1e-6f);
 
 	void Print() const;
 

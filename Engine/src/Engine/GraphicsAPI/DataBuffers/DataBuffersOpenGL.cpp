@@ -46,8 +46,8 @@ namespace OpenGL
 
 		GLint length = Format == BufferFormat::Vector3 ? 3 : 2;
 
-		glEnableVertexAttribArray(Location);
-		glVertexAttribPointer(Location, length, GL_FLOAT, GL_FALSE, Stride, static_cast<void*>(0));
+		glEnableVertexAttribArray(static_cast<GLuint>(Location));
+		glVertexAttribPointer(static_cast<GLuint>(Location), length, GL_FLOAT, GL_FALSE, static_cast<GLuint>(Stride), static_cast<void*>(0));
 		glBindVertexArray(0);
 
 	}
@@ -95,14 +95,17 @@ namespace OpenGL
 
 	void DataBuffers::BufferDataIndex(const uint32_t ID, const size_t& Size, void* Data)
 	{
+
 		DataBuffer& buffer = RegisteredBuffers[ID];
+
+		if (!buffer.EBO.has_value() && !buffer.VAO.has_value()) return;
 
 		glBindVertexArray(buffer.VAO.value());
 
-		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, buffer.EBO.value());
-		glBufferData(GL_ELEMENT_ARRAY_BUFFER, Size, Data, GL_STATIC_DRAW);
+		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, static_cast<uint32_t>(buffer.EBO.value()));
+		glBufferData(GL_ELEMENT_ARRAY_BUFFER, static_cast<GLsizeiptr>(Size), Data, GL_STATIC_DRAW);
 
-		buffer.IndsSize = Size;
+		buffer.IndsSize = static_cast<GLsizei>(Size);
 
 	}
 
@@ -147,15 +150,15 @@ namespace OpenGL
 		glGenBuffers(1, &buffer.UBO);
 
 		glBindBuffer(GL_SHADER_STORAGE_BUFFER, buffer.UBO);
-        glBufferData(GL_SHADER_STORAGE_BUFFER, Size, nullptr, GL_DYNAMIC_COPY);
+        glBufferData(GL_SHADER_STORAGE_BUFFER, static_cast<GLsizeiptr>(Size), nullptr, GL_DYNAMIC_COPY);
 
-		glBindBufferBase(GL_SHADER_STORAGE_BUFFER, Binding, buffer.UBO);
+		glBindBufferBase(GL_SHADER_STORAGE_BUFFER, static_cast<GLuint>(Binding), buffer.UBO);
 	}
 
 	void DataBuffers::BindShaderStorageBuffer(uint32_t ID, const size_t& Binding, const size_t& Size)
 	{
 		DataBuffer& buffer = RegisteredBuffers[ID];
-		glBindBufferBase(GL_SHADER_STORAGE_BUFFER, Binding, buffer.UBO);
+		glBindBufferBase(GL_SHADER_STORAGE_BUFFER, static_cast<GLuint>(Binding), buffer.UBO);
 	}
 
 	void* DataBuffers::MapBufferMemory(const uint32_t& ID, const size_t& Size)

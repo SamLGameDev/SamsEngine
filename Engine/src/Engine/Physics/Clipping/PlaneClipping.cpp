@@ -12,7 +12,7 @@ void PlaneClipping::ClipCellByFaces(Array<Face>& ToClip, const Array<Face>& Clip
 	{
 		center += face.GetCenter();
 	}
-	center = center / ClippingPlanes.GetSize();
+	center = center / static_cast<float>(ClippingPlanes.GetSize());
 
 	for (const auto& plane : ClippingPlanes)
 	{

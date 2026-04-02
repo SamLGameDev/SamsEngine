@@ -12,7 +12,7 @@
 namespace OpenGL {
 	UOpenGLComputeShader::~UOpenGLComputeShader()
 	{
-		glDeleteProgram(ID);
+		glDeleteProgram(static_cast<GLuint>(ID));
 	}
 
 	UOpenGLComputeShader::UOpenGLComputeShader(const std::string_view& InName, const std::string_view& InStorageLocation)
@@ -33,13 +33,13 @@ namespace OpenGL {
 
 	void UOpenGLComputeShader::Use()
 	{
-		glUseProgram(ID);
+		glUseProgram(static_cast<GLuint>(ID));
 	}
 
 	void UOpenGLComputeShader::Dispatch(const size_t& NumGroupsX, const size_t& NumGroupsY,
 	                                    const size_t& NumGroupsZ) 
 	{
-		glDispatchCompute(NumGroupsX, NumGroupsY, NumGroupsZ);
+		glDispatchCompute(static_cast<GLuint>(NumGroupsX), static_cast<GLuint>(NumGroupsY), static_cast<GLuint>(NumGroupsZ));
 		glMemoryBarrier(GL_SHADER_STORAGE_BARRIER_BIT);
 	}
 
@@ -104,17 +104,17 @@ namespace OpenGL {
 	void UOpenGLComputeShader::CreateProgram(const GLuint& Compute)
 	{
 		ID = glCreateProgram();
-		glAttachShader(ID, Compute);
-		glLinkProgram(ID);
+		glAttachShader(static_cast<GLuint>(ID), Compute);
+		glLinkProgram(static_cast<GLuint>(ID));
 
 		int success = 1;
-		glGetProgramiv(ID, GL_LINK_STATUS, &success);
+		glGetProgramiv(static_cast<GLuint>(ID), GL_LINK_STATUS, &success);
 
 
 		if (!success)
 		{
 			char infoLog[512];
-			glGetProgramInfoLog(ID, 512, NULL, infoLog);
+			glGetProgramInfoLog(static_cast<GLuint>(ID), 512, NULL, infoLog);
 			std::cout << "ERROR::SHADER::PROGRAM::COMPILATION_FAILED\n" << infoLog << std::endl;
 		}
 

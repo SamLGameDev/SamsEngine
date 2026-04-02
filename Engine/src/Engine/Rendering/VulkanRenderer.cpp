@@ -59,7 +59,7 @@ namespace Vulkan
 		VkDescriptorPoolCreateInfo dPoolCreateInfo{};
 		dPoolCreateInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_POOL_CREATE_INFO;
 		dPoolCreateInfo.pPoolSizes = poolSizes.GetFirstPtr();
-		dPoolCreateInfo.poolSizeCount = poolSizes.GetSize();
+		dPoolCreateInfo.poolSizeCount = static_cast<uint32_t>(poolSizes.GetSize());
 		dPoolCreateInfo.maxSets = 2000000;
 
 		vkCreateDescriptorPool(*OwningCard->GetLogicalDevice()->GetVulkanLogicalDevice(), &dPoolCreateInfo, nullptr, &DescriptorPool);
@@ -131,7 +131,7 @@ namespace Vulkan
 
 		VkCommandBufferAllocateInfo allocateInfo{};
 		allocateInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO;
-		allocateInfo.commandBufferCount = CommandBuffers.GetSize();
+		allocateInfo.commandBufferCount = static_cast<uint32_t>(CommandBuffers.GetSize());
 		allocateInfo.commandPool = CommandPool;
 		allocateInfo.level = VK_COMMAND_BUFFER_LEVEL_PRIMARY;
 		if (vkAllocateCommandBuffers(*OwningCard->GetLogicalDevice()->GetVulkanLogicalDevice(), &allocateInfo, CommandBuffers.GetFirstPtr()) != VK_SUCCESS) return ERROR;
@@ -258,7 +258,7 @@ namespace Vulkan
 		renderBeginInfo.framebuffer = OwningCard->GetLogicalDevice()->GetSwapChain()->GetFrameBuffers().GetItemAtPtr(ImageIndex)->GetFrameBuffer();
 		renderBeginInfo.renderArea.offset = { 0, 0 };
 		renderBeginInfo.renderArea.extent = OwningCard->GetLogicalDevice()->GetSwapChain()->GetSwapChainExtent();
-		renderBeginInfo.clearValueCount = clearValues.GetSize();
+		renderBeginInfo.clearValueCount = static_cast<uint32_t>(clearValues.GetSize());
 		renderBeginInfo.pClearValues = clearValues.GetFirstPtr();
 
 		vkCmdBeginRenderPass(Buffer, &renderBeginInfo, VK_SUBPASS_CONTENTS_INLINE);
@@ -267,8 +267,8 @@ namespace Vulkan
 		VkViewport viewport{};
 		viewport.x = 0;
 		viewport.y = 0;
-		viewport.width = OwningCard->GetLogicalDevice()->GetSwapChain()->GetSwapChainExtent().width;
-		viewport.height = OwningCard->GetLogicalDevice()->GetSwapChain()->GetSwapChainExtent().height;
+		viewport.width = static_cast<float>(OwningCard->GetLogicalDevice()->GetSwapChain()->GetSwapChainExtent().width);
+		viewport.height = static_cast<float>(OwningCard->GetLogicalDevice()->GetSwapChain()->GetSwapChainExtent().height);
 		viewport.minDepth = 0;
 		viewport.maxDepth = 1;
 

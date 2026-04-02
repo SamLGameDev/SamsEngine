@@ -53,7 +53,7 @@ ErrorCodes InitialiseVulkan::CreateVulkan()
 
 	Array<const char*> extensions = GetRequiredExtensions();
 
-	createInfo.enabledExtensionCount = extensions.GetSize();
+	createInfo.enabledExtensionCount = static_cast<uint32_t>(extensions.GetSize());
 	createInfo.ppEnabledExtensionNames = extensions.GetFirstPtr();
 	createInfo.enabledLayerCount = static_cast<std::uint32_t>(ValidationLayers.GetSize());
 	createInfo.ppEnabledLayerNames = ValidationLayers.GetFirstPtr();

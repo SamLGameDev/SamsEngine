@@ -115,8 +115,8 @@ namespace Vulkan
 
 		VkVertexInputBindingDescription2EXT bindingDescription{};
 		bindingDescription.sType = VK_STRUCTURE_TYPE_VERTEX_INPUT_BINDING_DESCRIPTION_2_EXT;
-		bindingDescription.binding = Location;
-		bindingDescription.stride = Stride;
+		bindingDescription.binding = static_cast<uint32_t>(Location);
+		bindingDescription.stride = static_cast<uint32_t>(Stride);
 		bindingDescription.inputRate = VK_VERTEX_INPUT_RATE_VERTEX;
 		bindingDescription.divisor = 1;
 		bindingDescription.pNext = nullptr;
@@ -124,9 +124,9 @@ namespace Vulkan
 
 		VkVertexInputAttributeDescription2EXT attributeDescription{};
 		attributeDescription.sType = VK_STRUCTURE_TYPE_VERTEX_INPUT_ATTRIBUTE_DESCRIPTION_2_EXT;
-		attributeDescription.binding = Location;
-		attributeDescription.location = Location;
-		attributeDescription.offset = Offset;
+		attributeDescription.binding = static_cast<uint32_t>(Location);
+		attributeDescription.location = static_cast<uint32_t>(Location);
+		attributeDescription.offset = static_cast<uint32_t>(Offset);
 		attributeDescription.format = FormatToVulkan.at(Format);
 		attributeDescription.pNext = nullptr;
 		buffer.AttributeDescriptions.Add(attributeDescription);
@@ -138,9 +138,9 @@ namespace Vulkan
 
 		vkCmdSetVertexInputEXT(
 			SInstance::GetInstance()->GraphicsCard->GetRenderer()->GetCurrentBuffer(),
-			buffer.BindingDescriptions.GetSize(),
+			static_cast<uint32_t>(buffer.BindingDescriptions.GetSize()),
 			buffer.BindingDescriptions.GetFirstPtr(),
-			buffer.AttributeDescriptions.GetSize(),
+			static_cast<uint32_t>(buffer.AttributeDescriptions.GetSize()),
 			buffer.AttributeDescriptions.GetFirstPtr()
 		);
 	}
@@ -327,7 +327,7 @@ namespace Vulkan
 		descriptorWrite.descriptorCount = 1;
 		descriptorWrite.descriptorType = VK_DESCRIPTOR_TYPE_STORAGE_BUFFER;
 		descriptorWrite.dstSet = computeShader->GetDescriptorSet();
-		descriptorWrite.dstBinding = Binding;
+		descriptorWrite.dstBinding = static_cast<uint32_t>(Binding);
 		descriptorWrite.dstArrayElement = 0;
 		descriptorWrite.pImageInfo = nullptr;
 		descriptorWrite.pTexelBufferView = nullptr;
@@ -354,7 +354,7 @@ namespace Vulkan
 		descriptorWrite.descriptorCount = 1;
 		descriptorWrite.descriptorType = VK_DESCRIPTOR_TYPE_STORAGE_BUFFER;
 		descriptorWrite.dstSet = computeShader->GetDescriptorSet();
-		descriptorWrite.dstBinding = Binding;
+		descriptorWrite.dstBinding = static_cast<uint32_t>(Binding);
 		descriptorWrite.dstArrayElement = 0;
 		descriptorWrite.pImageInfo = nullptr;
 		descriptorWrite.pTexelBufferView = nullptr;
@@ -407,7 +407,7 @@ namespace Vulkan
 
 
 		VkFormat format = SInstance::GetInstance()->GraphicsCard->FindDepthFormat();
-		CreateImage(Size.X, Size.Y, format, VK_IMAGE_TILING_OPTIMAL, VK_IMAGE_USAGE_DEPTH_STENCIL_ATTACHMENT_BIT, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT, image, memory);
+		CreateImage(static_cast<uint32_t>(Size.X), static_cast<uint32_t>(Size.Y), format, VK_IMAGE_TILING_OPTIMAL, VK_IMAGE_USAGE_DEPTH_STENCIL_ATTACHMENT_BIT, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT, image, memory);
 
 		TransitionimageLayout(image, format, VK_IMAGE_LAYOUT_UNDEFINED, VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL);
 
@@ -635,7 +635,7 @@ namespace Vulkan
 
 		VkDeviceSize offsets[] = { 0, 0, 0 };
 		vkCmdBindVertexBuffers(SInstance::GetInstance()->GraphicsCard->GetRenderer()->GetCurrentBuffer(),
-			0, buffer.Buffers.GetSize(), buffer.Buffers.GetFirstPtr(), offsets);
+			0, static_cast<uint32_t>(buffer.Buffers.GetSize()), buffer.Buffers.GetFirstPtr(), offsets);
 
 		vkCmdBindIndexBuffer(SInstance::GetInstance()->GraphicsCard->GetRenderer()->GetCurrentBuffer(), buffer.IndexBuffer, 0, VK_INDEX_TYPE_UINT16);
 	}

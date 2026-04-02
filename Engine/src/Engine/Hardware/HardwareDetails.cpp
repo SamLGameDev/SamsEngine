@@ -47,7 +47,7 @@ std::string UHardwareDetails::GetCPU()
 	memset(CPUBrandString, 0, sizeof(CPUBrandString));
 
 	// Get the information associated with each extended ID.
-	for (int i = 0x80000000; i <= nExIds; ++i)
+	for (unsigned int i = 0x80000000; i <= nExIds; ++i)
 	{
 		__cpuid(CPUInfo, i);
 		// Interpret CPU brand string.

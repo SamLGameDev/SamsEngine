@@ -50,7 +50,7 @@ namespace Vulkan
 
 		for (size_t i = 3; i < 7; i++)
 		{
-			descriptor.binding = i;
+			descriptor.binding = static_cast<uint32_t>(i);
 			descriptor.descriptorCount = 1;
 			descriptor.pImmutableSamplers = nullptr;
 			descriptor.descriptorType = VK_DESCRIPTOR_TYPE_STORAGE_BUFFER;

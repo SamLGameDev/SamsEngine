@@ -39,9 +39,9 @@ void UFileWriter::Load(const std::string_view& Name, Array<Vector3D>& Data, cons
     size_t count;
     in.read(reinterpret_cast<char*>(&count), sizeof(count));
 
-    Data.Reallocate((Range.Y - Range.X));
-    in.seekg(sizeof(count) + Range.X * sizeof(Vector3D), std::ios::beg);
-    in.read(reinterpret_cast<char*>(Data.GetFirstPtr()), (Range.Y - Range.X) * sizeof(Vector3D));
+    Data.Reallocate(static_cast<size_t>(Range.Y - Range.X));
+    in.seekg(static_cast<off_t>(sizeof(count) + sizeof(Vector3D) * Range.X), std::ios::beg);
+    in.read(reinterpret_cast<char*>(Data.GetFirstPtr()),  static_cast<std::streamsize>(sizeof(Vector3D) * (Range.Y - Range.X)));
 }
 
 

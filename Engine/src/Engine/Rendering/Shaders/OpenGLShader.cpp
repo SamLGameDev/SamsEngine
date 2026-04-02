@@ -146,7 +146,7 @@ namespace OpenGL {
 		//if there is a cube-map, apply it
 		if (Map.GetTextureLocation() != "")
 		{
-			glActiveTexture(GL_TEXTURE0 + Textures.GetSize());
+			glActiveTexture(GL_TEXTURE0 + static_cast<GLuint>(Textures.GetSize()));
 
 		//	SetInt("Map", Textures.GetSize());
 
@@ -168,9 +168,9 @@ namespace OpenGL {
 	void Shader::SetUniformBuffer(const size_t& Location, const void* Data, const size_t& Size)
 	{
 
-		DataBuffer* buffer = dynamic_cast<DataBuffer*>(::DataBuffers::GetBuffer(UniformBufferID[Location]));
+		DataBuffer* buffer = dynamic_cast<DataBuffer*>(::DataBuffers::GetBuffer(static_cast<uint32_t>(UniformBufferID[Location])));
 
-		glBindBufferBase(GL_UNIFORM_BUFFER, Location, buffer->UBO);
+		glBindBufferBase(GL_UNIFORM_BUFFER, static_cast<GLuint>(Location), buffer->UBO);
 
 		memcpy(UniformMappedData[Location], Data, Size);
 	}

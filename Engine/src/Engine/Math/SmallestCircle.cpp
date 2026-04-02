@@ -92,7 +92,7 @@ Circle Circle::GetSmallestCircle(Array<Vector2D>& Points, Array<Vector2D> EdgeRP
 {
 	if (Size == 0 || EdgeRPoints.GetSize() == 3) return GetMinCircleTrivial(EdgeRPoints);
 
-	size_t index = MathCore::RandomRange<int>(0, Size - 1);
+	size_t index = MathCore::RandomRange<int>(0, static_cast<int>(Size) - 1);
 	Vector2D point = Points[index];
 
 	Points.Swap(index, Size - 1);

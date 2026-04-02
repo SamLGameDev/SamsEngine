@@ -99,7 +99,7 @@ namespace OpenGL
 
 	void Renderer::Draw(const size_t& Size)
 	{
-		glDrawElements(GL_TRIANGLES, Size, GL_UNSIGNED_SHORT, nullptr);
+		glDrawElements(GL_TRIANGLES, static_cast<GLsizei>(Size), GL_UNSIGNED_SHORT, nullptr);
 	}
 
 	void Renderer::ShutDown()

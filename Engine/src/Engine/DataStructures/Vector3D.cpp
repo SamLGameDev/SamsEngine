@@ -142,7 +142,7 @@ bool Vector3D::GetIntersectionPointWithPlane(const Vector3D& Mid, const Vector3D
 		return false;
 	}
 
-	Out = Point + (t * LineDir);
+	Out = Point + LineDir * t;
 
 	return true;
 }
