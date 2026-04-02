@@ -88,7 +88,7 @@ public:
 		{
 			center += vert;
 		}
-		return center / Vertices.GetSize();
+		return center / static_cast<float>(Vertices.GetSize());
 	}
 };
 struct Edge

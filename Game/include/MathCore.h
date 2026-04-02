@@ -18,7 +18,7 @@ public:
 		return Value < Range && Value > -Range;
 	}
 
-	[[nodiscard]] static bool IsNearlyEqual(const float& A, const float& B, const float& Range = 1e-6f);
+	[[nodiscard]] static bool IsNearlyEqual(const double& A, const double& B, const double& Range = 1e-6f);
 
 	[[nodiscard]] static bool IsEven(const int& Value);
 	template <typename T>

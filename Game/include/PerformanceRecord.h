@@ -2,7 +2,16 @@
 #pragma once
 #include <string_view>
 
+#include "Array.h"
 #include "nlohmann/json_fwd.hpp"
+
+struct PointEntry
+{
+public:
+	std::string NumPoints;
+	std::string Generation;
+	std::string Clipping;
+};
 
 struct DataRecord
 {
@@ -12,12 +21,9 @@ public:
 	std::string RAM;
 	std::string CPU;
 	std::string API;
-	std::string TenPointsGeneration;
-	std::string TenPointsClipping;
-	std::string OneHundredPointsGeneration;
-	std::string OneHundredPointsClipping;
-	std::string OneThousandPointsGeneration;
-	std::string OneThousandPointsClipping;
+
+	Array<PointEntry> PointInfo;
+
 };
 
 class DataRecorder
@@ -29,6 +35,7 @@ public:
 	static bool DoesJsonContainRecord(const DataRecord& Record, const nlohmann::json& Root, size_t& Index);
 
 	static void AppendRecordToData(const DataRecord& Record, nlohmann::ordered_json& Root, size_t& Index, const std::string_view& Name);
+	static void AppendRecordToData(const DataRecord& Record, nlohmann::ordered_json& Root, const std::string_view& Name);
 
 	static void MakeDataEntryArrayIfNot(nlohmann::ordered_json& Data, const std::string_view& Key);
 

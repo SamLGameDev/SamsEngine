@@ -1,5 +1,5 @@
 // DO NOT MARK except FracturePlaneRandom, CreateMeshFractureGPU, FracturePlaneRandomGPU, GenerateRandomPointsInBounds, GenerateNewPointSets, FracturePeiceGPU, RawCell, FixedSizeFace, Cell,
-// WorkingBuffer, VOut, VOutRaw TetFace, FTet, InTets, VoronoiSSBOIn, TetrahedraliseMesh
+// WorkingBuffer, VOut, VOutRaw TetFace, FTet, InTets, VoronoiSSBOIn, TetrahedraliseMesh, GenerateCellGPU, GenerateClippedCellGPU, CleanUpBuffers, DrawFractures, LoadPoints, SetUpComputeShaders, CopyBoundingBoxToBuffer, CleanupGPUGeneration
 //This is because it has been submitted for my COMP305. Link to Original: https://github.falmouth.ac.uk/GA-Undergrad-Student-Work-25-26/Comp305-Engine-SL295211.git
 #pragma once
 
@@ -11,6 +11,8 @@
 #include "InterfaceRenderer.h"
 #include "Vector3D.h"
 #include "Model.h"
+#include "PerformanceRecord.h"
+#include "UComputeShader.h"
 #include "Vector4D.h"
 #include "WireShapes.h"
 #include "WorldObject.h"
@@ -30,47 +32,59 @@ struct TetRing
 
 struct alignas(16) RawCell
 {
-	Vector4D Verts[1000];
+	Vector4D Verts[1000]; // 1000 verts and 20000 inds is more than enough for a one cell.
 	uint32_t Inds[20000];
 	uint32_t NumInds;
 	uint32_t NumVerts;
-	uint32_t Padding[2];
+	uint32_t Padding[2]; // Padding to make sure the struct is a multiple of 16 bytes, which is required for std430 layout in shaders
 
 };
 
 struct alignas(16) FixedSizeFace
 {
-	Vector4D Verts[30];
+	Vector4D Verts[40];
 	uint32_t NumVerts;
 };
 
 struct alignas (16) Cell
 {
-	FixedSizeFace Faces[30];
+	FixedSizeFace Faces[40];
 	uint32_t NumFaces;
-	uint32_t padding[3];
+	uint32_t padding[3]; // padding to make sure the struct is a multiple of 16 bytes, which is required for std430 layout in shaders
 };
 
+/// <summary>
+/// This is the buffer that holds temporary variables in the computer shader during fracture generation.
+/// This was neccessary as there was not enough temporary memory in the compute shader to hold all the variables needed for the fracture generation, 
+/// so I had to create a buffer to hold them. This buffer is not used for anything else.
+/// </summary>
 struct alignas(16) WorkingBuffer
 {
 	Cell cells[100];
+	Cell Tempcells[100];
+	FixedSizeFace IntersectFaces[100];
 };
 
+/// <summary>
+/// The output of the cell generation stage
+/// </summary>
 struct alignas(16) VOut
 {
 	uint32_t NumCells;
 	uint32_t DebugNum;
 	uint32_t _Padding[2];
-	Cell CutCells[1000];
+	Cell CutCells[100];
 
 };
-
+/// <summary>
+/// The output of the cell clipping stage
+/// </summary>
 struct alignas(16) VOutRaw
 {
 	uint32_t NumCells;
 	uint32_t DebugNum;
 	uint32_t _Padding[2];
-	RawCell CutCells[1000];
+	RawCell CutCells[100];
 
 };
 
@@ -136,12 +150,9 @@ public:
 
 		RightArrow->Actions.BindMember(this, &FracturePieceGPU::Converge);
 
-		//Hide = std::make_unique<InputAction>(GLFW_KEY_H, inputManager, Camera::GetActiveWindow());
-		//Hide->Actions.BindMember(this, &FracturePiece3D::ToggleRendering);
-
 	}
 
-	FracturePieceGPU(const FracturePieceGPU& Other) : WorldObject()
+	FracturePieceGPU(const FracturePieceGPU& Other) : WorldObject(Other)
 	{
 		Copy(Other);
 	}
@@ -168,9 +179,6 @@ public:
 		RightArrow = std::make_unique<InputAction>(GLFW_KEY_RIGHT, inputManager, Camera::GetActiveWindow());
 
 		RightArrow->Actions.BindMember(this, &FracturePieceGPU::Converge);
-
-		//Hide = std::make_unique<InputAction>(GLFW_KEY_H, inputManager, Camera::GetActiveWindow());
-		//Hide->Actions.BindMember(this, &FracturePiece3D::ToggleRendering);
 
 		TickDel.Remove(&Other, &FracturePieceGPU::Tick);
 		TickDel.BindMember(this, &FracturePieceGPU::Tick);
@@ -248,12 +256,10 @@ public:
 
 		RightArrow->Actions.BindMember(this, &FracturePiece3D::Converge);
 
-		Hide = std::make_unique<InputAction>(GLFW_KEY_H, inputManager, Camera::GetActiveWindow());
-		Hide->Actions.BindMember(this, &FracturePiece3D::ToggleRendering);
-
 	}
 
-	FracturePiece3D(const FracturePiece3D& Other) : WorldObject()
+	FracturePiece3D(const FracturePiece3D& Other)
+		: WorldObject(Other)
 	{
 		Copy(Other);
 	}
@@ -287,9 +293,6 @@ public:
 
 		RightArrow->Actions.BindMember(this, &FracturePiece3D::Converge);
 
-		Hide = std::make_unique<InputAction>(GLFW_KEY_H, inputManager, Camera::GetActiveWindow());
-		Hide->Actions.BindMember(this, &FracturePiece3D::ToggleRendering);
-
 		TickDel.Remove(&Other, &FracturePiece3D::Tick);
 		TickDel.BindMember(this, &FracturePiece3D::Tick);
 	}
@@ -321,8 +324,6 @@ public:
 
 	void Converge();
 
-	void ToggleRendering();
-
 	void Draw();
 
 	void Start() override;
@@ -343,18 +344,11 @@ public:
 	Array<uint16_t> Inds;
 
 	Vector3D Point;
-	bool bIsHidden = true;
 
 private:
 
 
 	GLuint PVAO, PVBO;
-
-
-
-
-
-
 
 	GLuint VAO, VBO, EBO;
 
@@ -362,9 +356,6 @@ private:
 
 	std::unique_ptr<InputAction> LeftArrow;
 	std::unique_ptr<InputAction> RightArrow;
-	std::unique_ptr<InputAction> Hide;
-
-
 
 	void AddOrMakeInd(const Vector3D& Vert);
 };
@@ -380,12 +371,18 @@ struct alignas(16) FTet
 	TetFace TetFaces[4];
 };
 
+/// <summary>
+/// The input mesh tetrahedrons used for the clipping stage
+/// </summary>
 struct alignas(16) InTets
 {
 	uint32_t NumTets;
 	FTet Tets[1000];
 };
 
+/// <summary>
+/// The input points and Bounding box for cell generation
+/// </summary>
 struct VoronoiSSBOIn
 {
 	Vector4D Points[100];
@@ -399,17 +396,15 @@ public:
 
 	//Fracture the model into a voronoi diagram based on random points
 	void FracturePlaneRandom(Model& InModel, const size_t& NumPoints, const size_t& PointSetIndex);
-	void CreateMeshFractureGPU(VoronoiSSBOIn* buffer, Array<Vector3D> points, InTets tets, GLuint VoronoiIn,
-	                           GLuint VoronoiOut, GLuint ClippedOutInd, GLuint InTetsInd, GLuint WBuffer, const bool& bShouldDraw, const bool&
-	                           bShouldRecord);
-	static void TetrahedraliseMesh(const Model& InModel, InTets& tets);
+
+
+	//Fracture the model into a voronoi diagram based on random points
+	void FracturePlaneRandomGPU(Model& InModel);
+
+
 
 	//Fracture the model into a voronoi diagram based on random points
 	void FracturePlaneRandomGPU(Model& InModel, const size_t& NumPoints, const size_t& PointSetIndex);
-
-
-	//Fracture the model into a voronoi diagram based on random points
-	void FracturePlaneRandomGPU(Model& InModel, const size_t& NumPoints, const size_t& PointSetIndex, const bool& bShouldDraw);
 
 	static Array<Vector3D> GenerateRandomPointsInBounds(const Model& InModel, const size_t& NumPoints, Array<Vector3D>& Points);
 
@@ -431,12 +426,6 @@ private:
 	static bool IsPointInPolygon(const Vector3D& Normal, const Array<Vector3D>& Polygon, const Vector3D& center);
 	static bool IsPointTooClose(const Vector3D& Point, const Array<Vector3D>& Points);
 
-	std::vector<std::unique_ptr<WireObject>> TestSquare;
-
-	Array<Face> fractureFaces;
-
-	std::unique_ptr<InputAction> Next;
-
 	static Vector3D GetCircumCenter(const Vector3D& A, const Vector3D& B, const Vector3D& C, const Vector3D& D);
 	static void ClipVertexToPlane(const Vector3D& Normal, const double& D, Face& IntersectFace, const Vector3D& Vertex,
 	                              const Vector3D& NextVertex, Face& NewFace);
@@ -450,11 +439,34 @@ private:
 	static Array<Face> GetCell(const Array<Tetrahedron>& tetrahedra, const Vector3D& point);
 	void GenerateVoronoiCellDelaunay(const Model& InModel, const Array<Tetrahedron>& Tetrahedra, const Vector3D& Point);
 
-	void NextCell();
-
-	size_t current = 0;
-
 	void GenerateVoronoiCellsDelaunay(const Array<Vector3D>& Points, const Model& InModel);
+
+	static void TetrahedraliseMesh(const Model& InModel, InTets& Tets);
+	void CopyBoundingBoxToBuffer(const Model& InModel, VoronoiSSBOIn* Buffer);
+	void SetUpComputeShaders(const InTets& Tets, GLuint& VoronoiIn, GLuint& VoronoiOut, GLuint& ClippedOutInd,
+		GLuint& InTetsInd, GLuint& WBuffer, UComputeShader& ClippingCompute,
+		UComputeShader& VoronoiCompute);
+	void LoadPoints(VoronoiSSBOIn* InBuffer, Array<Vector3D>& Points, const size_t& NumPoints, const std::string& DataToLoad, const size_t&
+		PointSetIndex);
+	void CleanupGPUGeneration(VoronoiSSBOIn* InBuffer, VOut* VoronoiOutBuffer, VOutRaw* ClippedOut, GLuint& VoronoiIn,
+		GLuint& VoronoiOut,
+		GLuint& ClippedOutInd, GLuint& InTetsInd, GLuint& wBuffer);
+	void GenerateCellGPU(VoronoiSSBOIn* Buffer, const Array<Vector3D>& Points, const GLuint& VoronoiIn, const GLuint& VoronoiOut,
+		const GLuint& WBuffer,
+		double& TimeBeforeComputation, UComputeShader& VoronoiCompute);
+	void GenerateClippedCellGPU(const Array<Vector3D>& Points, const InTets& Tets, const GLuint& VoronoiOut, const GLuint& ClippedOutInd,
+		const GLuint& InTetsInd, const GLuint& WBuffer, double& TimeBeforeComputation, UComputeShader& ClippingCompute);
+	void CleanUpBuffers(const GLuint& VoronoiIn, const GLuint& VoronoiOut, const GLuint& ClippedOutInd, const GLuint& InTetsInd, const GLuint&
+		WBuffer);
+	void DrawFractures(const Array<Vector3D>& points, const GLuint& ClippedOutInd);
+	void CreateMeshFractureGPU(VoronoiSSBOIn* Buffer, const Array<Vector3D>& Points, const InTets& Tets, const GLuint& VoronoiIn,
+		const GLuint& VoronoiOut, const GLuint& ClippedOutInd, const GLuint& InTetsInd, const GLuint& WBuffer, UComputeShader&
+		VoronoiCompute, UComputeShader& ClippingCompute);
+	void CreateMeshFractureGPU(VoronoiSSBOIn* Buffer, const Array<Vector3D>& Points,
+		const InTets& Tets, const GLuint& VoronoiIn, const GLuint& VoronoiOut, const GLuint& ClippedOutInd,
+		const GLuint& InTetsInd, const GLuint& WBuffer, PointEntry& Entry, UComputeShader& VoronoiCompute, UComputeShader&
+		ClippingCompute);
+
 
 };
 

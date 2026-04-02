@@ -2,12 +2,12 @@
 
 struct Face
 {
-    vec3 Verts[30];
+    vec3 Verts[40];
     uint NumVerts;
 };
 
 struct Cell {
-    Face Faces[30];
+    Face Faces[40];
     uint NumFaces;
 };
 
@@ -17,7 +17,7 @@ layout(std430, binding = 1) readonly buffer VoronoiSSBOIn {
     uint NumPoints;
     Face BoundingBoxFaces[6];
 };
-
+// Skip buffer slot 2 as that is in use elsewhere
 layout(std430, binding = 3) buffer VoronoiSSBOOut
 { 
     uint NumCells;
@@ -28,33 +28,37 @@ layout(std430, binding = 3) buffer VoronoiSSBOOut
 layout(std430, binding = 6) buffer VoronoiWorkingBuffer
 {
     Cell WorkingCells[100];
+    Cell TempCells[100];
+    Face IntersectFaces[100];
 };
 
+//We dont need additonal invocations, as all tasks need to be done on a single thread in order
 layout (local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
 
 void DefinePlane(const in vec3 CurrentPoint, const in vec3 ComparedPoint, out vec3 Normal, out vec3 Center)
 {
-    Normal = normalize(CurrentPoint - ComparedPoint);
+    Normal = normalize(ComparedPoint - CurrentPoint);
     
     Center = (CurrentPoint + ComparedPoint) / 2;
 }
-
-void AddFaceVert(inout Face InFace, const in vec3 Vert)
+bool AlmostEqual(vec3 a, vec3 b, float epsilon)
 {
-    InFace.Verts[InFace.NumVerts] = Vert;
-    InFace.NumVerts++;
+    return all(lessThanEqual(abs(a - b), vec3(epsilon)));
 }
 
 bool GetIntersectionPoint(const in vec3 Center, const in vec3 Normal, const in vec3 LineStart, const in vec3 LineDir, out vec3 IntersectionPoint)
 {
     const float dot1 = dot(Normal, LineDir);
     
+    //if they are perpendicular
     if (dot1 == 0) return false;
+    
     const float d = -dot(Normal, Center);
     const float dot2 = dot(Normal, LineStart);
     
     const float t = -(dot2 + d) / dot1;
     
+    //Outside of the lines length, t = distance along the line
     if (t < 0 || t > 1) return false;
     
     IntersectionPoint = LineStart + (t * LineDir);
@@ -62,33 +66,42 @@ bool GetIntersectionPoint(const in vec3 Center, const in vec3 Normal, const in v
 }
 
 
-void GetFirstIntersection(const in vec3 Normal, const in vec3 Center, const in Face CurrentFace, inout Face NewFace, 
-inout uint FirstIntersectionIndex, out vec3 FirstIntersection)
+void GetFirstIntersection(const in vec3 Normal, const in vec3 Center, const in uint CurrentFace, 
+inout uint FirstIntersectionIndex, out vec3 FirstIntersection, const in uint Index)
 {
-    NewFace.NumVerts = 0;
-    for (FirstIntersectionIndex; FirstIntersectionIndex < CurrentFace.NumVerts; FirstIntersectionIndex++)
+    //Ensure the numVerts are reset to zero, should always be a new cell
+    TempCells[Index].Faces[TempCells[Index].NumFaces].NumVerts = 0;
+    for (FirstIntersectionIndex; FirstIntersectionIndex < WorkingCells[Index].Faces[CurrentFace].NumVerts; FirstIntersectionIndex++)
     {
-        const vec3 fromVert = CurrentFace.Verts[FirstIntersectionIndex];
-        const vec3 toVert = CurrentFace.Verts[(FirstIntersectionIndex +1) % CurrentFace.NumVerts];
+        const vec3 fromVert = WorkingCells[Index].Faces[CurrentFace].Verts[FirstIntersectionIndex];
+        const vec3 toVert = WorkingCells[Index].Faces[CurrentFace].Verts[(FirstIntersectionIndex +1) % WorkingCells[Index].Faces[CurrentFace].NumVerts];
         
         const vec3 lineDir = toVert - fromVert;
         vec3 intersectionPoint;
         const bool bDoesLineIntersect = GetIntersectionPoint(Center, Normal, fromVert, lineDir, intersectionPoint);
         if (bDoesLineIntersect)
         {
-            const bool bIsIntersectionNextVertex = intersectionPoint == toVert;
+            const bool bIsIntersectionNextVertex = AlmostEqual(intersectionPoint, toVert, 0.0001);
             if (bIsIntersectionNextVertex)
-            {
-                AddFaceVert(NewFace, toVert);
-                AddFaceVert(NewFace, CurrentFace.Verts[(FirstIntersectionIndex + 2) % CurrentFace.NumVerts]);
-                FirstIntersectionIndex = (FirstIntersectionIndex + 2) % CurrentFace.NumVerts;
+            { 
+                //Add the next vert and the next next vert. Dont functionise this, as this program needs to reduce temeporary memeory usagae
+                //As such, copying and local variables have been reduced as much as possible
+                TempCells[Index].Faces[TempCells[Index].NumFaces].Verts[TempCells[Index].Faces[TempCells[Index].NumFaces].NumVerts] = toVert;
+                TempCells[Index].Faces[TempCells[Index].NumFaces].NumVerts++;
+                TempCells[Index].Faces[TempCells[Index].NumFaces].Verts[TempCells[Index].Faces[TempCells[Index].NumFaces].NumVerts] = WorkingCells[Index].Faces[CurrentFace].Verts[(FirstIntersectionIndex + 2) % WorkingCells[Index].Faces[CurrentFace].NumVerts];
+                TempCells[Index].Faces[TempCells[Index].NumFaces].NumVerts++;
+                FirstIntersectionIndex = (FirstIntersectionIndex + 2) % WorkingCells[Index].Faces[CurrentFace].NumVerts;
 
             }
             else
             {
-                AddFaceVert(NewFace, intersectionPoint);
-                AddFaceVert(NewFace, toVert);
-                FirstIntersectionIndex = (FirstIntersectionIndex + 1) % CurrentFace.NumVerts;
+                //Add intersection point then the next vert, as if the intersection point is not the next vert,
+                //it means it lies somewhere between from vert and to vert 
+                TempCells[Index].Faces[TempCells[Index].NumFaces].Verts[TempCells[Index].Faces[TempCells[Index].NumFaces].NumVerts] = intersectionPoint;
+                TempCells[Index].Faces[TempCells[Index].NumFaces].NumVerts++;
+                TempCells[Index].Faces[TempCells[Index].NumFaces].Verts[TempCells[Index].Faces[TempCells[Index].NumFaces].NumVerts] = toVert;
+                TempCells[Index].Faces[TempCells[Index].NumFaces].NumVerts++;
+                FirstIntersectionIndex = (FirstIntersectionIndex + 1) % WorkingCells[Index].Faces[CurrentFace].NumVerts;
             }
             FirstIntersection = intersectionPoint;
             break;
@@ -96,13 +109,13 @@ inout uint FirstIntersectionIndex, out vec3 FirstIntersection)
     }
 }
 
-uint GetAllVertsUntillSecondIntersection(const in vec3 Normal, const in vec3 Center, const in Face ToClip, inout Face OutFace, const in uint FirstIntersectionIndex, out vec3 SecondIntersection)
+uint GetAllVertsUntillSecondIntersection(const in vec3 Normal, const in vec3 Center, const in uint ToClip, const in uint FirstIntersectionIndex, out vec3 SecondIntersection, const in uint Index)
 {
     uint secondIntersectionIndex = 0;
-    for (secondIntersectionIndex = FirstIntersectionIndex; secondIntersectionIndex < ToClip.NumVerts; secondIntersectionIndex++)
+    for (secondIntersectionIndex = FirstIntersectionIndex; secondIntersectionIndex <  WorkingCells[Index].Faces[ToClip].NumVerts; secondIntersectionIndex++)
     {
-        const vec3 fromVert = ToClip.Verts[secondIntersectionIndex];
-        const vec3 toVert = ToClip.Verts[(secondIntersectionIndex + 1) % ToClip.NumVerts];
+        const vec3 fromVert =  WorkingCells[Index].Faces[ToClip].Verts[secondIntersectionIndex];
+        const vec3 toVert =  WorkingCells[Index].Faces[ToClip].Verts[(secondIntersectionIndex + 1) %  WorkingCells[Index].Faces[ToClip].NumVerts];
 
         const vec3 lineDir = toVert - fromVert;
         vec3 intersectionPoint;
@@ -110,12 +123,14 @@ uint GetAllVertsUntillSecondIntersection(const in vec3 Normal, const in vec3 Cen
         
         if (bDoesLineIntersect)
         {
-            AddFaceVert(OutFace, intersectionPoint);
+            TempCells[Index].Faces[TempCells[Index].NumFaces].Verts[TempCells[Index].Faces[TempCells[Index].NumFaces].NumVerts] = intersectionPoint;
+            TempCells[Index].Faces[TempCells[Index].NumFaces].NumVerts++;
             SecondIntersection = intersectionPoint;
             secondIntersectionIndex++;
             break;
         }
-        AddFaceVert(OutFace, toVert);
+        TempCells[Index].Faces[TempCells[Index].NumFaces].Verts[TempCells[Index].Faces[TempCells[Index].NumFaces].NumVerts] = toVert;
+        TempCells[Index].Faces[TempCells[Index].NumFaces].NumVerts++;
     }
     return secondIntersectionIndex;
 }
@@ -125,12 +140,13 @@ bool isNearlyZero(const in float X)
     return X < 1e-6 && X > -1e-6;
 }
 
-bool IsPointInPolyhedra(const in vec3 Normal, const in Face OutFace, const in vec3 Center, const in uint CutTIme, const in uint Plane)
+bool IsPointInPolyhedra(const in vec3 Normal, const in uint Index, const in vec3 Center, const in uint CutTIme, const in uint Plane)
 {
-    for (uint i = 0; i < OutFace.NumVerts; i++)
+    for (uint i = 0; i < TempCells[Index].Faces[TempCells[Index].NumFaces].NumVerts; i++)
     {
-        const float d = dot(OutFace.Verts[i] - Center, Normal);
-        if (d < 0 && !isNearlyZero(d))
+        //if the dot from the center to any of the current verts is aligned with the normal, it is outside the current cell
+        const float d = dot(TempCells[Index].Faces[TempCells[Index].NumFaces].Verts[i] - Center, Normal);
+        if (d > 0 && !isNearlyZero(d))
         {
             return false;
         } 
@@ -138,44 +154,69 @@ bool IsPointInPolyhedra(const in vec3 Normal, const in Face OutFace, const in ve
     return true;
 }
 
-void GetFaceReversed(const in Face ToClip, inout Face NewFace, const in uint FirstIntersectionIndex,
+void GetFaceReversed(const in uint ToClip, const in uint Index, const in uint FirstIntersectionIndex,
 const in vec3 FirstIntersection, const in vec3 SecondIntersection, const in uint SecondInterectionIndex, const in uint CutTIme, const in uint Plane)
 {
-    NewFace.NumVerts = 0;
-    if (SecondIntersection != ToClip.Verts[SecondInterectionIndex % ToClip.NumVerts]) AddFaceVert(NewFace, SecondIntersection);
-    vec3 from;
-
-    for (uint i = SecondInterectionIndex; i % ToClip.NumVerts != FirstIntersectionIndex; i++)
+    TempCells[Index].Faces[TempCells[Index].NumFaces].NumVerts = 0;
+    if (SecondIntersection !=  WorkingCells[Index].Faces[ToClip].Verts[SecondInterectionIndex %  WorkingCells[Index].Faces[ToClip].NumVerts])
     {
-        from = ToClip.Verts[i % ToClip.NumVerts];
-        const vec3 to = ToClip.Verts[(i+1) % ToClip.NumVerts];
-        if (from == to) continue;
-        AddFaceVert(NewFace, from);
+        TempCells[Index].Faces[TempCells[Index].NumFaces].Verts[TempCells[Index].Faces[TempCells[Index].NumFaces].NumVerts] = SecondIntersection;
+        TempCells[Index].Faces[TempCells[Index].NumFaces].NumVerts++;
     }
-    if (from != FirstIntersection) AddFaceVert(NewFace, FirstIntersection);
+    //get the reverse verts, so instead of from the first intersection to second, you start at the second and get every vert until the first
+    vec3 from;
+    for (uint i = SecondInterectionIndex; i %  WorkingCells[Index].Faces[ToClip].NumVerts != FirstIntersectionIndex; i++)
+    {
+        from =  WorkingCells[Index].Faces[ToClip].Verts[i %  WorkingCells[Index].Faces[ToClip].NumVerts];
+        const vec3 to =  WorkingCells[Index].Faces[ToClip].Verts[(i+1) %  WorkingCells[Index].Faces[ToClip].NumVerts];
+        if (AlmostEqual(from, to, 0.00001)) continue;
+        TempCells[Index].Faces[TempCells[Index].NumFaces].Verts[TempCells[Index].Faces[TempCells[Index].NumFaces].NumVerts] = from;
+        TempCells[Index].Faces[TempCells[Index].NumFaces].NumVerts++;
+    }
+    if (!AlmostEqual(from, FirstIntersection, 0.00001))
+    {
+        TempCells[Index].Faces[TempCells[Index].NumFaces].Verts[TempCells[Index].Faces[TempCells[Index].NumFaces].NumVerts] = FirstIntersection;
+        TempCells[Index].Faces[TempCells[Index].NumFaces].NumVerts++;
+    }
     
 }
 
-void ClipFacebyFace(const in Face ToClip, const in vec3 Center, inout Face OutFace, const in vec3 Normal, inout Face IntersectFace, const in uint CutTimes, const in uint Plane)
+void ClipFacebyFace(const in uint ToClip, const in vec3 Center,const in uint Index, const in vec3 Normal, const in uint CutTimes, const in uint Plane)
 {
     uint firstIntersectionIndex = 0;
     vec3 firstIntersection;
-    GetFirstIntersection(Normal, Center, ToClip, OutFace, firstIntersectionIndex, firstIntersection);
-       
-    if (OutFace.NumVerts == 0)
+    GetFirstIntersection(Normal, Center, ToClip, firstIntersectionIndex, firstIntersection, Index);
+    
+    //If there is no first intersection
+    if (TempCells[Index].Faces[TempCells[Index].NumFaces].NumVerts == 0)
     {
-        if (dot(Normal, ToClip.Verts[0] - Center) > 0) OutFace = ToClip;
+        //If any of the points are on the normal facing side of the plane, the face is discarded, else keep it 
+        for (uint i = 0; i < WorkingCells[Index].Faces[ToClip].NumVerts; i++)
+        {
+            float d = dot(Normal, WorkingCells[Index].Faces[ToClip].Verts[i] - Center);
+            if (d <= 0)
+            {
+                TempCells[Index].Faces[TempCells[Index].NumFaces] =  WorkingCells[Index].Faces[ToClip];
+                return;
+            }
+        }
         return;
     }
     vec3 secondIntersection;
-    uint secondIntersectionIndex = GetAllVertsUntillSecondIntersection(Normal, Center, ToClip, OutFace, firstIntersectionIndex, secondIntersection);
-    if (!IsPointInPolyhedra(Normal, OutFace, Center, CutTimes, Plane))
+    uint secondIntersectionIndex = GetAllVertsUntillSecondIntersection(Normal, Center, ToClip, firstIntersectionIndex, secondIntersection, Index);
+    
+    //There are two possible shapes, as we are going from the first intersection untill the second.
+    //If the point is not contained in the first shape, we need to get the second shape by continuing from the second intersection,
+    //until we wrap round to the first intersection
+    if (!IsPointInPolyhedra(Normal, Index, Center, CutTimes, Plane))
     {
-        GetFaceReversed(ToClip, OutFace, firstIntersectionIndex, firstIntersection, secondIntersection, secondIntersectionIndex, CutTimes, Plane);
+        GetFaceReversed(ToClip, Index, firstIntersectionIndex, firstIntersection, secondIntersection, secondIntersectionIndex, CutTimes, Plane);
     }
-
-    AddFaceVert(IntersectFace, firstIntersection);
-    AddFaceVert(IntersectFace, secondIntersection);
+    //As the shape is cut by a plane, we need to add a face for the cut, to ensure the shape remains convex
+    IntersectFaces[Index].Verts[IntersectFaces[Index].NumVerts] = firstIntersection;
+    IntersectFaces[Index].NumVerts++;
+    IntersectFaces[Index].Verts[IntersectFaces[Index].NumVerts] = secondIntersection;
+    IntersectFaces[Index].NumVerts++;
     
 }
 
@@ -192,7 +233,7 @@ void OrderByAngle(inout Face InFace, const in vec3 Center, const in vec3 Normal)
     vec3 t, u;
     GetPlaneAxis(Normal, t, u);
     
-    float angles[30];
+    float angles[40];
     for (uint i = 0; i < InFace.NumVerts; i++)
     {
         const vec3 d = InFace.Verts[i] - Center;
@@ -202,7 +243,7 @@ void OrderByAngle(inout Face InFace, const in vec3 Center, const in vec3 Normal)
     }
     Face newFace;
     newFace.NumVerts = 0;
-    float nextAngle = 99999;
+    float nextAngle = 99999; //Dummy Number
     uint nextAngleIndex;
     while (newFace.NumVerts < InFace.NumVerts)
     {
@@ -216,45 +257,98 @@ void OrderByAngle(inout Face InFace, const in vec3 Center, const in vec3 Normal)
         }
         newFace.Verts[newFace.NumVerts] = InFace.Verts[nextAngleIndex];
         newFace.NumVerts++;
+        
+        //Mark this angle as completed by setting it to a number that will never be reached
+        
         angles[nextAngleIndex] = 99999;
         nextAngle = 9999;
     }
     
     InFace = newFace;
 }
-
-void ClipCellByFace(const in uint Index, const in vec3 Center, const in vec3 Normal, const in uint CutTime)
-{
-    Face intersectFace;
-    Cell newCell;
-    newCell.NumFaces = 0;
-    intersectFace.NumVerts = 0;
-    
-    for (uint i = 0; i <  WorkingCells[Index].NumFaces; i++)
-    {
-        newCell.Faces[newCell.NumFaces].NumVerts = 0;
-        ClipFacebyFace(WorkingCells[Index].Faces[i], Center, newCell.Faces[newCell.NumFaces], Normal, intersectFace, CutTime, newCell.NumFaces);
-        if (newCell.Faces[newCell.NumFaces].NumVerts != 0) newCell.NumFaces++;
-    }
-    if (intersectFace.NumVerts >= 3)
-    {
-        OrderByAngle(intersectFace, Center, Normal);
-        newCell.Faces[newCell.NumFaces] = intersectFace;
-        newCell.NumFaces++;
-    }
-
-    WorkingCells[Index] = newCell;
-}
-
 bool Contains(const in vec3 Item, const in Face InFace)
 {
     for (uint i = 0; i < InFace.NumVerts; i++)
     {
-        if (InFace.Verts[i] == Item) return true;
+        if (AlmostEqual(InFace.Verts[i], Item, 0.00001)) return true;
     }
     return false;
 }
 
+void RemoveDuplicates(const in uint Index)
+{
+    Face newFace;
+    newFace.NumVerts = 0;
+    for (uint i = 0; i < TempCells[Index].Faces[TempCells[Index].NumFaces].NumVerts; i++)
+    {
+        if (Contains(TempCells[Index].Faces[TempCells[Index].NumFaces].Verts[i], newFace)) continue;
+
+        newFace.Verts[newFace.NumVerts] =TempCells[Index].Faces[TempCells[Index].NumFaces].Verts[i];
+        newFace.NumVerts++;
+    }
+    TempCells[Index].Faces[TempCells[Index].NumFaces] = newFace;
+
+}
+
+void RemoveIntersectDuplicates(const in uint Index)
+{
+    //Need seperate functions for the intersect face to reduce temporary copies
+    Face newFace;
+    newFace.NumVerts = 0;
+    for (uint i = 0; i < IntersectFaces[Index].NumVerts; i++)
+    {
+        if (Contains(IntersectFaces[Index].Verts[i], newFace)) continue;
+
+        newFace.Verts[newFace.NumVerts] = IntersectFaces[Index].Verts[i];
+        newFace.NumVerts++;
+    }
+    IntersectFaces[Index] = newFace;
+
+}
+
+void RemoveAt(const in uint FaceIndex, const in uint Index)
+{
+    TempCells[FaceIndex].Faces[TempCells[FaceIndex].NumFaces].NumVerts--;
+    for (uint i = Index; i < TempCells[FaceIndex].Faces[TempCells[FaceIndex].NumFaces].NumVerts; i++)
+    {
+        TempCells[FaceIndex].Faces[TempCells[FaceIndex].NumFaces].Verts[i] = TempCells[FaceIndex].Faces[TempCells[FaceIndex].NumFaces].Verts[(i+1)];
+    }
+}
+
+
+void RemovePointsTooNear(const in uint Index)
+{
+    //If a point is too close to another point, there isnt a reason to contain them, thus they are removed.
+    for (uint i = 0; i < TempCells[Index].Faces[TempCells[Index].NumFaces].NumVerts; i++)
+    {
+        if (distance(TempCells[Index].Faces[TempCells[Index].NumFaces].Verts[i], TempCells[Index].Faces[TempCells[Index].NumFaces].Verts[(i+1) % TempCells[Index].Faces[TempCells[Index].NumFaces].NumVerts]) < 1e-6)
+        {
+            RemoveAt(Index, i);
+        }
+    }
+}
+
+void IntersectRemoveAt(const in uint FaceIndex, const in uint Index)
+{
+    IntersectFaces[FaceIndex].NumVerts--;
+    for (uint i = Index; i < IntersectFaces[FaceIndex].NumVerts; i++)
+    {
+        IntersectFaces[FaceIndex].Verts[i] = IntersectFaces[FaceIndex].Verts[(i+1)];
+    }
+}
+
+
+void RemoveIntersectPointsTooNear(const in uint Index)
+{
+    //If a point is too close to another point, there isnt a reason to contain them, thus they are removed.
+    for (uint i = 0; i < IntersectFaces[Index].NumVerts; i++)
+    {
+        if (distance(IntersectFaces[Index].Verts[i], IntersectFaces[Index].Verts[(i+1) % IntersectFaces[Index].NumVerts]) < 1e-6)
+        {
+            IntersectRemoveAt(Index, i);
+        }
+    }
+}
 vec3 GetPlaneCenter(const in Face Plane)
 {
     vec3 center = vec3(0, 0, 0);
@@ -264,6 +358,59 @@ vec3 GetPlaneCenter(const in Face Plane)
     }
     return center / Plane.NumVerts;
 }
+
+void ClipCellByFace(const in uint Index, const in vec3 Center, const in vec3 Normal, const in uint CutTime)
+{
+    TempCells[Index].NumFaces = 0;
+    IntersectFaces[Index].NumVerts = 0;
+    
+    //Clip each face by the plane, then add the intersect face if neccessary
+    
+    for (uint i = 0; i <  WorkingCells[Index].NumFaces; i++)
+    {
+        TempCells[Index].Faces[TempCells[Index].NumFaces].NumVerts = 0;
+        ClipFacebyFace(i, Center, Index, Normal, CutTime, TempCells[Index].NumFaces);
+
+        if (TempCells[Index].Faces[TempCells[Index].NumFaces].NumVerts < 3) continue;
+        RemoveDuplicates(Index);
+        if (TempCells[Index].Faces[TempCells[Index].NumFaces].NumVerts < 3) 
+        {
+            if (IntersectFaces[Index].NumVerts < 2) IntersectFaces[Index].NumVerts == 0;
+            else IntersectFaces[Index].NumVerts -= 2;
+            continue;
+        }
+
+        RemovePointsTooNear(Index);
+
+        if (TempCells[Index].Faces[TempCells[Index].NumFaces].NumVerts < 3)  
+        {
+            if (IntersectFaces[Index].NumVerts < 2) IntersectFaces[Index].NumVerts == 0;
+            else IntersectFaces[Index].NumVerts -= 2;
+            continue;
+        }
+
+        OrderByAngle(TempCells[Index].Faces[TempCells[Index].NumFaces], GetPlaneCenter(TempCells[Index].Faces[TempCells[Index].NumFaces]), Normal);
+
+        TempCells[Index].NumFaces++;
+    }
+    if (IntersectFaces[Index].NumVerts >= 3)
+    {
+        OrderByAngle(IntersectFaces[Index], Center, Normal);
+
+        RemoveIntersectDuplicates(Index);
+
+        RemoveIntersectPointsTooNear(Index);
+        
+        if (IntersectFaces[Index].NumVerts >= 3)
+        {
+            TempCells[Index].Faces[TempCells[Index].NumFaces] = IntersectFaces[Index];
+            TempCells[Index].NumFaces++;
+        }
+    }
+
+    WorkingCells[Index] = TempCells[Index];
+}
+
 
 vec3 GetPlaneNormal(const in Face Plane, const in vec3 Center)
 {
@@ -279,28 +426,6 @@ vec3 GetPlaneNormal(const in Face Plane, const in vec3 Center)
     }
     return normalize(normal);
 }
-
-void TriangulateRawCell(const in uint index)
-{
-    CutCells[index].NumFaces = 0;
-
-    for (uint i = 0; i < WorkingCells[index].NumFaces; i++)
-    {
-        if ( WorkingCells[index].Faces[i].NumVerts < 3) continue;
-        CutCells[index].Faces[CutCells[index].NumFaces].NumVerts = 0;
-        for (uint j = 0; j <  WorkingCells[index].Faces[i].NumVerts; j++)
-        {
-            if (Contains( WorkingCells[index].Faces[i].Verts[j], CutCells[index].Faces[CutCells[index].NumFaces])) continue;
-            AddFaceVert(CutCells[index].Faces[CutCells[index].NumFaces],  WorkingCells[index].Faces[i].Verts[j]);
-        }
-
-        if (CutCells[index].Faces[CutCells[index].NumFaces].NumVerts < 3) continue;
-        vec3 center = GetPlaneCenter(CutCells[index].Faces[CutCells[index].NumFaces]);
-        OrderByAngle(CutCells[index].Faces[CutCells[index].NumFaces], center, GetPlaneNormal(CutCells[index].Faces[CutCells[index].NumFaces], center));
-        CutCells[index].NumFaces++;
-    }
-}
-
 
 void main()
 {
@@ -326,8 +451,7 @@ void main()
         DefinePlane(point, ComparedPoint, normal, center);
         ClipCellByFace(index, center, normal, i);
     }
-    
-    TriangulateRawCell(index);
+    CutCells[index] = WorkingCells[index];
     atomicAdd(NumCells, 1);
 
 }
