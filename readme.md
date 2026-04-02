@@ -19,7 +19,7 @@
         <a href="#documentation">Documentation</a>
     </li>
     <li>
-        <a href="#video">Video</a>
+        <a href="#video-and-User-Expectation-Test">Video and User Expectation Test</a>
     </li>
     <li>
         <a href="#design-rational">Design Rational</a>
@@ -198,10 +198,14 @@ Find the doxygen generated documentation below
 
 https://samlgamedev.github.io/samsenginedocs.github.io/
 
-## Video
+## Video and User Expectation Test
+
+This is a video of me performing the user expectation test, which as shown, highlights that the artefact is displaying what would be expected.
 
 
-https://github.falmouth.ac.uk/user-attachments/assets/d35caa09-7ed5-4391-865a-00898ac367f4
+https://github.falmouth.ac.uk/user-attachments/assets/eedb841d-f108-4b4e-8635-e12a1b8c6933
+
+
 
 ## Design Rational
 
