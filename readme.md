@@ -52,7 +52,7 @@ CorePaths.cpp and .h
 Path.cpp and .h
 
 Voronoi.cpp and .h except FracturePlaneRandom, CreateMeshFractureGPU, FracturePlaneRandomGPU, GenerateRandomPointsInBounds, GenerateNewPointSets, FracturePeiceGPU, RawCell, FixedSizeFace, Cell,
-WorkingBuffer, VOut, VOutRaw TetFace, FTet, InTets, VoronoiSSBOIn, TetrahedrliseMesh
+WorkingBuffer, VOut, VOutRaw TetFace, FTet, InTets, VoronoiSSBOIn, TetrahedrliseMesh, GenerateCellGPU, GenerateClippedCellGPU, CleanUpBuffers, DrawFractures, LoadPoints, SetUpComputeShaders, CopyBoundingBoxToBuffer, CleanupGPUGeneration
 
 Voronoi2D.cpp and .h
 
