@@ -733,13 +733,11 @@ void RunEngineOpenGL(OpenGL::RuntimeEngine engine)
 
 	Voronoi vorn;
 	//vorn.GenerateNewPointSets(model);
-	vorn.FracturePlaneRandomGPU(model, 50, 45);
+	vorn.FracturePlaneRandomGPU(model,2, 45);
 
 	model.ModelTransform.Position = { 5, 0, 0 };
 
 	while (!engine.ShouldClose()) engine.Loop();
-
-	Vulkan::RuntimeEngine::WaitForFrameToFinish();
 }
 
 void OpenGLTest()
