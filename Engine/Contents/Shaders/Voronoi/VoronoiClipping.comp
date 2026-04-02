@@ -407,8 +407,8 @@ void ClipCellByFace(const in uint Index, const in vec3 Center, const in vec3 Nor
 
         if (TempCells[Index].Faces[TempCells[Index].NumFaces].NumVerts < 3)
         {
-            IntersectFaces[Index].NumVerts -= 2;
-            if (IntersectFaces[Index].NumVerts < 0) IntersectFaces[Index].NumVerts == 0;
+            if (IntersectFaces[Index].NumVerts < 2) IntersectFaces[Index].NumVerts == 0;
+            else IntersectFaces[Index].NumVerts -= 2;
             continue;
         }
 
@@ -416,8 +416,8 @@ void ClipCellByFace(const in uint Index, const in vec3 Center, const in vec3 Nor
 
         if (TempCells[Index].Faces[TempCells[Index].NumFaces].NumVerts < 3) 
         {
-            IntersectFaces[Index].NumVerts -= 2;
-            if (IntersectFaces[Index].NumVerts < 0) IntersectFaces[Index].NumVerts == 0;
+            if (IntersectFaces[Index].NumVerts < 2) IntersectFaces[Index].NumVerts == 0;
+            else IntersectFaces[Index].NumVerts -= 2;
             continue;
         }
 
