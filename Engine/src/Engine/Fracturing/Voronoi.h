@@ -1,5 +1,5 @@
 // DO NOT MARK except FracturePlaneRandom, CreateMeshFractureGPU, FracturePlaneRandomGPU, GenerateRandomPointsInBounds, GenerateNewPointSets, FracturePeiceGPU, RawCell, FixedSizeFace, Cell,
-// WorkingBuffer, VOut, VOutRaw TetFace, FTet, InTets, VoronoiSSBOIn, TetrahedraliseMesh
+// WorkingBuffer, VOut, VOutRaw TetFace, FTet, InTets, VoronoiSSBOIn, TetrahedraliseMesh, // DO NOT MARK except FracturePlaneRandom, CreateMeshFractureGPU, FracturePlaneRandomGPU, GenerateRandomPointsInBounds, GenerateNewPointSets, FracturePeiceGPU, TetrahedraliseMesh, GenerateCellGPU, GenerateClippedCellGPU, CleanUpBuffers, DrawFractures, LoadPoints, SetUpComputeShaders, CopyBoundingBoxToBuffer, CleanupGPUGeneration
 //This is because it has been submitted for my COMP305. Link to Original: https://github.falmouth.ac.uk/GA-Undergrad-Student-Work-25-26/Comp305-Engine-SL295211.git
 #pragma once
 
@@ -418,10 +418,19 @@ public:
 	                           const InTets& Tets, const GLuint& VoronoiIn, const GLuint& VoronoiOut, const GLuint& ClippedOutInd,
 	                           const GLuint& InTetsInd, const GLuint& WBuffer, PointEntry& Entry, UComputeShader& VoronoiCompute, UComputeShader&
 	                           ClippingCompute);
-	static void TetrahedraliseMesh(const Model& InModel, InTets& tets);
+	static void TetrahedraliseMesh(const Model& InModel, InTets& Tets);
+	void CopyBoundingBoxToBuffer(const Model& InModel, VoronoiSSBOIn* Buffer);
+	void SetUpComputeShaders(const InTets& Tets, GLuint& VoronoiIn, GLuint& VoronoiOut, GLuint& ClippedOutInd,
+	                         GLuint& InTetsInd, GLuint& WBuffer, UComputeShader& ClippingCompute,
+	                         UComputeShader& VoronoiCompute);
+	void LoadPoints(VoronoiSSBOIn* InBuffer, Array<Vector3D>& Points, const size_t& NumPoints, const std::string& DataToLoad, const size_t&
+	                PointSetIndex);
 
 	//Fracture the model into a voronoi diagram based on random points
 	void FracturePlaneRandomGPU(Model& InModel);
+	void CleanupGPUGeneration(VoronoiSSBOIn* InBuffer, VOut* VoronoiOutBuffer, VOutRaw* ClippedOut, GLuint& VoronoiIn,
+	                          GLuint& VoronoiOut,
+	                          GLuint& ClippedOutInd, GLuint& InTetsInd, GLuint& wBuffer);
 
 
 	//Fracture the model into a voronoi diagram based on random points

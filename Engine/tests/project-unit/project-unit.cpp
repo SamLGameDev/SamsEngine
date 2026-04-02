@@ -693,11 +693,16 @@ TEST(Tringulation, Delauney)
 void RunEngine(Vulkan::RuntimeEngine& engine)
 {
 
-	Model model = Model("/Models/Asteroid/rock.obj", Shader("ColorShape", "/Shaders/"));
-	model.ModelTransform.Position = { 5, 0, 0 };
+	Model model = Model("/Models/Asteroid/rock.obj", Shader("BasicTexture", "/Shaders/"));
+	//Model model = Model("/Models/Bunny/Bunny.obj", Shader("ColorShape", "/Shaders/"));
 
 	Voronoi vorn;
-	vorn.FracturePlaneRandomGPU(model);
+	//vorn.GenerateNewPointSets(model);
+	vorn.FracturePlaneRandomGPU(model, 100, 45);
+
+	model.ModelTransform.Position = { 5, 0, 0 };
+
+	while (!engine.ShouldClose()) engine.Loop();
 
 	Vulkan::RuntimeEngine::WaitForFrameToFinish();
 }
@@ -733,13 +738,11 @@ void RunEngineOpenGL(OpenGL::RuntimeEngine engine)
 
 	Voronoi vorn;
 	//vorn.GenerateNewPointSets(model);
-	vorn.FracturePlaneRandomGPU(model, 50, 45);
+	vorn.FracturePlaneRandomGPU(model,100, 45);
 
 	model.ModelTransform.Position = { 5, 0, 0 };
 
 	while (!engine.ShouldClose()) engine.Loop();
-
-	Vulkan::RuntimeEngine::WaitForFrameToFinish();
 }
 
 void OpenGLTest()
@@ -764,8 +767,8 @@ void EngineDelaunay()
 }
 
 TEST(Fracturing, Diagram) {
-	//EnginePlane();
+	EnginePlane();
 
 	//EngineDelaunay();
-	OpenGLTest();
+	//OpenGLTest();
 }

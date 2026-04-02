@@ -5,24 +5,15 @@
 #include "VulkanGraphicsCard.h"
 #define GLFW_INCLUDE_VULKAN
 #include <chrono>
-#include <complex.h>
 #include <GLFW/glfw3.h>
-
-#include "CorePaths.h"
 #include "DataBuffers.h"
-#include "Transform.h"
-#include "Vector2D.h"
 #include "VulkanImageView.h"
 #include "VulkanInstance.h"
 #include "Window.h"
-#include "VulkanImageView.h"
-#include "glm/ext/matrix_clip_space.hpp"
-#include "glm/ext/matrix_transform.hpp"
 #include "Voronoi.h"
 #include "InterfaceRenderer.h"
 #include "Voronoi2D.h"
 #include "VoronoiClipping.h"
-#include "VulkanWindow.h"
 
 namespace Vulkan
 {
