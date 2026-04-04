@@ -11,6 +11,9 @@
         <li>
         <a href="#methodology">Methodology</a>
     </li>
+    <li>
+        <a href="#specification">Specification</a>
+    </li>
     </li>
          <li>
         <a href="#references">References</a>
