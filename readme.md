@@ -261,6 +261,7 @@ Please close the application using the red X first, as the second application co
 ## How to run the Build
 First, download the build from the releases section. The one to download it Release.zip
 Then, unzip it, and go to Release->Windows-Release->src and run SamsEngine.exe. 
+It will then prompt you to type ether exp to run the experiment again, or frac to view the fractured mesh.
 This may take a few minuites to load the first time, as it has to compile all of the shaders. It will have loaded when something appears on screen
 
 ## Controls
