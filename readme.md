@@ -195,6 +195,11 @@ for (uint i = 0; i < tets.GetSize(); i++)
 
 This algorithm works by iterating through each tetrahedron of the mesh, performing an AABB test to check if it is within the bounds of the cell, and if it is, Clips the tetrahedron by the cell. Once fully clipped, if it still has faces, it is added to the new cell. After iterating through all tetes, a new clipped cell is formed.
 
+
+This class diagram shows relationship between Voronoi and compute shaders 
+
+<img width="8192" height="6446" alt="VoronoiUML" src="https://github.falmouth.ac.uk/user-attachments/assets/3d6ac297-258c-41c7-8aeb-8dcf32312989" />
+
 ## Specification
 ### Overview
 This project aimed to evaluate OpenGL and Vulkan in the Fracturing of a Voronoi mesh. This project therefore uses a bridge interface between OpenGL and Vulkan to prevent bias, and has impliemtned the algorithm using compute shaders. Accurate performance results that are reproducable are produced by waiting for the GPU compute shaders to be completed, and recording the time taken, 145 times for a varying set of points of from sizes 2-100. 
