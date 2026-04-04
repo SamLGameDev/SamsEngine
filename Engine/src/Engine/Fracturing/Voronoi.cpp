@@ -342,7 +342,7 @@ void Voronoi::FracturePlaneRandomGPU(Model& InModel)
 
 		}
 	}
-	DataRecorder::SaveDataRecord(record, "/ExperimentData/TestData.txt");
+	DataRecorder::SaveDataRecord(record, "/ExperimentData/TestData.json");
 	CleanupGPUGeneration(buffer, vOut, ClippedOut, VoronoiIn, VoronoiOut, ClippedOutInd, InTetsInd, wBuffer);
 
 }

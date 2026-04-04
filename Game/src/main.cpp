@@ -8,7 +8,7 @@
 #include <Voronoi2D.h>
 #include <RuntimeEngineVulkan.h>
 
-void RunEngine(OpenGL::RuntimeEngine engine)
+void RunEngineDisplay(OpenGL::RuntimeEngine engine)
 {
 	Model model = Model("/Models/Asteroid/rock.obj", Shader("BasicTexture", "/Shaders/"));
 	model.ModelTransform.Position = { 5, 0, 0 };
@@ -39,12 +39,50 @@ void RunEngine(OpenGL::RuntimeEngine engine)
 	}
 }
 
+void RunEngineExperimentVulkan(Vulkan::RuntimeEngine engine)
+{
+	Model model = Model("/Models/Asteroid/rock.obj", Shader("BasicTexture", "/Shaders/"));
+	model.ModelTransform.Position = { 5, 0, 0 };
+	Voronoi vorn;
+	vorn.FracturePlaneRandomGPU(model);
+
+	engine.WaitForFrameToFinish();
+}
+
+
+void RunEngineExperimentOpenGL(OpenGL::RuntimeEngine engine)
+{
+	Model model = Model("/Models/Asteroid/rock.obj", Shader("BasicTexture", "/Shaders/"));
+	model.ModelTransform.Position = { 5, 0, 0 };
+	Voronoi vorn;
+	vorn.FracturePlaneRandomGPU(model);
+}
+
+
+void EngineExperiment()
+{
+	Vulkan::RuntimeEngine engine;
+	engine.Init();
+
+	RunEngineExperimentVulkan(engine);
+
+	engine.ShutDown();
+
+	OpenGL::RuntimeEngine engineOpenGL;
+	engineOpenGL.Init();
+
+	RunEngineExperimentOpenGL(engineOpenGL);
+
+	engineOpenGL.ShutDown();
+}
+
+
 void EnginePlane()
 {
 	OpenGL::RuntimeEngine engine;
 	engine.Init();
 
-	RunEngine(engine);
+	RunEngineDisplay(engine);
 
 	engine.ShutDown();
 }
@@ -52,7 +90,25 @@ void EnginePlane()
 
 int main(int argc, char* argv[])
 {
-	EnginePlane();
+	std::cout << "Run experiment or View fracture? Type exp for experiment, frac for fracture" << std::endl;
+
+	std::string input;
+	std::cin >> input;
+
+	while (input != "exp" && input != "frac")
+	{
+		std::cout << "Invalid input, please enter 'exp' or 'frac':" << std::endl;
+		std::cin >> input;
+	}
+
+	if (input == "exp")
+	{
+		EngineExperiment();
+	}
+	else if (input == "frac")
+	{
+		 EnginePlane();
+	}
 
 	return EXIT_SUCCESS;
 }
