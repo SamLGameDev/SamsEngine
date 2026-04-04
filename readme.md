@@ -192,6 +192,41 @@ for (uint i = 0; i < tets.GetSize(); i++)
 
 This algorithm works by iterating through each tetrahedron of the mesh, performing an AABB test to check if it is within the bounds of the cell, and if it is, Clips the tetrahedron by the cell. Once fully clipped, if it still has faces, it is added to the new cell. After iterating through all tetes, a new clipped cell is formed.
 
+## Specification
+### Overview
+This project aimed to evaluate OpenGL and Vulkan in the Fracturing of a Voronoi mesh. This project therefore uses a bridge interface between OpenGL and Vulkan to prevent bias, and has impliemtned the algorithm using compute shaders. Accurate performance results that are reproducable are produced by waiting for the GPU compute shaders to be completed, and recording the time taken, 145 times for a varying set of points of from sizes 2-100. 
+
+### Stakeholders
+The primary stakeholders of this project are:
+
+<ul> 
+  <li>Graphics/Engine Developers – require reliable performance data to inform API selection</li>
+
+  <li>Game Studios / Businesses – benefit from reduced development time and improved optimisation decisions</li>
+
+  <li>End Users (Players) – indirectly benefit from improved performance and accessibility on varied hardware</li>
+
+  <li>Academic Researchers – can replicate and extend findings for further study</li>
+</ul>
+
+### User needs
+The user of this artefact is likely to be a developer, as such it must meet these requirments:
+
+* Provide clear, reproducible performance results across APIs
+* Ensure fair comparison (Similar API implementations and Identical Voronoi fracturing implementation)
+* Be easy to run and interpret, requiring minimal setup
+* Output data in a standardised format (JSON) for further analysis
+* Support scalability testing (varying point counts)
+
+These requirements ensure the artefact is usable and practical for professional use. It meets these requirments by storing all the point sets used and allowing the download of an executable to re-run the experiment, thus making the project reproducable. By providing clear results in the paper, with clear recommendations, it meets the requirments. By creating a bridge interface between APIs, ensuring one feature can only be used if implementated by the other and having the same compute shader be ran by both APIs, it ensures fair comparason. By testing on a wide variety of point sets, from 2-100, it ensures scalability has been sufficently tested.
+
+### Societal needs
+This project addresses several societal needs. In accessablility, this project has contributed by identifying which APIs are preferable at a lower and higher scale, helping applications become more optimsied, allowing these applications to be used on lower-end hardware, reducing the hardware barrier to entry. This project has contributed by challanging assumptions that "Vulkan is always faster", promoting more evidenced based practices. 
+
+### Buisiness needs
+
+From a buisiness perspective, this project contributes by reducing development cost, as developers will be able to make a more informed choice about which API is better optimised for their project at an earlier point in time, saving development costs spent developing on a less suitable API. This project also helps applications run faster, which will allow a better user experience, potentially leading to increased market success. This project also prevents risks, by allowing buisinesses to make more informed decisions based on data, rather than assumptions. This will help them better plan for long term scalability.
+
 ## Documentation
 
 Find the doxygen generated documentation below
