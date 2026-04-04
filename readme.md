@@ -246,15 +246,22 @@ https://github.falmouth.ac.uk/user-attachments/assets/eedb841d-f108-4b4e-8635-e1
 
 
 ## Design Rational
+The design of this artefact was driven by the need to ensure results were reproducable, fair and scalable.
 
 ### Bridge interface
-For this project, as I am testing both OpenGL and Vulkan, I decided to use a bridge interaface between API's. This was to follow DRY principles, and reduce code duplication. It was also to increase maintainability as it would reduce the workload if furture API's such as Direct X were to be added. Anothr beneift was that is restricted me to only use functions that both API's could use, ensuring implimentations were similar which was important for my experiment. The alternatives were to impliment seperate versions of the API, but that would not have been as scalable, though it would have allowed me to make full use of the API. 
+A key design decision for this project was creating the bridge interface between Vulkan and OpenGL. The problem was how to ensure fairness when comparing Vulkan and OpenGL, as a more optimised implementation of either would bias the results. To solve this, a bridge interface was implemented. This worked by having a base implementation of classes, i.e. shader, which creates the underlying API specific shader class, defined by which engine is created on the applications start. This is to follow DRY principles, reduce code duplication, and increase maintainability as the workload to add future APIs is reduced. It also ensures fairness, as features of one API can no longer be used if the other API has not implemented them, reducing the bias this experiment faced.  The alternatives were to impliment seperate versions of the API, but that would not have been as scalable, though it would have allowed full use of each API. 
+
+### Compute Shaders
+Another key decision was the use of the same compute shader across both APIs. The shaders were written in GLSL and compiled to SPIR-V for Vulkan. This guarantees that the same algorithm is executed in both cases, ensuring experimental validity and eliminating bias caused by shader implementation. Compute shaders themselves were neccessary as it would be difficult to integrate the algoithm into the compute pipeline, and this needed to be performed on the GPU for the experiment to be valid.
+
+### Json
+The system outputs results in Json format using a custom struct. This design choice improved maintainability and aided integration with the analysis code written in Python using Seaborn. It also ensures that additional fields can be added easily if the experiment is extended.
 
 ### Voronoi cell generation
-I went with half plane clipping for my cell generation. This was due to the ease of implimentation, and limitations of the GPU. More complex methods would have been unsuitable for GPU archetexture, and would have increased the difficulty of implimentation, whilst not neccessarily increasing performance. Alternative methods are those such as fortunes algorithm, though this would need adaption for 3D, and extraction from a deluanay triangulation.
+Half plane clipping was chosen for the cell generation. This was due to the ease of implimentation, and limitations of the GPU. More complex methods would have been unsuitable for GPU archetexture, and would have increased the difficulty of implimentation, whilst not neccessarily increasing performance. Alternative methods are those such as fortunes algorithm, though this would need adaption for 3D, and extraction from a deluanay triangulation. This was a seperate stage than the clipping, as this needed to be measured seperatly for the hypothesis. 
 
 ### Clipping
-I went with half plane clipping again for the clipping process, this was due to the ease of implimentation, and its suitaility for GPU archetexture. Tetrahedrons were neccessary to clip against instead of triangles due to artefacting when using triangles. This occurs becuase triangles can clip part of the cell that is inside the mesh, due to how the mesh is structured. For example, if part of the mesh is sticking out like a spike, it would only clip the spike, not the rest of the mesh.
+Half plane clipping was chosen again for the clipping process, due to the ease of implimentation, and its suitaility for GPU archetexture. Tetrahedrons were neccessary to clip against instead of triangles due to artefacting when using triangles. This occurs becuase triangles can clip part of the cell that is inside the mesh, due to how the mesh is structured. For example, if part of the mesh is sticking out like a spike, it would only clip the spike, not the rest of the mesh. This was a seperate stage than the generation, as this needed to be measured seperatly for the hypothesis. 
 
 ## References
 
