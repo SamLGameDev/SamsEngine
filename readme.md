@@ -200,6 +200,11 @@ This class diagram shows relationship between Voronoi and compute shaders
 
 <img width="8192" height="6446" alt="VoronoiUML" src="https://github.falmouth.ac.uk/user-attachments/assets/3d6ac297-258c-41c7-8aeb-8dcf32312989" />
 
+This flow chart shows the process of an API gathering data for each point set. 
+
+<img width="581" height="481" alt="RecordPipeline drawio" src="https://github.falmouth.ac.uk/user-attachments/assets/1bca96e7-4e4b-4262-ad79-de8a63bd3267" />
+
+
 ## Specification
 ### Overview
 This project aimed to evaluate OpenGL and Vulkan in the Fracturing of a Voronoi mesh. This project therefore uses a bridge interface between OpenGL and Vulkan to prevent bias, and has impliemtned the algorithm using compute shaders. Accurate performance results that are reproducable are produced by waiting for the GPU compute shaders to be completed, and recording the time taken, 145 times for a varying set of points of from sizes 2-100. 
