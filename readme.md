@@ -335,3 +335,7 @@ Right arrow to condese the shape.
 * nlohmann json
 * OpenGL
 * CGAL
+* Pandas
+* Seaborn
+* Json
+* StatsModels
