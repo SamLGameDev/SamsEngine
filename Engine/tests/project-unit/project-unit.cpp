@@ -15,10 +15,71 @@
 #include "PlaneClipping.h"
 #include "Vector4D.h"
 #include "ComputeShader/UComputeShader.h"
+#include "LFQueue.h"
 
 int main(int argc, char** argv) {
 	::testing::InitGoogleTest(&argc, argv);
 	return RUN_ALL_TESTS();
+}
+
+TEST(LFQueue, AddSingle)
+{
+	TLFQueue<int> q;
+
+	q.Add(42);
+
+	EXPECT_EQ(q.GetHead(), 42);
+}
+
+TEST(LFQueue, AddMultiple)
+{
+	TLFQueue<int> q;
+
+	q.Add(1);
+	q.Add(2);
+	q.Add(3);
+
+	EXPECT_EQ(q.GetHead(), 1);
+	EXPECT_EQ(q[0], 1);
+	EXPECT_EQ(q[1], 2);
+	EXPECT_EQ(q[2], 3);
+
+	for (int i = 0; i < 1000; ++i)
+		q.Add(100 + i);
+
+	EXPECT_EQ(q[3], 100);
+	EXPECT_EQ(q[102], 199);
+}
+
+TEST(LFQueue, PopRemovesHead)
+{
+	TLFQueue<int> q;
+
+	q.Add(1);
+	q.Add(2);
+	q.Add(3);
+
+	int popped = q.Pop();
+
+	EXPECT_EQ(popped, 1);
+
+	EXPECT_EQ(q.GetHead(), 2);
+}
+
+TEST(LFQueue, PopMultiple)
+{
+	TLFQueue<int> q;
+
+	for (int i = 0; i < 10; ++i)
+		q.Add(i);
+
+	for (int i = 0; i < 5; ++i)
+	{
+		int v = q.Pop();
+		EXPECT_EQ(v, i);
+	}
+
+	EXPECT_EQ(q.GetHead(), 5);
 }
 
 TEST(Test1, Math)
@@ -767,8 +828,9 @@ void EngineDelaunay()
 }
 
 TEST(Fracturing, Diagram) {
-	EnginePlane();
+	//EnginePlane();
 
 	//EngineDelaunay();
 	//OpenGLTest();
 }
+

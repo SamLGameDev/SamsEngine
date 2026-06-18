@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<AutoVisualizer xmlns="http://schemas.microsoft.com/vstudio/debugger/natvis/2010">
+  <!-- Visualizer for the lock-free queue template TLFQueue<T> -->
+  <Type Name="TLFQueue&lt;*&gt;">
+	<DisplayString>{{size={NumItems}, capacity={AllocatedSize}, containers={AllocatedContainers}}}</DisplayString>
+	<Expand>
+	  <Item Name="size">NumItems</Item>
+	  <Item Name="Capacity">AllocatedSize</Item>
+	  <Item Name="Containers">AllocatedContainers</Item>
+
+	<!-- Present elements as an indexed list: QueueContainer[containerIndex][indexInContainer] -->
+		  <IndexListItems>
+			<Size>NumItems</Size>
+			<ValueNode>QueueContainer[$i / MaxItemsPerContainer][$i % MaxItemsPerContainer]</ValueNode>
+		  </IndexListItems>
+	</Expand>
+  </Type>
+</AutoVisualizer>

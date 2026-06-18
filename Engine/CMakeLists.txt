@@ -9,8 +9,8 @@ if(DEFINED ENV{VCPKG_ROOT} AND NOT DEFINED CMAKE_TOOLCHAIN_FILE)
       CACHE STRING "")
 endif()
 #set(CMAKE_BUILD_TYPE Debug)
-#set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /fsanitize=address /Zi")
-#set(CMAKE_LINK_FLAGS "${CMAKE_LINK_FLAGS} /fsanitize=address")
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /fsanitize=address /Zi")
+set(CMAKE_LINK_FLAGS "${CMAKE_LINK_FLAGS} /fsanitize=address")
 #set(ASAN_OPTIONS "alloc_dealloc_mismatch=1:detect_leaks=1:halt_on_error=1:print_stats=1:strict_string_checks=1")
 #set(ENV{ASAN_OPTIONS} "${ASAN_OPTIONS}")
 
@@ -47,6 +47,7 @@ add_library(EngineCore STATIC
     "src/Engine/Compute/ComputeShader/UVulkanComputeShader.cpp"
     "src/Engine/Compute/ComputeShader/UOpenGLComputeShader.cpp"
     "src/Engine/DataStructures/Array.cpp"
+    "src/Engine/DataStructures/LFQueue.cpp"
     "src/Engine/DataStructures/LinkedList.cpp"
     "src/Engine/DataStructures/Item.cpp"
     "src/Engine/DataStructures/Vector2D.cpp"
@@ -118,7 +119,10 @@ add_library(EngineCore STATIC
     "src/Engine/GraphicsAPI/VulkanAPI/VulkanImageView.cpp"
     "src/Engine/GraphicsAPI/VulkanAPI/VulkanRenderPass.cpp"
     "src/Engine/GraphicsAPI/VulkanAPI/VulkanFrameBuffer.cpp"
-    "src/Engine/GraphicsAPI/GraphicsAPIConstructor.cpp")
+    "src/Engine/GraphicsAPI/GraphicsAPIConstructor.cpp"
+    "src/Engine/Threading/ThreadManager.cpp"
+
+)
 
 set_target_properties(EngineCore
                       PROPERTIES
@@ -164,6 +168,7 @@ target_include_directories(EngineCore
                            "$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/src/Engine/Hardware>"
                            "$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/src/Engine/Compute>"
                            "$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/src/Engine/Compute/ComputeShader>"
+                           "$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/src/Engine/Threading>"
                            "$<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}>")
 
 install(TARGETS EngineCore
@@ -188,6 +193,7 @@ install(FILES
     src/Engine/Compute/ComputeShader/UOpenGLComputeShader.h
     src/Engine/Rendering/Textures/CubeMap.h
     src/Engine/DataStructures/Array.h
+    src/Engine/DataStructures/LFQueue.h
     src/Engine/DataStructures/LinkedList.h
     src/Engine/DataStructures/Item.h
     src/Engine/DataStructures/Vector2D.h
@@ -260,6 +266,7 @@ install(FILES
     src/Engine/GraphicsAPI/VulkanAPI/VulkanFrameBuffer.h
     src/Engine/GraphicsAPI/GraphicsAPIConstructor.h
     src/Engine/GraphicsAPI/VulkanAPI/VulkanInstance.h
+    src/Engine/Threading/ThreadManager.h
     DESTINATION ${CMAKE_INSTALL_INCLUDEDIR})
 
     find_package(glfw3 CONFIG REQUIRED)

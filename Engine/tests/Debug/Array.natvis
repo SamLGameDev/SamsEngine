@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<AutoVisualizer xmlns="http://schemas.microsoft.com/vstudio/debugger/natvis/2010">
+  <!-- Visualizer for Array<T> -->
+  <Type Name="Array&lt;*&gt;">
+	<DisplayString>{{size={NumItems}, capacity={ArraySize}}}</DisplayString>
+	<Expand>
+	  <Item Name="size">NumItems</Item>
+	  <Item Name="capacity">ArraySize</Item>
+
+	  <ArrayItems Optional="true">
+		  <Size>NumItems</Size>
+		  <ValuePointer>DynamicArray</ValuePointer>
+		</ArrayItems>
+
+
+	</Expand>
+  </Type>
+</AutoVisualizer>
