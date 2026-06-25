@@ -70,16 +70,66 @@ TEST(LFQueue, PopMultiple)
 {
 	TLFQueue<int> q;
 
-	for (int i = 0; i < 10; ++i)
+	for (int i = 0; i < 5000; ++i)
 		q.Add(i);
 
-	for (int i = 0; i < 5; ++i)
+	for (int i = 0; i < 1000; ++i)
 	{
 		int v = q.Pop();
 		EXPECT_EQ(v, i);
 	}
 
-	EXPECT_EQ(q.GetHead(), 5);
+	EXPECT_EQ(q.GetHead(), 1000);
+
+	for (int i = 0; i < 500; ++i)
+		q.Add(i);
+	for (int i = 0; i < 100; ++i)
+	{
+		int v = q.Pop();
+		EXPECT_EQ(v, 1000+i);
+	}
+
+	EXPECT_EQ(q.GetHead(), 1100);
+
+
+}
+
+TEST(MathCore_Wrap, WithinRange_ReturnsSame)
+{
+	EXPECT_EQ(MathCore::Wrap<int>(0, 10, 5), 5);
+	EXPECT_EQ(MathCore::Wrap<int>(-3, 3, 0), 0);
+}
+
+TEST(MathCore_Wrap, MinEqualsMax_ReturnsMin)
+{
+	EXPECT_EQ(MathCore::Wrap<int>(7, 7, 100), 7);
+	EXPECT_EQ(MathCore::Wrap<int>(0, 0, 0), 0);
+}
+
+TEST(MathCore_Wrap, BelowRange_WrapsCorrectly)
+{
+	EXPECT_EQ(MathCore::Wrap<int>(0, 10, -3), 7); 
+	EXPECT_EQ(MathCore::Wrap<int>(0, 10, -10), 0); 
+	EXPECT_EQ(MathCore::Wrap<int>(-5, 5, -8), 2); 
+}
+
+TEST(MathCore_Wrap, AboveRange_WrapsCorrectly)
+{
+	EXPECT_EQ(MathCore::Wrap<int>(0, 10, 13), 3); 
+	EXPECT_EQ(MathCore::Wrap<int>(0, 10, 20), 10); 
+	EXPECT_EQ(MathCore::Wrap<int>(-5, 5, 7), -3); 
+}
+
+TEST(MathCore_Wrap, UnsignedTypes)
+{
+	EXPECT_EQ(MathCore::Wrap<unsigned int>(0u, 5u, 8u), 3u);
+	EXPECT_EQ(MathCore::Wrap<unsigned long>(2ul, 6ul, 14ul), 6ul); 
+}
+
+TEST(MathCore_Wrap, MultipleWrapsAndBoundaries)
+{
+	EXPECT_EQ(MathCore::Wrap<int>(1, 4, 10), 4);
+	EXPECT_EQ(MathCore::Wrap<int>(1, 4, 7), 4);
 }
 
 TEST(Test1, Math)

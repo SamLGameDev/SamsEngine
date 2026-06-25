@@ -169,6 +169,7 @@ target_include_directories(EngineCore
                            "$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/src/Engine/Compute>"
                            "$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/src/Engine/Compute/ComputeShader>"
                            "$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/src/Engine/Threading>"
+                           "$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/src/Engine/Debug>"
                            "$<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}>")
 
 install(TARGETS EngineCore
@@ -267,6 +268,7 @@ install(FILES
     src/Engine/GraphicsAPI/GraphicsAPIConstructor.h
     src/Engine/GraphicsAPI/VulkanAPI/VulkanInstance.h
     src/Engine/Threading/ThreadManager.h
+    src/Engine/Debug/Asserts.h
     DESTINATION ${CMAKE_INSTALL_INCLUDEDIR})
 
     find_package(glfw3 CONFIG REQUIRED)
