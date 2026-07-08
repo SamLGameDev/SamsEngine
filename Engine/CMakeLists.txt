@@ -122,7 +122,7 @@ add_library(EngineCore STATIC
     "src/Engine/GraphicsAPI/GraphicsAPIConstructor.cpp"
     "src/Engine/Threading/ThreadManager.cpp"
 
-)
+ "src/Engine/Threading/WorkerThread.cpp")
 
 set_target_properties(EngineCore
                       PROPERTIES
@@ -269,6 +269,7 @@ install(FILES
     src/Engine/GraphicsAPI/VulkanAPI/VulkanInstance.h
     src/Engine/Threading/ThreadManager.h
     src/Engine/Debug/Asserts.h
+    src/Engine/Threading/WorkerThread.h
     DESTINATION ${CMAKE_INSTALL_INCLUDEDIR})
 
     find_package(glfw3 CONFIG REQUIRED)

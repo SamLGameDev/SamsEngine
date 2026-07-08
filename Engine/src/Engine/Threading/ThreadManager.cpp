@@ -1,8 +1,42 @@
 #include "ThreadManager.h"
 #include <thread>
 
-void UThreadManager::DispatchJob(EThreadTypes thread)
+#include "WorkerThread.h"
+
+std::unique_ptr<UThreadManager> UThreadManager::Instance = nullptr;
+
+UThreadManager::UThreadManager()
 {
+	if (Instance)
+	{
+		return;
+	}
+	InitialiseAllThreads();
+}
+
+void UThreadManager::DispatchJob(EThreadTypes thread, const std::function<void()>& Job)
+{
+	switch (thread) 
+	{
+		case EThreadTypes::GameThread:
+			DispatchJob<EThreadTypes::GameThread>(Job);
+			break;
+		case EThreadTypes::RenderThread:
+			DispatchJob<EThreadTypes::RenderThread>(Job);
+			break;
+		case EThreadTypes::WorkerThread:
+			DispatchJob<EThreadTypes::WorkerThread>(Job);
+			break;
+	}
+}
+
+UThreadManager* UThreadManager::Get()
+{
+	if (!Instance)
+	{
+		Instance = std::make_unique<UThreadManager>();
+	}
+	return Instance.get();
 }
 
 void UThreadManager::InitialiseAllThreads()
@@ -11,10 +45,6 @@ void UThreadManager::InitialiseAllThreads()
 
 	RenderThread = std::thread();
 
-	WorkerThreads = Array<std::thread>(std::thread::hardware_concurrency() - 3);
-
-	DispatchJob<EThreadTypes::RenderThread>();
-
-	DispatchJob(EThreadTypes::GameThread);
+	WorkerThreads = Array<UWorkerThread>(std::thread::hardware_concurrency() - 3);
 
 }

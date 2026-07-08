@@ -16,11 +16,38 @@
 #include "Vector4D.h"
 #include "ComputeShader/UComputeShader.h"
 #include "LFQueue.h"
+#include "ThreadManager.h"
 
 int main(int argc, char** argv) {
 	::testing::InitGoogleTest(&argc, argv);
 	return RUN_ALL_TESTS();
 }
+
+
+void WorkerTest()
+{
+	std::cout << "Worker thread job running..." << std::endl;
+	std::this_thread::sleep_for(std::chrono::milliseconds(3));
+	UThreadManager::DispatchJob<WorkerThread>([]()
+		{
+			std::cout << "Worker thread job running again..." << std::endl;
+			WorkerTest();
+		});
+}
+
+TEST(DispatchWorkerJobs, Threading)
+{
+	UThreadManager::Get();
+
+
+	UThreadManager::DispatchJob<WorkerThread>([]()
+		{
+			WorkerTest();
+		});
+
+	while (true);
+}
+
 
 TEST(LFQueue, AddSingle)
 {
@@ -883,4 +910,5 @@ TEST(Fracturing, Diagram) {
 	//EngineDelaunay();
 	//OpenGLTest();
 }
+
 

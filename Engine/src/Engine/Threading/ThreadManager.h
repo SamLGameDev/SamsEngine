@@ -1,7 +1,11 @@
 #pragma once
+#include <functional>
 #include <thread>
 
 #include "Array.h"
+#include "LFQueue.h"
+#include "WorkerThread.h"
+#include <memory>
 
 enum EThreadTypes : std::uint8_t
 {
@@ -20,17 +24,27 @@ class UThreadManager final
 
 public:
 
+	UThreadManager();
+
 
 	template<EThreadTypes T> requires MatchesThread<T, EThreadTypes::GameThread>
-	void DispatchJob();
+	static void DispatchJob(const std::function<void()>& Job);
 
 	template<EThreadTypes T> requires MatchesThread<T, EThreadTypes::RenderThread>
-	void DispatchJob();
+	static void DispatchJob(const std::function<void()>& Job);
 
 	template<EThreadTypes T> requires MatchesThread<T, EThreadTypes::WorkerThread>
-	void DispatchJob();
+	static void DispatchJob(const std::function<void()>& Job);
 
-	void DispatchJob(EThreadTypes thread);
+	static void DispatchJob(EThreadTypes thread, const std::function<void()>& Job);
+
+	template<EThreadTypes T> requires MatchesThread<T, EThreadTypes::WorkerThread>
+	static bool DoesTheadHaveQueuedJobs();
+
+	template<EThreadTypes T> requires MatchesThread<T, EThreadTypes::WorkerThread>
+	static std::function<void()> GetJob();
+
+	static UThreadManager* Get();
 
 
 protected:
@@ -41,24 +55,45 @@ protected:
 
 	std::thread RenderThread;
 
-	Array<std::thread> WorkerThreads;
+	Array<UWorkerThread> WorkerThreads;
+
+	TLFQueue<std::function<void()>> GameJobQueue;
+	TLFQueue<std::function<void()>> RenderJobQueue;
+	TLFQueue<std::function<void()>> WorkerJobQueue;
+
+	static std::unique_ptr<UThreadManager> Instance;
 
 
 };
 
 template <EThreadTypes T> requires MatchesThread<T, EThreadTypes::GameThread>
-void UThreadManager::DispatchJob()
+void UThreadManager::DispatchJob(const std::function<void()>& Job)
 {
+	UThreadManager::Get()->GameJobQueue.Add(Job);
 }
 
 template <EThreadTypes T> requires MatchesThread<T, EThreadTypes::RenderThread>
-void UThreadManager::DispatchJob()
+void UThreadManager::DispatchJob(const std::function<void()>& Job)
 {
+	UThreadManager::Get()->RenderJobQueue.Add(Job);
 }
 
 template <EThreadTypes T> requires MatchesThread<T, EThreadTypes::WorkerThread>
-void UThreadManager::DispatchJob()
+void UThreadManager::DispatchJob(const std::function<void()>& Job)
 {
+	UThreadManager::Get()->WorkerJobQueue.Add(Job);
+}
+
+template <EThreadTypes T> requires MatchesThread<T, EThreadTypes::WorkerThread>
+bool UThreadManager::DoesTheadHaveQueuedJobs()
+{
+	return !UThreadManager::Get()->WorkerJobQueue.IsEmpty();
+}
+
+template <EThreadTypes T> requires MatchesThread<T, EThreadTypes::WorkerThread>
+std::function<void()> UThreadManager::GetJob()
+{
+	return Get()->WorkerJobQueue.Pop();
 }
 
 

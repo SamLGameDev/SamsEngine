@@ -4,9 +4,19 @@
 #include <memory>
 #include <cmath>
 #include <iostream>
+#include <mutex>
 
+#include "Array.h"
 #include "MathCore.h"
 #include "Asserts.h"
+
+
+struct FQueueThreadPos
+{
+	size_t Head;
+	size_t Tail;
+};
+
 
 template<typename T>
 class TLFQueue
@@ -17,8 +27,8 @@ public:
 	{
 		QueueContainer = new T*[InitialContainers];
 		QueueContainer[0] = new T[InitialContainerSize];
-		HeadIndex = 0;
-		TailIndex = 0;
+		HeadIndex.exchange(0);
+		TailIndex.exchange(0);
 	}
 
 	~TLFQueue()
@@ -58,9 +68,8 @@ public:
 		if (this == &other)
 			return *this;
 		QueueContainer = other.QueueContainer;
-		NumItems = other.NumItems;
+		NumItems.exchange(other.NumItems.load());
 		AllocatedSize = other.AllocatedSize;
-		MaxItemsPerContainer = other.MaxItemsPerContainer;
 		return *this;
 	}
 
@@ -71,7 +80,7 @@ public:
 
 	[[nodiscard]] T& GetItemAtRef(const size_t Index) const
 	{
-		CheckF(MathCore::WithinRange(HeadIndex, TailIndex, Index), "Index out of bounds, Index: {}, NumItems: {}", Index, NumItems);
+		CheckF(MathCore::WithinRange<size_t>(HeadIndex.load(), TailIndex.load(), Index), "Index out of bounds, Index: {}, NumItems: {}", Index, NumItems.load());
 
 		return QueueContainer[GetContainerIndex(Index)][GetIndexInContainer(Index)];
 	}
@@ -91,43 +100,92 @@ public:
 
 	void Add(const T& Item)
 	{
+
 		MoveTailAndReallocatedIfNeeded(1);
 
-		GetItemAtRefUnchecked(TailIndex) = Item;
-		NumItems++;
+		size_t tmpTail = ReservedTail.exchange(ReservedTail.load() + 1 & AllocatedSize - 1);
+
+
+
+		GetItemAtRefUnchecked(tmpTail ) = Item;
+
+		while (tmpTail > TailIndex.load())
+		{
+			std::this_thread::sleep_for(std::chrono::milliseconds(1));
+		}
+
+		TailIndex.exchange(tmpTail + 1 & AllocatedSize - 1);
+		ThreadsCurrentlyAccessingMemory.fetch_add(-1);
 	}
 
 
+	bool IsAssignedMemory(const size_t Index)
+	{
+		if (TailIndex.load() < HeadIndex.load())
+		{
+			return Index < TailIndex.load() || Index > HeadIndex.load();
+		}
+		else
+		{
+			return Index < TailIndex.load() && Index >= HeadIndex.load();
+		}
+	}
+
 	T Pop()
 	{
+		
+		while (NumItems > AllocatedSize)
+		{
+			std::this_thread::sleep_for(std::chrono::milliseconds(1));
+		}
 
-		CheckF(NumItems > 0, "Queue is empty");
 
-		const T head = std::move(GetHead());
+		size_t old = ReservedHead.fetch_add(1);
 
-		NumItems--;
-		HeadIndex++;
-
+		size_t tmpHead = old & (AllocatedSize - 1);
+		while (!IsAssignedMemory(tmpHead))
+		{
+			std::this_thread::sleep_for(std::chrono::milliseconds(3));
+			if (ReservedHead.load() < tmpHead)
+			{
+				tmpHead = ReservedHead.exchange(ReservedHead.load() + 1 & AllocatedSize - 1);
+			}
+		}
+		ThreadsCurrentlyAccessingMemory.fetch_add(1);
+		const T head = std::move(GetItemAtRef(tmpHead));
+		HeadIndex.fetch_add(1);
+		NumItems--; //Race condition here
+		ThreadsCurrentlyAccessingMemory.fetch_add(-1);
 		return head;
 	}
 
 	bool IsEmpty() const
 	{
-		return NumItems == 0;
+		return NumItems.load() == 0;
 	}
 
 protected:
 
 	T** QueueContainer;
 	//Tail is last element, not first empty element
-	size_t TailIndex = 0;
-	size_t HeadIndex = 0;
+	std::atomic<size_t> TailIndex = 0;
+	std::atomic<size_t> HeadIndex = 0;
 
-	size_t NumItems = 0;
+	std::atomic<size_t> ReservedTail = 0;
+
+	std::atomic<size_t> ReservedHead = 0;
+
+	std::atomic<size_t> NumItems = 0;
+
+	std::atomic<size_t> ThreadsCurrentlyAccessingMemory;
 
 	size_t AllocatedSize = InitialContainerSize;
 
 	size_t AllocatedContainers = InitialContainers;	
+
+	std::mutex printm;
+
+	Array<FQueueThreadPos> ThreadPositions;
 
 	constexpr static size_t MaxContainerSize = 1024;
 
@@ -147,6 +205,11 @@ protected:
 	[[nodiscard]] size_t GetRemainingSpaceInCurrentContainer() const
 	{
 		return GetIndexInContainer(NumItems);
+	}
+
+	[[nodiscard]] size_t GetRemainingSpaceInContainer(const size_t Index) const
+	{
+		return GetIndexInContainer(Index);
 	}
 
 	[[nodiscard]] size_t GetNumItemsInCurrentContainer() const
@@ -242,7 +305,7 @@ protected:
 		delete[] QueueContainer;
 	}
 
-	void AllocateNeededSlots(const size_t NumSlots)
+	void AllocateNeededSlots(const size_t NumSlots, const size_t NumItemsAtFull)
 	{
 
 		const size_t normalGrowth = AllocatedSize * QueueGrowthMultiplier;
@@ -252,14 +315,14 @@ protected:
 
 		// calculates how many new unallocated containers are needed,
 		// taking the needed container amount and subtracting the unused but allocated containers
-		const size_t NewContainersNeeded = (std::max<float>(0, AdditionalSlots - GetRemainingSpaceInCurrentContainer()) / MaxItemsPerContainer);
+		const size_t NewContainersNeeded = (std::max<float>(0, AdditionalSlots - GetRemainingSpaceInContainer(NumItemsAtFull)) / MaxItemsPerContainer);
 
 
 		T** NewQueue = new T*[AllocatedContainers + NewContainersNeeded];
 
 		size_t currentContainer = 0;
 
-		AllocatedSize = NewContainerSize;
+		const size_t tmpAllocatedSize = NewContainerSize;
 
 		while (NewContainerSize > 0)
 		{
@@ -302,11 +365,14 @@ protected:
 		}
 
 		DeleteCurrentQueue();
-
+		HeadIndex = 0;
+		TailIndex = NumItemsAtFull;
+		ReservedTail = NumItemsAtFull;
+		ReservedHead = 0;
 		QueueContainer = NewQueue;
 		AllocatedContainers = AllocatedContainers + NewContainersNeeded;
-		HeadIndex = 0;
-		TailIndex = NumItems - 1;
+		AllocatedSize = tmpAllocatedSize;
+
 	}
 
 	void MoveTail(const size_t NumSpaces)
@@ -317,18 +383,33 @@ protected:
 		}
 		else
 		{
-			TailIndex = MathCore::WrapExclusive<size_t>(0, AllocatedSize, TailIndex + NumSpaces);
+			TailIndex = TailIndex + NumSpaces & AllocatedSize - 1;
 		}
 	}
 
 	void MoveTailAndReallocatedIfNeeded(const size_t NumSpaces)
 	{
-		if (NumItems + NumSpaces > AllocatedSize)
+		const size_t tmpNumItems = NumItems.fetch_add(NumSpaces);
+
+		while (tmpNumItems > AllocatedSize)
 		{
-			AllocateNeededSlots(NumSpaces);
+			std::this_thread::sleep_for(std::chrono::milliseconds(1));
 		}
 
-		MoveTail(NumSpaces);
+
+
+		if (tmpNumItems + NumSpaces > AllocatedSize)
+		{
+
+			while (ThreadsCurrentlyAccessingMemory.load() > 0)
+			{
+				std::this_thread::sleep_for(std::chrono::milliseconds(1));
+			}
+
+			AllocateNeededSlots(NumSpaces, tmpNumItems);
+		}
+		ThreadsCurrentlyAccessingMemory.fetch_add(1);
+
 
 	}
 

@@ -10,7 +10,7 @@
 
 	<!-- Present elements as an indexed list: QueueContainer[containerIndex][indexInContainer] -->
 		  <IndexListItems>
-			<Size>NumItems</Size>
+			<Size>NumItems.load()</Size>
 			<ValueNode>QueueContainer[$i / MaxItemsPerContainer][$i % MaxItemsPerContainer]</ValueNode>
 		  </IndexListItems>
 	</Expand>
