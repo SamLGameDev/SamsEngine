@@ -100,7 +100,7 @@ public:
 
 	void Add(const T& Item)
 	{
-
+		std::scoped_lock guard(PushPopMtx);
 		MoveTailAndReallocatedIfNeeded(1);
 
 		size_t tmpTail = ReservedTail.exchange(ReservedTail.load() + 1 & AllocatedSize - 1);
@@ -133,29 +133,16 @@ public:
 
 	T Pop()
 	{
-		
-		while (NumItems > AllocatedSize)
-		{
-			std::this_thread::sleep_for(std::chrono::milliseconds(1));
-		}
+		std::scoped_lock wait(PopWait);
 
+		while (NumItems.load() < 1) std::this_thread::yield();
 
-		size_t old = ReservedHead.fetch_add(1);
+		std::scoped_lock guard(PushPopMtx);
 
-		size_t tmpHead = old & (AllocatedSize - 1);
-		while (!IsAssignedMemory(tmpHead))
-		{
-			std::this_thread::sleep_for(std::chrono::milliseconds(3));
-			if (ReservedHead.load() < tmpHead)
-			{
-				tmpHead = ReservedHead.exchange(ReservedHead.load() + 1 & AllocatedSize - 1);
-			}
-		}
-		ThreadsCurrentlyAccessingMemory.fetch_add(1);
-		const T head = std::move(GetItemAtRef(tmpHead));
-		HeadIndex.fetch_add(1);
-		NumItems--; //Race condition here
-		ThreadsCurrentlyAccessingMemory.fetch_add(-1);
+		 
+		const T head = std::move(GetItemAtRef(HeadIndex));
+		HeadIndex.exchange(HeadIndex + 1 & AllocatedSize - 1);
+		NumItems.fetch_add(-1); //Race condition here
 		return head;
 	}
 
@@ -167,6 +154,10 @@ public:
 protected:
 
 	T** QueueContainer;
+
+	std::mutex PushPopMtx;
+
+	std::mutex PopWait;
 	//Tail is last element, not first empty element
 	std::atomic<size_t> TailIndex = 0;
 	std::atomic<size_t> HeadIndex = 0;
