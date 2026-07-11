@@ -40,12 +40,13 @@ TEST(DispatchWorkerJobs, Threading)
 	UThreadManager::Get();
 
 
-	UThreadManager::DispatchJob<WorkerThread>([]()
-		{
-			WorkerTest();
-		});
-
-	while (true);
+	for (int i = 0; i < 5; ++i) {
+		UThreadManager::DispatchJob<WorkerThread>([]()
+			{
+				WorkerTest();
+			});
+		std::this_thread::sleep_for(std::chrono::milliseconds(3));
+	}
 }
 
 

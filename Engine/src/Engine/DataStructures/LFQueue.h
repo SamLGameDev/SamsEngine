@@ -5,6 +5,7 @@
 #include <cmath>
 #include <iostream>
 #include <mutex>
+#include <string>
 
 #include "Array.h"
 #include "MathCore.h"
@@ -139,8 +140,15 @@ public:
 
 		std::scoped_lock guard(PushPopMtx);
 
-		 
+		const T hea = GetItemAtRef(HeadIndex);
+
+		if (!hea)
+		{
+			std::cout << "wh";
+		}
+
 		const T head = std::move(GetItemAtRef(HeadIndex));
+
 		HeadIndex.exchange(HeadIndex + 1 & AllocatedSize - 1);
 		NumItems.fetch_add(-1); //Race condition here
 		return head;
@@ -149,6 +157,15 @@ public:
 	bool IsEmpty() const
 	{
 		return NumItems.load() == 0;
+	}
+
+
+	void DebugLog()
+	{
+		std::cout << "Tail Index: " << TailIndex << "\n"
+		<< "Head Index: " << HeadIndex << "\n"
+		<< "NumItems: " << NumItems << "\n"
+		<< "AllocatedSize: " << AllocatedSize << "\n";
 	}
 
 protected:
@@ -208,6 +225,11 @@ protected:
 		return GetIndexInContainer(NumItems);
 	}
 
+	[[nodiscard]] size_t GetNumItemsInCurrentContainer(const size_t NumItemsAtFull) const
+	{
+		return GetIndexInContainer(NumItemsAtFull);
+	}
+
 	[[nodiscard]] size_t GetContainerIndex(const size_t Index) const
 	{
 		return Index / MaxItemsPerContainer;
@@ -224,6 +246,17 @@ protected:
 
 		if (Container == currentContainer) return GetNumItemsInCurrentContainer();
 		
+		if (Container < currentContainer) return MaxItemsPerContainer;
+
+		return 0;
+	}
+
+	[[nodiscard]] size_t GetNumItemsInContainer(const size_t Container, const size_t NumItemsAtFull) const
+	{
+		const size_t currentContainer = GetContainerIndex(NumItemsAtFull);
+
+		if (Container == currentContainer) return GetNumItemsInCurrentContainer(NumItemsAtFull);
+
 		if (Container < currentContainer) return MaxItemsPerContainer;
 
 		return 0;
@@ -325,33 +358,73 @@ protected:
 
 		if (!IsEmpty()) {
 
-			if (HeadIndex < TailIndex)
+			if (HeadIndex.load() < TailIndex.load())
 			{
 				currentContainer = 0;
 				for (size_t i = GetContainerIndex(HeadIndex); i <= GetContainerIndex(TailIndex); ++i)
 				{
-					std::move(QueueContainer[i], QueueContainer[i] + GetNumItemsInContainer(i), NewQueue[currentContainer]);
+					std::move(QueueContainer[i], QueueContainer[i] + GetNumItemsInContainer(i, NumItemsAtFull), NewQueue[currentContainer]);
 					currentContainer++;
 				}
 			}
 			else
 			{
 				currentContainer = 0;
-				size_t headIndex = GetIndexInContainer(HeadIndex);
-				for (size_t i = GetContainerIndex(HeadIndex); i <= GetContainerIndex(AllocatedContainers); ++i)
-				{
+			// Correctly move elements from the wrapped queue into the newly allocated containers.
+			// Use atomic loads for head/tail indices and copy in two phases: [headContainer..end] then [0..tailContainer].
+			currentContainer = 0;
+			auto headIdxAtomic = HeadIndex.load();
+			auto tailIdxAtomic = TailIndex.load();
+			size_t headContainer = GetContainerIndex(headIdxAtomic);
+			size_t tailContainer = GetContainerIndex(tailIdxAtomic);
+			size_t headIdx = GetIndexInContainer(headIdxAtomic);
+			size_t tailIdx = GetIndexInContainer(tailIdxAtomic);
 
-					std::move(QueueContainer[i] + headIndex, QueueContainer[i] + GetNumItemsInContainer(i), NewQueue[currentContainer]);
-					currentContainer++;
-					headIndex = 0;
-				}
+			// helper to compute new container sizes based on the total new allocation (tmpAllocatedSize)
+			auto GetNewContainerSize = [&](size_t idx) -> size_t {
+				size_t full = tmpAllocatedSize / MaxItemsPerContainer;
+				size_t rem = tmpAllocatedSize % MaxItemsPerContainer;
+				if (idx < full) return MaxItemsPerContainer;
+				if (idx == full) return rem;
+				return 0;
+			};
 
-				for (size_t i = 0; i <= GetContainerIndex(HeadIndex); ++i)
-				{
-					const size_t tailIndex = i == HeadIndex ? GetIndexInContainer(TailIndex) : 0;
-					std::move(QueueContainer[i], QueueContainer[i] + (tailIndex!=0 ? tailIndex : GetNumItemsInContainer(i)), NewQueue[currentContainer]);
-					currentContainer++;
+			// destination offset within current new container
+			size_t destOffset = 0;
+
+			auto move_into_dest = [&](T* src, size_t count) {
+				size_t srcOff = 0;
+				while (count > 0) {
+					size_t destCap = GetNewContainerSize(currentContainer);
+					// if destCap is zero something is wrong; guard against division by zero
+					if (destCap == 0) return;
+					size_t room = destCap - destOffset;
+					size_t toMove = std::min(count, room);
+					std::move(src + srcOff, src + srcOff + toMove, NewQueue[currentContainer] + destOffset);
+					srcOff += toMove;
+					count -= toMove;
+					destOffset += toMove;
+					if (destOffset == destCap) { currentContainer++; destOffset = 0; }
 				}
+			};
+
+			// Phase 1: from headContainer to end of allocated containers
+			for (size_t i = headContainer; i < AllocatedContainers; ++i) {
+				size_t start = (i == headContainer) ? headIdx : 0;
+				size_t endExclusive = GetNumItemsInContainer(i, NumItemsAtFull);
+				if (endExclusive > start) {
+					move_into_dest(QueueContainer[i] + start, endExclusive - start);
+				}
+			}
+
+			// Phase 2: from container 0 up to tailContainer
+			for (size_t i = 0; i <= tailContainer; ++i) {
+				size_t start = 0;
+				size_t endExclusive = (i == tailContainer) ? tailIdx : GetNumItemsInContainer(i, NumItemsAtFull);
+				if (endExclusive > start) {
+					move_into_dest(QueueContainer[i] + start, endExclusive - start);
+				}
+			}
 			}
 		}
 
@@ -364,6 +437,13 @@ protected:
 		AllocatedContainers = AllocatedContainers + NewContainersNeeded;
 		AllocatedSize = tmpAllocatedSize;
 
+		for (size_t i = 0; i < NumItemsAtFull; i++)
+		{
+			if (!GetItemAtRef(i))
+			{
+				std::cout << "Bad Move";
+			}
+		}
 	}
 
 	void MoveTail(const size_t NumSpaces)

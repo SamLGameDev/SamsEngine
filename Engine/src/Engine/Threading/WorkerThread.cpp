@@ -13,8 +13,11 @@ void UWorkerThread::Run()
 	{
 		if (UThreadManager::DoesTheadHaveQueuedJobs<WorkerThread>())
 		{
+
 			auto job = UThreadManager::GetJob<WorkerThread>();
 			job();
+			
+
 		}
 	}
 }
