@@ -2,18 +2,19 @@
 
 #pragma once
 
+#include "BaseRuntimeEngine.h"
 #include "ErrorCodes.h"
 #include "SubsystemInitialiser.h"
 
 namespace OpenGL {
 
-	class RuntimeEngine
+	class RuntimeEngine : public BaseRuntimeEngine
 	{
 	public:
 
 		RuntimeEngine() = default;
 
-		ErrorCodes Init();
+		ErrorCodes Init() override;
 
 		ErrorCodes Loop();
 

@@ -32,6 +32,8 @@ project(EngineCore LANGUAGES C CXX)
 include(GNUInstallDirs)
 
 add_library(EngineCore STATIC
+    "src/Engine/Initialisation/Application.cpp"
+    "src/Engine//GraphicsAPI/BaseRuntimeEngine.cpp"
     "src/Engine/Hardware/HardwareDetails.cpp"
     "src/Engine/Rendering/Shaders/Shader.cpp"
     "src/Engine/Rendering/Shaders/BaseShader.cpp"
@@ -121,8 +123,11 @@ add_library(EngineCore STATIC
     "src/Engine/GraphicsAPI/VulkanAPI/VulkanFrameBuffer.cpp"
     "src/Engine/GraphicsAPI/GraphicsAPIConstructor.cpp"
     "src/Engine/Threading/ThreadManager.cpp"
+    "src/Engine/Threading/WorkerThread.cpp"
+    "src/Engine/Threading/GameThread.cpp"
+    "src/Engine/Threading/RenderThread.cpp"
 
- "src/Engine/Threading/WorkerThread.cpp")
+ )
 
 set_target_properties(EngineCore
                       PROPERTIES
@@ -170,6 +175,7 @@ target_include_directories(EngineCore
                            "$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/src/Engine/Compute/ComputeShader>"
                            "$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/src/Engine/Threading>"
                            "$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/src/Engine/Debug>"
+                           "$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/src/Engine/Initialisation>"
                            "$<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}>")
 
 install(TARGETS EngineCore
@@ -179,6 +185,8 @@ install(TARGETS EngineCore
         RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
         INCLUDES DESTINATION ${CMAKE_INSTALL_INCLUDEDIR})
 install(FILES
+    src/Engine/Initialisation/Application.h
+    src/Engine//GraphicsAPI/BaseRuntimeEngine.h
     src/Engine/Hardware/HardwareDetails.h
     src/Engine/Rendering/Shaders/Shader.h 
     src/Engine/Rendering/Shaders/BaseShader.h
@@ -270,6 +278,8 @@ install(FILES
     src/Engine/Threading/ThreadManager.h
     src/Engine/Debug/Asserts.h
     src/Engine/Threading/WorkerThread.h
+    src/Engine/Threading/GameThread.h
+    src/Engine/Threading/RenderThread.h
     DESTINATION ${CMAKE_INSTALL_INCLUDEDIR})
 
     find_package(glfw3 CONFIG REQUIRED)

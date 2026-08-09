@@ -41,9 +41,9 @@ UThreadManager* UThreadManager::Get()
 
 void UThreadManager::InitialiseAllThreads()
 {
-	GameThread = std::thread();
+	GameThread = UGameThread();
 
-	RenderThread = std::thread();
+	RenderThread = URenderThread();
 
 	WorkerThreads = Array<UWorkerThread>(std::thread::hardware_concurrency() - 3);
 

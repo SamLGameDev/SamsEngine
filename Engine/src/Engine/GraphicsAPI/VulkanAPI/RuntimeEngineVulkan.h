@@ -3,19 +3,20 @@
 
 #pragma once
 
+#include "BaseRuntimeEngine.h"
 #include "ErrorCodes.h"
 #include "VulkanSubsystemInitialiser.h"
 
 namespace Vulkan
 {
 
-	class RuntimeEngine
+	class RuntimeEngine : public BaseRuntimeEngine
 	{
 	public:
 
 		RuntimeEngine() = default;
 
-		ErrorCodes Init();
+		ErrorCodes Init() override;
 
 		ErrorCodes Loop();
 
